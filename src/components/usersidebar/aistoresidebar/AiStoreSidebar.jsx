@@ -1,0 +1,203 @@
+import {
+  Atom,
+  Bookmark,
+  CircleHelp,
+  Grid2X2,
+  PanelLeft,
+  Plus,
+  Search,
+  Settings,
+  Store,
+} from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+
+const mainItems = [
+  { label: 'AI App Store', to: '/user/aistore/store', icon: Store },
+  { label: '내 도구', to: '/user/aistore/mytools', icon: Grid2X2 },
+  { label: '즐겨찾기', to: '/user/aistore/favorites', icon: Bookmark },
+];
+
+const supportItems = [
+  { label: '이용 가이드', to: '/user/aistore/guide', icon: CircleHelp },
+  { label: '설정', to: '/user/aistore/settings', icon: Settings },
+];
+
+function SidebarLink({ item, onNavigate }) {
+  const Icon = item.icon;
+
+  return (
+    <NavLink
+      to={item.to}
+      onClick={onNavigate}
+      className={({ isActive }) =>
+        `group flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-[#0d0d0d] transition-colors ${
+          isActive ? 'bg-[#e8e8e8]' : 'hover:bg-[#ececec]'
+        }`
+      }
+    >
+      <Icon
+        className="h-[18px] w-[18px] shrink-0 text-[#2f2f2f]"
+        strokeWidth={1.75}
+        aria-hidden="true"
+      />
+      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+    </NavLink>
+  );
+}
+
+function SectionLabel({ children }) {
+  return (
+    <p className="mb-1 mt-5 px-2.5 text-[12px] font-medium leading-5 text-[#8f8f8f]">{children}</p>
+  );
+}
+
+const railItems = [
+  ...mainItems,
+  { label: '새 AI 도구 등록', to: '/user/aistore/register', icon: Plus },
+  ...supportItems,
+];
+
+export function AiStoreSidebarRail({ onOpen, onNavigate }) {
+  return (
+    <aside
+      id="ai-store-sidebar"
+      className="flex h-full min-h-screen w-12 flex-col border-r border-black/5 bg-white text-[#0d0d0d]"
+      aria-label="접힌 AI App Store 메뉴"
+    >
+      <div className="flex flex-1 flex-col items-center gap-1 px-1.5 py-3">
+        <div className="group relative mb-4 h-9 w-9 shrink-0">
+          <img
+            src="/simbol.png"
+            alt="ONDAM AI"
+            className="absolute inset-0 h-9 w-9 object-contain transition-opacity group-hover:opacity-0 group-focus-within:opacity-0"
+          />
+          <button
+            type="button"
+            onClick={onOpen}
+            className="absolute inset-0 grid place-items-center rounded-lg bg-white opacity-0 transition-[opacity,background-color] hover:bg-[#ececec] focus:opacity-100 group-hover:opacity-100"
+            aria-label="사이드바 열기"
+            aria-controls="ai-store-sidebar"
+            aria-expanded="false"
+            title="사이드바 열기"
+          >
+            <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.7} />
+          </button>
+        </div>
+
+        <nav className="flex w-full flex-col items-center gap-1" aria-label="빠른 메뉴">
+          {railItems.map(item => {
+            const Icon = item.icon;
+
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={onNavigate}
+                className={({ isActive }) =>
+                  `grid h-9 w-9 place-items-center rounded-lg text-[#191919] transition-colors ${
+                    isActive ? 'bg-[#e8e8e8]' : 'hover:bg-[#ececec]'
+                  }`
+                }
+                aria-label={item.label}
+                title={item.label}
+              >
+                <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
+              </NavLink>
+            );
+          })}
+        </nav>
+      </div>
+
+      <div className="flex shrink-0 justify-center border-t border-black/5 px-1.5 py-3">
+        <button
+          type="button"
+          className="grid h-8 w-8 place-items-center rounded-full bg-[#e3e3e3] text-[#4b4b4b] transition-opacity hover:opacity-85"
+          aria-label="ONDAM AI 계정"
+          title="ONDAM AI"
+        >
+          <Atom className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+export default function AiStoreSidebar({ className = '', onNavigate, onClose }) {
+  return (
+    <aside
+      id="ai-store-sidebar"
+      className={`flex h-full min-h-screen w-[260px] shrink-0 flex-col border-r border-black/5 bg-white text-[#0d0d0d] ${className}`.trim()}
+      aria-label="AI App Store 메뉴"
+    >
+      <header className="flex h-16 shrink-0 items-center gap-1 px-3">
+        <div className="flex min-w-0 flex-1 items-center ">
+          <img
+            src="/logo.png"
+            alt="ONDAM AI"
+            className="h-12 w-auto max-w-[165px] object-contain"
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-[#5d5d5d] transition-colors hover:bg-[#ececec] hover:text-[#0d0d0d]"
+          aria-label="사이드바 닫기"
+          aria-controls="ai-store-sidebar"
+        >
+          <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.7} />
+        </button>
+      </header>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4 pt-1 [scrollbar-color:#d9d9d9_transparent] [scrollbar-width:thin]">
+        <nav aria-label="주요 메뉴">
+          <div className="space-y-0.5">
+            {mainItems.map(item => (
+              <SidebarLink key={item.to} item={item} onNavigate={onNavigate} />
+            ))}
+          </div>
+
+          <SectionLabel>도구 등록</SectionLabel>
+          <NavLink
+            to="/user/aistore/register"
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              `group flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-[#0d0d0d] transition-colors ${
+                isActive ? 'bg-[#e8e8e8]' : 'hover:bg-[#ececec]'
+              }`
+            }
+          >
+            <Plus
+              className="h-[18px] w-[18px] shrink-0 text-[#2f2f2f]"
+              strokeWidth={1.75}
+              aria-hidden="true"
+            />
+            <span className="min-w-0 flex-1 truncate">새 AI 도구 등록</span>
+          </NavLink>
+
+          <SectionLabel>지원</SectionLabel>
+          <div className="space-y-0.5">
+            {supportItems.map(item => (
+              <SidebarLink key={item.to} item={item} onNavigate={onNavigate} />
+            ))}
+          </div>
+        </nav>
+      </div>
+
+      <div className="shrink-0 border-t border-black/5 p-2">
+        <button
+          type="button"
+          className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-[#ececec]"
+        >
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#e3e3e3] text-[#4b4b4b]">
+            <Atom className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[13px] font-medium leading-[18px]">ONDAM AI</span>
+            <span className="block truncate text-[11px] leading-4 text-[#777]">Manage</span>
+          </span>
+        </button>
+      </div>
+    </aside>
+  );
+}

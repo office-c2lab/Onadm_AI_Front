@@ -1,5 +1,5 @@
-import GamgikModalDemo from './components/character/GamgikModalDemo.jsx';
+import AppRouter from './routes/AppRouter.jsx';
 
 export default function App() {
-  return <GamgikModalDemo />;
+  return <AppRouter />;
 }
