@@ -1,466 +1,489 @@
-import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, Info } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
+import { useRef, useState } from 'react';
+import {
+  CheckCircle2,
+  ChevronDown,
+  Circle,
+  Clock3,
+  CloudUpload,
+  FileArchive,
+  XCircle,
+} from 'lucide-react';
+import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 
-import { categories, useMyTools } from '../data/manageStore.js';
+const STORAGE_KEY = 'ondam:register:uploads';
+const MAX_ZIP_BYTES = 500 * 1024 * 1024;
 
-const kindOptions = [
+const sampleUploads = [
   {
-    name: 'AI App',
-    detail: 'AI 기능을 활용하는 업무용 앱',
+    id: 'sample-report',
+    fileName: 'report-assistant.zip',
+    name: '보고서 작성 도우미',
+    size: '12.4 MB',
+    createdAt: '2026. 10. 18. 14:32',
+    status: '승인 대기',
   },
   {
-    name: 'AI Agent',
-    detail: '자율적으로 업무를 수행하는 도구',
+    id: 'sample-meeting',
+    fileName: 'meeting-summarizer.zip',
+    name: '회의록 정리 도우미',
+    size: '8.7 MB',
+    createdAt: '2026. 10. 17. 10:15',
+    status: '승인 완료',
   },
   {
-    name: '자동화 도구',
-    detail: '반복 업무를 자동으로 처리하는 도구',
-  },
-  {
-    name: '일반 업무 도구',
-    detail: 'AI 없이 업무에 도움을 주는 도구',
+    id: 'sample-analysis',
+    fileName: 'data-analyzer.zip',
+    name: '데이터 분석 도구',
+    size: '28.1 MB',
+    createdAt: '2026. 10. 16. 16:08',
+    status: '검토 중',
   },
 ];
 
-const initialForm = {
-  type: 'AI App',
-  name: '',
-  summary: '',
-  category: '문서·생산성',
-  version: '0.1.0',
-  description: '',
-  repository: '',
-  executionUrl: '',
-  usageGuide: '',
-  visibility: '사내 전체',
-  agree: false,
+function readUploads() {
+  if (typeof window === 'undefined') return sampleUploads;
+
+  try {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    if (!saved) return sampleUploads;
+    const rows = JSON.parse(saved);
+    return Array.isArray(rows)
+      ? rows.map(row => ({
+          ...row,
+          status:
+            row.status === '등록 대기'
+              ? '제출 준비'
+              : row.status === '등록 완료'
+                ? '승인 완료'
+                : row.status,
+        }))
+      : sampleUploads;
+  } catch {
+    return sampleUploads;
+  }
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatDate(date) {
+  const twoDigits = value => String(value).padStart(2, '0');
+  return `${date.getFullYear()}. ${twoDigits(date.getMonth() + 1)}. ${twoDigits(date.getDate())}. ${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())}`;
+}
+
+function ZipIcon({ large = false }) {
+  return (
+    <span
+      className={`flex shrink-0 flex-col items-center justify-center rounded-lg bg-blue-50 font-semibold text-blue-600 ${large ? 'h-14 w-14 gap-0.5 text-[11px]' : 'h-12 w-12 text-[9px]'}`}
+      aria-hidden="true"
+    >
+      <FileArchive size={large ? 24 : 17} strokeWidth={1.8} />
+      ZIP
+    </span>
+  );
+}
+
+const reviewSteps = [
+  {
+    label: 'ZIP 정보 준비',
+    description: '등록에 필요한 기본 파일 정보를 확인합니다.',
+    checks: ['ZIP 형식 확인', '파일 크기 500MB 이하 확인', '파일명·크기 기록'],
+  },
+  {
+    label: '파일 제출·보안 검사',
+    description: '서버에 접수된 파일의 안전성을 검사합니다.',
+    checks: ['파일 수신 및 압축 구조 확인', '악성 파일 검사', '요청 권한과 외부 연결 확인'],
+  },
+  {
+    label: '관리자 검토',
+    description: '담당자가 도구의 운영 적합성을 검토합니다.',
+    checks: ['도구 목적과 설명 검토', '사내 데이터 접근 범위 확인', '운영 정책 적합성 검토'],
+  },
+  {
+    label: '승인 및 게시',
+    description: '최종 승인 후 운영 목록에 반영합니다.',
+    checks: ['최종 승인 확인', '내 도구에 게시'],
+  },
+];
+
+function getStepState(status, index) {
+  if (status === '승인 완료') return 'complete';
+  if (index === 0) return 'complete';
+  if (status === '제출 준비') return 'pending';
+  if (index === 1) return 'complete';
+  if (index !== 2) return 'pending';
+  if (status === '검토 중') return 'running';
+  if (status === '보완 필요' || status === '반려') return 'failed';
+  return 'queued';
+}
+
+const stepVisuals = {
+  complete: { Icon: CheckCircle2, color: 'text-emerald-600', label: '완료' },
+  running: { Icon: Clock3, color: 'text-blue-600', label: '진행 중' },
+  queued: { Icon: Clock3, color: 'text-amber-600', label: '검토 대기' },
+  failed: { Icon: XCircle, color: 'text-red-600', label: '확인 필요' },
+  pending: { Icon: Circle, color: 'text-slate-300', label: '대기' },
 };
 
-const inputClass =
-  'mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500';
+function getCheckState(stepState, checkIndex) {
+  if (stepState === 'complete') return 'complete';
+  if (stepState === 'running' && checkIndex === 0) return 'complete';
+  if (stepState === 'running' && checkIndex === 1) return 'running';
+  return 'pending';
+}
 
-// 공통 입력 항목
-function Field({ label, required = false, hint, children }) {
+const checkLabels = {
+  complete: '확인 완료',
+  running: '확인 중',
+  pending: '대기',
+};
+
+function ReviewDetails({ upload }) {
+  const completedCount = reviewSteps.filter(
+    (_, index) => getStepState(upload.status, index) === 'complete'
+  ).length;
+  const isLocalDraft = upload.status === '제출 준비';
+
   return (
-    <div>
-      <label className="text-sm font-medium text-slate-800">
-        {label}
-        {required && <span className="ml-1 text-blue-600">*</span>}
-      </label>
+    <div
+      id={`review-detail-${upload.id}`}
+      role="region"
+      aria-label={`${upload.name} 심사 진행 내역`}
+      className="border-t border-slate-100 px-4 pb-5 pt-4 sm:px-6"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h4 className="text-sm font-semibold text-slate-900">심사 진행 내역</h4>
+          <p className="mt-1 text-xs text-slate-500">
+            {isLocalDraft ? '제출 전 파일 정보 확인 단계' : '심사 단계별 진행 예시'}
+          </p>
+        </div>
+        <span className="text-sm font-medium text-blue-600">
+          {completedCount}/{reviewSteps.length}단계 완료
+        </span>
+      </div>
+      <div
+        role="progressbar"
+        aria-label="완료된 심사 단계"
+        aria-valuemin={0}
+        aria-valuemax={reviewSteps.length}
+        aria-valuenow={completedCount}
+        className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100"
+      >
+        <div
+          className="h-full rounded-full bg-blue-600"
+          style={{ width: `${(completedCount / reviewSteps.length) * 100}%` }}
+        />
+      </div>
 
-      {children}
-
-      {hint && <p className="mt-1.5 text-xs text-slate-500">{hint}</p>}
+      <ol className="mt-5 space-y-3">
+        {reviewSteps.map((step, index) => {
+          const state = getStepState(upload.status, index);
+          const { Icon, color, label } = stepVisuals[state];
+          return (
+            <li
+              key={step.label}
+              className="rounded-lg border border-slate-100 bg-slate-50/50 p-3 sm:p-4"
+            >
+              <div className="flex items-start gap-3">
+                <Icon size={20} className={`mt-0.5 shrink-0 ${color}`} aria-hidden="true" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                    <span className="font-semibold text-slate-800">
+                      {index + 1}. {step.label}
+                    </span>
+                    <span className={`font-medium ${color}`}>{label}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-500">{step.description}</p>
+                  <ul className="mt-3 space-y-1 border-t border-slate-200/70 pt-3">
+                    {step.checks.map((check, checkIndex) => {
+                      const checkState = getCheckState(state, checkIndex);
+                      const CheckIcon = stepVisuals[checkState].Icon;
+                      return (
+                        <li
+                          key={check}
+                          className={`flex items-center justify-between gap-3 rounded-md px-2 py-1.5 text-xs ${checkState === 'complete' ? 'bg-emerald-50/60' : checkState === 'running' ? 'bg-blue-50/70' : ''}`}
+                        >
+                          <span className="flex min-w-0 items-center gap-2 text-slate-700">
+                            <CheckIcon
+                              size={15}
+                              className={`shrink-0 ${stepVisuals[checkState].color}`}
+                              aria-hidden="true"
+                            />
+                            {check}
+                          </span>
+                          <span className={`shrink-0 ${stepVisuals[checkState].color}`}>
+                            {checkLabels[checkState]}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+      <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-500">
+        {isLocalDraft
+          ? '파일 정보만 브라우저에 저장되었습니다. 실제 파일 제출과 심사는 아직 시작되지 않았습니다.'
+          : '위 체크 표시는 화면 예시이며 실제 검사 결과가 아닙니다. 검사 로그와 보완 사유는 서버 연동 후 확인할 수 있습니다.'}
+      </p>
     </div>
   );
 }
 
-// URL 검사
-function validUrl(value) {
-  if (!value.trim()) return true;
+function ReviewStatus({ status }) {
+  const isApproved = status === '승인 완료';
+  const isRejected = status === '반려' || status === '보완 필요';
+  const Icon = isApproved ? CheckCircle2 : isRejected ? XCircle : Clock3;
+  const color = isApproved
+    ? 'bg-emerald-50 text-emerald-700'
+    : isRejected
+      ? 'bg-red-50 text-red-700'
+      : status === '검토 중'
+        ? 'bg-amber-50 text-amber-700'
+        : 'bg-slate-100 text-slate-700';
 
-  try {
-    return ['http:', 'https:'].includes(new URL(value).protocol);
-  } catch {
-    return false;
-  }
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium ${color}`}
+    >
+      <Icon size={14} aria-hidden="true" />
+      {status}
+    </span>
+  );
 }
 
 export default function RegisterPage() {
-  const navigate = useNavigate();
-  const { addMyTool } = useMyTools();
-
-  const [step, setStep] = useState(1);
-  const [form, setForm] = useState(initialForm);
+  const inputRef = useRef(null);
+  const [uploads, setUploads] = useState(readUploads);
+  const [search, setSearch] = useState('');
+  const [openUploadId, setOpenUploadId] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const keyword = search.trim().toLowerCase();
+  const filteredUploads = uploads.filter(upload =>
+    `${upload.fileName} ${upload.name} ${upload.status}`.toLowerCase().includes(keyword)
+  );
 
-  const steps = ['기본 정보', '실행 정보', '최종 확인'];
+  const saveUploads = next => {
+    setUploads(next);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      setError('목록을 브라우저에 저장하지 못했습니다. 저장 공간을 확인해 주세요.');
+    }
+  };
 
-  const change = (name, value) => {
-    setForm(prev => ({
-      ...prev,
-      [name]: value,
+  const addFiles = fileList => {
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+
+    const invalidTypes = files.filter(file => !file.name.toLowerCase().endsWith('.zip'));
+    const oversized = files.filter(
+      file => file.name.toLowerCase().endsWith('.zip') && file.size > MAX_ZIP_BYTES
+    );
+    const accepted = files.filter(
+      file => file.name.toLowerCase().endsWith('.zip') && file.size <= MAX_ZIP_BYTES
+    );
+
+    const errors = [];
+    if (invalidTypes.length) errors.push('ZIP 형식의 파일만 선택할 수 있습니다.');
+    if (oversized.length) errors.push('파일당 최대 크기는 500MB입니다.');
+    setError(errors.join(' '));
+
+    if (!accepted.length) return;
+
+    const now = new Date();
+    const nextRows = accepted.map((file, index) => ({
+      id: `upload-${now.getTime()}-${index}-${Math.random().toString(36).slice(2)}`,
+      fileName: file.name,
+      name: file.name.replace(/\.zip$/i, '').replace(/[-_]+/g, ' '),
+      size: formatSize(file.size),
+      createdAt: formatDate(now),
+      status: '제출 준비',
     }));
 
-    setError('');
-  };
-
-  // 다음 단계
-  const goNext = () => {
-    if (step === 1 && (!form.name.trim() || !form.summary.trim() || !form.description.trim())) {
-      setError('도구 이름, 한 줄 설명, 도구 소개를 입력해 주세요.');
-      return;
-    }
-
-    if (step === 2 && (!validUrl(form.repository) || !validUrl(form.executionUrl))) {
-      setError('저장소 주소와 실행 주소에 올바른 URL을 입력해 주세요.');
-      return;
-    }
-
-    setError('');
-    setStep(prev => Math.min(prev + 1, 3));
-  };
-
-  // 도구 등록
-  const submit = () => {
-    if (!form.agree) {
-      setError('등록 내용 확인에 동의해 주세요.');
-      return;
-    }
-
-    const today = new Date();
-
-    const updatedAt = [
-      today.getFullYear(),
-      String(today.getMonth() + 1).padStart(2, '0'),
-      String(today.getDate()).padStart(2, '0'),
-    ].join('.');
-
-    addMyTool({
-      id: `mine-${Date.now()}`,
-      name: form.name.trim(),
-      summary: form.summary.trim(),
-      description: form.description.trim(),
-      category: form.category,
-      type: form.type,
-      version: form.version.trim() || '0.1.0',
-      status: '검사 대기',
-      updatedAt,
-      maker: '나',
-      repository: form.repository.trim(),
-      executionUrl: form.executionUrl.trim(),
-      usageGuide: form.usageGuide.trim(),
-      visibility: form.visibility,
-      review: 'UI 시안에서 등록한 항목입니다. 실제 보안검사 및 승인은 서버 연동 후 진행됩니다.',
-    });
-
-    navigate('/user/aistore/mytools', {
-      state: { registered: true },
-    });
+    saveUploads([...nextRows, ...uploads]);
+    setSearch('');
+    setMessage(
+      `${accepted.length}개 파일 정보를 제출 준비 목록에 추가했습니다. 실제 제출과 심사는 서버 연동 후 제공됩니다.`
+    );
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-5 py-6 md:px-8">
-      {/* 페이지 헤더 */}
+    <div className="w-full">
+      <SearchHeader
+        value={search}
+        onSearchChange={setSearch}
+        placeholder="등록한 도구 또는 ZIP 파일 검색"
+        ariaLabel="등록 목록 검색"
+      />
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".zip,application/zip,application/x-zip-compressed"
+        multiple
+        className="sr-only"
+        tabIndex={-1}
+        onChange={event => {
+          addFiles(event.target.files);
+          event.target.value = '';
+        }}
+      />
 
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        onDragEnter={event => {
+          event.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragOver={event => event.preventDefault()}
+        onDragLeave={event => {
+          if (!event.currentTarget.contains(event.relatedTarget)) setIsDragging(false);
+        }}
+        onDrop={event => {
+          event.preventDefault();
+          setIsDragging(false);
+          addFiles(event.dataTransfer.files);
+        }}
+        aria-label="ZIP 파일 선택 또는 드래그 앤 드롭"
+        className={`flex min-h-[238px] w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/30'}`}
+      >
+        <ZipIcon large />
+        <strong className="mt-4 text-lg font-semibold text-slate-900">
+          승인 요청할 ZIP 파일을 선택하세요
+        </strong>
+        <span className="mt-1 text-sm text-slate-500">
+          파일을 드래그하거나 클릭하여 선택할 수 있습니다.
+        </span>
+        <span className="mt-5 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700">
+          <CloudUpload size={16} aria-hidden="true" />
+          파일 선택
+        </span>
+        <span className="mt-3 text-xs text-slate-500">
+          ZIP 형식의 파일만 업로드할 수 있습니다. (최대 500MB)
+        </span>
+        <span className="mt-1 text-xs text-slate-400">
+          현재는 파일 정보만 저장되며 실제 파일 전송은 지원하지 않습니다.
+        </span>
+      </button>
 
-      <h1 className="mt-2 text-2xl font-bold text-slate-900">새 AI 도구 등록</h1>
+      {error && (
+        <p role="alert" className="mt-3 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600">
+          {error}
+        </p>
+      )}
+      {message && (
+        <p role="status" className="mt-3 rounded-lg bg-blue-50 px-4 py-2.5 text-sm text-blue-700">
+          {message}
+        </p>
+      )}
 
-      <p className="mt-2 text-sm text-slate-500">
-        직접 만든 AI·자동화 도구를 등록하고 검토를 요청하세요.
-      </p>
+      <section
+        className="mt-5 rounded-xl border border-slate-200 bg-white px-5 py-4"
+        aria-label="도구 승인 절차"
+      >
+        <h2 className="text-sm font-semibold text-slate-900">도구 승인 절차</h2>
+        <ol className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {reviewSteps.map((step, index) => (
+            <li key={step.label} className="flex items-center gap-2 text-sm text-slate-600">
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blue-50 text-xs font-semibold text-blue-600">
+                {index + 1}
+              </span>
+              {step.label}
+            </li>
+          ))}
+        </ol>
+        <p className="mt-3 text-xs text-slate-500">
+          현재는 화면 시안으로, 파일 제출·보안 검사·관리자 승인은 서버 연동 전까지 진행되지
+          않습니다.
+        </p>
+      </section>
 
-      <div className="mt-7 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
-        <div className="min-w-0">
-          {/* 진행 단계 */}
-          <div className="grid grid-cols-3 gap-2 rounded-xl border border-slate-200 bg-white p-4">
-            {steps.map((item, index) => (
-              <div key={item} className="flex items-center gap-2 text-xs sm:text-sm">
-                <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-semibold ${
-                    step >= index + 1 ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'
-                  }`}
-                >
-                  {step > index + 1 ? <Check size={16} /> : index + 1}
-                </span>
-
-                <span
-                  className={step === index + 1 ? 'font-semibold text-slate-900' : 'text-slate-500'}
-                >
-                  {item}
-                </span>
-              </div>
-            ))}
+      <section className="mt-7">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-[17px] font-bold text-slate-900">등록 및 심사 목록</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              신규 도구의 심사 상태를 확인합니다. 승인된 도구는 내 도구에서 관리하세요.
+            </p>
           </div>
-
-          {/* 등록 폼 */}
-          <section className="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white">
-            {/* 단계 제목 */}
-            <div className="border-b border-slate-100 p-6">
-              <h2 className="text-lg font-semibold text-slate-900">
-                {['도구 기본 정보', '실행 및 공유 정보', '등록 내용 확인'][step - 1]}
-              </h2>
-
-              <p className="mt-2 text-sm text-slate-500">
-                {
-                  [
-                    '도구 유형과 기본 정보를 입력해 주세요.',
-                    '도구의 저장소 및 실행 정보를 입력해 주세요.',
-                    '입력한 내용을 확인하고 등록을 요청하세요.',
-                  ][step - 1]
-                }
-              </p>
-            </div>
-
-            {/* 1단계: 기본 정보 */}
-            {step === 1 && (
-              <div className="space-y-6 p-6">
-                <Field label="도구 유형" required>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    {kindOptions.map(item => (
-                      <button
-                        key={item.name}
-                        type="button"
-                        onClick={() => change('type', item.name)}
-                        className={`rounded-xl border p-4 text-left ${
-                          form.type === item.name
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-slate-200 hover:border-slate-300'
-                        }`}
-                      >
-                        <strong className="text-sm text-slate-900">{item.name}</strong>
-
-                        <p className="mt-2 text-xs leading-5 text-slate-500">{item.detail}</p>
-                      </button>
-                    ))}
-                  </div>
-                </Field>
-
-                <Field label="도구 이름" required>
-                  <input
-                    className={inputClass}
-                    value={form.name}
-                    onChange={e => change('name', e.target.value)}
-                    maxLength={60}
-                    placeholder="예: 회의록 정리 도우미"
-                  />
-                </Field>
-
-                <Field label="한 줄 설명" required hint="스토어 카드에 표시되는 짧은 설명입니다.">
-                  <input
-                    className={inputClass}
-                    value={form.summary}
-                    onChange={e => change('summary', e.target.value)}
-                    maxLength={130}
-                    placeholder="도구의 주요 기능을 간결하게 설명해 주세요."
-                  />
-                </Field>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="카테고리" required>
-                    <CustomDropdown
-                      value={form.category}
-                      onChange={value => change('category', value)}
-                      options={categories.filter(item => item !== '전체')}
-                      ariaLabel="카테고리"
-                      className="mt-2 w-full"
-                    />
-                  </Field>
-
-                  <Field label="버전">
-                    <input
-                      className={inputClass}
-                      value={form.version}
-                      onChange={e => change('version', e.target.value)}
-                      placeholder="0.1.0"
-                    />
-                  </Field>
-                </div>
-
-                <Field label="도구 소개" required>
-                  <textarea
-                    rows={5}
-                    className={inputClass}
-                    value={form.description}
-                    onChange={e => change('description', e.target.value)}
-                    placeholder="도구 사용 목적과 주요 기능을 설명해 주세요."
-                  />
-                </Field>
-              </div>
-            )}
-
-            {/* 2단계: 실행 정보 */}
-            {step === 2 && (
-              <div className="space-y-6 p-6">
-                <Field label="소스코드 / 저장소 주소" hint="GitHub, GitLab 또는 사내 저장소 URL">
-                  <input
-                    type="url"
-                    className={inputClass}
-                    value={form.repository}
-                    onChange={e => change('repository', e.target.value)}
-                    placeholder="https://github.com/company/repo"
-                  />
-                </Field>
-
-                <Field label="도구 실행 주소" hint="배포된 도구가 있다면 URL을 입력해 주세요.">
-                  <input
-                    type="url"
-                    className={inputClass}
-                    value={form.executionUrl}
-                    onChange={e => change('executionUrl', e.target.value)}
-                    placeholder="https://tool.company.com"
-                  />
-                </Field>
-
-                <Field label="사용 방법">
-                  <textarea
-                    rows={5}
-                    className={inputClass}
-                    value={form.usageGuide}
-                    onChange={e => change('usageGuide', e.target.value)}
-                    placeholder="사용 순서와 필요한 권한을 안내해 주세요."
-                  />
-                </Field>
-
-                <Field label="공개 범위">
-                  <div className="mt-3 flex flex-wrap gap-3">
-                    {['사내 전체', '특정 부서'].map(item => (
-                      <button
-                        key={item}
-                        type="button"
-                        onClick={() => change('visibility', item)}
-                        className={`rounded-lg border px-4 py-3 text-sm ${
-                          form.visibility === item
-                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                            : 'border-slate-200 text-slate-600'
-                        }`}
-                      >
-                        {item}
-                      </button>
-                    ))}
-                  </div>
-                </Field>
-
-                {form.visibility === '특정 부서' && (
-                  <p className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600">
-                    실제 부서 및 접근 권한 선택은 관리자 API 연결 후 구현합니다.
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* 3단계: 최종 확인 */}
-            {step === 3 && (
-              <div className="space-y-5 p-6">
-                <div className="rounded-xl border border-slate-200 p-5">
-                  <h3 className="font-semibold text-slate-900">{form.name}</h3>
-
-                  <p className="mt-2 text-sm text-slate-500">{form.summary}</p>
-                </div>
-
-                <dl className="divide-y divide-slate-100 rounded-xl border border-slate-200 px-4 text-sm">
-                  {[
-                    ['유형', form.type],
-                    ['카테고리', form.category],
-                    ['버전', form.version || '0.1.0'],
-                    ['공개 범위', form.visibility],
-                    ['저장소 주소', form.repository || '미입력'],
-                    ['실행 주소', form.executionUrl || '미입력'],
-                  ].map(([label, value]) => (
-                    <div key={label} className="flex flex-wrap justify-between gap-2 py-3">
-                      <dt className="text-slate-500">{label}</dt>
-
-                      <dd className="max-w-full break-all font-medium text-slate-800">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-
-                <div className="flex items-start gap-2 rounded-lg bg-blue-50 p-4 text-sm leading-6 text-blue-800">
-                  <Info className="mt-0.5 shrink-0" size={18} />
-
-                  <span>
-                    등록 후 보안검사 및 관리자 승인이 필요합니다. 지금 화면은 실제 검사 없이 '검사
-                    대기' 상태로 저장하는 UI 시안입니다.
-                  </span>
-                </div>
-
-                <label className="flex cursor-pointer items-start gap-3 text-sm text-slate-700">
-                  <input
-                    type="checkbox"
-                    className="mt-1 accent-blue-600"
-                    checked={form.agree}
-                    onChange={e => change('agree', e.target.checked)}
-                  />
-
-                  <span>입력 내용을 확인했으며 등록을 요청합니다.</span>
-                </label>
-              </div>
-            )}
-
-            {/* 오류 메시지 */}
-            {error && (
-              <p
-                role="alert"
-                className="mx-6 mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600"
-              >
-                {error}
-              </p>
-            )}
-
-            {/* 하단 버튼 */}
-            <div className="flex items-center justify-between border-t border-slate-100 p-6">
-              <button
-                type="button"
-                onClick={() => {
-                  if (step === 1) {
-                    navigate('/user/aistore/mytools');
-                  } else {
-                    setStep(step - 1);
-                    setError('');
-                  }
-                }}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
-              >
-                <ArrowLeft size={16} />
-                {step === 1 ? '취소' : '이전'}
-              </button>
-
-              {step < 3 ? (
-                <button
-                  type="button"
-                  onClick={goNext}
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700"
-                >
-                  다음 단계
-                  <ArrowRight size={16} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={submit}
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700"
-                >
-                  <Check size={16} />
-                  등록 요청
-                </button>
-              )}
-            </div>
-          </section>
+          <div className="flex items-center gap-3 pt-1">
+            <span className="text-sm text-slate-500">
+              {keyword
+                ? `검색 결과 ${filteredUploads.length}개 / 총 ${uploads.length}개`
+                : `총 ${uploads.length}개`}
+            </span>
+          </div>
         </div>
 
-        {/* 우측 등록 안내 */}
-        <aside className="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 className="font-semibold text-slate-900">등록 진행 안내</h3>
-
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            도구 등록은 아래 절차로 진행됩니다.
-          </p>
-
-          <div className="mt-5 space-y-5">
-            {[
-              ['01', '정보 입력', '도구 유형과 기본 정보'],
-              ['02', '보안검사', '등록된 구성과 소스 검토'],
-              ['03', '검토 및 승인', '관리자 확인 후 공개 결정'],
-            ].map(([num, title, detail]) => (
-              <div key={num} className="flex gap-3">
-                <span className="font-semibold text-blue-600">{num}</span>
-
-                <div>
-                  <p className="text-sm font-medium text-slate-800">{title}</p>
-
-                  <p className="mt-1 text-xs text-slate-500">{detail}</p>
-                </div>
-              </div>
+        {filteredUploads.length ? (
+          <div className="grid gap-3">
+            {filteredUploads.map(upload => (
+              <article
+                key={upload.id}
+                className="min-w-0 rounded-xl border border-slate-200 bg-white transition hover:border-slate-300 hover:shadow-sm"
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    setOpenUploadId(current => (current === upload.id ? null : upload.id))
+                  }
+                  aria-expanded={openUploadId === upload.id}
+                  aria-controls={`review-detail-${upload.id}`}
+                  className="flex min-h-[100px] w-full cursor-pointer flex-wrap items-center gap-x-4 gap-y-3 rounded-xl p-4 text-left"
+                >
+                  <span className="flex min-w-[220px] flex-[1_1_300px] items-center gap-3">
+                    <ZipIcon />
+                    <span className="min-w-0 flex-1">
+                      <span
+                        className="block truncate text-base font-semibold text-slate-900"
+                        title={upload.name}
+                      >
+                        {upload.name}
+                      </span>
+                      <span
+                        className="mt-1 block truncate text-sm text-slate-500"
+                        title={upload.fileName}
+                      >
+                        {upload.fileName}
+                      </span>
+                    </span>
+                  </span>
+                  <span className="min-w-[80px] shrink-0 text-xs leading-5 text-slate-500">
+                    <span className="block">파일 크기</span>
+                    <span className="block font-medium text-slate-700">{upload.size}</span>
+                  </span>
+                  <span className="min-w-[155px] shrink-0 text-xs leading-5 text-slate-500">
+                    <span className="block">목록 추가</span>
+                    <span className="block font-medium text-slate-700">{upload.createdAt}</span>
+                  </span>
+                  <span className="ml-auto flex shrink-0 items-center gap-3">
+                    <ReviewStatus status={upload.status} />
+                    <ChevronDown
+                      size={19}
+                      className={`shrink-0 text-slate-500 transition-transform ${openUploadId === upload.id ? 'rotate-180' : ''}`}
+                      aria-hidden="true"
+                    />
+                  </span>
+                </button>
+                {openUploadId === upload.id && <ReviewDetails upload={upload} />}
+              </article>
             ))}
           </div>
-
-          <p className="mt-6 rounded-lg bg-slate-50 p-3 text-xs leading-6 text-slate-500">
-            실제 소스 업로드, 검증, 승인 기능은 백엔드 연동이 필요합니다.
+        ) : (
+          <p className="py-12 text-center text-sm text-slate-500">
+            {keyword ? '검색 조건에 맞는 ZIP 파일이 없습니다.' : '등록된 ZIP 파일이 없습니다.'}
           </p>
-        </aside>
-      </div>
-    </main>
+        )}
+      </section>
+    </div>
   );
 }

@@ -143,6 +143,8 @@ const initialMyTools = [
     version: '1.2.0',
     status: '승인 완료',
     updatedAt: '2026.10.18',
+    createdAt: '2026.10.18 14:32',
+    usageCount: 1240,
     description: '팀에서 공유 중인 문서 작성 도구입니다.',
     review: '필수 검사 항목을 통과했습니다.',
   },
@@ -155,6 +157,8 @@ const initialMyTools = [
     version: '0.8.0',
     status: '검토 대기',
     updatedAt: '2026.10.17',
+    createdAt: '2026.10.17 10:15',
+    usageCount: 0,
     description: '엑셀 데이터 전처리 자동화 도구입니다.',
     review: '관리자 검토를 기다리고 있습니다.',
   },
@@ -167,6 +171,8 @@ const initialMyTools = [
     version: '0.3.1',
     status: '검사 중',
     updatedAt: '2026.10.16',
+    createdAt: '2026.10.16 09:42',
+    usageCount: 0,
     description: '근태 신청 프로세스를 간소화하는 도구입니다.',
     review: '검사 결과가 아직 생성되지 않았습니다.',
   },
@@ -179,8 +185,122 @@ const initialMyTools = [
     version: '0.5.0',
     status: '보완 필요',
     updatedAt: '2026.10.13',
+    createdAt: '2026.10.13 13:21',
+    usageCount: 0,
     description: '내부 문서 검색 및 질의응답 도구입니다.',
     review: '문서별 접근 권한 설정을 확인해 주세요.',
+  },
+  {
+    id: 'mine-5',
+    name: '회의록 정리 도우미',
+    summary: '회의 내용을 요약하고 할 일을 자동으로 정리합니다.',
+    type: 'AI Agent',
+    category: '문서·생산성',
+    version: '0.9.1',
+    status: '승인 완료',
+    updatedAt: '2026.10.12',
+    createdAt: '2026.10.12 10:15',
+    usageCount: 860,
+    description: '회의 내용에서 요약, 결정 사항, 담당자별 할 일을 추출합니다.',
+    review: '필수 검사 항목을 통과했습니다.',
+  },
+  {
+    id: 'mine-6',
+    name: '업무 요청 자동 분류',
+    summary: '접수된 업무 요청을 분석하여 담당 부서로 배정합니다.',
+    type: 'AI Agent',
+    category: '업무 자동화',
+    version: '1.0.0',
+    status: '승인 완료',
+    updatedAt: '2026.10.11',
+    createdAt: '2026.10.11 09:42',
+    usageCount: 2340,
+    description: '업무 요청의 내용을 분석해 적절한 담당 부서를 추천합니다.',
+    review: '필수 검사 항목을 통과했습니다.',
+  },
+  {
+    id: 'mine-7',
+    name: '데이터 분석 도우미',
+    summary: '데이터를 분석하고 인사이트를 시각화합니다.',
+    type: 'AI App',
+    category: '데이터·분석',
+    version: '1.1.0',
+    status: '승인 완료',
+    updatedAt: '2026.10.10',
+    createdAt: '2026.10.10 16:08',
+    usageCount: 980,
+    description: '표 데이터를 요약하고 주요 지표를 시각화합니다.',
+    review: '필수 검사 항목을 통과했습니다.',
+  },
+  {
+    id: 'mine-8',
+    name: '코드 리뷰 도우미',
+    summary: '코드를 분석하고 개선점을 제안합니다.',
+    type: 'AI Agent',
+    category: '개발·IT',
+    version: '0.8.0',
+    status: '반려',
+    updatedAt: '2026.10.09',
+    createdAt: '2026.10.09 13:21',
+    usageCount: 320,
+    description: '코드 품질과 잠재적인 오류를 검토합니다.',
+    review: '필수 보안 설정을 보완해 다시 등록해 주세요.',
+  },
+  {
+    id: 'mine-9',
+    name: '이미지 생성 도구',
+    summary: '텍스트를 기반으로 이미지를 생성합니다.',
+    type: 'AI App',
+    category: '문서·생산성',
+    version: '1.0.5',
+    status: '승인 완료',
+    updatedAt: '2026.10.08',
+    createdAt: '2026.10.08 11:37',
+    usageCount: 1120,
+    description: '업무 자료에 사용할 이미지를 생성합니다.',
+    review: '필수 검사 항목을 통과했습니다.',
+  },
+  {
+    id: 'mine-10',
+    name: '고객 문의 분류',
+    summary: '고객 문의를 주제별로 분류하고 우선순위를 정합니다.',
+    type: 'AI Agent',
+    category: '고객·지원',
+    version: '1.3.0',
+    status: '승인 완료',
+    updatedAt: '2026.10.07',
+    createdAt: '2026.10.07 15:20',
+    usageCount: 645,
+    description: '고객 문의 유형을 자동 분류합니다.',
+    review: '필수 검사 항목을 통과했습니다.',
+  },
+  {
+    id: 'mine-11',
+    name: '문서 번역 도구',
+    summary: '업무 문서를 번역하고 사내 용어를 통일합니다.',
+    type: 'AI App',
+    category: '문서·생산성',
+    version: '1.2.0',
+    status: '승인 완료',
+    updatedAt: '2026.10.06',
+    createdAt: '2026.10.06 14:10',
+    usageCount: 780,
+    description: '사내 용어집을 참고하여 문서를 번역합니다.',
+    review: '필수 검사 항목을 통과했습니다.',
+  },
+  {
+    id: 'mine-12',
+    name: '일정 요약 에이전트',
+    summary: '팀 일정을 요약하고 회의 준비를 도와줍니다.',
+    type: 'AI Agent',
+    category: '업무 자동화',
+    version: '0.7.2',
+    status: '승인 완료',
+    updatedAt: '2026.10.05',
+    createdAt: '2026.10.05 08:45',
+    usageCount: 510,
+    description: '팀의 예정된 일정을 요약합니다.',
+    review: '필수 검사 항목을 통과했습니다.',
   },
 ];
 
@@ -282,8 +402,26 @@ export function useMyTools() {
     setMyTools(next);
   };
 
+  const updateMyTool = (id, changes) => {
+    setMyTools(current => {
+      const next = current.map(tool => (tool.id === id ? { ...tool, ...changes } : tool));
+      window.localStorage.setItem(MY_TOOLS_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const removeMyTools = ids => {
+    setMyTools(current => {
+      const next = current.filter(tool => !ids.includes(tool.id));
+      window.localStorage.setItem(MY_TOOLS_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
   return {
     myTools,
     addMyTool,
+    updateMyTool,
+    removeMyTools,
   };
 }

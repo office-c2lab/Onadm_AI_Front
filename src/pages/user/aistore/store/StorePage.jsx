@@ -114,7 +114,7 @@ export default function StorePage() {
   }, [search, selectedCategory]);
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-5 md:px-8">
+    <div className="w-full">
       <SearchHeader
         title="AI App Store"
         description="업무에 필요한 도구를 발견하고, 안전하게 활용해 보세요."
@@ -292,6 +292,6 @@ export default function StorePage() {
       )}
 
       <ToolDetailModal tool={selectedTool} onClose={() => setSelectedTool(null)} />
-    </main>
+    </div>
   );
 }

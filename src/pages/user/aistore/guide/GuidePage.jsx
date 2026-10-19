@@ -276,8 +276,8 @@ export default function GuidePage() {
   const navigate = useNavigate();
 
   return (
-    <main className="w-full min-w-0">
-      <div className="mx-auto max-w-[1320px] px-5 pb-24 pt-9 md:px-8 lg:px-10">
+    <div className="w-full min-w-0">
+      <div className="pt-3">
         <div className="grid items-start gap-12 xl:grid-cols-[minmax(0,1fr)_210px] xl:gap-16">
           {/* 본문 */}
           <div className="min-w-0">
@@ -711,6 +711,6 @@ export default function GuidePage() {
           </aside>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
