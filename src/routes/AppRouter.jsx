@@ -16,7 +16,7 @@ export default function AppRouter() {
         <Route path="/character" element={<GamgikModalDemo />} />
 
         {/* 사용자 AI-STORE */}
-        <Route path="/user/aistore" element={<AiStoreLayout />}>
+        <Route path="/" element={<AiStoreLayout />}>
           <Route index element={<Navigate to="store" replace />} />
           <Route path="store" element={<StorePage />} />
           <Route path="mytools" element={<MyToolsPage />} />
