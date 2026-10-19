@@ -4,7 +4,7 @@ import AiStoreLayout from '../layouts/AiStoreLayout.jsx';
 import StorePage from '../pages/user/aistore/store/StorePage.jsx';
 import MyToolsPage from '../pages/user/aistore/mytools/MyToolsPage.jsx';
 import RegisterPage from '../pages/user/aistore/register/RegisterPage.jsx';
-import GuidePage from '../pages/user/aistore/guide/guide.jsx';
+import GuidePage from '../pages/user/aistore/guide/GuidePage.jsx';
 import SettingsPage from '../pages/user/aistore/settings/settings.jsx';
 import FavoritesPage from '../pages/user/aistore/favorites/FavoritesPage.jsx';
 
