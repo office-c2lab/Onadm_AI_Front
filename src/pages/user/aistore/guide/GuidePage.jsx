@@ -19,7 +19,7 @@ import {
 const ROUTES = {
   store: '/user/aistore/store',
   myTools: '/user/aistore/mytools',
-  favorites: '/user/aistore/favorites',
+  favorites: '/user/aistore/library/favorites',
   register: '/user/aistore/register',
 };
 
@@ -193,7 +193,7 @@ const FAQS = [
   {
     question: '즐겨찾기는 어떻게 사용하나요?',
     answer:
-      '도구 목록의 즐겨찾기 아이콘을 선택하면 저장할 수 있습니다. 저장한 도구는 즐겨찾기 메뉴에서 확인할 수 있습니다.',
+      '도구 목록의 즐겨찾기 아이콘을 선택하면 저장할 수 있습니다. 저장한 도구는 라이브러리의 즐겨찾기 탭에서 확인할 수 있습니다.',
   },
   {
     question: '승인된 도구는 모든 직원이 볼 수 있나요?',

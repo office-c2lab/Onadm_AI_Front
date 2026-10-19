@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
+import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 
 import { useMyTools } from '../data/manageStore.js';
 
@@ -61,19 +62,19 @@ export default function MyToolsPage() {
   ];
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8">
+    <main className="mx-auto w-full max-w-7xl px-5 py-6 md:px-8">
       {/* 페이지 헤더 */}
-      <p className="text-xs font-semibold tracking-wider text-blue-600">MANAGE</p>
+  
+      <SearchHeader
+        title="내 도구"
+        description="등록한 도구의 검사 결과와 승인 상태를 확인하고 관리해 보세요."
+        value={search}
+        onSearchChange={setSearch}
+        placeholder="내 도구 검색"
+        ariaLabel="내 도구 검색"
+      />
 
-      <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">내 도구</h1>
-
-          <p className="mt-2 text-sm text-slate-500">
-            등록한 도구의 검사 결과와 승인 상태를 확인하고 관리해 보세요.
-          </p>
-        </div>
-
+      <div className="mt-4 flex justify-end">
         <button
           type="button"
           onClick={() => navigate('/user/aistore/register')}
@@ -111,21 +112,8 @@ export default function MyToolsPage() {
 
           <p className="mt-1 text-sm text-slate-500">본인이 등록한 도구와 진행 상태입니다.</p>
 
-          {/* 검색 및 상태 필터 */}
-          <div className="mt-5 flex flex-wrap gap-3">
-            <label className="flex min-h-10 flex-1 items-center gap-2 rounded-lg border border-slate-200 px-3 text-slate-400">
-              <Search size={17} />
-
-              <input
-                type="search"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="내 도구 검색"
-                aria-label="내 도구 검색"
-                className="w-full min-w-32 text-sm text-slate-900 outline-none placeholder:text-slate-400"
-              />
-            </label>
-
+          {/* 상태 필터 */}
+          <div className="mt-5 flex justify-end">
             <CustomDropdown
               value={status}
               onChange={setStatus}

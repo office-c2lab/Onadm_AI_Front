@@ -142,9 +142,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-5 py-8 md:px-8">
+    <main className="mx-auto w-full max-w-7xl px-5 py-6 md:px-8">
       {/* 페이지 헤더 */}
-      <p className="text-xs font-semibold tracking-wider text-blue-600">MANAGE</p>
+
 
       <h1 className="mt-2 text-2xl font-bold text-slate-900">새 AI 도구 등록</h1>
 

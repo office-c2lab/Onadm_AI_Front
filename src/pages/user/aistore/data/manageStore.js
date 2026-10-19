@@ -103,6 +103,7 @@ export const toolTypes = ['전체 유형', 'AI App', 'AI Agent', '자동화 도�
 
 // 브라우저 저장소 키
 const FAVORITES_KEY = 'ondam:manage:favorites';
+const DOWNLOADS_KEY = 'ondam:manage:downloads';
 const MY_TOOLS_KEY = 'ondam:manage:mytools';
 
 // 내 도구 샘플 데이터
@@ -190,6 +191,21 @@ export function useFavorites() {
     favorites,
     toggleFavorite,
   };
+}
+
+// 다운로드한 도구 관리
+export function useDownloads() {
+  const [downloads, setDownloads] = useState(() => load(DOWNLOADS_KEY, ['meeting', 'analysis']));
+
+  const removeDownload = id => {
+    setDownloads(current => {
+      const next = current.filter(item => item !== id);
+      window.localStorage.setItem(DOWNLOADS_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  return { downloads, removeDownload };
 }
 
 // 내 도구 관리

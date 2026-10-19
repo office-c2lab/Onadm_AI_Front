@@ -1,4 +1,4 @@
-import { Atom, Bookmark, CircleHelp, Grid2X2, PanelLeft, Plus, Store } from 'lucide-react';
+import { Atom, CircleHelp, Grid2X2, LibraryBig, PanelLeft, Plus, Store } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 const toolItems = [
@@ -8,7 +8,7 @@ const toolItems = [
 
 const storeItems = [
   { label: '스토어', to: '/user/aistore/store', icon: Store },
-  { label: '즐겨찾기', to: '/user/aistore/favorites', icon: Bookmark },
+  { label: '라이브러리', to: '/user/aistore/library', icon: LibraryBig },
 ];
 
 const supportItems = [{ label: '이용 가이드', to: '/user/aistore/guide', icon: CircleHelp }];

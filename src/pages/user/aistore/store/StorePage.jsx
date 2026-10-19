@@ -1,34 +1,12 @@
 import { useMemo, useState } from 'react';
-import {
-  ArrowRight,
-  BarChart3,
-  Bot,
-  Bookmark,
-  Braces,
-  ChevronRight,
-  FileText,
-  Languages,
-  MessageSquareText,
-  Search,
-  Sparkles,
-  Workflow,
-} from 'lucide-react';
+import { ArrowRight, Bookmark, ChevronRight } from 'lucide-react';
 
 import banner1 from '../../../../assets/images/banner1.png';
 import banner2 from '../../../../assets/images/banner2.png';
+import SearchHeader from '../../../../components/search/SearchHeader.jsx';
+import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import { ToolDetailModal } from '../components/ManageToolCard/ManageToolCard.jsx';
 import { publishedTools, useFavorites } from '../data/manageStore.js';
-
-const toolVisuals = {
-  report: [FileText, 'bg-blue-600 text-white'],
-  meeting: [MessageSquareText, 'bg-violet-100 text-violet-600'],
-  workflow: [Workflow, 'bg-orange-500 text-white'],
-  analysis: [BarChart3, 'bg-emerald-500 text-white'],
-  review: [Braces, 'bg-slate-900 text-white'],
-  expense: [Sparkles, 'bg-amber-100 text-amber-600'],
-  translate: [Languages, 'bg-sky-100 text-sky-600'],
-  support: [Bot, 'bg-indigo-100 text-indigo-600'],
-};
 
 const featuredBackgrounds = {
   report: 'from-rose-50 to-rose-100',
@@ -40,30 +18,6 @@ const featuredBackgrounds = {
   translate: 'from-cyan-50 to-sky-100',
   support: 'from-indigo-50 to-violet-100',
 };
-
-function ToolIcon({ tool, small = false, featured = false, promo = false }) {
-  const [Icon, color] = toolVisuals[tool.id] || toolVisuals.report;
-
-  return (
-    <span
-      className={`grid shrink-0 place-items-center rounded-xl ${color} ${
-        featured
-          ? 'h-[72px] w-[72px] rounded-2xl shadow-sm'
-          : promo
-            ? 'h-14 w-14 shadow-sm'
-            : small
-              ? 'h-12 w-12'
-              : 'h-10 w-10'
-      }`}
-    >
-      <Icon
-        size={featured ? 36 : promo ? 28 : small ? 24 : 20}
-        strokeWidth={1.8}
-        aria-hidden="true"
-      />
-    </span>
-  );
-}
 
 function SectionTitle({ children, viewAll = false }) {
   return (
@@ -90,7 +44,7 @@ function FeaturedCard({ tool, favorite, onFavorite, onDetail }) {
           featuredBackgrounds[tool.id] || featuredBackgrounds.report
         }`}
       >
-        <ToolIcon tool={tool} featured />
+        <StoreToolIcon tool={tool} featured />
         <button
           type="button"
           onClick={() => onFavorite(tool.id)}
@@ -124,7 +78,7 @@ function CompactTool({ tool, onDetail }) {
       onClick={() => onDetail(tool)}
       className="group flex h-[82px] min-w-0 items-center gap-4 rounded-xl border border-transparent px-3 text-left transition hover:border-slate-100 hover:bg-white hover:shadow-sm"
     >
-      <ToolIcon tool={tool} small />
+      <StoreToolIcon tool={tool} small />
       <span className="min-w-0 flex-1">
         <strong className="block truncate text-base text-slate-900">{tool.name}</strong>
         <span className="mt-1 block truncate text-sm text-slate-500">
@@ -152,27 +106,15 @@ export default function StorePage() {
   }, [search]);
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-5  md:px-8">
-      <header className="pb-3 text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">AI App Store</h1>
-        <p className="mt-2 text-sm text-slate-500">
-          업무에 필요한 도구를 발견하고, 안전하게 활용해 보세요.
-        </p>
-      </header>
-
-      <div className="sticky top-0 z-30 -mx-5 bg-[#f9f9f9]/95 px-5 py-3 backdrop-blur md:-mx-8 md:px-8">
-        <label className="mx-auto flex h-11 w-full max-w-xl items-center gap-3 rounded-lg bg-[#edf2f7] px-4 text-slate-500 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20">
-          <Search size={19} strokeWidth={2} />
-          <input
-            type="search"
-            value={search}
-            onChange={event => setSearch(event.target.value)}
-            placeholder="확장 프로그램 및 테마 검색"
-            aria-label="도구 검색"
-            className="h-full min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-600"
-          />
-        </label>
-      </div>
+    <main className="mx-auto w-full max-w-7xl px-5 py-6 md:px-8">
+      <SearchHeader
+        title="AI App Store"
+        description="업무에 필요한 도구를 발견하고, 안전하게 활용해 보세요."
+        value={search}
+        onSearchChange={setSearch}
+        placeholder="확장 프로그램 및 테마 검색"
+        ariaLabel="도구 검색"
+      />
 
       {!search.trim() && (
         <section
@@ -237,7 +179,7 @@ export default function StorePage() {
                   데이터 인사이트 도구
                 </strong>
               </span>
-              <ToolIcon tool={publishedTools[3]} promo />
+              <StoreToolIcon tool={publishedTools[3]} promo />
             </button>
 
             <button
@@ -253,7 +195,7 @@ export default function StorePage() {
                   회의록 정리 도우미
                 </strong>
               </span>
-              <ToolIcon tool={publishedTools[1]} promo />
+              <StoreToolIcon tool={publishedTools[1]} promo />
             </button>
           </div>
         </section>
