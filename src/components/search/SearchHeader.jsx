@@ -10,10 +10,7 @@ export default function SearchHeader({
 }) {
   return (
     <>
-      <header className="pb-3 text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
-        {description && <p className="mt-2 text-sm text-slate-500">{description}</p>}
-      </header>
+      
 
       <div className="sticky top-0 z-30 -mx-5 bg-[#f9f9f9]/95 px-5 py-3 backdrop-blur md:-mx-8 md:px-8">
         <label className="mx-auto flex h-11 w-full max-w-xl items-center gap-3 rounded-lg bg-[#edf2f7] px-4 text-slate-500 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20">

@@ -9,6 +9,7 @@ export const publishedTools = [
     type: 'AI App',
     category: '문서·생산성',
     storeCategory: '문서 자동화',
+    storeTags: ['문서 작성', '생산성'],
     maker: '경영지원팀',
     version: '1.2.0',
     featured: true,
@@ -20,6 +21,7 @@ export const publishedTools = [
     summary: '회의 내용을 요약하고 결정 사항과 할 일을 정리해요.',
     type: 'AI App',
     category: '문서·생산성',
+    storeTags: ['회의·요약', '협업', '생산성'],
     maker: '전략기획팀',
     version: '1.4.1',
     featured: true,
@@ -31,6 +33,7 @@ export const publishedTools = [
     summary: '접수된 업무 요청을 담당 부서로 자동 배정해요.',
     type: '자동화 도구',
     category: '업무 자동화',
+    storeTags: ['업무 자동화', '협업', '사내 업무'],
     maker: '운영혁신팀',
     version: '2.0.0',
     featured: true,
@@ -42,6 +45,7 @@ export const publishedTools = [
     summary: '표 데이터를 분석하고 주요 인사이트를 정리해요.',
     type: 'AI Agent',
     category: '데이터·분석',
+    storeTags: ['데이터 분석', 'AI 에이전트'],
     maker: '데이터팀',
     version: '0.9.2',
     description: '표 데이터의 추세와 이상값을 분석합니다.',
@@ -52,6 +56,7 @@ export const publishedTools = [
     summary: '코드 품질과 잠재적인 오류를 검토해요.',
     type: 'AI App',
     category: '개발·IT',
+    storeTags: ['개발·IT', '생산성'],
     maker: '개발팀',
     version: '1.1.0',
     description: '코드 품질 개선을 위한 피드백을 제공합니다.',
@@ -62,6 +67,7 @@ export const publishedTools = [
     summary: '여러 엑셀 파일을 동일한 양식으로 취합해요.',
     type: '자동화 도구',
     category: '업무 자동화',
+    storeTags: ['업무 자동화', '파일·정산'],
     maker: '재무팀',
     version: '1.0.2',
     description: 'AI 모델을 사용하지 않는 파일 취합 자동화입니다.',
@@ -72,6 +78,7 @@ export const publishedTools = [
     summary: '업무 문서를 빠르게 번역하고 용어를 통일해요.',
     type: 'AI App',
     category: '문서·생산성',
+    storeTags: ['번역', '문서 작성', '생산성'],
     maker: '글로벌사업팀',
     version: '1.3.0',
     description: '사내 용어집을 참고해 번역을 제공합니다.',
@@ -82,6 +89,7 @@ export const publishedTools = [
     summary: '자주 묻는 사내 문의에 답변을 제공해요.',
     type: 'AI Agent',
     category: '고객·지원',
+    storeTags: ['고객 지원', 'AI 에이전트', '사내 업무'],
     maker: '인사총무팀',
     version: '1.0.0',
     description: '사내 FAQ를 바탕으로 안내합니다.',
@@ -98,12 +106,30 @@ export const categories = [
   '고객·지원',
 ];
 
+// 스토어 탐색용 카테고리. 등록 폼의 대표 카테고리와 별도로 여러 주제로 탐색할 수 있습니다.
+export const storeCategories = [
+  '전체',
+  '문서 작성',
+  '회의·요약',
+  '번역',
+  '업무 자동화',
+  '파일·정산',
+  '데이터 분석',
+  '개발·IT',
+  '고객 지원',
+  'AI 에이전트',
+  '협업',
+  '생산성',
+  '사내 업무',
+];
+
 // 도구 유형
 export const toolTypes = ['전체 유형', 'AI App', 'AI Agent', '자동화 도구', '일반 업무 도구'];
 
 // 브라우저 저장소 키
 const FAVORITES_KEY = 'ondam:manage:favorites';
 const DOWNLOADS_KEY = 'ondam:manage:downloads';
+const DOWNLOAD_VERSIONS_KEY = 'ondam:manage:downloadVersions';
 const MY_TOOLS_KEY = 'ondam:manage:mytools';
 
 // 내 도구 샘플 데이터
@@ -196,6 +222,28 @@ export function useFavorites() {
 // 다운로드한 도구 관리
 export function useDownloads() {
   const [downloads, setDownloads] = useState(() => load(DOWNLOADS_KEY, ['meeting', 'analysis']));
+  const [installedVersions, setInstalledVersions] = useState(() =>
+    load(DOWNLOAD_VERSIONS_KEY, { meeting: '1.3.0', analysis: '0.9.2' })
+  );
+
+  const addDownload = id => {
+    setDownloads(current => {
+      if (current.includes(id)) return current;
+
+      const next = [...current, id];
+      window.localStorage.setItem(DOWNLOADS_KEY, JSON.stringify(next));
+      return next;
+    });
+
+    const tool = publishedTools.find(item => item.id === id);
+    if (tool) {
+      setInstalledVersions(current => {
+        const next = { ...current, [id]: tool.version };
+        window.localStorage.setItem(DOWNLOAD_VERSIONS_KEY, JSON.stringify(next));
+        return next;
+      });
+    }
+  };
 
   const removeDownload = id => {
     setDownloads(current => {
@@ -203,9 +251,23 @@ export function useDownloads() {
       window.localStorage.setItem(DOWNLOADS_KEY, JSON.stringify(next));
       return next;
     });
+    setInstalledVersions(current => {
+      const next = { ...current };
+      delete next[id];
+      window.localStorage.setItem(DOWNLOAD_VERSIONS_KEY, JSON.stringify(next));
+      return next;
+    });
   };
 
-  return { downloads, removeDownload };
+  const updateDownload = tool => {
+    setInstalledVersions(current => {
+      const next = { ...current, [tool.id]: tool.version };
+      window.localStorage.setItem(DOWNLOAD_VERSIONS_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  return { downloads, installedVersions, addDownload, removeDownload, updateDownload };
 }
 
 // 내 도구 관리

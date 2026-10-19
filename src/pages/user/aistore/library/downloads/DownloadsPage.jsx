@@ -8,8 +8,18 @@ import LibraryToolRow from '../components/LibraryToolRow.jsx';
 export default function DownloadsPage() {
   const navigate = useNavigate();
   const { keyword } = useOutletContext();
-  const { downloads, removeDownload } = useDownloads();
+  const { downloads, installedVersions, removeDownload, updateDownload } = useDownloads();
   const [selected, setSelected] = useState(null);
+  const [actionMessage, setActionMessage] = useState('');
+
+  const openTool = tool => {
+    if (tool.launchUrl) {
+      window.open(tool.launchUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    setActionMessage(`${tool.name}의 실행 주소가 아직 연결되지 않았습니다.`);
+  };
 
   const downloadedTools = useMemo(() => {
     const query = keyword.trim().toLowerCase();
@@ -25,6 +35,11 @@ export default function DownloadsPage() {
     <>
       <section className="mt-7">
         <h2 className="mb-3 text-lg font-semibold text-slate-900">다운로드한 도구</h2>
+        {actionMessage && (
+          <p role="status" className="mb-3 rounded-lg bg-blue-50 px-4 py-2.5 text-sm text-blue-700">
+            {actionMessage}
+          </p>
+        )}
 
         {downloadedTools.length > 0 ? (
           <div className="grid gap-2 md:grid-cols-2">
@@ -33,7 +48,17 @@ export default function DownloadsPage() {
                 key={tool.id}
                 tool={tool}
                 mode="downloads"
+                updateAvailable={Boolean(
+                  installedVersions[tool.id] && installedVersions[tool.id] !== tool.version
+                )}
                 onDetail={setSelected}
+                onUpdate={tool => {
+                  updateDownload(tool);
+                  setActionMessage(
+                    `${tool.name}의 버전 상태를 최신으로 표시했습니다. 실제 업데이트는 아직 연결되지 않았습니다.`
+                  );
+                }}
+                onOpen={openTool}
                 onRemove={removeDownload}
               />
             ))}

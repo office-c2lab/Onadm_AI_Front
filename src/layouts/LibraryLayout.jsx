@@ -11,7 +11,7 @@ export default function LibraryLayout() {
   const [keyword, setKeyword] = useState('');
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-5 py-6 md:px-8">
+    <div className="mx-auto w-full max-w-7xl px-5  md:px-8">
       <SearchHeader
         title="라이브러리"
         description="다운로드한 도구와 즐겨찾기를 한곳에서 관리해 보세요."

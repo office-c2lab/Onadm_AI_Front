@@ -6,7 +6,7 @@ import banner2 from '../../../../assets/images/banner2.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import { ToolDetailModal } from '../components/ManageToolCard/ManageToolCard.jsx';
-import { publishedTools, useFavorites } from '../data/manageStore.js';
+import { publishedTools, storeCategories, useFavorites } from '../data/manageStore.js';
 
 const featuredBackgrounds = {
   report: 'from-rose-50 to-rose-100',
@@ -94,19 +94,27 @@ function CompactTool({ tool, onDetail }) {
 
 export default function StorePage() {
   const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('전체');
   const [selectedTool, setSelectedTool] = useState(null);
   const { favorites, toggleFavorite } = useFavorites();
+  const isDefaultView = !search.trim() && selectedCategory === '전체';
 
   const visibleTools = useMemo(() => {
     const keyword = search.trim().toLowerCase();
-    if (!keyword) return publishedTools;
-    return publishedTools.filter(tool =>
-      `${tool.name} ${tool.summary} ${tool.maker} ${tool.category}`.toLowerCase().includes(keyword)
-    );
-  }, [search]);
+    return publishedTools.filter(tool => {
+      const matchesCategory =
+        selectedCategory === '전체' || tool.storeTags.includes(selectedCategory);
+      const matchesSearch =
+        !keyword ||
+        `${tool.name} ${tool.summary} ${tool.maker} ${tool.category} ${tool.storeTags.join(' ')}`
+          .toLowerCase()
+          .includes(keyword);
+      return matchesCategory && matchesSearch;
+    });
+  }, [search, selectedCategory]);
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-5 py-6 md:px-8">
+    <main className="mx-auto w-full max-w-7xl px-5 md:px-8">
       <SearchHeader
         title="AI App Store"
         description="업무에 필요한 도구를 발견하고, 안전하게 활용해 보세요."
@@ -116,7 +124,30 @@ export default function StorePage() {
         ariaLabel="도구 검색"
       />
 
-      {!search.trim() && (
+      <nav
+        aria-label="도구 카테고리"
+        className="mt-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        <div className="flex w-max min-w-full justify-center gap-1">
+          {storeCategories.map(category => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => setSelectedCategory(category)}
+              aria-pressed={selectedCategory === category}
+              className={`shrink-0 cursor-pointer whitespace-nowrap rounded-full px-4 py-1 text-sm transition-colors ${
+                selectedCategory === category
+                  ? 'bg-[#ededed] font-medium text-[#333]'
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {isDefaultView && (
         <section
           className="mt-3 grid gap-2 lg:aspect-[4.8/1] lg:grid-cols-[1.35fr_1fr]"
           aria-label="추천 프로모션"
@@ -202,8 +233,20 @@ export default function StorePage() {
       )}
 
       <section className="py-6">
-        <SectionTitle>요즘 주목받는 AI 도구</SectionTitle>
-        {visibleTools.length > 0 ? (
+        <SectionTitle>
+          {selectedCategory !== '전체'
+            ? `${selectedCategory} 도구`
+            : search.trim()
+              ? '검색 결과'
+              : '요즘 주목받는 AI 도구'}
+        </SectionTitle>
+        {visibleTools.length === 0 ? (
+          <div className="p-14 text-center text-sm text-slate-500">
+            {search.trim()
+              ? '검색 조건에 맞는 도구가 없습니다.'
+              : '선택한 카테고리에 도구가 없습니다.'}
+          </div>
+        ) : isDefaultView ? (
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {visibleTools.slice(0, 6).map(tool => (
               <FeaturedCard
@@ -216,13 +259,15 @@ export default function StorePage() {
             ))}
           </div>
         ) : (
-          <div className="p-14 text-center text-sm text-slate-500">
-            검색 조건에 맞는 도구가 없습니다.
+          <div className="mt-4 grid gap-x-5 md:grid-cols-2 lg:grid-cols-3">
+            {visibleTools.map(tool => (
+              <CompactTool key={tool.id} tool={tool} onDetail={setSelectedTool} />
+            ))}
           </div>
         )}
       </section>
 
-      {!search.trim() && (
+      {isDefaultView && (
         <>
           <section className="py-6">
             <SectionTitle viewAll>지금 써봐야 할 AI 도구</SectionTitle>

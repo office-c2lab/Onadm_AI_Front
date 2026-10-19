@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Bookmark } from 'lucide-react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { publishedTools, useFavorites } from '../../data/manageStore.js';
+import { publishedTools, useDownloads, useFavorites } from '../../data/manageStore.js';
 import { ToolDetailModal } from '../../components/ManageToolCard/ManageToolCard.jsx';
 import LibraryToolRow from '../components/LibraryToolRow.jsx';
 
@@ -9,6 +9,7 @@ export default function FavoritesPage() {
   const navigate = useNavigate();
   const { keyword } = useOutletContext();
   const { favorites, toggleFavorite } = useFavorites();
+  const { downloads, addDownload } = useDownloads();
   const [selected, setSelected] = useState(null);
 
   const savedTools = useMemo(() => {
@@ -33,7 +34,9 @@ export default function FavoritesPage() {
                 key={tool.id}
                 tool={tool}
                 mode="favorites"
+                downloaded={downloads.includes(tool.id)}
                 onDetail={setSelected}
+                onDownload={addDownload}
                 onRemove={toggleFavorite}
               />
             ))}
