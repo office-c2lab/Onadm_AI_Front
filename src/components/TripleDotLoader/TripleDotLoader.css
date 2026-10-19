@@ -1,0 +1,157 @@
+.status-infinity-loader {
+  --loader-color: #168bff;
+  --loader-color-right: #075df6;
+  --loader-color-left: #36e9ff;
+  display: flex;
+  justify-content: center;
+  transform: scale(2);
+  transform-origin: center;
+}
+
+.status-infinity-loader.is-dark {
+  --loader-color: #a58bff;
+  --loader-color-right: #4e6bff;
+  --loader-color-left: #f6f0ff;
+}
+
+.status-infinity-loader--large { transform: scale(3); }
+
+.status-infinity-loader__defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.status-infinity-loader__chrome,
+.status-infinity-loader__fallback {
+  position: relative;
+  height: 4.5rem;
+}
+
+.status-infinity-loader__chrome { width: 8.6rem; }
+
+.status-infinity-loader__chrome div {
+  position: absolute;
+  width: 1.32rem;
+  height: 1.32rem;
+  background: var(--loader-color);
+  box-shadow: 2px 2px 8px var(--loader-color);
+  border-radius: 9999px;
+  animation: status-infinity-move-svg 6.9s linear infinite;
+  filter: var(--loader-filter);
+  transform: scaleX(-1);
+  offset-path: path(
+    'M64.3636364,29.4064278 C77.8909091,43.5203348 84.4363636,56 98.5454545,56 C112.654545,56 124,44.4117395 124,30.0006975 C124,15.5896556 112.654545,3.85282763 98.5454545,4.00139508 C84.4363636,4.14996252 79.2,14.6982509 66.4,29.4064278 C53.4545455,42.4803627 43.5636364,56 29.4545455,56 C15.3454545,56 4,44.4117395 4,30.0006975 C4,15.5896556 15.3454545,4.00139508 29.4545455,4.00139508 C43.5636364,4.00139508 53.1636364,17.8181672 64.3636364,29.4064278 Z'
+  );
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .status-infinity-loader__chrome div {
+    box-shadow: 2px 2px 8px color-mix(in srgb, var(--loader-color) 18%, transparent);
+  }
+}
+
+.status-infinity-loader__chrome div::before,
+.status-infinity-loader__chrome div::after,
+.status-infinity-loader__fallback span::before,
+.status-infinity-loader__fallback span::after {
+  content: '';
+  position: absolute;
+  display: block;
+  width: 1.08rem;
+  height: 1.08rem;
+  border-radius: 9999px;
+  background: inherit;
+  top: 50%;
+  left: 50%;
+  margin: -0.54rem 0 0 -0.54rem;
+  box-shadow: inherit;
+}
+
+.status-infinity-loader__chrome div::before,
+.status-infinity-loader__fallback span::before {
+  animation: status-infinity-drop-1 0.8s linear infinite;
+}
+
+.status-infinity-loader__chrome div::after,
+.status-infinity-loader__fallback span::after {
+  animation: status-infinity-drop-2 0.8s linear infinite 0.4s;
+}
+
+.status-infinity-loader__chrome div:nth-child(2),
+.status-infinity-loader__fallback div:nth-child(2),
+.status-infinity-loader__fallback div:nth-child(2) span { animation-delay: -2.3s; }
+
+.status-infinity-loader__chrome div:nth-child(3),
+.status-infinity-loader__fallback div:nth-child(3),
+.status-infinity-loader__fallback div:nth-child(3) span { animation-delay: -4.6s; }
+
+.status-infinity-loader__fallback {
+  display: none;
+  width: 8.1rem;
+}
+
+.status-infinity-loader__fallback div,
+.status-infinity-loader__fallback span { position: absolute; }
+
+.status-infinity-loader__fallback div {
+  top: 0;
+  left: 50%;
+  width: 4.5rem;
+  height: 4.5rem;
+  animation: status-infinity-rotate 6.9s linear infinite;
+}
+
+.status-infinity-loader__fallback span {
+  left: -0.66rem;
+  top: 50%;
+  margin: -0.66rem 0 0 0;
+  width: 1.32rem;
+  height: 1.32rem;
+  display: block;
+  background: var(--loader-color);
+  box-shadow: 2px 2px 8px var(--loader-color);
+  border-radius: 9999px;
+  transform: rotate(90deg);
+  animation: status-infinity-move 6.9s linear infinite;
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .status-infinity-loader__fallback span {
+    box-shadow: 2px 2px 8px color-mix(in srgb, var(--loader-color) 18%, transparent);
+  }
+}
+
+@supports not (offset-path: path('M0,0')) {
+  .status-infinity-loader__chrome { display: none; }
+  .status-infinity-loader__fallback { display: block; }
+}
+
+@keyframes status-infinity-move-svg {
+  0% { offset-distance: 0%; }
+  25% { background: var(--loader-color-right); }
+  75% { background: var(--loader-color-left); }
+  100% { offset-distance: 100%; }
+}
+
+@keyframes status-infinity-rotate {
+  50% { transform: rotate(360deg); margin-left: 0; }
+  50.0001%, 100% { margin-left: -4.5rem; }
+}
+
+@keyframes status-infinity-move {
+  0%, 50% { left: -0.66rem; }
+  25% { background: var(--loader-color-right); }
+  75% { background: var(--loader-color-left); }
+  50.0001%, 100% { left: auto; right: -0.66rem; }
+}
+
+@keyframes status-infinity-drop-1 {
+  100% { transform: translate(2.35rem, 0.62rem) scale(0); }
+}
+
+@keyframes status-infinity-drop-2 {
+  0% { transform: translate(0, 0) scale(0.9); }
+  100% { transform: translate(2.35rem, -0.62rem) scale(0); }
+}
