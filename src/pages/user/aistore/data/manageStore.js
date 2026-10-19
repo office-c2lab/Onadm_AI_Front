@@ -8,6 +8,7 @@ export const publishedTools = [
     summary: '핵심 내용만 입력하면 보고서 초안을 체계적으로 작성해요.',
     type: 'AI App',
     category: '문서·생산성',
+    storeCategory: '문서 자동화',
     maker: '경영지원팀',
     version: '1.2.0',
     featured: true,
@@ -98,13 +99,7 @@ export const categories = [
 ];
 
 // 도구 유형
-export const toolTypes = [
-  '전체 유형',
-  'AI App',
-  'AI Agent',
-  '자동화 도구',
-  '일반 업무 도구',
-];
+export const toolTypes = ['전체 유형', 'AI App', 'AI Agent', '자동화 도구', '일반 업무 도구'];
 
 // 브라우저 저장소 키
 const FAVORITES_KEY = 'ondam:manage:favorites';
@@ -179,20 +174,13 @@ function load(key, fallback) {
 
 // 즐겨찾기 관리
 export function useFavorites() {
-  const [favorites, setFavorites] = useState(() =>
-    load(FAVORITES_KEY, ['report', 'workflow'])
-  );
+  const [favorites, setFavorites] = useState(() => load(FAVORITES_KEY, ['report', 'workflow']));
 
-  const toggleFavorite = (id) => {
-    setFavorites((current) => {
-      const next = current.includes(id)
-        ? current.filter((item) => item !== id)
-        : [...current, id];
+  const toggleFavorite = id => {
+    setFavorites(current => {
+      const next = current.includes(id) ? current.filter(item => item !== id) : [...current, id];
 
-      window.localStorage.setItem(
-        FAVORITES_KEY,
-        JSON.stringify(next)
-      );
+      window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
 
       return next;
     });
@@ -206,20 +194,12 @@ export function useFavorites() {
 
 // 내 도구 관리
 export function useMyTools() {
-  const [myTools, setMyTools] = useState(() =>
-    load(MY_TOOLS_KEY, initialMyTools)
-  );
+  const [myTools, setMyTools] = useState(() => load(MY_TOOLS_KEY, initialMyTools));
 
-  const addMyTool = (tool) => {
-    const next = [
-      tool,
-      ...load(MY_TOOLS_KEY, initialMyTools),
-    ];
+  const addMyTool = tool => {
+    const next = [tool, ...load(MY_TOOLS_KEY, initialMyTools)];
 
-    window.localStorage.setItem(
-      MY_TOOLS_KEY,
-      JSON.stringify(next)
-    );
+    window.localStorage.setItem(MY_TOOLS_KEY, JSON.stringify(next));
 
     setMyTools(next);
   };

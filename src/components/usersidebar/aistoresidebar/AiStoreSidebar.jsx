@@ -1,26 +1,17 @@
-import {
-  Atom,
-  Bookmark,
-  CircleHelp,
-  Grid2X2,
-  PanelLeft,
-  Plus,
-  Search,
-  Settings,
-  Store,
-} from 'lucide-react';
+import { Atom, Bookmark, CircleHelp, Grid2X2, PanelLeft, Plus, Store } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
-const mainItems = [
-  { label: 'AI App Store', to: '/user/aistore/store', icon: Store },
+const toolItems = [
   { label: '내 도구', to: '/user/aistore/mytools', icon: Grid2X2 },
+  { label: '새 AI 도구 등록', to: '/user/aistore/register', icon: Plus },
+];
+
+const storeItems = [
+  { label: '스토어', to: '/user/aistore/store', icon: Store },
   { label: '즐겨찾기', to: '/user/aistore/favorites', icon: Bookmark },
 ];
 
-const supportItems = [
-  { label: '이용 가이드', to: '/user/aistore/guide', icon: CircleHelp },
-
-];
+const supportItems = [{ label: '이용 가이드', to: '/user/aistore/guide', icon: CircleHelp }];
 
 function SidebarLink({ item, onNavigate }) {
   const Icon = item.icon;
@@ -51,11 +42,7 @@ function SectionLabel({ children }) {
   );
 }
 
-const railItems = [
-  ...mainItems,
-  { label: '새 AI 도구 등록', to: '/user/aistore/register', icon: Plus },
-  ...supportItems,
-];
+const railItems = [...toolItems, ...storeItems, ...supportItems];
 
 export function AiStoreSidebarRail({ onOpen, onNavigate }) {
   return (
@@ -151,29 +138,19 @@ export default function AiStoreSidebar({ className = '', onNavigate, onClose }) 
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4 pt-1 [scrollbar-color:#d9d9d9_transparent] [scrollbar-width:thin]">
         <nav aria-label="주요 메뉴">
+          <SectionLabel>내 도구 관리</SectionLabel>
           <div className="space-y-0.5">
-            {mainItems.map(item => (
+            {toolItems.map(item => (
               <SidebarLink key={item.to} item={item} onNavigate={onNavigate} />
             ))}
           </div>
 
-          <SectionLabel>도구 등록</SectionLabel>
-          <NavLink
-            to="/user/aistore/register"
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              `group flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-[14px] font-normal text-[#0d0d0d] transition-colors ${
-                isActive ? 'bg-[#e8e8e8]' : 'hover:bg-[#ececec]'
-              }`
-            }
-          >
-            <Plus
-              className="h-[18px] w-[18px] shrink-0 text-[#2f2f2f]"
-              strokeWidth={1.75}
-              aria-hidden="true"
-            />
-            <span className="min-w-0 flex-1 truncate">새 AI 도구 등록</span>
-          </NavLink>
+          <SectionLabel>AI APP Store</SectionLabel>
+          <div className="space-y-0.5">
+            {storeItems.map(item => (
+              <SidebarLink key={item.to} item={item} onNavigate={onNavigate} />
+            ))}
+          </div>
 
           <SectionLabel>지원</SectionLabel>
           <div className="space-y-0.5">

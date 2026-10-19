@@ -28,7 +28,7 @@ export default function AiStoreLayout() {
         )}
       </div>
 
-      <main className="relative min-h-screen min-w-0 flex-1 bg-[#f9f9f9] p-8">
+      <main className="relative min-h-screen min-w-0 flex-1 bg-[#f9f9f9] py-4 px-8">
         <Outlet />
       </main>
     </div>
