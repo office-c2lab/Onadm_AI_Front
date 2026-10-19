@@ -42,7 +42,7 @@ function SectionLabel({ children }) {
   );
 }
 
-const railItems = [...toolItems, ...storeItems, ...supportItems];
+const railItems = [...storeItems, ...toolItems, ...supportItems];
 
 export function AiStoreSidebarRail({ onOpen, onNavigate }) {
   return (
@@ -138,16 +138,16 @@ export default function AiStoreSidebar({ className = '', onNavigate, onClose }) 
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4 pt-1 [scrollbar-color:#d9d9d9_transparent] [scrollbar-width:thin]">
         <nav aria-label="주요 메뉴">
-          <SectionLabel>내 도구 관리</SectionLabel>
+          <SectionLabel>AI APP Store</SectionLabel>
           <div className="space-y-0.5">
-            {toolItems.map(item => (
+            {storeItems.map(item => (
               <SidebarLink key={item.to} item={item} onNavigate={onNavigate} />
             ))}
           </div>
 
-          <SectionLabel>AI APP Store</SectionLabel>
+          <SectionLabel>내 도구 관리</SectionLabel>
           <div className="space-y-0.5">
-            {storeItems.map(item => (
+            {toolItems.map(item => (
               <SidebarLink key={item.to} item={item} onNavigate={onNavigate} />
             ))}
           </div>
