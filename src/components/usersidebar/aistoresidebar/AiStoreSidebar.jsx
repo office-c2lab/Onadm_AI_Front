@@ -19,7 +19,7 @@ const mainItems = [
 
 const supportItems = [
   { label: '이용 가이드', to: '/user/aistore/guide', icon: CircleHelp },
-  { label: '설정', to: '/user/aistore/settings', icon: Settings },
+
 ];
 
 function SidebarLink({ item, onNavigate }) {
