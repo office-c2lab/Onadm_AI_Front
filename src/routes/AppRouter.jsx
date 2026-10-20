@@ -18,6 +18,7 @@ import RegisterPage from '../pages/user/aistore/register/RegisterPage.jsx';
 import GuidePage from '../pages/user/aistore/guide/GuidePage.jsx';
 import FavoritesPage from '../pages/user/aistore/library/favorites/FavoritesPage.jsx';
 import DownloadsPage from '../pages/user/aistore/library/downloads/DownloadsPage.jsx';
+import OndamPage from '../pages/user/ondam/OndamPage.jsx';
 
 // ================================
 // 관리자 - Dashboard
@@ -40,7 +41,14 @@ import ClassificationPage from '../pages/admin/control/classification/Classifica
 import ControlPoliciesPage from '../pages/admin/control/policies/PoliciesPage.jsx';
 import LimitsPage from '../pages/admin/control/limits/LimitsPage.jsx';
 import HistoryPage from '../pages/admin/control/history/HistoryPage.jsx';
-import ExternalPage from '../pages/admin/control/external/ExternalPage.jsx';
+import GarimExternalLayout from '../features/garim/GarimExternalLayout.jsx';
+import GarimDownloadRoute from '../features/garim/GarimDownloadRoute.jsx';
+import ExternalDashboardPage from '../features/garim/pages/DashboardPage/DashboardPage.jsx';
+import ExternalMonitoringPage from '../features/garim/pages/MonitoringPage/MonitoringPage.jsx';
+import ExternalUsersPage from '../features/garim/pages/UserPage/UserPage.jsx';
+import ExternalPoliciesPage from '../features/garim/pages/PolicyPage/PolicyPage.jsx';
+import ExternalDomainsPage from '../features/garim/pages/DomainPage/DomainPage.jsx';
+import ExternalSupportPage from '../features/garim/pages/SupportPage/SupportPage.jsx';
 
 // ================================
 // 관리자 - Manage
@@ -78,6 +86,12 @@ export default function AppRouter() {
 
         {/* 캐릭터 */}
         <Route path="/character" element={<GamgikModalDemo />} />
+
+        {/* 외부 AI 보안 설정 패키지 다운로드 */}
+        <Route path="/download" element={<GarimDownloadRoute />} />
+
+        {/* 사용자 AI 채팅 */}
+        <Route path="/user/ondam" element={<OndamPage />} />
 
         {/* ===================================== */}
         {/* 사용자 AI Store */}
@@ -165,36 +179,76 @@ export default function AppRouter() {
           <Route path="control">
             <Route
               index
-              element={<Navigate to="usage" replace />}
+              element={<Navigate to="internal/usage" replace />}
             />
+            <Route path="internal">
+              <Route
+                index
+                element={<Navigate to="usage" replace />}
+              />
+              <Route
+                path="usage"
+                element={<UsagePage />}
+              />
+              <Route
+                path="models"
+                element={<ModelsPage />}
+              />
+              <Route
+                path="classification"
+                element={<ClassificationPage />}
+              />
+              <Route
+                path="policies"
+                element={<ControlPoliciesPage />}
+              />
+              <Route
+                path="limits"
+                element={<LimitsPage />}
+              />
+              <Route
+                path="history"
+                element={<HistoryPage />}
+              />
+            </Route>
+
+            {/* 이전 내부 AI 경로 호환 */}
             <Route
               path="usage"
-              element={<UsagePage />}
+              element={<Navigate to="/admin/control/internal/usage" replace />}
             />
             <Route
               path="models"
-              element={<ModelsPage />}
+              element={<Navigate to="/admin/control/internal/models" replace />}
             />
             <Route
               path="classification"
-              element={<ClassificationPage />}
+              element={<Navigate to="/admin/control/internal/classification" replace />}
             />
             <Route
               path="policies"
-              element={<ControlPoliciesPage />}
+              element={<Navigate to="/admin/control/internal/policies" replace />}
             />
             <Route
               path="limits"
-              element={<LimitsPage />}
+              element={<Navigate to="/admin/control/internal/limits" replace />}
             />
             <Route
               path="history"
-              element={<HistoryPage />}
+              element={<Navigate to="/admin/control/internal/history" replace />}
             />
-            <Route
-              path="external"
-              element={<ExternalPage />}
-            />
+            <Route path="external" element={<GarimExternalLayout />}>
+              <Route
+                index
+                element={<Navigate to="dashboard" replace />}
+              />
+              <Route path="dashboard" element={<ExternalDashboardPage />} />
+              <Route path="monitoring" element={<ExternalMonitoringPage />} />
+              <Route path="users" element={<ExternalUsersPage />} />
+              <Route path="policies" element={<ExternalPoliciesPage />} />
+              <Route path="domains" element={<ExternalDomainsPage />} />
+              <Route path="support" element={<ExternalSupportPage />} />
+            </Route>
           </Route>
 
           {/* Manage */}

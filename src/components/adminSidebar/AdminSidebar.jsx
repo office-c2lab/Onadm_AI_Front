@@ -46,36 +46,62 @@ const adminMenus = [
     ],
   },
   {
-    label: 'Control',
+    label: 'Control 내부',
     icon: ShieldCheck,
     children: [
       {
         label: 'AI 사용 현황',
-        to: '/admin/control/usage',
+        to: '/admin/control/internal/usage',
       },
       {
         label: 'LLM 모델 관리',
-        to: '/admin/control/models',
+        to: '/admin/control/internal/models',
       },
       {
         label: 'CSO 분류 관리',
-        to: '/admin/control/classification',
+        to: '/admin/control/internal/classification',
       },
       {
         label: 'AI 사용 정책 및 라우팅',
-        to: '/admin/control/policies',
+        to: '/admin/control/internal/policies',
       },
       {
         label: '사용량 및 한도 관리',
-        to: '/admin/control/limits',
+        to: '/admin/control/internal/limits',
       },
       {
         label: 'AI 요청 이력',
-        to: '/admin/control/history',
+        to: '/admin/control/internal/history',
+      },
+    ],
+  },
+  {
+    label: 'Control 외부',
+    icon: ShieldCheck,
+    children: [
+      {
+        label: '통제 대시보드',
+        to: '/admin/control/external/dashboard',
       },
       {
-        label: '외부 AI 통제 (Control B)',
-        to: '/admin/control/external',
+        label: '프롬프트 모니터링',
+        to: '/admin/control/external/monitoring',
+      },
+      {
+        label: '외부 AI 사용자 관리',
+        to: '/admin/control/external/users',
+      },
+      {
+        label: '외부 AI 정책 관리',
+        to: '/admin/control/external/policies',
+      },
+      {
+        label: '서비스·도메인 관리',
+        to: '/admin/control/external/domains',
+      },
+      {
+        label: '배포 및 운영지원',
+        to: '/admin/control/external/support',
       },
     ],
   },
@@ -200,6 +226,7 @@ function SidebarSubLink({ item, onNavigate }) {
 // ================================
 // 상위 메뉴
 // ================================
+
 function SidebarGroup({
   menu,
   expanded,
@@ -209,6 +236,7 @@ function SidebarGroup({
   const Icon = menu.icon;
   const location = useLocation();
 
+  // 하위 메뉴 중 하나라도 활성화되어 있으면 상위 메뉴 활성화
   const active = isMenuActive(menu, location.pathname);
 
   return (
@@ -217,17 +245,20 @@ function SidebarGroup({
         type="button"
         onClick={onToggle}
         aria-expanded={expanded}
+        data-active={active}
         className={`group flex h-9 w-full items-center gap-2.5
           rounded-lg px-2.5 text-left text-[14px]
           transition-colors ${
             active
-              ? 'font-medium text-[#0d0d0d]'
-              : 'font-normal text-[#333]'
-          } hover:bg-[#f1f1f1]`}
+              ? 'bg-[#e8e8e8] font-medium text-[#0d0d0d]'
+              : 'font-normal text-[#333] hover:bg-[#f1f1f1]'
+          }`}
       >
         <Icon
           className={`h-[18px] w-[18px] shrink-0 ${
-            active ? 'text-[#0d0d0d]' : 'text-[#404040]'
+            active
+              ? 'text-[#0d0d0d]'
+              : 'text-[#404040]'
           }`}
           strokeWidth={1.75}
           aria-hidden="true"
@@ -238,9 +269,11 @@ function SidebarGroup({
         </span>
 
         <ChevronDown
-          className={`h-3.5 w-3.5 shrink-0 text-[#999]
+          className={`h-3.5 w-3.5 shrink-0
             transition-transform duration-200 ${
               expanded ? 'rotate-180' : ''
+            } ${
+              active ? 'text-[#0d0d0d]' : 'text-[#999]'
             }`}
           strokeWidth={1.75}
           aria-hidden="true"
@@ -251,7 +284,7 @@ function SidebarGroup({
         <div className="mt-0.5 flex flex-col gap-0.5">
           {menu.children.map(item => (
             <SidebarSubLink
-              key={item.to}
+              key={item.to ?? item.label}
               item={item}
               onNavigate={onNavigate}
             />
@@ -322,7 +355,7 @@ export function AdminSidebarRail({
               location.pathname
             );
 
-            const destination = menu.children[0].to;
+            const destination = menu.children.find(item => item.to)?.to;
 
             return (
               <NavLink
