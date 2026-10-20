@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 
 const toolItems = [
   { label: '내 도구', to: '/user/aistore/mytools', icon: Grid2X2 },
-  { label: '새 AI 도구 등록', to: '/user/aistore/register', icon: Plus },
+  { label: '등록 및 심사', to: '/user/aistore/register', icon: Plus },
 ];
 
 const storeItems = [

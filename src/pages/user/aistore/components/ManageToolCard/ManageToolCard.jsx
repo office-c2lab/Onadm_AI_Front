@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Bookmark, Bot, Boxes, FileText, Workflow, X } from 'lucide-react';
+import ToolInfoModalShell from '../ToolInfoModalShell.jsx';
 
 const statusStyle = {
   '승인 완료': 'bg-emerald-50 text-emerald-700',
@@ -122,10 +123,84 @@ export function ManageToolCard({ tool, onDetail }) {
 export function ToolDetailModal({ tool, onClose, mine = false }) {
   if (!tool) return null;
 
+  if (mine) {
+    const fields = [
+      ['도구 이름', tool.name],
+      ['한 줄 설명', tool.summary],
+      ['도구 유형', tool.type],
+      ['카테고리', tool.category],
+      ['상세 설명', tool.description || tool.summary],
+      ['사용 방법', tool.instructions],
+      ['버전', tool.version],
+    ];
+
+    return (
+      <ToolInfoModalShell
+        title="도구 등록 정보"
+        description="등록된 도구의 정보를 확인할 수 있습니다."
+        onClose={onClose}
+        footer={
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            닫기
+          </button>
+        }
+      >
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-6">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-5">
+            {tool.iconData ? (
+              <img
+                src={tool.iconData}
+                alt=""
+                className="h-12 w-12 shrink-0 rounded-xl border border-slate-200 bg-white object-cover"
+              />
+            ) : (
+              <ToolAvatar type={tool.type} />
+            )}
+            <div className="min-w-0">
+              <p className="truncate font-semibold text-slate-900">{tool.name}</p>
+              <p className="mt-1 text-xs text-slate-500">{tool.status}</p>
+            </div>
+          </div>
+
+          <dl className="mt-6 grid gap-5 sm:grid-cols-2">
+            {fields.map(([label, value], index) => (
+              <div
+                key={label}
+                className={`min-w-0 text-sm ${[0, 1, 4, 5, 6].includes(index) ? 'sm:col-span-2' : ''}`}
+              >
+                <dt className="font-medium text-slate-700">{label}</dt>
+                <dd className="mt-2 min-h-11 whitespace-pre-wrap break-words rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-slate-700">
+                  {value || '정보 없음'}
+                </dd>
+              </div>
+            ))}
+            {tool.fileName && (
+              <div className="min-w-0 text-sm sm:col-span-2">
+                <dt className="font-medium text-slate-700">등록 파일</dt>
+                <dd className="mt-2 min-h-11 break-all rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-slate-700">
+                  {tool.fileName}
+                </dd>
+              </div>
+            )}
+          </dl>
+
+          {tool.review && (
+            <p className="mt-6 rounded-lg bg-blue-50 px-4 py-3 text-xs leading-6 text-blue-800">
+              {tool.review}
+            </p>
+          )}
+        </div>
+      </ToolInfoModalShell>
+    );
+  }
+
   const details = [
     ['제작자', tool.maker || '나'],
     ['버전', `v${tool.version}`],
-    ...(mine ? [['진행 상태', tool.status]] : []),
   ];
 
   return (
@@ -144,9 +219,7 @@ export function ToolDetailModal({ tool, onClose, mine = false }) {
         className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"
       >
         <div className="flex items-start justify-between">
-          <span className="text-xs font-medium text-blue-600">
-            {mine ? '내 도구' : '도구 상세 정보'}
-          </span>
+          <span className="text-xs font-medium text-blue-600">도구 상세 정보</span>
 
           <button
             type="button"
@@ -183,9 +256,7 @@ export function ToolDetailModal({ tool, onClose, mine = false }) {
         </dl>
 
         <div className="mt-5 rounded-lg bg-slate-50 p-4 text-xs leading-6 text-slate-600">
-          {mine
-            ? tool.review
-            : '현재는 프론트엔드 시안입니다. 실제 도구 실행은 배포 URL 연동 이후 제공됩니다.'}
+          현재는 프론트엔드 시안입니다. 실제 도구 실행은 배포 URL 연동 이후 제공됩니다.
         </div>
 
         <div className="mt-6 flex justify-end">

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Download, ExternalLink, MoreVertical, RefreshCw } from 'lucide-react';
 import StoreToolIcon from '../../components/StoreToolIcon.jsx';
+import ToolHoverPreview from '../../components/ToolHoverPreview.jsx';
 
 export default function LibraryToolRow({
   tool,
@@ -16,13 +17,11 @@ export default function LibraryToolRow({
   const [menuOpen, setMenuOpen] = useState(false);
   const isFavorite = mode === 'favorites';
   const removeLabel = isFavorite ? '즐겨찾기 해제' : '다운로드 목록에서 제거';
-  const typeLabel = tool.type === '자동화 도구' ? '자동화' : tool.type;
-  const typeClassName =
-    tool.type === '자동화 도구' ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600';
+  const category = tool.storeCategory || tool.category;
 
   return (
     <article
-      className={`relative flex min-h-[108px] min-w-0 flex-wrap items-center gap-4 rounded-xl border border-transparent px-3 py-3 transition hover:border-slate-100 hover:bg-white hover:shadow-sm ${menuOpen ? 'z-20 border-slate-100 bg-white shadow-sm' : ''}`}
+      className={`group relative flex min-h-[82px] min-w-0 flex-wrap items-center gap-4 rounded-xl border border-transparent px-3 py-3 transition hover:z-20 hover:border-slate-100 hover:bg-white hover:shadow-sm focus-within:z-20 ${menuOpen ? 'z-30 border-slate-100 bg-white shadow-sm' : ''}`}
     >
       <button
         type="button"
@@ -33,15 +32,7 @@ export default function LibraryToolRow({
         <StoreToolIcon tool={tool} small />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-base font-semibold text-slate-900">{tool.name}</span>
-          <span className="mt-0.5 line-clamp-2 text-xs leading-4 text-slate-500">
-            {tool.summary}
-          </span>
-          <span className="mt-1.5 flex flex-wrap gap-1 text-[11px] font-medium">
-            <span className={`rounded-full px-2 py-0.5 ${typeClassName}`}>{typeLabel}</span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
-              {tool.storeCategory || tool.category}
-            </span>
-          </span>
+          <span className="mt-1 block truncate text-sm text-slate-500">{category}</span>
         </span>
       </button>
 
@@ -117,6 +108,8 @@ export default function LibraryToolRow({
           )}
         </div>
       </div>
+
+      {!menuOpen && <ToolHoverPreview tool={tool} label={isFavorite ? '즐겨찾기' : '다운로드됨'} />}
     </article>
   );
 }

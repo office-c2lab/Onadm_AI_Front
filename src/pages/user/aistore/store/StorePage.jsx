@@ -5,6 +5,7 @@ import banner1 from '../../../../assets/images/banner1.png';
 import banner2 from '../../../../assets/images/banner2.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
+import ToolHoverPreview from '../components/ToolHoverPreview.jsx';
 import { ToolDetailModal } from '../components/ManageToolCard/ManageToolCard.jsx';
 import { publishedTools, storeCategories, useFavorites } from '../data/manageStore.js';
 
@@ -36,11 +37,11 @@ function SectionTitle({ children, viewAll = false }) {
   );
 }
 
-function FeaturedCard({ tool, favorite, onFavorite, onDetail }) {
+function FeaturedCard({ tool, favorite, onFavorite, onDetail, previewAlign }) {
   return (
-    <article className="group relative h-[224px] min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-900/5">
+    <article className="group relative h-[224px] min-w-0 rounded-xl border border-slate-200 bg-white transition hover:z-20 hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-900/5 focus-within:z-20">
       <div
-        className={`flex h-[128px] items-center justify-center bg-gradient-to-br ${
+        className={`flex h-[128px] items-center justify-center rounded-t-xl bg-gradient-to-br ${
           featuredBackgrounds[tool.id] || featuredBackgrounds.report
         }`}
       >
@@ -57,7 +58,7 @@ function FeaturedCard({ tool, favorite, onFavorite, onDetail }) {
       <button
         type="button"
         onClick={() => onDetail(tool)}
-        className="flex h-[96px] w-full flex-col items-start px-4 py-3 text-left"
+        className="flex h-[96px] w-full flex-col items-start rounded-b-xl px-4 py-3 text-left"
       >
         <h3 className="truncate text-[15px] font-semibold leading-5 text-slate-900">{tool.name}</h3>
         <span className="mt-1 block truncate text-xs text-slate-500">
@@ -67,28 +68,32 @@ function FeaturedCard({ tool, favorite, onFavorite, onDetail }) {
           <ChevronRight size={19} strokeWidth={2} aria-hidden="true" />
         </span>
       </button>
+      <ToolHoverPreview tool={tool} align={previewAlign} />
     </article>
   );
 }
 
-function CompactTool({ tool, onDetail }) {
+function CompactTool({ tool, onDetail, previewAlign }) {
   return (
-    <button
-      type="button"
-      onClick={() => onDetail(tool)}
-      className="group flex h-[82px] min-w-0 items-center gap-4 rounded-xl border border-transparent px-3 text-left transition hover:border-slate-100 hover:bg-white hover:shadow-sm"
-    >
-      <StoreToolIcon tool={tool} small />
-      <span className="min-w-0 flex-1">
-        <strong className="block truncate text-base text-slate-900">{tool.name}</strong>
-        <span className="mt-1 block truncate text-sm text-slate-500">
-          {tool.storeCategory || tool.category}
+    <article className="group relative min-w-0 rounded-xl hover:z-20 focus-within:z-20">
+      <button
+        type="button"
+        onClick={() => onDetail(tool)}
+        className="flex h-[82px] w-full min-w-0 items-center gap-4 rounded-xl border border-transparent px-3 text-left transition hover:border-slate-100 hover:bg-white hover:shadow-sm"
+      >
+        <StoreToolIcon tool={tool} small />
+        <span className="min-w-0 flex-1">
+          <strong className="block truncate text-base text-slate-900">{tool.name}</strong>
+          <span className="mt-1 block truncate text-sm text-slate-500">
+            {tool.storeCategory || tool.category}
+          </span>
         </span>
-      </span>
-      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
-        <ChevronRight size={19} strokeWidth={2} aria-hidden="true" />
-      </span>
-    </button>
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+          <ChevronRight size={19} strokeWidth={2} aria-hidden="true" />
+        </span>
+      </button>
+      <ToolHoverPreview tool={tool} align={previewAlign} />
+    </article>
   );
 }
 
@@ -232,7 +237,7 @@ export default function StorePage() {
         </section>
       )}
 
-      <section className="py-6">
+      <section className={isDefaultView ? 'py-6' : 'pt-6'}>
         <SectionTitle>
           {selectedCategory !== '전체'
             ? `${selectedCategory} 도구`
@@ -248,20 +253,26 @@ export default function StorePage() {
           </div>
         ) : isDefaultView ? (
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {visibleTools.slice(0, 6).map(tool => (
+            {visibleTools.slice(0, 6).map((tool, index) => (
               <FeaturedCard
                 key={tool.id}
                 tool={tool}
                 favorite={favorites.includes(tool.id)}
                 onFavorite={toggleFavorite}
                 onDetail={setSelectedTool}
+                previewAlign={index >= 3 || index % 2 ? 'right' : 'left'}
               />
             ))}
           </div>
         ) : (
           <div className="mt-4 grid gap-x-5 md:grid-cols-2 lg:grid-cols-3">
-            {visibleTools.map(tool => (
-              <CompactTool key={tool.id} tool={tool} onDetail={setSelectedTool} />
+            {visibleTools.map((tool, index) => (
+              <CompactTool
+                key={tool.id}
+                tool={tool}
+                onDetail={setSelectedTool}
+                previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
+              />
             ))}
           </div>
         )}
@@ -272,19 +283,29 @@ export default function StorePage() {
           <section className="py-6">
             <SectionTitle viewAll>지금 써봐야 할 AI 도구</SectionTitle>
             <div className="grid gap-x-5 md:grid-cols-2 lg:grid-cols-3">
-              {publishedTools.slice(0, 6).map(tool => (
-                <CompactTool key={tool.id} tool={tool} onDetail={setSelectedTool} />
+              {publishedTools.slice(0, 6).map((tool, index) => (
+                <CompactTool
+                  key={tool.id}
+                  tool={tool}
+                  onDetail={setSelectedTool}
+                  previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
+                />
               ))}
             </div>
           </section>
-          <section className="py-6">
+          <section className="pt-6">
             <SectionTitle viewAll>업무 효율을 높이는 도구</SectionTitle>
             <div className="grid gap-x-5 md:grid-cols-2 lg:grid-cols-3">
               {[...publishedTools]
                 .reverse()
                 .slice(0, 6)
-                .map(tool => (
-                  <CompactTool key={tool.id} tool={tool} onDetail={setSelectedTool} />
+                .map((tool, index) => (
+                  <CompactTool
+                    key={tool.id}
+                    tool={tool}
+                    onDetail={setSelectedTool}
+                    previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
+                  />
                 ))}
             </div>
           </section>

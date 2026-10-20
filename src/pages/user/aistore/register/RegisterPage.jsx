@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   CheckCircle2,
   ChevronDown,
@@ -10,28 +11,45 @@ import {
   FileArchive,
   LoaderCircle,
   Plus,
-  Send,
-  X,
+  RefreshCw,
   XCircle,
 } from 'lucide-react';
 import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import projectImage from '../../../../assets/images/project.png';
+import ToolInfoModalShell from '../components/ToolInfoModalShell.jsx';
+import { formatReviewDate, REVIEW_REQUESTS_KEY } from '../data/reviewRequests.js';
 
-const STORAGE_KEY = 'ondam:register:uploads';
 const MAX_ZIP_BYTES = 500 * 1024 * 1024;
 const MAX_ICON_BYTES = 2 * 1024 * 1024;
 const TOOL_TYPE_OPTIONS = ['AI App', 'AI Agent', '자동화 도구'];
 const CATEGORY_OPTIONS = ['문서·생산성', '데이터 분석', '커뮤니케이션', '개발', '기타'];
+const MOCK_UPLOADS = [
+  {
+    id: 'mock-contract-review',
+    name: '계약서 검토 도우미',
+    fileName: 'contract_review_assistant.zip',
+    size: '2.4 MB',
+    createdAt: '2026. 10. 20. 09:42',
+    status: '검토 중',
+  },
+  {
+    id: 'mock-inquiry-sorter',
+    name: '고객 문의 분류 에이전트',
+    fileName: 'inquiry_sorter_agent.zip',
+    size: '1.8 MB',
+    createdAt: '2026. 10. 19. 16:18',
+    status: '승인 대기',
+  },
+];
 
 function readUploads() {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === 'undefined') return MOCK_UPLOADS;
 
   try {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (!saved) return [];
-    const rows = JSON.parse(saved);
-    return Array.isArray(rows)
+    const saved = window.localStorage.getItem(REVIEW_REQUESTS_KEY);
+    const rows = saved ? JSON.parse(saved) : [];
+    const uploads = Array.isArray(rows)
       ? rows.map(row => ({
           ...row,
           status:
@@ -42,8 +60,10 @@ function readUploads() {
                 : row.status,
         }))
       : [];
+    const savedIds = new Set(uploads.map(row => row.id));
+    return [...uploads, ...MOCK_UPLOADS.filter(row => !savedIds.has(row.id))];
   } catch {
-    return [];
+    return MOCK_UPLOADS;
   }
 }
 
@@ -62,11 +82,6 @@ const initialForm = {
 function formatSize(bytes) {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function formatDate(date) {
-  const twoDigits = value => String(value).padStart(2, '0');
-  return `${date.getFullYear()}. ${twoDigits(date.getMonth() + 1)}. ${twoDigits(date.getDate())}. ${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())}`;
 }
 
 function ZipIcon({ large = false }) {
@@ -108,6 +123,28 @@ const reviewSteps = [
   },
 ];
 
+const updateReviewSteps = [
+  {
+    label: '업데이트 정보 준비',
+    description: '변경된 도구 정보를 확인합니다.',
+    checks: ['필수 정보 확인', '버전 확인', '변경 내용 기록'],
+    duration: '2s',
+  },
+  {
+    label: '업데이트 요청 접수',
+    description: '변경 내용을 심사 목록에 접수합니다.',
+    checks: ['요청 정보 저장', '아이콘 형식 확인', '검토 대기열 등록'],
+    duration: '18s',
+  },
+  reviewSteps[2],
+  {
+    label: '승인 및 반영',
+    description: '승인 후 내 도구의 정보에 변경 내용을 반영합니다.',
+    checks: ['최종 승인 확인', '업데이트 반영'],
+    duration: '—',
+  },
+];
+
 function getStepState(status, index) {
   if (status === '승인 완료') return 'complete';
   if (index === 0) return 'complete';
@@ -141,11 +178,12 @@ const checkLabels = {
 };
 
 function ReviewDetails({ upload }) {
-  const completedCount = reviewSteps.filter(
+  const steps = upload.requestType === '업데이트' ? updateReviewSteps : reviewSteps;
+  const completedCount = steps.filter(
     (_, index) => getStepState(upload.status, index) === 'complete'
   ).length;
   const isLocalDraft = upload.status === '제출 준비';
-  const initialOpenStep = reviewSteps.findIndex(
+  const initialOpenStep = steps.findIndex(
     (_, index) => getStepState(upload.status, index) === 'running'
   );
   const [openStep, setOpenStep] = useState(initialOpenStep >= 0 ? initialOpenStep : null);
@@ -177,7 +215,7 @@ function ReviewDetails({ upload }) {
               </span>
             </div>
             <p className="mt-1 text-xs text-slate-500">
-              {upload.fileName} · {upload.createdAt}
+              {upload.requestType === '업데이트' ? `업데이트 요청 · v${upload.version}` : upload.fileName} · {upload.createdAt}
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs">
@@ -185,7 +223,7 @@ function ReviewDetails({ upload }) {
               {isComplete ? '1m 24s' : completedCount ? '20s' : '0s'}
             </span>
             <span className="font-medium text-blue-600">
-              {completedCount}/{reviewSteps.length}단계 완료
+              {completedCount}/{steps.length}단계 완료
             </span>
           </div>
         </div>
@@ -195,18 +233,34 @@ function ReviewDetails({ upload }) {
             role="progressbar"
             aria-label="완료된 심사 단계"
             aria-valuemin={0}
-            aria-valuemax={reviewSteps.length}
+            aria-valuemax={steps.length}
             aria-valuenow={completedCount}
             className="h-1 bg-slate-100"
           >
             <div
               className={`h-full transition-[width] ${hasFailed ? 'bg-red-500' : 'bg-blue-600'}`}
-              style={{ width: `${(completedCount / reviewSteps.length) * 100}%` }}
+              style={{ width: `${(completedCount / steps.length) * 100}%` }}
             />
           </div>
 
+          {upload.requestType === '업데이트' && (
+            <div className="border-b border-slate-100 px-4 py-4 text-xs sm:px-6">
+              <h5 className="font-semibold text-slate-900">업데이트 요청 정보</h5>
+              <p className="mt-2 text-slate-600">
+                {upload.type} · {upload.category} · v{upload.version}
+              </p>
+              <p className="mt-1 text-slate-700">{upload.summary}</p>
+              <p className="mt-2 whitespace-pre-wrap text-slate-500">{upload.description}</p>
+              {upload.instructions && (
+                <p className="mt-2 whitespace-pre-wrap text-slate-500">
+                  사용 방법: {upload.instructions}
+                </p>
+              )}
+            </div>
+          )}
+
           <ol className="divide-y divide-slate-100">
-            {reviewSteps.map((step, index) => {
+            {steps.map((step, index) => {
               const state = getStepState(upload.status, index);
               const { Icon, color, label } = stepVisuals[state];
               const isOpen = openStep === index;
@@ -318,11 +372,12 @@ function ReviewStatus({ status }) {
 }
 
 export default function RegisterPage() {
+  const location = useLocation();
   const inputRef = useRef(null);
   const iconInputRef = useRef(null);
   const [uploads, setUploads] = useState(readUploads);
   const [search, setSearch] = useState('');
-  const [openUploadId, setOpenUploadId] = useState(null);
+  const [openUploadId, setOpenUploadId] = useState(location.state?.openReviewId ?? null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -331,13 +386,15 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const keyword = search.trim().toLowerCase();
   const filteredUploads = uploads.filter(upload =>
-    `${upload.fileName} ${upload.name} ${upload.status}`.toLowerCase().includes(keyword)
+    `${upload.fileName} ${upload.name} ${upload.status} ${upload.requestType || ''}`
+      .toLowerCase()
+      .includes(keyword)
   );
 
   const saveUploads = next => {
     setUploads(next);
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      window.localStorage.setItem(REVIEW_REQUESTS_KEY, JSON.stringify(next));
     } catch {
       setError('목록을 브라우저에 저장하지 못했습니다. 저장 공간을 확인해 주세요.');
     }
@@ -419,7 +476,7 @@ export default function RegisterPage() {
       fileName: selectedFile.name,
       name: form.name.trim(),
       size: formatSize(selectedFile.size),
-      createdAt: formatDate(now),
+      createdAt: formatReviewDate(now),
       status: '승인 대기',
     };
 
@@ -490,220 +547,192 @@ export default function RegisterPage() {
       </section>
 
       {isRegistering && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-3 backdrop-blur-[2px] sm:p-6"
-          onMouseDown={event => {
-            if (event.target === event.currentTarget) closeRegistration();
+        <ToolInfoModalShell
+          title="도구 등록 정보"
+          description="파일과 정보를 입력한 후 승인을 요청하세요."
+          onClose={closeRegistration}
+          onSubmit={event => {
+            event.preventDefault();
+            submitRegistration();
           }}
+          footer={
+            <button
+              type="submit"
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              승인 요청
+            </button>
+          }
         >
-          <form
-            onSubmit={event => {
-              event.preventDefault();
-              submitRegistration();
-            }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="register-modal-title"
-            className="flex max-h-[calc(100vh-1.5rem)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-950/20 sm:max-h-[calc(100vh-3rem)]"
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-5 sm:px-6">
-              <div>
-                <h2 id="register-modal-title" className="text-lg font-semibold text-slate-900">
-                  도구 등록 정보
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  파일과 정보를 입력한 후 승인을 요청하세요.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={closeRegistration}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                aria-label="등록 화면 닫기"
-              >
-                <X size={19} />
-              </button>
-            </div>
-
-            <ol className="grid grid-cols-3 border-b border-slate-100 px-5 py-4 text-xs sm:px-6">
-              {['파일 업로드', '도구 정보 입력', '승인 요청'].map((label, index) => (
-                <li key={label} className="flex items-center text-slate-500">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blue-600 font-semibold text-white">
-                    {index + 1}
-                  </span>
-                  <span className="ml-2 hidden font-medium sm:inline">{label}</span>
-                  {index < 2 && <span className="mx-3 h-px flex-1 bg-slate-200" />}
-                </li>
-              ))}
-            </ol>
-
-            {error && (
-              <p
-                role="alert"
-                className="mx-5 mt-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 sm:mx-6"
-              >
-                {error}
-              </p>
-            )}
-
-            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-6">
-              <button
-                type="button"
-                onClick={() => inputRef.current?.click()}
-                onDragEnter={event => {
-                  event.preventDefault();
-                  setIsDragging(true);
-                }}
-                onDragOver={event => event.preventDefault()}
-                onDragLeave={event => {
-                  if (!event.currentTarget.contains(event.relatedTarget)) setIsDragging(false);
-                }}
-                onDrop={event => {
-                  event.preventDefault();
-                  setIsDragging(false);
-                  selectZipFile(event.dataTransfer.files);
-                }}
-                aria-label="ZIP 파일 선택 또는 드래그 앤 드롭"
-                className={`flex min-h-[190px] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors ${
-                  isDragging
-                    ? 'border-blue-500 bg-blue-50'
-                    : selectedFile
-                      ? 'border-blue-300 bg-blue-50/40'
-                      : 'border-slate-200 bg-slate-50/50 hover:border-blue-300 hover:bg-blue-50/30'
-                }`}
-              >
-                <ZipIcon large />
-                <strong className="mt-3 text-sm font-semibold text-slate-900">
-                  {selectedFile ? selectedFile.name : '도구의 ZIP 파일을 업로드하세요'}
-                </strong>
-                <span className="mt-1 text-xs text-slate-500">
-                  {selectedFile
-                    ? `${formatSize(selectedFile.size)} · 클릭하여 파일 변경`
-                    : '파일을 드래그하거나 클릭하여 선택할 수 있습니다. (최대 500MB)'}
+          <ol className="grid grid-cols-3 border-b border-slate-100 px-5 py-4 text-xs sm:px-6">
+            {['파일 업로드', '도구 정보 입력', '승인 요청'].map((label, index) => (
+              <li key={label} className="flex items-center text-slate-500">
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blue-600 font-semibold text-white">
+                  {index + 1}
                 </span>
-                {!selectedFile && (
-                  <span className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white">
-                    <CloudUpload size={15} aria-hidden="true" />
-                    파일 선택
+                <span className="ml-2 hidden font-medium sm:inline">{label}</span>
+                {index < 2 && <span className="mx-3 h-px flex-1 bg-slate-200" />}
+              </li>
+            ))}
+          </ol>
+
+          {error && (
+            <p
+              role="alert"
+              className="mx-5 mt-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 sm:mx-6"
+            >
+              {error}
+            </p>
+          )}
+
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-6">
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              onDragEnter={event => {
+                event.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragOver={event => event.preventDefault()}
+              onDragLeave={event => {
+                if (!event.currentTarget.contains(event.relatedTarget)) setIsDragging(false);
+              }}
+              onDrop={event => {
+                event.preventDefault();
+                setIsDragging(false);
+                selectZipFile(event.dataTransfer.files);
+              }}
+              aria-label="ZIP 파일 선택 또는 드래그 앤 드롭"
+              className={`flex min-h-[190px] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors ${
+                isDragging
+                  ? 'border-blue-500 bg-blue-50'
+                  : selectedFile
+                    ? 'border-blue-300 bg-blue-50/40'
+                    : 'border-slate-200 bg-slate-50/50 hover:border-blue-300 hover:bg-blue-50/30'
+              }`}
+            >
+              <ZipIcon large />
+              <strong className="mt-3 text-sm font-semibold text-slate-900">
+                {selectedFile ? selectedFile.name : '도구의 ZIP 파일을 업로드하세요'}
+              </strong>
+              <span className="mt-1 text-xs text-slate-500">
+                {selectedFile
+                  ? `${formatSize(selectedFile.size)} · 클릭하여 파일 변경`
+                  : '파일을 드래그하거나 클릭하여 선택할 수 있습니다. (최대 500MB)'}
+              </span>
+              {!selectedFile && (
+                <span className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white">
+                  <CloudUpload size={15} aria-hidden="true" />
+                  파일 선택
+                </span>
+              )}
+            </button>
+
+            <fieldset className="mt-7">
+              <legend className="text-base font-semibold text-slate-900">도구 정보 입력</legend>
+              <div className="mt-4 grid gap-5 sm:grid-cols-2">
+                <label className="text-sm font-medium text-slate-700 sm:col-span-2">
+                  도구 이름 <span className="text-red-500">*</span>
+                  <input
+                    value={form.name}
+                    onChange={event => updateForm('name', event.target.value)}
+                    placeholder="예: 보고서 작성 도우미"
+                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    required
+                  />
+                </label>
+                <label className="text-sm font-medium text-slate-700 sm:col-span-2">
+                  한 줄 설명 <span className="text-red-500">*</span>
+                  <input
+                    value={form.summary}
+                    onChange={event => updateForm('summary', event.target.value)}
+                    placeholder="어떤 도구인지 간단히 설명해 주세요."
+                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    required
+                  />
+                </label>
+                <div className="text-sm font-medium text-slate-700">
+                  <span>
+                    도구 유형 <span className="text-red-500">*</span>
                   </span>
-                )}
-              </button>
-
-              <fieldset className="mt-7">
-                <legend className="text-base font-semibold text-slate-900">도구 정보 입력</legend>
-                <div className="mt-4 grid gap-5 sm:grid-cols-2">
-                  <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-                    도구 이름 <span className="text-red-500">*</span>
-                    <input
-                      value={form.name}
-                      onChange={event => updateForm('name', event.target.value)}
-                      placeholder="예: 보고서 작성 도우미"
-                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                      required
-                    />
-                  </label>
-                  <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-                    한 줄 설명 <span className="text-red-500">*</span>
-                    <input
-                      value={form.summary}
-                      onChange={event => updateForm('summary', event.target.value)}
-                      placeholder="어떤 도구인지 간단히 설명해 주세요."
-                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                      required
-                    />
-                  </label>
-                  <div className="text-sm font-medium text-slate-700">
-                    <span>
-                      도구 유형 <span className="text-red-500">*</span>
-                    </span>
-                    <CustomDropdown
-                      value={form.type}
-                      options={TOOL_TYPE_OPTIONS}
-                      onChange={value => updateForm('type', value)}
-                      ariaLabel="도구 유형 선택"
-                      className="mt-2"
-                    />
-                  </div>
-                  <div className="text-sm font-medium text-slate-700">
-                    <span>
-                      카테고리 <span className="text-red-500">*</span>
-                    </span>
-                    <CustomDropdown
-                      value={form.category}
-                      options={CATEGORY_OPTIONS}
-                      onChange={value => updateForm('category', value)}
-                      ariaLabel="카테고리 선택"
-                      className="mt-2"
-                    />
-                  </div>
-                  <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-                    상세 설명 <span className="text-red-500">*</span>
-                    <textarea
-                      value={form.description}
-                      onChange={event => updateForm('description', event.target.value)}
-                      placeholder="도구의 주요 기능과 활용 목적을 자세히 작성해 주세요."
-                      rows={4}
-                      className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                      required
-                    />
-                  </label>
-                  <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-                    사용 방법
-                    <textarea
-                      value={form.instructions}
-                      onChange={event => updateForm('instructions', event.target.value)}
-                      placeholder="설치 및 실행 방법, 사용 방법을 작성해 주세요."
-                      rows={3}
-                      className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                  <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-                    버전 <span className="text-red-500">*</span>
-                    <input
-                      value={form.version}
-                      onChange={event => updateForm('version', event.target.value)}
-                      placeholder="예: 1.0.0"
-                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                      required
-                    />
-                  </label>
-                  <div className="text-sm font-medium text-slate-700 sm:col-span-2">
-                    도구 아이콘 <span className="text-xs font-normal text-slate-400">(선택)</span>
-                    <button
-                      type="button"
-                      onClick={() => iconInputRef.current?.click()}
-                      className="mt-2 flex w-full items-center gap-3 rounded-lg border border-dashed border-slate-200 px-4 py-3 text-left text-sm font-normal text-slate-500 hover:border-blue-300 hover:bg-blue-50/30"
-                    >
-                      {form.iconData ? (
-                        <img
-                          src={form.iconData}
-                          alt="업로드한 도구 아이콘 미리보기"
-                          className="h-10 w-10 shrink-0 rounded-lg border border-slate-200 bg-white object-cover"
-                        />
-                      ) : (
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600">
-                          <Plus size={18} aria-hidden="true" />
-                        </span>
-                      )}
-                      <span className="min-w-0 truncate">
-                        {form.iconName || 'PNG, JPG 또는 WEBP 이미지 (최대 2MB)'}
-                      </span>
-                    </button>
-                  </div>
+                  <CustomDropdown
+                    value={form.type}
+                    options={TOOL_TYPE_OPTIONS}
+                    onChange={value => updateForm('type', value)}
+                    ariaLabel="도구 유형 선택"
+                    className="mt-2"
+                  />
                 </div>
-              </fieldset>
-            </div>
-
-            <div className="flex justify-end border-t border-slate-100 bg-slate-50/50 px-5 py-4 sm:px-6">
-              <button
-                type="submit"
-                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
-              >
-                승인 요청
-              </button>
-            </div>
-          </form>
-        </div>
+                <div className="text-sm font-medium text-slate-700">
+                  <span>
+                    카테고리 <span className="text-red-500">*</span>
+                  </span>
+                  <CustomDropdown
+                    value={form.category}
+                    options={CATEGORY_OPTIONS}
+                    onChange={value => updateForm('category', value)}
+                    ariaLabel="카테고리 선택"
+                    className="mt-2"
+                  />
+                </div>
+                <label className="text-sm font-medium text-slate-700 sm:col-span-2">
+                  상세 설명 <span className="text-red-500">*</span>
+                  <textarea
+                    value={form.description}
+                    onChange={event => updateForm('description', event.target.value)}
+                    placeholder="도구의 주요 기능과 활용 목적을 자세히 작성해 주세요."
+                    rows={4}
+                    className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    required
+                  />
+                </label>
+                <label className="text-sm font-medium text-slate-700 sm:col-span-2">
+                  사용 방법
+                  <textarea
+                    value={form.instructions}
+                    onChange={event => updateForm('instructions', event.target.value)}
+                    placeholder="설치 및 실행 방법, 사용 방법을 작성해 주세요."
+                    rows={3}
+                    className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
+                </label>
+                <label className="text-sm font-medium text-slate-700 sm:col-span-2">
+                  버전 <span className="text-red-500">*</span>
+                  <input
+                    value={form.version}
+                    onChange={event => updateForm('version', event.target.value)}
+                    placeholder="예: 1.0.0"
+                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    required
+                  />
+                </label>
+                <div className="text-sm font-medium text-slate-700 sm:col-span-2">
+                  도구 아이콘 <span className="text-xs font-normal text-slate-400">(선택)</span>
+                  <button
+                    type="button"
+                    onClick={() => iconInputRef.current?.click()}
+                    className="mt-2 flex w-full items-center gap-3 rounded-lg border border-dashed border-slate-200 px-4 py-3 text-left text-sm font-normal text-slate-500 hover:border-blue-300 hover:bg-blue-50/30"
+                  >
+                    {form.iconData ? (
+                      <img
+                        src={form.iconData}
+                        alt="업로드한 도구 아이콘 미리보기"
+                        className="h-10 w-10 shrink-0 rounded-lg border border-slate-200 bg-white object-cover"
+                      />
+                    ) : (
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600">
+                        <Plus size={18} aria-hidden="true" />
+                      </span>
+                    )}
+                    <span className="min-w-0 truncate">
+                      {form.iconName || 'PNG, JPG 또는 WEBP 이미지 (최대 2MB)'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+        </ToolInfoModalShell>
       )}
 
       {!isRegistering && error && (
@@ -725,21 +754,14 @@ export default function RegisterPage() {
               신규 도구의 심사 상태를 확인합니다. 승인된 도구는 내 도구에서 관리하세요.
             </p>
           </div>
-          <div className="flex items-center gap-3 pt-1">
-            <span className="text-sm text-slate-500">
-              {keyword
-                ? `검색 결과 ${filteredUploads.length}개 / 총 ${uploads.length}개`
-                : `총 ${uploads.length}개`}
-            </span>
-          </div>
         </div>
 
         {filteredUploads.length ? (
-          <div className="grid gap-3">
+          <div className="grid gap-2">
             {filteredUploads.map(upload => (
               <article
                 key={upload.id}
-                className="min-w-0 rounded-xl border border-slate-200 bg-white transition hover:border-slate-300 hover:shadow-sm"
+                className={`group relative min-w-0 rounded-xl border transition hover:z-20 hover:border-slate-100 hover:bg-white hover:shadow-sm focus-within:z-20 ${openUploadId === upload.id ? 'border-slate-100 bg-white shadow-sm' : 'border-transparent'}`}
               >
                 <button
                   type="button"
@@ -748,9 +770,9 @@ export default function RegisterPage() {
                   }
                   aria-expanded={openUploadId === upload.id}
                   aria-controls={`review-detail-${upload.id}`}
-                  className="flex min-h-[100px] w-full cursor-pointer flex-wrap items-center gap-x-4 gap-y-3 rounded-xl p-4 text-left"
+                  className="flex min-h-[82px] w-full cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left"
                 >
-                  <span className="flex min-w-[220px] flex-[1_1_300px] items-center gap-3">
+                  <span className="flex min-w-0 flex-1 items-center gap-4">
                     {upload.iconData ? (
                       <img
                         src={upload.iconData}
@@ -758,33 +780,41 @@ export default function RegisterPage() {
                         className="h-12 w-12 shrink-0 rounded-xl border border-slate-200 bg-white object-cover"
                         aria-hidden="true"
                       />
+                    ) : upload.requestType === '업데이트' ? (
+                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
+                        <RefreshCw size={24} strokeWidth={1.8} aria-hidden="true" />
+                      </span>
                     ) : (
                       <ZipIcon />
                     )}
-                    <span className="min-w-0 flex-1">
+                    <span className="flex min-w-0 flex-1 items-center gap-2">
                       <span
-                        className="block truncate text-base font-semibold text-slate-900"
+                        className="min-w-0 max-w-full shrink-0 truncate text-base font-semibold text-slate-900 lg:max-w-[55%]"
                         title={upload.name}
                       >
                         {upload.name}
                       </span>
                       <span
-                        className="mt-1 block truncate text-sm text-slate-500"
-                        title={upload.fileName}
+                        className="hidden min-w-0 truncate text-xs text-slate-500 lg:block"
+                        title={upload.requestType === '업데이트' ? '업데이트 요청' : upload.fileName}
                       >
-                        {upload.fileName}
+                        {upload.requestType === '업데이트'
+                          ? `업데이트 요청 · v${upload.version}`
+                          : upload.fileName}
                       </span>
                     </span>
                   </span>
-                  <span className="min-w-[80px] shrink-0 text-xs leading-5 text-slate-500">
-                    <span className="block">파일 크기</span>
-                    <span className="block font-medium text-slate-700">{upload.size}</span>
+                  {upload.requestType !== '업데이트' && (
+                    <span className="hidden shrink-0 text-xs text-slate-600 sm:inline">
+                      <span className="sr-only">파일 크기 </span>
+                      {upload.size}
+                    </span>
+                  )}
+                  <span className="hidden shrink-0 text-xs text-slate-500 md:inline">
+                    <span className="sr-only">목록 추가 </span>
+                    {upload.createdAt}
                   </span>
-                  <span className="min-w-[155px] shrink-0 text-xs leading-5 text-slate-500">
-                    <span className="block">목록 추가</span>
-                    <span className="block font-medium text-slate-700">{upload.createdAt}</span>
-                  </span>
-                  <span className="ml-auto flex shrink-0 items-center gap-3">
+                  <span className="flex shrink-0 items-center gap-3">
                     <ReviewStatus status={upload.status} />
                     <ChevronDown
                       size={19}
