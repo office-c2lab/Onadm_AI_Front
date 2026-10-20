@@ -12,6 +12,7 @@ import {
   LoaderCircle,
   Plus,
   RefreshCw,
+  X,
   XCircle,
 } from 'lucide-react';
 import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
@@ -22,8 +23,17 @@ import { formatReviewDate, REVIEW_REQUESTS_KEY } from '../data/reviewRequests.js
 
 const MAX_ZIP_BYTES = 500 * 1024 * 1024;
 const MAX_ICON_BYTES = 2 * 1024 * 1024;
+const MAX_SCREENSHOT_BYTES = 500 * 1024;
+const MAX_SCREENSHOTS = 3;
 const TOOL_TYPE_OPTIONS = ['AI App', 'AI Agent', '자동화 도구'];
 const CATEGORY_OPTIONS = ['문서·생산성', '데이터 분석', '커뮤니케이션', '개발', '기타'];
+const SUPPORT_ENVIRONMENT_FIELDS = [
+  { key: 'audience', label: '사용 가능 대상', placeholder: '예: PC (사내망)', required: true },
+  { key: 'operatingSystem', label: '운영체제', placeholder: '예: Windows 10 이상', required: true },
+  { key: 'browser', label: '브라우저', placeholder: '예: Chrome, Edge 최신 버전', required: true },
+  { key: 'memory', label: '메모리', placeholder: '예: 최소 4GB, 권장 8GB' },
+  { key: 'other', label: '기타', placeholder: '예: 별도 설치 없이 사용 가능' },
+];
 const MOCK_UPLOADS = [
   {
     id: 'mock-contract-review',
@@ -73,10 +83,19 @@ const initialForm = {
   type: 'AI App',
   category: '문서·생산성',
   description: '',
+  features: '',
   instructions: '',
   version: '1.0.0',
   iconName: '',
   iconData: '',
+  screenshots: [],
+  supportEnvironment: {
+    audience: '',
+    operatingSystem: '',
+    browser: '',
+    memory: '',
+    other: '',
+  },
 };
 
 function formatSize(bytes) {
@@ -215,7 +234,10 @@ function ReviewDetails({ upload }) {
               </span>
             </div>
             <p className="mt-1 text-xs text-slate-500">
-              {upload.requestType === '업데이트' ? `업데이트 요청 · v${upload.version}` : upload.fileName} · {upload.createdAt}
+              {upload.requestType === '업데이트'
+                ? `업데이트 요청 · v${upload.version}`
+                : upload.fileName}{' '}
+              · {upload.createdAt}
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs">
@@ -243,18 +265,58 @@ function ReviewDetails({ upload }) {
             />
           </div>
 
-          {upload.requestType === '업데이트' && (
-            <div className="border-b border-slate-100 px-4 py-4 text-xs sm:px-6">
-              <h5 className="font-semibold text-slate-900">업데이트 요청 정보</h5>
-              <p className="mt-2 text-slate-600">
+          {upload.description && (
+            <div className="border-b border-slate-100 px-4 py-5 text-sm sm:px-6">
+              <h5 className="font-semibold text-slate-900">
+                {upload.requestType === '업데이트' ? '업데이트 요청 정보' : '등록 정보'}
+              </h5>
+              <p className="mt-2 text-xs text-slate-500">
                 {upload.type} · {upload.category} · v{upload.version}
               </p>
-              <p className="mt-1 text-slate-700">{upload.summary}</p>
-              <p className="mt-2 whitespace-pre-wrap text-slate-500">{upload.description}</p>
-              {upload.instructions && (
-                <p className="mt-2 whitespace-pre-wrap text-slate-500">
-                  사용 방법: {upload.instructions}
-                </p>
+              <dl className="mt-4 space-y-4">
+                {[
+                  ['한 줄 설명', upload.summary],
+                  ['상세 설명', upload.description],
+                  ['주요 기능', upload.features],
+                  ['사용 방법', upload.instructions],
+                ]
+                  .filter(([, value]) => value)
+                  .map(([label, value]) => (
+                    <div key={label}>
+                      <dt className="text-xs font-semibold text-slate-700">{label}</dt>
+                      <dd className="mt-1 whitespace-pre-wrap leading-6 text-slate-600">{value}</dd>
+                    </div>
+                  ))}
+              </dl>
+              {upload.supportEnvironment && (
+                <div className="mt-5">
+                  <h6 className="text-xs font-semibold text-slate-700">지원 환경</h6>
+                  <dl className="mt-2 divide-y divide-slate-100">
+                    {SUPPORT_ENVIRONMENT_FIELDS.filter(
+                      field => upload.supportEnvironment[field.key]
+                    ).map(field => (
+                      <div key={field.key} className="grid grid-cols-[8rem_1fr] gap-3 py-2 text-xs">
+                        <dt className="text-slate-500">{field.label}</dt>
+                        <dd className="text-slate-700">{upload.supportEnvironment[field.key]}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              )}
+              {upload.screenshots?.length > 0 && (
+                <div className="mt-5">
+                  <h6 className="text-xs font-semibold text-slate-700">화면 이미지</h6>
+                  <div className="mt-2 grid grid-cols-3 gap-2">
+                    {upload.screenshots.map((screenshot, index) => (
+                      <img
+                        key={`${screenshot.name}-${index}`}
+                        src={screenshot.data}
+                        alt={`${upload.name} 화면 이미지 ${index + 1}`}
+                        className="aspect-video w-full rounded-lg border border-slate-200 object-cover"
+                      />
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           )}
@@ -375,6 +437,7 @@ export default function RegisterPage() {
   const location = useLocation();
   const inputRef = useRef(null);
   const iconInputRef = useRef(null);
+  const screenshotInputRef = useRef(null);
   const [uploads, setUploads] = useState(readUploads);
   const [search, setSearch] = useState('');
   const [openUploadId, setOpenUploadId] = useState(location.state?.openReviewId ?? null);
@@ -392,11 +455,13 @@ export default function RegisterPage() {
   );
 
   const saveUploads = next => {
-    setUploads(next);
     try {
       window.localStorage.setItem(REVIEW_REQUESTS_KEY, JSON.stringify(next));
+      setUploads(next);
+      return true;
     } catch {
       setError('목록을 브라우저에 저장하지 못했습니다. 저장 공간을 확인해 주세요.');
+      return false;
     }
   };
 
@@ -426,6 +491,13 @@ export default function RegisterPage() {
     setForm(current => ({ ...current, [field]: value }));
   };
 
+  const updateEnvironment = (field, value) => {
+    setForm(current => ({
+      ...current,
+      supportEnvironment: { ...current.supportEnvironment, [field]: value },
+    }));
+  };
+
   const selectIconFile = fileList => {
     const file = Array.from(fileList || [])[0];
     if (!file) return;
@@ -451,6 +523,48 @@ export default function RegisterPage() {
     reader.readAsDataURL(file);
   };
 
+  const selectScreenshots = async fileList => {
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+    if (files.length + form.screenshots.length > MAX_SCREENSHOTS) {
+      setError(`화면 이미지는 최대 ${MAX_SCREENSHOTS}장까지 등록할 수 있습니다.`);
+      return;
+    }
+    if (files.some(file => !['image/png', 'image/jpeg', 'image/webp'].includes(file.type))) {
+      setError('화면 이미지는 PNG, JPG 또는 WEBP 형식만 사용할 수 있습니다.');
+      return;
+    }
+    if (files.some(file => file.size > MAX_SCREENSHOT_BYTES)) {
+      setError('화면 이미지는 장당 500KB 이하로 선택해 주세요.');
+      return;
+    }
+
+    try {
+      const screenshots = await Promise.all(
+        files.map(
+          file =>
+            new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () =>
+                resolve({
+                  name: file.name,
+                  data: typeof reader.result === 'string' ? reader.result : '',
+                });
+              reader.onerror = () => reject(new Error('이미지를 읽지 못했습니다.'));
+              reader.readAsDataURL(file);
+            })
+        )
+      );
+      setForm(current => ({
+        ...current,
+        screenshots: [...current.screenshots, ...screenshots].slice(0, MAX_SCREENSHOTS),
+      }));
+      setError('');
+    } catch {
+      setError('화면 이미지를 불러오지 못했습니다. 다시 선택해 주세요.');
+    }
+  };
+
   const closeRegistration = () => {
     setIsRegistering(false);
     setSelectedFile(null);
@@ -464,8 +578,23 @@ export default function RegisterPage() {
       setError('등록할 ZIP 파일을 먼저 선택해 주세요.');
       return;
     }
-    if (!form.name.trim() || !form.summary.trim() || !form.description.trim()) {
-      setError('도구 이름, 한 줄 설명, 상세 설명을 입력해 주세요.');
+    if (
+      !form.name.trim() ||
+      !form.summary.trim() ||
+      !form.description.trim() ||
+      !form.features.trim() ||
+      !form.instructions.trim() ||
+      !form.version.trim()
+    ) {
+      setError('도구 이름, 설명, 주요 기능, 사용 방법, 버전을 입력해 주세요.');
+      return;
+    }
+    if (
+      !form.supportEnvironment.audience.trim() ||
+      !form.supportEnvironment.operatingSystem.trim() ||
+      !form.supportEnvironment.browser.trim()
+    ) {
+      setError('지원 환경의 사용 가능 대상, 운영체제, 브라우저를 입력해 주세요.');
       return;
     }
 
@@ -475,12 +604,20 @@ export default function RegisterPage() {
       id: `upload-${now.getTime()}-${Math.random().toString(36).slice(2)}`,
       fileName: selectedFile.name,
       name: form.name.trim(),
+      summary: form.summary.trim(),
+      description: form.description.trim(),
+      features: form.features.trim(),
+      instructions: form.instructions.trim(),
+      version: form.version.trim(),
+      supportEnvironment: Object.fromEntries(
+        Object.entries(form.supportEnvironment).map(([key, value]) => [key, value.trim()])
+      ),
       size: formatSize(selectedFile.size),
       createdAt: formatReviewDate(now),
       status: '승인 대기',
     };
 
-    saveUploads([nextRow, ...uploads]);
+    if (!saveUploads([nextRow, ...uploads])) return;
     setSearch('');
     setMessage('승인 요청을 접수했습니다. 심사 진행 내역에서 상태를 확인해 주세요.');
     closeRegistration();
@@ -513,6 +650,18 @@ export default function RegisterPage() {
         tabIndex={-1}
         onChange={event => {
           selectIconFile(event.target.files);
+          event.target.value = '';
+        }}
+      />
+      <input
+        ref={screenshotInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        multiple
+        className="sr-only"
+        tabIndex={-1}
+        onChange={event => {
+          void selectScreenshots(event.target.files);
           event.target.value = '';
         }}
       />
@@ -687,12 +836,25 @@ export default function RegisterPage() {
                   />
                 </label>
                 <label className="text-sm font-medium text-slate-700 sm:col-span-2">
+                  주요 기능 <span className="text-red-500">*</span>
+                  <textarea
+                    value={form.features}
+                    onChange={event => updateForm('features', event.target.value)}
+                    placeholder="주요 기능을 한 줄에 하나씩 작성해 주세요."
+                    rows={4}
+                    required
+                    className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
+                </label>
+                <label className="text-sm font-medium text-slate-700 sm:col-span-2">
                   사용 방법
+                  <span className="ml-1 text-red-500">*</span>
                   <textarea
                     value={form.instructions}
                     onChange={event => updateForm('instructions', event.target.value)}
-                    placeholder="설치 및 실행 방법, 사용 방법을 작성해 주세요."
-                    rows={3}
+                    placeholder="입력할 내용과 결과 확인 방법을 문장으로 자세히 작성해 주세요."
+                    rows={4}
+                    required
                     className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                 </label>
@@ -729,6 +891,83 @@ export default function RegisterPage() {
                     </span>
                   </button>
                 </div>
+                <div className="text-sm font-medium text-slate-700 sm:col-span-2">
+                  화면 이미지{' '}
+                  <span className="text-xs font-normal text-slate-400">
+                    (선택 · 최대 3장, 장당 500KB)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => screenshotInputRef.current?.click()}
+                    disabled={form.screenshots.length >= MAX_SCREENSHOTS}
+                    className="mt-2 flex w-full items-center gap-3 rounded-lg border border-dashed border-slate-200 px-4 py-3 text-left text-sm font-normal text-slate-500 hover:border-blue-300 hover:bg-blue-50/30 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600">
+                      <Plus size={18} aria-hidden="true" />
+                    </span>
+                    화면 이미지 선택 ({form.screenshots.length}/{MAX_SCREENSHOTS})
+                  </button>
+                  {form.screenshots.length > 0 && (
+                    <div className="mt-3 grid grid-cols-3 gap-3">
+                      {form.screenshots.map((screenshot, index) => (
+                        <div key={`${screenshot.name}-${index}`} className="min-w-0">
+                          <div className="relative">
+                            <img
+                              src={screenshot.data}
+                              alt={`${index + 1}번째 화면 이미지 미리보기`}
+                              className="aspect-video w-full rounded-lg border border-slate-200 bg-slate-50 object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setForm(current => ({
+                                  ...current,
+                                  screenshots: current.screenshots.filter(
+                                    (_, imageIndex) => imageIndex !== index
+                                  ),
+                                }))
+                              }
+                              aria-label={`${screenshot.name} 제거`}
+                              className="absolute right-1 top-1 rounded-full bg-slate-900/70 p-1 text-white hover:bg-slate-900"
+                            >
+                              <X size={13} aria-hidden="true" />
+                            </button>
+                          </div>
+                          <p
+                            className="mt-1 truncate text-xs font-normal text-slate-500"
+                            title={screenshot.name}
+                          >
+                            {screenshot.name}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset className="mt-8 border-t border-slate-100 pt-7">
+              <legend className="text-base font-semibold text-slate-900">지원 환경</legend>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                실제로 사용할 수 있는 기기와 환경을 입력해 주세요. 상세 페이지에 표시할 정보입니다.
+              </p>
+              <div className="mt-4 grid gap-5 sm:grid-cols-2">
+                {SUPPORT_ENVIRONMENT_FIELDS.map(field => (
+                  <label
+                    key={field.key}
+                    className={`text-sm font-medium text-slate-700 ${field.key === 'other' ? 'sm:col-span-2' : ''}`}
+                  >
+                    {field.label} {field.required && <span className="text-red-500">*</span>}
+                    <input
+                      value={form.supportEnvironment[field.key]}
+                      onChange={event => updateEnvironment(field.key, event.target.value)}
+                      placeholder={field.placeholder}
+                      required={field.required}
+                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </label>
+                ))}
               </div>
             </fieldset>
           </div>
@@ -796,7 +1035,9 @@ export default function RegisterPage() {
                       </span>
                       <span
                         className="hidden min-w-0 truncate text-xs text-slate-500 lg:block"
-                        title={upload.requestType === '업데이트' ? '업데이트 요청' : upload.fileName}
+                        title={
+                          upload.requestType === '업데이트' ? '업데이트 요청' : upload.fileName
+                        }
                       >
                         {upload.requestType === '업데이트'
                           ? `업데이트 요청 · v${upload.version}`

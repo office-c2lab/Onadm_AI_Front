@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { ArrowRight, Bookmark, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import banner1 from '../../../../assets/images/banner1.png';
 import banner2 from '../../../../assets/images/banner2.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import ToolHoverPreview from '../components/ToolHoverPreview.jsx';
-import { ToolDetailModal } from '../components/ManageToolCard/ManageToolCard.jsx';
 import { publishedTools, storeCategories, useFavorites } from '../data/manageStore.js';
 
 const featuredBackgrounds = {
@@ -98,10 +98,11 @@ function CompactTool({ tool, onDetail, previewAlign }) {
 }
 
 export default function StorePage() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('전체');
-  const [selectedTool, setSelectedTool] = useState(null);
   const { favorites, toggleFavorite } = useFavorites();
+  const openTool = tool => navigate(`/user/aistore/store/${tool.id}`);
   const isDefaultView = !search.trim() && selectedCategory === '전체';
 
   const visibleTools = useMemo(() => {
@@ -159,7 +160,7 @@ export default function StorePage() {
         >
           <button
             type="button"
-            onClick={() => setSelectedTool(publishedTools[0])}
+            onClick={() => openTool(publishedTools[0])}
             className="group relative min-h-[220px] overflow-hidden rounded-lg text-left shadow-sm lg:min-h-0"
           >
             <img
@@ -184,7 +185,7 @@ export default function StorePage() {
           <div className="grid h-full gap-2 sm:grid-cols-2 lg:grid-rows-[1.35fr_1fr]">
             <button
               type="button"
-              onClick={() => setSelectedTool(publishedTools[2])}
+              onClick={() => openTool(publishedTools[2])}
               className="group relative min-h-[130px] overflow-hidden rounded-lg text-left sm:col-span-2 lg:min-h-0"
             >
               <img
@@ -204,7 +205,7 @@ export default function StorePage() {
 
             <button
               type="button"
-              onClick={() => setSelectedTool(publishedTools[3])}
+              onClick={() => openTool(publishedTools[3])}
               className="flex min-h-[100px] items-center justify-between gap-2 rounded-lg bg-gradient-to-br from-emerald-50 to-cyan-100 p-4 text-left hover:brightness-[0.98] lg:min-h-0"
             >
               <span className="min-w-0 flex-1">
@@ -220,7 +221,7 @@ export default function StorePage() {
 
             <button
               type="button"
-              onClick={() => setSelectedTool(publishedTools[1])}
+              onClick={() => openTool(publishedTools[1])}
               className="flex min-h-[100px] items-center justify-between gap-2 rounded-lg bg-gradient-to-br from-indigo-50 to-violet-100 p-4 text-left hover:brightness-[0.98] lg:min-h-0"
             >
               <span className="min-w-0 flex-1">
@@ -259,7 +260,7 @@ export default function StorePage() {
                 tool={tool}
                 favorite={favorites.includes(tool.id)}
                 onFavorite={toggleFavorite}
-                onDetail={setSelectedTool}
+                onDetail={openTool}
                 previewAlign={index >= 3 || index % 2 ? 'right' : 'left'}
               />
             ))}
@@ -270,7 +271,7 @@ export default function StorePage() {
               <CompactTool
                 key={tool.id}
                 tool={tool}
-                onDetail={setSelectedTool}
+                onDetail={openTool}
                 previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
               />
             ))}
@@ -287,7 +288,7 @@ export default function StorePage() {
                 <CompactTool
                   key={tool.id}
                   tool={tool}
-                  onDetail={setSelectedTool}
+                  onDetail={openTool}
                   previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
                 />
               ))}
@@ -303,7 +304,7 @@ export default function StorePage() {
                   <CompactTool
                     key={tool.id}
                     tool={tool}
-                    onDetail={setSelectedTool}
+                    onDetail={openTool}
                     previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
                   />
                 ))}
@@ -311,8 +312,6 @@ export default function StorePage() {
           </section>
         </>
       )}
-
-      <ToolDetailModal tool={selectedTool} onClose={() => setSelectedTool(null)} />
     </div>
   );
 }

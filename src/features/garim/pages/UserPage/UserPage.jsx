@@ -1,6 +1,5 @@
 import { Fragment, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import AppButton from '../../components/AppButton.jsx';
 import AppSearchField from '../../components/AppSearchField.jsx';
 import FixedPaginationBar from '../../components/FixedPaginationBar.jsx';
@@ -27,7 +26,6 @@ import {
   usePatchClientMetadataMutation,
   useRegisteredClientsQuery,
 } from '../../queries/userManagementQueries.js';
-import { DropdownSettingsContent } from '../../components/settings/SettingsContent.jsx';
 import macIcon from '../../assets/icons/mac.svg';
 import windowIcon from '../../assets/icons/window.svg';
 
@@ -283,7 +281,10 @@ function DeleteIpModal({ user, isDeleting = false, errorMessage = '', onClose, o
         className="app-modal-panel"
       >
         <div className="app-modal-header flex items-center justify-between gap-[var(--app-gap-md)] border-b border-[#E7EBF4]">
-          <h3 id="delete-ip-modal-title" className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-[#111827]">
+          <h3
+            id="delete-ip-modal-title"
+            className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-[#111827]"
+          >
             등록 IP 삭제
           </h3>
           <button
@@ -355,8 +356,6 @@ function DeleteIpModal({ user, isDeleting = false, errorMessage = '', onClose, o
 }
 
 export default function UserPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const activeView = searchParams.get('view') === 'dropdowns' ? 'dropdowns' : 'users';
   const [selectedId, setSelectedId] = useState(null);
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -407,22 +406,6 @@ export default function UserPage() {
   }, [detailPositionItems, users]);
 
   const selectedUser = users.find(user => user.id === selectedId) ?? null;
-
-  const handleChangeView = view => {
-    setSelectedId(null);
-    setCurrentPage(1);
-    setSearchParams(current => {
-      const nextParams = new URLSearchParams(current);
-
-      if (view === 'users') {
-        nextParams.delete('view');
-      } else {
-        nextParams.set('view', view);
-      }
-
-      return nextParams;
-    });
-  };
 
   const filteredUsers = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -517,245 +500,201 @@ export default function UserPage() {
   return (
     <PageLayout bottomPaddingClassName="pb-0">
       <div className="flex min-h-0 flex-1 flex-col gap-5">
-        {activeView === 'users' ? (
-          <div className="flex flex-col gap-4 pt-1">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex w-full flex-col gap-3 lg:flex-1 lg:flex-row">
-                <MonitoringDropdown
-                  value={department}
-                  onChange={handleChangeDepartment}
-                  options={departmentOptions}
-                  ariaLabel="전체 부서"
-                  widthClass="w-full lg:w-[clamp(10rem,13vw,12rem)] lg:shrink-0"
-                  triggerClassName="h-12 rounded-xl border-slate-200 bg-white shadow-none"
-                  optionLabelMap={{ [DEFAULT_DEPARTMENT_OPTION]: '전체' }}
-                />
+        <div className="flex flex-col gap-4 pt-1">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex w-full flex-col gap-3 lg:flex-1 lg:flex-row">
+              <MonitoringDropdown
+                value={department}
+                onChange={handleChangeDepartment}
+                options={departmentOptions}
+                ariaLabel="전체 부서"
+                widthClass="w-full lg:w-[clamp(10rem,13vw,12rem)] lg:shrink-0"
+                triggerClassName="h-12 rounded-xl border-slate-200 bg-white shadow-none"
+                optionLabelMap={{ [DEFAULT_DEPARTMENT_OPTION]: '전체' }}
+              />
 
-                <MonitoringDropdown
-                  value={position}
-                  onChange={handleChangePosition}
-                  options={positionOptions}
-                  ariaLabel="전체 직책"
-                  widthClass="w-full lg:w-[clamp(10rem,13vw,12rem)] lg:shrink-0"
-                  triggerClassName="h-12 rounded-xl border-slate-200 bg-white shadow-none"
-                  optionLabelMap={{ [DEFAULT_POSITION_OPTION]: '전체' }}
-                />
+              <MonitoringDropdown
+                value={position}
+                onChange={handleChangePosition}
+                options={positionOptions}
+                ariaLabel="전체 직책"
+                widthClass="w-full lg:w-[clamp(10rem,13vw,12rem)] lg:shrink-0"
+                triggerClassName="h-12 rounded-xl border-slate-200 bg-white shadow-none"
+                optionLabelMap={{ [DEFAULT_POSITION_OPTION]: '전체' }}
+              />
 
-                <div className="flex flex-1 flex-col gap-3 sm:min-w-[20rem] sm:flex-row lg:w-[clamp(18rem,30vw,24rem)] lg:min-w-0 lg:flex-none">
-                  <AppSearchField
-                    value={searchInput}
-                    onChange={event => setSearchInput(event.target.value)}
-                    placeholder="사용자명, IP 검색"
+              <div className="flex flex-1 flex-col gap-3 sm:min-w-[20rem] sm:flex-row lg:w-[clamp(18rem,30vw,24rem)] lg:min-w-0 lg:flex-none">
+                <AppSearchField
+                  value={searchInput}
+                  onChange={event => setSearchInput(event.target.value)}
+                  placeholder="사용자명, IP 검색"
+                />
+                <AppButton onClick={handleSearch} className="h-12 min-w-[4.5rem]">
+                  검색
+                </AppButton>
+                <MonitoringIconButtonTooltip label="초기화">
+                  <MonitoringResetButton
+                    onClick={handleResetFilters}
+                    heightClass="h-12"
+                    widthClass="w-12 shrink-0"
+                    aria-label="초기화"
                   />
-                  <AppButton onClick={handleSearch} className="h-12 min-w-[4.5rem]">
-                    검색
-                  </AppButton>
-                  <MonitoringIconButtonTooltip label="초기화">
-                    <MonitoringResetButton
-                      onClick={handleResetFilters}
-                      heightClass="h-12"
-                      widthClass="w-12 shrink-0"
-                      aria-label="초기화"
-                    />
-                  </MonitoringIconButtonTooltip>
-                </div>
+                </MonitoringIconButtonTooltip>
               </div>
-              <AppButton onClick={() => handleChangeView('dropdowns')} className="h-12 shrink-0 px-5">
-                부서/직책 설정
-                <ChevronRight className="h-4 w-4" aria-hidden="true" />
-              </AppButton>
             </div>
           </div>
-        ) : null}
+        </div>
 
-        {activeView === 'users' ? (
-          <>
-            <SectionCard className="overflow-hidden">
-              <div ref={tableAreaRef} className={monitoringTableSurfaceClass}>
-                <div className="overflow-hidden">
-                  <table className={`${monitoringTableClass} text-left`}>
-                    <thead className={monitoringTableHeadClass}>
-                      <tr className={monitoringTableHeaderRowClass}>
-                        <th className={`${monitoringTableHeaderCellClass} w-[4%] px-4`} />
-                        <th
-                          className={`${monitoringTableHeaderCellClass} w-[18%] whitespace-nowrap px-3`}
-                        >
-                          IP 주소
-                        </th>
-                        <th
-                          className={`${monitoringTableHeaderCellClass} w-[10%] whitespace-nowrap px-3 !text-center`}
-                        >
-                          운영체제
-                        </th>
-                        <th
-                          className={`${monitoringTableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}
-                        >
-                          사용자명
-                        </th>
-                        <th
-                          className={`${monitoringTableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}
-                        >
-                          부서
-                        </th>
-                        <th
-                          className={`${monitoringTableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}
-                        >
-                          직책
-                        </th>
-                        <th
-                          className={`${monitoringTableHeaderCellClass} w-[20%] whitespace-nowrap px-3`}
-                        >
-                          최초 등록일
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {visibleUsers.map((user, index) => {
-                        const isSelected = user.id === selectedId;
-                        const osIcon = getOsIcon(user.osType);
+        <SectionCard className="overflow-hidden">
+          <div ref={tableAreaRef} className={monitoringTableSurfaceClass}>
+            <div className="overflow-hidden">
+              <table className={`${monitoringTableClass} text-left`}>
+                <thead className={monitoringTableHeadClass}>
+                  <tr className={monitoringTableHeaderRowClass}>
+                    <th className={`${monitoringTableHeaderCellClass} w-[4%] px-4`} />
+                    <th
+                      className={`${monitoringTableHeaderCellClass} w-[18%] whitespace-nowrap px-3`}
+                    >
+                      IP 주소
+                    </th>
+                    <th
+                      className={`${monitoringTableHeaderCellClass} w-[10%] whitespace-nowrap px-3 !text-center`}
+                    >
+                      운영체제
+                    </th>
+                    <th
+                      className={`${monitoringTableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}
+                    >
+                      사용자명
+                    </th>
+                    <th
+                      className={`${monitoringTableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}
+                    >
+                      부서
+                    </th>
+                    <th
+                      className={`${monitoringTableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}
+                    >
+                      직책
+                    </th>
+                    <th
+                      className={`${monitoringTableHeaderCellClass} w-[20%] whitespace-nowrap px-3`}
+                    >
+                      최초 등록일
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleUsers.map((user, index) => {
+                    const isSelected = user.id === selectedId;
+                    const osIcon = getOsIcon(user.osType);
 
-                        return (
-                          <Fragment key={user.id}>
-                            <tr
-                              onClick={() =>
-                                setSelectedId(current => (current === user.id ? null : user.id))
-                              }
-                              className={monitoringTableRowClass({
-                                selected: isSelected,
-                                striped: index % 2 === 1,
-                                interactive: true,
-                              })}
+                    return (
+                      <Fragment key={user.id}>
+                        <tr
+                          onClick={() =>
+                            setSelectedId(current => (current === user.id ? null : user.id))
+                          }
+                          className={monitoringTableRowClass({
+                            selected: isSelected,
+                            striped: index % 2 === 1,
+                            interactive: true,
+                          })}
+                        >
+                          <td className={monitoringTableCellClass(index, 'px-4 align-middle')}>
+                            <button
+                              type="button"
+                              aria-label={`${user.name} 선택`}
+                              className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
+                                isSelected ? 'border-[#075DF6]' : 'border-slate-300'
+                              }`.trim()}
                             >
-                              <td className={monitoringTableCellClass(index, 'px-4 align-middle')}>
-                                <button
-                                  type="button"
-                                  aria-label={`${user.name} 선택`}
-                                  className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
-                                    isSelected ? 'border-[#075DF6]' : 'border-slate-300'
-                                  }`.trim()}
-                                >
-                                  <span
-                                    className={`h-2.5 w-2.5 rounded-full transition ${
-                                      isSelected ? 'bg-[#075DF6]' : 'bg-transparent'
-                                    }`.trim()}
+                              <span
+                                className={`h-2.5 w-2.5 rounded-full transition ${
+                                  isSelected ? 'bg-[#075DF6]' : 'bg-transparent'
+                                }`.trim()}
+                              />
+                            </button>
+                          </td>
+                          <td className={monitoringTableCellClass(index, 'whitespace-nowrap px-3')}>
+                            <span className="font-semibold text-slate-800">{user.ip}</span>
+                          </td>
+                          <td
+                            className={monitoringTableCellClass(
+                              index,
+                              'whitespace-nowrap px-3 text-center'
+                            )}
+                          >
+                            {osIcon ? (
+                              <div className="flex items-center justify-center">
+                                <div className="flex h-[var(--app-control-xs)] w-[var(--app-control-xs)] items-center justify-center rounded-[var(--app-radius-md)] border border-[#8BC6FF] bg-[#F7FBFF] shadow-[0_0.625rem_1.5rem_rgba(7, 93, 246,0.08)]">
+                                  <img
+                                    src={osIcon.src}
+                                    alt={osIcon.label}
+                                    title={osIcon.label}
+                                    className="h-[var(--app-icon-md)] w-[var(--app-icon-md)] object-contain"
                                   />
-                                </button>
-                              </td>
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'whitespace-nowrap px-3'
-                                )}
-                              >
-                                <span className="font-semibold text-slate-800">{user.ip}</span>
-                              </td>
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'whitespace-nowrap px-3 text-center'
-                                )}
-                              >
-                                {osIcon ? (
-                                  <div className="flex items-center justify-center">
-                                    <div className="flex h-[var(--app-control-xs)] w-[var(--app-control-xs)] items-center justify-center rounded-[var(--app-radius-md)] border border-[#8BC6FF] bg-[#F7FBFF] shadow-[0_0.625rem_1.5rem_rgba(7, 93, 246,0.08)]">
-                                      <img
-                                        src={osIcon.src}
-                                        alt={osIcon.label}
-                                        title={osIcon.label}
-                                        className="h-[var(--app-icon-md)] w-[var(--app-icon-md)] object-contain"
-                                      />
-                                    </div>
-                                  </div>
-                                ) : (
-                                  getFallbackValue(user.osType)
-                                )}
-                              </td>
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'whitespace-nowrap px-3'
-                                )}
-                              >
-                                {getFallbackValue(user.name)}
-                              </td>
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'whitespace-nowrap px-3'
-                                )}
-                              >
-                                {getFallbackValue(user.department)}
-                              </td>
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'whitespace-nowrap px-3'
-                                )}
-                              >
-                                <div className="truncate">{getFallbackValue(user.position)}</div>
-                              </td>
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'whitespace-nowrap px-3'
-                                )}
-                              >
-                                {user.createdAt}
-                              </td>
-                            </tr>
-                            {isSelected ? (
-                              <tr>
-                                <td colSpan={7} className="border-t border-[#E5EBF5] bg-white p-0">
-                                  {selectedUser ? (
-                                    <UserDetailPanel
-                                      key={selectedUser.id}
-                                      user={selectedUser}
-                                      departmentOptions={detailDepartmentItems}
-                                      positionOptions={detailPositionItems}
-                                      onCancel={() => setSelectedId(null)}
-                                      onDelete={() => {
-                                        setDeleteErrorMessage('');
-                                        setDeleteTarget(selectedUser);
-                                      }}
-                                      onSave={handleSaveSelectedUser}
-                                      isSaving={isSaving}
-                                    />
-                                  ) : null}
-                                </td>
-                              </tr>
-                            ) : null}
-                          </Fragment>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-                {statusMessage ? (
-                  <section className="border-t border-dashed border-[#DCEAF1] px-6 py-4 text-center text-sm text-[#94A3B8]">
-                    {statusMessage}
-                  </section>
-                ) : null}
-              </div>
-            </SectionCard>
-
-            {filteredUsers.length ? (
-              <FixedPaginationBar
-                currentPage={safePage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
+                                </div>
+                              </div>
+                            ) : (
+                              getFallbackValue(user.osType)
+                            )}
+                          </td>
+                          <td className={monitoringTableCellClass(index, 'whitespace-nowrap px-3')}>
+                            {getFallbackValue(user.name)}
+                          </td>
+                          <td className={monitoringTableCellClass(index, 'whitespace-nowrap px-3')}>
+                            {getFallbackValue(user.department)}
+                          </td>
+                          <td className={monitoringTableCellClass(index, 'whitespace-nowrap px-3')}>
+                            <div className="truncate">{getFallbackValue(user.position)}</div>
+                          </td>
+                          <td className={monitoringTableCellClass(index, 'whitespace-nowrap px-3')}>
+                            {user.createdAt}
+                          </td>
+                        </tr>
+                        {isSelected ? (
+                          <tr>
+                            <td colSpan={7} className="border-t border-[#E5EBF5] bg-white p-0">
+                              {selectedUser ? (
+                                <UserDetailPanel
+                                  key={selectedUser.id}
+                                  user={selectedUser}
+                                  departmentOptions={detailDepartmentItems}
+                                  positionOptions={detailPositionItems}
+                                  onCancel={() => setSelectedId(null)}
+                                  onDelete={() => {
+                                    setDeleteErrorMessage('');
+                                    setDeleteTarget(selectedUser);
+                                  }}
+                                  onSave={handleSaveSelectedUser}
+                                  isSaving={isSaving}
+                                />
+                              ) : null}
+                            </td>
+                          </tr>
+                        ) : null}
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {statusMessage ? (
+              <section className="border-t border-dashed border-[#DCEAF1] px-6 py-4 text-center text-sm text-[#94A3B8]">
+                {statusMessage}
+              </section>
             ) : null}
-          </>
-        ) : (
-          <DropdownSettingsContent
-            toolbarAction={
-              <AppButton onClick={() => handleChangeView('users')} className="h-12 shrink-0 px-5">
-                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-                사용자 관리
-              </AppButton>
-            }
+          </div>
+        </SectionCard>
+
+        {filteredUsers.length ? (
+          <FixedPaginationBar
+            currentPage={safePage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
           />
-        )}
+        ) : null}
       </div>
 
       {deleteTarget ? (
@@ -774,4 +713,3 @@ export default function UserPage() {
     </PageLayout>
   );
 }
-

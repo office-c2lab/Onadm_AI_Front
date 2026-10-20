@@ -1,10 +1,7 @@
-
 import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
-import AdminSidebar, {
-  AdminSidebarRail,
-} from '../components/adminSidebar/AdminSidebar';
+import AdminSidebar, { AdminSidebarRail } from '../components/adminSidebar/AdminSidebar';
 
 export default function AdminLayout() {
   const location = useLocation();
@@ -27,21 +24,20 @@ export default function AdminLayout() {
         }`}
       >
         {isSidebarOpen ? (
-          <AdminSidebar
-            className="h-screen"
-            onClose={() => setSidebarOpen(false)}
-          />
+          <AdminSidebar className="h-screen" onClose={() => setSidebarOpen(false)} />
         ) : (
-          <AdminSidebarRail
-            onOpen={() => setSidebarOpen(true)}
-          />
+          <AdminSidebarRail onOpen={() => setSidebarOpen(true)} />
         )}
       </div>
 
       {/* 관리자 콘텐츠 */}
       <main
         className="relative z-0 min-h-screen min-w-0 flex-1 bg-[#f9f9f9]"
-        style={isExternalControl ? { '--ondam-admin-sidebar-width': isSidebarOpen ? '260px' : '48px' } : undefined}
+        style={
+          isExternalControl
+            ? { '--ondam-admin-sidebar-width': isSidebarOpen ? '260px' : '48px' }
+            : undefined
+        }
       >
         <div className={isExternalControl ? 'w-full' : 'mx-auto w-full max-w-7xl px-8 py-8'}>
           <Outlet />

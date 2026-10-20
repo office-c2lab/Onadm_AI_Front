@@ -13,6 +13,7 @@ import AdminLayout from '../layouts/AdminLayout.jsx';
 // 사용자 AI Store
 // ================================
 import StorePage from '../pages/user/aistore/store/StorePage.jsx';
+import StoreDetailPage from '../pages/user/aistore/store/StoreDetailPage.jsx';
 import MyToolsPage from '../pages/user/aistore/mytools/MyToolsPage.jsx';
 import RegisterPage from '../pages/user/aistore/register/RegisterPage.jsx';
 import GuidePage from '../pages/user/aistore/guide/GuidePage.jsx';
@@ -103,6 +104,7 @@ export default function AppRouter() {
           />
 
           <Route path="store" element={<StorePage />} />
+          <Route path="store/:toolId" element={<StoreDetailPage />} />
           <Route path="mytools" element={<MyToolsPage />} />
 
           {/* 라이브러리 */}
