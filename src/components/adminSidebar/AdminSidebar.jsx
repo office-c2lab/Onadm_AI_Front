@@ -32,15 +32,11 @@ const adminMenus = [
     icon: Search,
     children: [
       {
-        label: 'AI 서비스 검색',
-        to: '/admin/discover/search',
-      },
-      {
-        label: 'URL 분석 및 결과',
+        label: 'AI Service Analysis',
         to: '/admin/discover/url-analysis',
       },
       {
-        label: 'Intelligence DB 업데이트',
+        label: 'Intelligence DB',
         to: '/admin/discover/intelligence',
       },
     ],

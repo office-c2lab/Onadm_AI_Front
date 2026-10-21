@@ -6,7 +6,10 @@ import AdminSidebar, { AdminSidebarRail } from '../components/adminSidebar/Admin
 export default function AdminLayout() {
   const location = useLocation();
   const isExternalControl = location.pathname.startsWith('/admin/control/external');
-  const usesOwnPageLayout = isExternalControl || location.pathname === '/admin/users';
+  const isHistoryPage = location.pathname === '/admin/control/internal/history';
+  const isModelsPage = location.pathname === '/admin/control/internal/models';
+  const usesOwnPageLayout =
+    isExternalControl || isHistoryPage || isModelsPage || location.pathname === '/admin/users';
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     return window.localStorage.getItem('admin-sidebar-open') !== 'false';
   });

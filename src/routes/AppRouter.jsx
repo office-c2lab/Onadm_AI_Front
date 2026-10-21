@@ -29,7 +29,6 @@ import DashboardPage from '../pages/admin/dashboard/DashboardPage.jsx';
 // ================================
 // 관리자 - Discover
 // ================================
-import SearchPage from '../pages/admin/discover/search/SearchPage.jsx';
 import UrlAnalysisPage from '../pages/admin/discover/url-analysis/UrlAnalysisPage.jsx';
 import IntelligencePage from '../pages/admin/discover/intelligence/IntelligencePage.jsx';
 
@@ -162,10 +161,6 @@ export default function AppRouter() {
             <Route
               index
               element={<Navigate to="search" replace />}
-            />
-            <Route
-              path="search"
-              element={<SearchPage />}
             />
             <Route
               path="url-analysis"
