@@ -6,10 +6,15 @@ import AdminSidebar, { AdminSidebarRail } from '../components/adminSidebar/Admin
 export default function AdminLayout() {
   const location = useLocation();
   const isExternalControl = location.pathname.startsWith('/admin/control/external');
-  const isHistoryPage = location.pathname === '/admin/control/internal/history';
-  const isModelsPage = location.pathname === '/admin/control/internal/models';
+  const isInternalTabbedPage = [
+    '/admin/control/internal/usage',
+    '/admin/control/internal/models',
+    '/admin/control/internal/limits',
+    '/admin/control/internal/history',
+  ].includes(location.pathname);
   const usesOwnPageLayout =
-    isExternalControl || isHistoryPage || isModelsPage || location.pathname === '/admin/users';
+    isExternalControl || isInternalTabbedPage || location.pathname === '/admin/users';
+  const isTopFlushPage = location.pathname === '/admin/discover/intelligence';
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     return window.localStorage.getItem('admin-sidebar-open') !== 'false';
   });
@@ -45,7 +50,11 @@ export default function AdminLayout() {
           </div>
         ) : (
           <div className="mx-auto flex min-h-full w-full max-w-[88rem] px-[clamp(0.875rem,2vw,1.5rem)] pb-[clamp(2rem,4vw,3rem)]">
-            <div className="mx-auto w-full max-w-[74rem] pt-[clamp(1.1rem,2vw,1.8rem)]">
+            <div
+              className={`mx-auto w-full max-w-[74rem] ${
+                isTopFlushPage ? 'pt-0' : 'pt-[clamp(1.1rem,2vw,1.8rem)]'
+              }`}
+            >
               <Outlet />
             </div>
           </div>

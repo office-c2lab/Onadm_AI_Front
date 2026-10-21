@@ -419,7 +419,6 @@ export default function UrlAnalysisPage() {
   const [urlInput, setUrlInput] = useState('');
   const [openHistoryId, setOpenHistoryId] = useState(null);
   const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
   const [aiFilter, setAiFilter] = useState('all');
   const [dbFilter, setDbFilter] = useState('all');
   const [error, setError] = useState('');
@@ -448,11 +447,13 @@ export default function UrlAnalysisPage() {
     () =>
       history.filter(
         item =>
-          item.domain.toLowerCase().includes(search.trim().toLowerCase()) &&
+          `${item.domain} ${item.ai} ${item.kind} ${item.db} ${item.time}`
+            .toLowerCase()
+            .includes(searchInput.trim().toLowerCase()) &&
           (aiFilter === 'all' || item.ai === aiFilter) &&
           (dbFilter === 'all' || item.db === dbFilter)
       ),
-    [history, search, aiFilter, dbFilter]
+    [history, searchInput, aiFilter, dbFilter]
   );
 
   const analyze = event => {
@@ -493,7 +494,6 @@ export default function UrlAnalysisPage() {
     setSelectedId(null);
     setUrlInput('');
     setSearchInput('');
-    setSearch('');
     setAiFilter('all');
     setDbFilter('all');
     setError('');
@@ -504,8 +504,20 @@ export default function UrlAnalysisPage() {
 
   return (
     <div className="w-full space-y-6 text-slate-900">
+      <div className="sticky top-0 z-30 -mx-5 -mt-[clamp(1.1rem,2vw,1.8rem)] bg-[#f9f9f9]/95 px-5 py-3 backdrop-blur md:-mx-8 md:px-8">
+        <label className="mx-auto flex h-11 w-full max-w-xl items-center gap-3 rounded-lg bg-[#edf2f7] px-4 text-slate-500 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20">
+          <Search size={19} strokeWidth={2} aria-hidden="true" />
+          <input
+            type="search"
+            value={searchInput}
+            onChange={event => setSearchInput(event.target.value)}
+            placeholder="URL 분석 이력 검색"
+            aria-label="URL 분석 이력 검색"
+            className="h-full min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-600"
+          />
+        </label>
+      </div>
       <section aria-labelledby="url-analysis-title">
-       
         <div className="flex min-h-[330px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-10 text-center">
           <img src={urlImage} alt="" className="h-40 w-40 object-contain" aria-hidden="true" />
           <h2 className="mt-6 text-lg font-semibold text-slate-900">
@@ -556,75 +568,6 @@ export default function UrlAnalysisPage() {
       </section>
 
       <section ref={historyRef} className="min-w-0 scroll-mt-6" aria-label="URL 분석 이력">
-        <form
-          onSubmit={event => {
-            event.preventDefault();
-            setSearch(searchInput);
-          }}
-          role="search"
-          aria-label="URL 분석 이력 검색 및 필터"
-          className="grid gap-3 pb-5 sm:grid-cols-2 xl:grid-cols-[minmax(145px,0.8fr)_minmax(145px,0.8fr)_minmax(0,2.2fr)]"
-        >
-          <CustomDropdown
-            value={aiFilter}
-            options={aiFilterOptions}
-            onChange={setAiFilter}
-            ariaLabel="AI 서비스 여부 필터"
-            className="[&>button]:h-12 [&>button]:rounded-xl"
-          />
-          <CustomDropdown
-            value={dbFilter}
-            options={dbFilterOptions}
-            onChange={setDbFilter}
-            ariaLabel="분석 상태 필터"
-            className="[&>button]:h-12 [&>button]:rounded-xl"
-          />
-          <div className="flex min-w-0 flex-wrap gap-2 sm:col-span-2 xl:col-span-1">
-            <label className="relative min-w-[160px] flex-[1_1_160px]">
-              <span className="sr-only">URL 또는 도메인 검색</span>
-              <input
-                type="search"
-                value={searchInput}
-                onChange={event => setSearchInput(event.target.value)}
-                placeholder="URL 또는 도메인 검색"
-                className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 pr-11 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-              />
-              <Search
-                className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                aria-hidden="true"
-              />
-            </label>
-            <button
-              type="submit"
-              className="h-12 shrink-0 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
-            >
-              검색
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchInput('');
-                setSearch('');
-                setAiFilter('all');
-                setDbFilter('all');
-              }}
-              aria-label="검색 조건 초기화"
-              title="초기화"
-              className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-colors hover:border-blue-300 hover:text-blue-600"
-            >
-              <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              onClick={() => exportCsv(visible)}
-              aria-label="결과 CSV 다운로드"
-              title="CSV 다운로드"
-              className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-colors hover:border-blue-300 hover:text-blue-600"
-            >
-              <Download className="h-4 w-4" aria-hidden="true" />
-            </button>
-          </div>
-        </form>
         <div className="grid gap-2">
           {visible.map(item => {
             const isOpen = openHistoryId === item.id;

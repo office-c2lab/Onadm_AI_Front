@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
-  Bookmark,
+  CheckCircle2,
   Database,
   ExternalLink,
   FileSearch,
@@ -10,7 +10,7 @@ import {
   Newspaper,
   Search,
   ShieldAlert,
-  Star,
+  Ban,
   X,
 } from 'lucide-react';
 
@@ -75,15 +75,15 @@ const intelligenceItems = [
     icon: Database,
     color: 'bg-cyan-50 text-cyan-600',
   },
-  
 ];
 
 const tabs = [
-  { id: 'all', label: '전체 자료' },
-  { id: 'favorites', label: '차단된 서비스' },
+  { id: 'all', label: '전체 서비스' },
+  { id: 'allowed', label: '허용된 서비스' },
+  { id: 'blocked', label: '차단된 서비스' },
 ];
 
-function IntelligenceRow({ item, favorite, onToggleFavorite, onOpen }) {
+function IntelligenceRow({ item, blocked, onToggleBlocked, onOpen }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const Icon = item.icon;
 
@@ -154,29 +154,21 @@ function IntelligenceRow({ item, favorite, onToggleFavorite, onOpen }) {
                 type="button"
                 onClick={() => {
                   setMenuOpen(false);
-                  onToggleFavorite(item.id);
+                  onToggleBlocked(item.id);
                 }}
                 className="w-full rounded-md px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
               >
-                {favorite ? '즐겨찾기 해제' : '즐겨찾기에 추가'}
+                {blocked ? '차단 해제' : '서비스 차단'}
               </button>
             </div>
           ) : null}
         </div>
       </div>
-
-      <div className="pointer-events-none absolute left-3 right-3 top-[calc(100%+0.35rem)] z-20 hidden rounded-xl border border-slate-100 bg-white p-4 opacity-0 shadow-xl transition group-hover:opacity-100 lg:group-hover:block">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-xs font-semibold text-slate-400">{item.type}</p>
-          <span className="text-xs text-slate-400">{item.updatedAt}</span>
-        </div>
-        <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{item.summary}</p>
-      </div>
     </article>
   );
 }
 
-function DetailModal({ item, favorite, onToggleFavorite, onClose }) {
+function DetailModal({ item, blocked, onToggleBlocked, onClose }) {
   if (!item) return null;
   const Icon = item.icon;
 
@@ -224,7 +216,7 @@ function DetailModal({ item, favorite, onToggleFavorite, onClose }) {
             {[
               ['자료 유형', item.type],
               ['출처', item.source],
-              ['처리 상태', item.status],
+              ['서비스 상태', blocked ? '차단됨' : '허용됨'],
               ['업데이트', item.updatedAt],
             ].map(([label, value]) => (
               <div key={label}>
@@ -237,15 +229,15 @@ function DetailModal({ item, favorite, onToggleFavorite, onClose }) {
         <footer className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
           <button
             type="button"
-            onClick={() => onToggleFavorite(item.id)}
+            onClick={() => onToggleBlocked(item.id)}
             className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition ${
-              favorite
-                ? 'bg-amber-50 text-amber-600'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              blocked
+                ? 'bg-emerald-50 text-emerald-600'
+                : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
             }`}
           >
-            <Star size={16} fill={favorite ? 'currentColor' : 'none'} />
-            {favorite ? '즐겨찾기됨' : '즐겨찾기'}
+            {blocked ? <CheckCircle2 size={16} /> : <Ban size={16} />}
+            {blocked ? '차단 해제' : '서비스 차단'}
           </button>
           <button
             type="button"
@@ -262,11 +254,11 @@ function DetailModal({ item, favorite, onToggleFavorite, onClose }) {
 export default function IntelligencePage() {
   const [keyword, setKeyword] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const [favorites, setFavorites] = useState(['intel-001', 'intel-003', 'intel-006']);
+  const [blockedServices, setBlockedServices] = useState(['intel-001', 'intel-003']);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const toggleFavorite = id => {
-    setFavorites(current =>
+  const toggleBlocked = id => {
+    setBlockedServices(current =>
       current.includes(id) ? current.filter(itemId => itemId !== id) : [...current, id]
     );
   };
@@ -274,14 +266,15 @@ export default function IntelligencePage() {
   const visibleItems = useMemo(() => {
     const query = keyword.trim().toLowerCase();
     return intelligenceItems.filter(item => {
-      const matchesTab = activeTab === 'all' || favorites.includes(item.id);
+      const isBlocked = blockedServices.includes(item.id);
+      const matchesTab = activeTab === 'all' || (activeTab === 'blocked' ? isBlocked : !isBlocked);
       const matchesQuery =
         `${item.title} ${item.category} ${item.type} ${item.source} ${item.summary}`
           .toLowerCase()
           .includes(query);
       return matchesTab && matchesQuery;
     });
-  }, [activeTab, favorites, keyword]);
+  }, [activeTab, blockedServices, keyword]);
 
   return (
     <div className="w-full">
@@ -313,11 +306,10 @@ export default function IntelligencePage() {
               }`}
             >
               {tab.label}
-              
             </button>
           ))}
         </nav>
-        <p className="hidden text-sm text-slate-400 sm:block">총 {visibleItems.length}개 자료</p>
+        <p className="hidden text-sm text-slate-400 sm:block">총 {visibleItems.length}개 서비스</p>
       </div>
 
       <section className="mt-7">
@@ -327,28 +319,32 @@ export default function IntelligencePage() {
               <IntelligenceRow
                 key={item.id}
                 item={item}
-                favorite={favorites.includes(item.id)}
-                onToggleFavorite={toggleFavorite}
+                blocked={blockedServices.includes(item.id)}
+                onToggleBlocked={toggleBlocked}
                 onOpen={setSelectedItem}
               />
             ))}
           </div>
         ) : (
           <div className="px-4 py-16 text-center">
-            {activeTab === 'favorites' ? (
-              <Bookmark className="mx-auto text-slate-300" size={30} />
+            {activeTab === 'blocked' ? (
+              <Ban className="mx-auto text-slate-300" size={30} />
             ) : (
-              <Search className="mx-auto text-slate-300" size={30} />
+              <CheckCircle2 className="mx-auto text-slate-300" size={30} />
             )}
             <p className="mt-4 font-medium text-slate-900">
-              {activeTab === 'favorites' && !keyword
-                ? '즐겨찾기한 자료가 없습니다.'
-                : '검색 결과가 없습니다.'}
+              {keyword
+                ? '검색 결과가 없습니다.'
+                : activeTab === 'blocked'
+                  ? '차단된 서비스가 없습니다.'
+                  : activeTab === 'allowed'
+                    ? '허용된 서비스가 없습니다.'
+                    : '등록된 서비스가 없습니다.'}
             </p>
             <p className="mt-2 text-sm text-slate-500">
-              {activeTab === 'favorites'
-                ? '자주 확인하는 인텔리전스를 즐겨찾기에 추가해 보세요.'
-                : '다른 검색어로 다시 찾아보세요.'}
+              {keyword
+                ? '다른 검색어로 다시 찾아보세요.'
+                : '서비스를 등록하거나 상태를 변경해 보세요.'}
             </p>
           </div>
         )}
@@ -356,8 +352,8 @@ export default function IntelligencePage() {
 
       <DetailModal
         item={selectedItem}
-        favorite={selectedItem ? favorites.includes(selectedItem.id) : false}
-        onToggleFavorite={toggleFavorite}
+        blocked={selectedItem ? blockedServices.includes(selectedItem.id) : false}
+        onToggleBlocked={toggleBlocked}
         onClose={() => setSelectedItem(null)}
       />
     </div>

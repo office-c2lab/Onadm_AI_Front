@@ -30,10 +30,10 @@ export default function ControlTabNav({ type, className = '' }) {
           key={tab.to}
           to={tab.to}
           className={({ isActive }) =>
-            `shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${
+            `shrink-0 rounded-full px-4 py-1 text-sm transition-colors ${
               isActive
-                ? 'bg-[#ededed] font-semibold text-[#333]'
-                : 'font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+                ? 'bg-[#ededed] font-medium text-[#333]'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
             }`
           }
         >

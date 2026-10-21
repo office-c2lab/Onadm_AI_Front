@@ -557,22 +557,28 @@ export default function ModelsPage() {
 
   return (
     <div className="garim-external-root min-h-full bg-[#f9f9f9] text-[#111827]">
-      <div className="mx-auto flex min-h-full w-full max-w-[88rem] flex-col px-[var(--app-page-x)] pb-8 pt-[var(--app-page-top)]">
-        <nav className="mb-5 flex gap-7 border-b border-slate-200" aria-label="모델 설정 유형">
+      <div className="bg-[#f9f9f9]/95">
+        <nav
+          className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-1 overflow-x-auto px-[var(--app-page-x)] py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          aria-label="모델 설정 유형"
+        >
           {tabs.map(tab => (
             <button
               key={tab.id}
               type="button"
               onClick={() => changeTab(tab.id)}
-              className={`relative pb-3 text-sm font-bold transition ${activeTab === tab.id ? 'text-[#075DF6]' : 'text-slate-400 hover:text-slate-600'}`}
+              className={`shrink-0 rounded-full px-4 py-1 text-sm transition-colors ${
+                activeTab === tab.id
+                  ? 'bg-[#ededed] font-medium text-[#333]'
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+              }`}
             >
               {tab.label}
-              {activeTab === tab.id ? (
-                <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-[#075DF6]" />
-              ) : null}
             </button>
           ))}
         </nav>
+      </div>
+      <div className="mx-auto flex min-h-full w-full max-w-[88rem] flex-col px-[var(--app-page-x)] pb-8 pt-[var(--app-page-top)]">
         <section
           className={`mb-5 grid items-end gap-2.5 md:grid-cols-2 ${activeTab === 'models' ? 'xl:grid-cols-[9rem_11rem_minmax(0,1fr)_5.25rem]' : 'xl:grid-cols-[9rem_minmax(0,1fr)_5.25rem]'}`}
         >
