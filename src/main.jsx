@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { QueryClientProvider } from '@tanstack/react-query';
 import './index.css';
 import App from './App.jsx';
-import { queryClient } from './features/garim/queries/queryClient.js';
+import { queryClient } from './pages/admin/control/external/queries/queryClient.js';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -1,15 +1,15 @@
 import { useMemo, useState } from 'react';
-import AppToggle from '../../components/AppToggle.jsx';
-import FixedPaginationBar from '../../components/FixedPaginationBar.jsx';
+import AppToggle from '../components/AppToggle.jsx';
+import FixedPaginationBar from '../components/FixedPaginationBar.jsx';
 import {
   APP_PAGE_HORIZONTAL_PADDING_CLASS,
   APP_PAGE_INNER_WIDTH_CLASS,
   APP_PAGE_OUTER_WIDTH_CLASS,
-} from '../../constants/contentLayout.js';
-import { MonitoringDomainTable } from '../../components/monitoring/MonitoringListComponents.jsx';
-import ServiceLogoBadge from '../../components/ServiceLogoBadge.jsx';
-import useAdaptiveRowsPerPage from '../../hooks/useAdaptiveRowsPerPage.js';
-import { useDomainsQuery, usePatchDomainEnabledMutation } from '../../queries/domainQueries.js';
+} from '../constants/contentLayout.js';
+import { MonitoringDomainTable } from '../components/monitoring/MonitoringListComponents.jsx';
+import ServiceLogoBadge from '../components/ServiceLogoBadge.jsx';
+import useAdaptiveRowsPerPage from '../hooks/useAdaptiveRowsPerPage.js';
+import { useDomainsQuery, usePatchDomainEnabledMutation } from '../queries/domainQueries.js';
 
 const MAX_ROWS_PER_PAGE = 10;
 

@@ -1,6 +1,6 @@
 import { GripVertical, Info, Minus, Plus, X } from 'lucide-react';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
+import CustomDropdown from '../../../../../../components/dropdown/CustomDropdown.jsx';
 
 import AppButton from '../AppButton.jsx';
 import AppSearchField from '../AppSearchField.jsx';

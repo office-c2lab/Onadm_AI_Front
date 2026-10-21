@@ -12,29 +12,29 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import AppButton from '../../components/AppButton.jsx';
-import AppSearchField from '../../components/AppSearchField.jsx';
-import FixedPaginationBar from '../../components/FixedPaginationBar.jsx';
-import { getServiceLogo } from '../../components/ServiceLogoBadge.jsx';
+import AppButton from '../components/AppButton.jsx';
+import AppSearchField from '../components/AppSearchField.jsx';
+import FixedPaginationBar from '../components/FixedPaginationBar.jsx';
+import { getServiceLogo } from '../components/ServiceLogoBadge.jsx';
 import {
   DateRangePicker,
   MonitoringActionButton,
   MonitoringDataTable,
   MonitoringIconButtonTooltip,
   MonitoringResetButton,
-} from '../../components/monitoring/MonitoringListComponents.jsx';
+} from '../components/monitoring/MonitoringListComponents.jsx';
 import {
   APP_PAGE_HORIZONTAL_PADDING_CLASS,
   APP_PAGE_INNER_WIDTH_CLASS,
   APP_PAGE_OUTER_WIDTH_CLASS,
-} from '../../constants/contentLayout.js';
-import { getStatusTextClassName as getStatusColorClassName } from '../../constants/statusColors.js';
-import useAdaptiveRowsPerPage from '../../hooks/useAdaptiveRowsPerPage.js';
-import { useDropdownSelectOptionsQuery } from '../../queries/dropdownSettingsQueries.js';
+} from '../constants/contentLayout.js';
+import { getStatusTextClassName as getStatusColorClassName } from '../constants/statusColors.js';
+import useAdaptiveRowsPerPage from '../hooks/useAdaptiveRowsPerPage.js';
+import { useDropdownSelectOptionsQuery } from '../queries/dropdownSettingsQueries.js';
 import {
   useMonitoringEventsExportMutation,
   useMonitoringEventsQuery,
-} from '../../queries/monitoringQueries.js';
+} from '../queries/monitoringQueries.js';
 
 const ALL_USERS_OPTION = '사용자';
 const ALL_DEPARTMENTS_OPTION = '부서';

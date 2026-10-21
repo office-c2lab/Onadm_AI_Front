@@ -1,5 +1,5 @@
-import { DropdownSettingsContent } from '../../../../features/garim/components/settings/SettingsContent.jsx';
-import '../../../../features/garim/garim.css';
+import { DropdownSettingsContent } from '../../control/external/components/settings/SettingsContent.jsx';
+import '../../control/external/garim.css';
 
 export default function DepartmentsPage() {
   return (

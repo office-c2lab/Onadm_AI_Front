@@ -11,16 +11,16 @@ import {
   ShieldCheck,
   Trash2,
 } from 'lucide-react';
-import AppButton from '../../components/AppButton.jsx';
-import downloadBannerImage from '../../../../assets/images/downloadbanner.png';
-import packIcon from '../../../../assets/images/pac.png';
-import { useTemplateSettingsQuery } from '../../queries/companySettingsQueries.js';
+import AppButton from '../components/AppButton.jsx';
+import downloadBannerImage from '../../../../../assets/images/downloadbanner.png';
+import packIcon from '../../../../../assets/images/pac.png';
+import { useTemplateSettingsQuery } from '../queries/companySettingsQueries.js';
 import {
   useMacosSetupDownloadMutation,
   useWindowsSetupDownloadMutation,
   useWindowsSetupMsiDownloadMutation,
-} from '../../queries/downloadQueries.js';
-import { normalizeTemplateSettings } from '../../utils/companyTemplate.js';
+} from '../queries/downloadQueries.js';
+import { normalizeTemplateSettings } from '../utils/companyTemplate.js';
 
 const installSteps = [
   [Download, '압축 파일 다운로드', 'ondam-ai-windows-setup.zip\n파일을 다운로드합니다.'],

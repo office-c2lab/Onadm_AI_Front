@@ -42,14 +42,14 @@ import ClassificationPage from '../pages/admin/control/classification/Classifica
 import ControlPoliciesPage from '../pages/admin/control/policies/PoliciesPage.jsx';
 import LimitsPage from '../pages/admin/control/limits/LimitsPage.jsx';
 import HistoryPage from '../pages/admin/control/history/HistoryPage.jsx';
-import GarimExternalLayout from '../features/garim/GarimExternalLayout.jsx';
-import GarimDownloadRoute from '../features/garim/GarimDownloadRoute.jsx';
-import ExternalDashboardPage from '../features/garim/pages/DashboardPage/DashboardPage.jsx';
-import ExternalMonitoringPage from '../features/garim/pages/MonitoringPage/MonitoringPage.jsx';
-import ExternalUsersPage from '../features/garim/pages/UserPage/UserPage.jsx';
-import ExternalPoliciesPage from '../features/garim/pages/PolicyPage/PolicyPage.jsx';
-import ExternalDomainsPage from '../features/garim/pages/DomainPage/DomainPage.jsx';
-import ExternalSupportPage from '../features/garim/pages/SupportPage/SupportPage.jsx';
+import ExternalControlLayout from '../pages/admin/control/external/layout/ExternalControlLayout.jsx';
+import DownloadRoute from '../pages/admin/control/external/download/DownloadRoute.jsx';
+import ExternalDashboardPage from '../pages/admin/control/external/dashboard/DashboardPage.jsx';
+import ExternalMonitoringPage from '../pages/admin/control/external/monitoring/MonitoringPage.jsx';
+import ExternalUsersPage from '../pages/admin/control/external/users/UsersPage.jsx';
+import ExternalPoliciesPage from '../pages/admin/control/external/policies/PoliciesPage.jsx';
+import ExternalDomainsPage from '../pages/admin/control/external/domains/DomainsPage.jsx';
+import ExternalSupportPage from '../pages/admin/control/external/support/SupportPage.jsx';
 
 // ================================
 // 관리자 - Manage
@@ -89,7 +89,7 @@ export default function AppRouter() {
         <Route path="/character" element={<GamgikModalDemo />} />
 
         {/* 외부 AI 보안 설정 패키지 다운로드 */}
-        <Route path="/download" element={<GarimDownloadRoute />} />
+        <Route path="/download" element={<DownloadRoute />} />
 
         {/* 사용자 AI 채팅 */}
         <Route path="/user/ondam" element={<OndamPage />} />
@@ -239,7 +239,7 @@ export default function AppRouter() {
               path="history"
               element={<Navigate to="/admin/control/internal/history" replace />}
             />
-            <Route path="external" element={<GarimExternalLayout />}>
+            <Route path="external" element={<ExternalControlLayout />}>
               <Route
                 index
                 element={<Navigate to="dashboard" replace />}

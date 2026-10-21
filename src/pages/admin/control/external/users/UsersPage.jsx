@@ -1,14 +1,14 @@
 import { Fragment, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
-import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
-import AppButton from '../../components/AppButton.jsx';
-import AppSearchField from '../../components/AppSearchField.jsx';
-import FixedPaginationBar from '../../components/FixedPaginationBar.jsx';
-import SectionCard from '../../components/SectionCard.jsx';
+import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
+import AppButton from '../components/AppButton.jsx';
+import AppSearchField from '../components/AppSearchField.jsx';
+import FixedPaginationBar from '../components/FixedPaginationBar.jsx';
+import SectionCard from '../components/SectionCard.jsx';
 import {
   MonitoringIconButtonTooltip,
   MonitoringResetButton,
-} from '../../components/monitoring/MonitoringListComponents.jsx';
+} from '../components/monitoring/MonitoringListComponents.jsx';
 import {
   monitoringTableCellClass,
   monitoringTableClass,
@@ -17,17 +17,17 @@ import {
   monitoringTableHeaderRowClass,
   monitoringTableRowClass,
   monitoringTableSurfaceClass,
-} from '../../components/monitoring/monitoringTableStyles.js';
-import useAdaptiveRowsPerPage from '../../hooks/useAdaptiveRowsPerPage.js';
-import PageLayout from '../../layout/PageLayout.jsx';
-import { useDropdownSelectOptionsQuery } from '../../queries/dropdownSettingsQueries.js';
+} from '../components/monitoring/monitoringTableStyles.js';
+import useAdaptiveRowsPerPage from '../hooks/useAdaptiveRowsPerPage.js';
+import PageLayout from '../layout/PageLayout.jsx';
+import { useDropdownSelectOptionsQuery } from '../queries/dropdownSettingsQueries.js';
 import {
   useDeleteClientMutation,
   usePatchClientMetadataMutation,
   useRegisteredClientsQuery,
-} from '../../queries/userManagementQueries.js';
-import macIcon from '../../assets/icons/mac.svg';
-import windowIcon from '../../assets/icons/window.svg';
+} from '../queries/userManagementQueries.js';
+import macIcon from '../assets/icons/mac.svg';
+import windowIcon from '../assets/icons/window.svg';
 
 const DEFAULT_DEPARTMENT_OPTION = '전체 부서';
 const DEFAULT_POSITION_OPTION = '전체 직책';

@@ -2,10 +2,10 @@ import { Fragment, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-import AppButton, { primaryButtonClassName } from '../../components/AppButton.jsx';
-import FixedPaginationBar from '../../components/FixedPaginationBar.jsx';
-import ServiceLogoBadge from '../../components/ServiceLogoBadge.jsx';
-import SectionCard from '../../components/SectionCard.jsx';
+import AppButton, { primaryButtonClassName } from '../components/AppButton.jsx';
+import FixedPaginationBar from '../components/FixedPaginationBar.jsx';
+import ServiceLogoBadge from '../components/ServiceLogoBadge.jsx';
+import SectionCard from '../components/SectionCard.jsx';
 import {
   monitoringTableCellClass,
   monitoringTableClass,
@@ -14,11 +14,11 @@ import {
   monitoringTableHeaderRowClass,
   monitoringTableRowClass,
   monitoringTableSurfaceClass,
-} from '../../components/monitoring/monitoringTableStyles.js';
-import useAdaptiveRowsPerPage from '../../hooks/useAdaptiveRowsPerPage.js';
-import PageLayout from '../../layout/PageLayout.jsx';
-import { usePatchPolicyEnabledMutation, usePoliciesQuery } from '../../queries/policyQueries.js';
-import { FileUploadProtectionContent } from '../../components/settings/SettingsContent.jsx';
+} from '../components/monitoring/monitoringTableStyles.js';
+import useAdaptiveRowsPerPage from '../hooks/useAdaptiveRowsPerPage.js';
+import PageLayout from '../layout/PageLayout.jsx';
+import { usePatchPolicyEnabledMutation, usePoliciesQuery } from '../queries/policyQueries.js';
+import { FileUploadProtectionContent } from '../components/settings/SettingsContent.jsx';
 
 const MAX_ROWS_PER_PAGE = 10;
 const POLICY_SETTINGS_BACK_BUTTON_CLASS = 'h-12 shrink-0 px-5';

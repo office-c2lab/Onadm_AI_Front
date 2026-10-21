@@ -1,24 +1,24 @@
 import { ChevronUp, Copy, ExternalLink, Info, RefreshCw, Tag, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import AppButton, { primaryButtonClassName } from '../../components/AppButton.jsx';
-import SectionCard from '../../components/SectionCard.jsx';
-import PageLayout from '../../layout/PageLayout.jsx';
+import AppButton, { primaryButtonClassName } from '../components/AppButton.jsx';
+import SectionCard from '../components/SectionCard.jsx';
+import PageLayout from '../layout/PageLayout.jsx';
 import {
   useDownloadSettingsQuery,
   usePatchDownloadSettingsMutation,
   usePatchTemplateSettingsMutation,
   useTemplateSettingsQuery,
-} from '../../queries/companySettingsQueries.js';
+} from '../queries/companySettingsQueries.js';
 import {
   createTemplateSettingsPayload,
   normalizeTemplateSettings,
-} from '../../utils/companyTemplate.js';
+} from '../utils/companyTemplate.js';
 import {
   normalizeDownloadPath,
   normalizeDownloadSettings,
   reservedDownloadPaths,
-} from '../../utils/downloadSettings.js';
+} from '../utils/downloadSettings.js';
 
 const urlExamples = ['/download', '/guide', '/support/download'];
 const modalCancelButtonClass =

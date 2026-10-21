@@ -13,11 +13,11 @@ import {
   YAxis,
 } from 'recharts';
 
-import { DateRangePicker } from '../../components/monitoring/MonitoringListComponents.jsx';
-import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
-import ServiceLogoBadge from '../../components/ServiceLogoBadge.jsx';
-import { STATUS_COLORS } from '../../constants/statusColors.js';
-import PageLayout from '../../layout/PageLayout.jsx';
+import { DateRangePicker } from '../components/monitoring/MonitoringListComponents.jsx';
+import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
+import ServiceLogoBadge from '../components/ServiceLogoBadge.jsx';
+import { STATUS_COLORS } from '../constants/statusColors.js';
+import PageLayout from '../layout/PageLayout.jsx';
 
 const dashboardTabs = [
   { key: 'all', label: '전체', description: '각 항목 탐지 현황을 한눈에 확인합니다.' },

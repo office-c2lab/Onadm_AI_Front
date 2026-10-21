@@ -6,6 +6,7 @@ import AdminSidebar, { AdminSidebarRail } from '../components/adminSidebar/Admin
 export default function AdminLayout() {
   const location = useLocation();
   const isExternalControl = location.pathname.startsWith('/admin/control/external');
+  const usesOwnPageLayout = isExternalControl || location.pathname === '/admin/users';
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     return window.localStorage.getItem('admin-sidebar-open') !== 'false';
   });
@@ -33,15 +34,19 @@ export default function AdminLayout() {
       {/* 관리자 콘텐츠 */}
       <main
         className="relative z-0 min-h-screen min-w-0 flex-1 bg-[#f9f9f9]"
-        style={
-          isExternalControl
-            ? { '--ondam-admin-sidebar-width': isSidebarOpen ? '260px' : '48px' }
-            : undefined
-        }
+        style={{ '--ondam-admin-sidebar-width': isSidebarOpen ? '260px' : '48px' }}
       >
-        <div className={isExternalControl ? 'w-full' : 'mx-auto w-full max-w-7xl px-8 py-8'}>
-          <Outlet />
-        </div>
+        {usesOwnPageLayout ? (
+          <div className="w-full">
+            <Outlet />
+          </div>
+        ) : (
+          <div className="mx-auto flex min-h-full w-full max-w-[88rem] px-[clamp(0.875rem,2vw,1.5rem)] pb-[clamp(2rem,4vw,3rem)]">
+            <div className="mx-auto w-full max-w-[74rem] pt-[clamp(1.1rem,2vw,1.8rem)]">
+              <Outlet />
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
