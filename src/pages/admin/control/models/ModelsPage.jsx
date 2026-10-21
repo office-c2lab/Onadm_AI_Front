@@ -20,7 +20,6 @@ import '../external/garim.css';
 const tabs = [
   { id: 'providers', label: '제공자 / API Key' },
   { id: 'models', label: '모델 · 단가' },
-  { id: 'prompts', label: '시스템 프롬프트' },
 ];
 
 const providers = [
@@ -505,8 +504,9 @@ function ManagementModal({ tab, item, mode, onClose }) {
   );
 }
 
-export default function ModelsPage() {
-  const [activeTab, setActiveTab] = useState('providers');
+export default function ModelsPage({ initialTab = 'providers' }) {
+  const isPromptPage = initialTab === 'prompts';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [status, setStatus] = useState('전체 상태');
   const [providerFilter, setProviderFilter] = useState('전체 제공자');
   const [queryInput, setQueryInput] = useState('');
@@ -558,25 +558,27 @@ export default function ModelsPage() {
   return (
     <div className="garim-external-root min-h-full bg-[#f9f9f9] text-[#111827]">
       <div className="bg-[#f9f9f9]/95">
-        <nav
-          className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-1 overflow-x-auto px-[var(--app-page-x)] py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          aria-label="모델 설정 유형"
-        >
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => changeTab(tab.id)}
-              className={`shrink-0 rounded-full px-4 py-1 text-sm transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-[#ededed] font-medium text-[#333]'
-                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+        {!isPromptPage ? (
+          <nav
+            className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-1 overflow-x-auto px-[var(--app-page-x)] py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            aria-label="모델 설정 유형"
+          >
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => changeTab(tab.id)}
+                className={`shrink-0 rounded-full px-4 py-1 text-sm transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-[#ededed] font-medium text-[#333]'
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        ) : null}
       </div>
       <div className="mx-auto flex min-h-full w-full max-w-[88rem] flex-col px-[var(--app-page-x)] pb-8 pt-[var(--app-page-top)]">
         <section

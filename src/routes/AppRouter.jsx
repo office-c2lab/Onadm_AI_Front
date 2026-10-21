@@ -38,7 +38,7 @@ import UsagePage from '../pages/admin/control/usage/UsagePage.jsx';
 import ModelsPage from '../pages/admin/control/models/ModelsPage.jsx';
 import ClassificationPage from '../pages/admin/control/classification/ClassificationPage.jsx';
 import ControlPoliciesPage from '../pages/admin/control/policies/PoliciesPage.jsx';
-import LimitsPage from '../pages/admin/control/limits/LimitsPage.jsx';
+import LimitsPage, { CreditHistoryPage } from '../pages/admin/control/limits/LimitsPage.jsx';
 import HistoryPage from '../pages/admin/control/history/HistoryPage.jsx';
 import InternalControlLayout from '../pages/admin/control/layout/InternalControlLayout.jsx';
 import ExternalControlLayout from '../pages/admin/control/external/layout/ExternalControlLayout.jsx';
@@ -145,9 +145,11 @@ export default function AppRouter() {
               <Route index element={<Navigate to="usage" replace />} />
               <Route path="usage" element={<UsagePage />} />
               <Route path="models" element={<ModelsPage />} />
+              <Route path="prompts" element={<ModelsPage initialTab="prompts" />} />
               <Route path="classification" element={<ClassificationPage />} />
               <Route path="policies" element={<ControlPoliciesPage />} />
               <Route path="limits" element={<LimitsPage />} />
+              <Route path="credit-history" element={<CreditHistoryPage />} />
               <Route path="history" element={<HistoryPage />} />
             </Route>
 

@@ -4,7 +4,9 @@ const tabSets = {
   internal: [
     { label: 'AI 사용 현황', to: '/admin/control/internal/usage' },
     { label: 'LLM 모델 관리', to: '/admin/control/internal/models' },
+    { label: '시스템 프롬프트', to: '/admin/control/internal/prompts' },
     { label: '사용량 및 한도 관리', to: '/admin/control/internal/limits' },
+    { label: '크레딧 변동 내역', to: '/admin/control/internal/credit-history' },
     { label: 'AI 요청 이력', to: '/admin/control/internal/history' },
   ],
   external: [

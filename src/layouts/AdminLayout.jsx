@@ -9,7 +9,9 @@ export default function AdminLayout() {
   const isInternalTabbedPage = [
     '/admin/control/internal/usage',
     '/admin/control/internal/models',
+    '/admin/control/internal/prompts',
     '/admin/control/internal/limits',
+    '/admin/control/internal/credit-history',
     '/admin/control/internal/history',
   ].includes(location.pathname);
   const usesOwnPageLayout =
