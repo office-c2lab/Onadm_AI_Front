@@ -1,5 +1,5 @@
-import { ChartLine, ChartPie, ChevronDown } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { ChartLine, ChartPie } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import {
   CartesianGrid,
   Cell,
@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 
 import { DateRangePicker } from '../../components/monitoring/MonitoringListComponents.jsx';
+import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
 import ServiceLogoBadge from '../../components/ServiceLogoBadge.jsx';
 import { STATUS_COLORS } from '../../constants/statusColors.js';
 import PageLayout from '../../layout/PageLayout.jsx';
@@ -577,89 +578,17 @@ function DashboardChartViewSwitch({ view, onChange }) {
 }
 
 function OrganizationTitleDropdown({ value, onChange, suffix = '별' }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const rootRef = useRef(null);
-  const selectedOption =
-    organizationViewOptions.find(option => option.value === value) ?? organizationViewOptions[0];
-
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    const handlePointerDown = event => {
-      if (!rootRef.current?.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-
-    const handleKeyDown = event => {
-      if (event.key === 'Escape') {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('pointerdown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen]);
-
-  const handleSelect = optionValue => {
-    onChange(optionValue);
-    setIsOpen(false);
-  };
-
   return (
-    <div ref={rootRef} className="relative inline-flex">
-      <h2 className="text-[1.12rem] font-bold tracking-[-0.03em] text-[#11182E] xl:text-[1.18rem]">
-        <button
-          type="button"
-          aria-label="전체 탭 사용자 그래프 기준"
-          aria-expanded={isOpen}
-          onClick={() => setIsOpen(open => !open)}
-          className="group inline-flex cursor-pointer items-center gap-1 rounded-[8px] px-0 py-0 text-inherit"
-        >
-          <span>
-            {selectedOption.label}
-            {suffix}
-          </span>
-          <ChevronDown
-            className={cn(
-              'h-5 w-5 shrink-0 text-[#667085] transition-transform',
-              isOpen && 'rotate-180 text-[#075DF6]'
-            )}
-            strokeWidth={2.6}
-            aria-hidden="true"
-          />
-        </button>
-      </h2>
-
-      {isOpen ? (
-        <div className="absolute top-[calc(100%+0.45rem)] left-0 z-40 min-w-[8.75rem] rounded-xl border border-slate-200 bg-white p-2 shadow-[0_16px_32px_rgba(15,23,42,0.12)]">
-          {organizationViewOptions.map(option => {
-            const isSelected = value === option.value;
-
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => handleSelect(option.value)}
-                className={cn(
-                  'flex h-11 w-full cursor-pointer items-center rounded-lg px-4 text-left text-[1rem] tracking-[-0.02em] transition',
-                  isSelected
-                    ? 'bg-[#075DF6] font-bold text-white'
-                    : 'font-bold text-[#484848] hover:bg-[#F7F8FC]'
-                )}
-              >
-                {option.label}
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
-    </div>
+    <CustomDropdown
+      value={value}
+      onChange={onChange}
+      options={organizationViewOptions.map(option => ({
+        ...option,
+        label: `${option.label}${suffix}`,
+      }))}
+      ariaLabel="전체 탭 사용자 그래프 기준"
+      className="w-[9.5rem] [&>button]:min-h-9 [&>button]:rounded-lg [&>button]:text-[1rem] [&>button]:font-bold"
+    />
   );
 }
 

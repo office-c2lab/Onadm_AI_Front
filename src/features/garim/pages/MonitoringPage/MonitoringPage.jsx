@@ -1,5 +1,6 @@
 import {
   Bot,
+  Check,
   ChevronDown,
   ChevronRight,
   Download,
@@ -535,23 +536,22 @@ function MonitoringMultiSelectDropdown({
         aria-label={ariaLabel}
         aria-expanded={isOpen}
         onClick={() => setIsOpen(current => !current)}
-        className={`flex h-[var(--app-control-lg)] w-full cursor-pointer items-center gap-[var(--app-gap-xs)] rounded-[var(--app-radius-lg)] border pr-[var(--app-pad-xs)] pl-0 text-left transition ${
+        className={`flex h-[var(--app-control-lg)] w-full cursor-pointer items-center justify-between gap-3 rounded-lg border bg-white px-3 text-left text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
           isOpen
-            ? 'border-[#8BC6FF] bg-[#EFF6FF] ring-[clamp(0.2rem,0.32vw,0.25rem)] ring-[#DEEEFF]'
-            : 'border-slate-200 bg-white hover:border-[#B6D9FF] hover:bg-[#F8FBFF] active:border-[#8BC6FF] active:bg-[#EFF6FF] focus:border-[#8BC6FF] focus:ring-[clamp(0.2rem,0.32vw,0.25rem)] focus:ring-[#DEEEFF]'
+            ? 'border-blue-500 text-slate-900'
+            : 'border-slate-200 text-slate-700 hover:border-slate-300'
         }`.trim()}
       >
-        <span className="min-w-0 flex-1 truncate px-[var(--app-pad-md)] text-[clamp(0.92rem,1vw,1rem)] font-medium leading-5 text-[#344054]">
-          {displayValue}
-        </span>
+        <span className="min-w-0 flex-1 truncate">{displayValue}</span>
         <ChevronDown
-          className={`h-[var(--app-icon-md)] w-[var(--app-icon-md)] shrink-0 text-[#075DF6] transition-transform ${isOpen ? 'rotate-180' : ''}`.trim()}
+          className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`.trim()}
+          strokeWidth={1.8}
           aria-hidden="true"
         />
       </button>
 
       {isOpen ? (
-        <div className="absolute top-[calc(100%+var(--app-gap-xs))] left-0 z-40 max-h-[min(48vh,18rem)] w-full min-w-[12rem] overflow-y-auto rounded-[var(--app-radius-lg)] border border-slate-200 bg-white p-2 shadow-[0_1rem_2rem_rgba(15,23,42,0.12)]">
+        <div className="absolute left-0 top-[calc(100%+0.25rem)] z-40 max-h-60 w-full min-w-[12rem] overflow-y-auto rounded-lg border border-slate-200 bg-white p-1 shadow-lg shadow-slate-900/10">
           {options.map(option => {
             const isSelected =
               option === allOption ? selectedValues.length === 0 : selectedValues.includes(option);
@@ -562,13 +562,16 @@ function MonitoringMultiSelectDropdown({
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => handleOptionChange(option)}
-                className={`flex h-[var(--app-control-xs)] w-full items-center rounded-[var(--app-radius-md)] px-[var(--app-pad-sm)] text-left text-[clamp(0.8rem,0.9vw,0.86rem)] transition ${
-                  isSelected
-                    ? 'app-solid-button bg-[#075DF6] font-bold text-white'
-                    : 'bg-white font-normal text-[#484848] hover:bg-[#F7F8FC]'
+                className={`flex min-h-9 w-full items-center gap-2 rounded-md px-2.5 text-left text-sm transition-colors ${
+                  isSelected ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-100'
                 }`.trim()}
               >
-                <span className="truncate">{option === allOption ? '전체' : option}</span>
+                <span className="min-w-0 flex-1 truncate">
+                  {option === allOption ? '전체' : option}
+                </span>
+                {isSelected ? (
+                  <Check className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+                ) : null}
               </button>
             );
           })}
@@ -818,19 +821,20 @@ function UserScopeFilterDropdown({
         aria-label="사용자 및 조직 필터"
         aria-expanded={isOpen}
         onClick={handleToggleDropdown}
-        className={`flex h-[var(--app-control-lg)] w-full cursor-pointer items-center gap-[var(--app-gap-xs)] rounded-[var(--app-radius-lg)] border pr-[var(--app-pad-xs)] pl-0 text-left transition ${
+        className={`flex h-[var(--app-control-lg)] w-full cursor-pointer items-center justify-between gap-3 rounded-lg border bg-white px-3 text-left text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
           isOpen
-            ? 'border-[#8BC6FF] bg-[#EFF6FF] ring-[clamp(0.2rem,0.32vw,0.25rem)] ring-[#DEEEFF]'
-            : 'border-slate-200 bg-white hover:border-[#B6D9FF] hover:bg-[#F8FBFF] active:border-[#8BC6FF] active:bg-[#EFF6FF] focus:border-[#8BC6FF] focus:ring-[clamp(0.2rem,0.32vw,0.25rem)] focus:ring-[#DEEEFF]'
+            ? 'border-blue-500 text-slate-900'
+            : 'border-slate-200 text-slate-700 hover:border-slate-300'
         }`.trim()}
       >
-        <span className="flex min-w-0 flex-1 items-center px-[var(--app-pad-md)] text-[clamp(0.86rem,0.95vw,0.94rem)] font-medium leading-5 tracking-[0.01em] text-[#344054]">
+        <span className="flex min-w-0 flex-1 items-center">
           <span className="truncate">{displayValue}</span>
         </span>
         <ChevronDown
-          className={`h-[var(--app-icon-md)] w-[var(--app-icon-md)] shrink-0 text-[#075DF6] transition-transform ${
+          className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`.trim()}
+          strokeWidth={1.8}
           aria-hidden="true"
         />
       </button>
@@ -838,17 +842,17 @@ function UserScopeFilterDropdown({
       {isOpen ? (
         <div
           style={dropdownStyle ?? undefined}
-          className={`absolute top-[calc(100%+var(--app-gap-xs))] z-40 grid items-start gap-[var(--app-gap-md)] ${
+          className={`absolute top-[calc(100%+0.25rem)] z-40 grid items-start gap-3 ${
             isSelectionPanelOpen ? 'md:grid-cols-[minmax(0,3fr)_minmax(16rem,2fr)]' : 'grid-cols-1'
           } ${dropdownStyle ? 'visible' : 'invisible'}`.trim()}
         >
           <div
-            className={`overflow-hidden rounded-[var(--app-radius-lg)] border border-slate-200 bg-white shadow-[0_1rem_2rem_rgba(15,23,42,0.12)] ${
+            className={`overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-900/10 ${
               isSelectionPanelOpen ? '' : 'md:w-3/5 md:justify-self-center'
             }`.trim()}
           >
-            <div className="flex min-h-[3.25rem] items-center justify-between gap-3 border-b border-[#E2E8F0] bg-[#F8FBFF] px-[var(--app-pad-md)] py-[var(--app-pad-sm)]">
-              <p className="text-[clamp(0.88rem,1vw,0.96rem)] font-black text-[#27324A]">
+            <div className="flex min-h-[3.25rem] items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3">
+              <p className="text-sm font-semibold text-slate-900">
                 사용자 및 조직 필터
               </p>
               <button
@@ -881,16 +885,16 @@ function UserScopeFilterDropdown({
                 return (
                   <section
                     key={section.title}
-                    className="min-w-0 md:border-l md:border-[#E2E8F0] md:first:border-l-0"
+                    className="min-w-0 md:border-l md:border-slate-200 md:first:border-l-0"
                   >
-                    <div className="border-b border-[#E2E8F0] px-[calc(var(--app-pad-md)*0.75)] py-[var(--app-pad-sm)]">
+                    <div className="border-b border-slate-200 px-3 py-3">
                       <div className="mb-2 flex items-center justify-between gap-2">
-                        <span className="text-[clamp(0.84rem,0.95vw,0.92rem)] font-black text-[#667085]">
+                        <span className="text-sm font-semibold text-slate-700">
                           {section.title}
                         </span>
                       </div>
-                      <label className="flex h-[var(--app-control-sm)] items-center gap-2 rounded-[var(--app-radius-md)] border border-[#DDE3EF] bg-white px-2.5 transition focus-within:border-[#8BC6FF] focus-within:ring-2 focus-within:ring-[#DEEEFF]">
-                        <Search className="h-4 w-4 shrink-0 text-[#8A96AB]" aria-hidden="true" />
+                      <label className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20">
+                        <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
                         <input
                           type="search"
                           value={filterQueries[section.queryKey]}
@@ -899,11 +903,11 @@ function UserScopeFilterDropdown({
                           }
                           placeholder={section.searchPlaceholder}
                           aria-label={section.searchPlaceholder}
-                          className="min-w-0 flex-1 bg-transparent text-[clamp(0.76rem,0.87vw,0.82rem)] text-[#344054] outline-none placeholder:text-[#9AA5B8]"
+                          className="min-w-0 flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
                         />
                       </label>
                     </div>
-                    <div className="hover-scrollbar flex max-h-[min(48vh,18rem)] flex-col gap-[calc(var(--app-gap-xs)*0.35)] overflow-y-auto overscroll-contain px-[calc(var(--app-pad-md)*0.65)] py-[calc(var(--app-pad-sm)*0.75)]">
+                    <div className="hover-scrollbar flex max-h-60 flex-col gap-1 overflow-y-auto overscroll-contain p-1.5">
                       {filteredOptions.map(option => {
                         const isSelected = section.multiple
                           ? option === section.defaultValue
@@ -918,15 +922,22 @@ function UserScopeFilterDropdown({
                             onClick={() => handleOptionChange(section, option)}
                             aria-pressed={section.multiple ? isSelected : undefined}
                             title={optionLabels[option] ?? option}
-                            className={`flex h-[var(--app-control-xs)] w-full shrink-0 cursor-pointer items-center gap-[var(--app-gap-xs)] px-[var(--app-pad-sm)] text-left transition ${
+                            className={`flex min-h-9 w-full shrink-0 cursor-pointer items-center gap-2 rounded-md px-2.5 text-left text-sm transition-colors ${
                               isSelected
-                                ? 'app-solid-button rounded-[var(--app-radius-md)] bg-[#075DF6] text-[clamp(0.8rem,0.9vw,0.86rem)] font-bold leading-[150%] text-white'
-                                : 'rounded-[var(--app-radius-sm)] bg-white text-[clamp(0.8rem,0.9vw,0.86rem)] font-normal leading-5 tracking-[0.01em] text-[#484848] hover:bg-[#F7F8FC]'
+                                ? 'bg-blue-50 text-blue-700'
+                                : 'text-slate-700 hover:bg-slate-100'
                             }`.trim()}
                           >
-                            <span className="flex-1 whitespace-nowrap">
+                            <span className="min-w-0 flex-1 truncate">
                               {optionLabels[option] ?? option}
                             </span>
+                            {isSelected ? (
+                              <Check
+                                className="h-4 w-4 shrink-0"
+                                strokeWidth={2}
+                                aria-hidden="true"
+                              />
+                            ) : null}
                           </button>
                         );
                       })}
@@ -940,7 +951,7 @@ function UserScopeFilterDropdown({
                 );
               })}
             </div>
-            <div className="flex items-center justify-between gap-2 border-t border-[#E2E8F0] bg-[#F8FBFF] px-[var(--app-pad-md)] py-[var(--app-pad-sm)]">
+            <div className="flex items-center justify-between gap-2 border-t border-slate-200 bg-white px-4 py-3">
               <div>
                 {activeFilterCount ? (
                   <button
@@ -971,9 +982,9 @@ function UserScopeFilterDropdown({
           </div>
 
           {isSelectionPanelOpen ? (
-            <aside className="overflow-hidden rounded-[var(--app-radius-lg)] border border-[#DDE3EF] bg-white shadow-[0_1rem_2rem_rgba(15,23,42,0.12)]">
-              <div className="flex min-h-[3.25rem] items-center border-b border-[#E2E8F0] bg-[#F8FBFF] px-[var(--app-pad-md)] py-[var(--app-pad-sm)]">
-                <p className="text-[clamp(0.84rem,0.95vw,0.92rem)] font-black text-[#667085]">
+            <aside className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-900/10">
+              <div className="flex min-h-[3.25rem] items-center border-b border-slate-200 bg-white px-4 py-3">
+                <p className="text-sm font-semibold text-slate-700">
                   선택 항목
                 </p>
               </div>

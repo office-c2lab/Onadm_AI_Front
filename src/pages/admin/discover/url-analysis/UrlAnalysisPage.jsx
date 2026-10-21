@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
+import urlImage from '../../../../assets/images/url.png';
 
 const sampleHistory = [
   {
@@ -83,37 +84,6 @@ const sampleHistory = [
     db: '등록됨',
     time: '10.19 14:37',
     confidence: 97,
-  },
-];
-
-const metrics = [
-  {
-    label: '전체 분석 요청',
-    value: '1,284건',
-    note: '최근 30일',
-    icon: PanelLeft,
-    color: 'bg-[#edf3ff] text-[#3774ee]',
-  },
-  {
-    label: 'AI 서비스 식별',
-    value: '832건',
-    note: '전체 분석의 64.8%',
-    icon: Check,
-    color: 'bg-[#e7f8f0] text-[#14a973]',
-  },
-  {
-    label: '신규 등록 후보',
-    value: '86건',
-    note: 'DB 반영 검토 필요',
-    icon: Sparkles,
-    color: 'bg-[#fff4df] text-[#d2921c]',
-  },
-  {
-    label: '판단 불가 / 재검토',
-    value: '24건',
-    note: '재분석 대상',
-    icon: AlertCircle,
-    color: 'bg-[#fff0f2] text-[#ea6072]',
   },
 ];
 
@@ -535,23 +505,9 @@ export default function UrlAnalysisPage() {
   return (
     <div className="w-full space-y-6 text-slate-900">
       <section aria-labelledby="url-analysis-title">
-        <header className="mb-5">
-          <h1 id="url-analysis-title" className="text-xl font-bold text-slate-900">
-            URL 분석 실행
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            웹사이트 URL을 입력하고 AI 서비스 식별 결과를 확인해 보세요.
-          </p>
-        </header>
+       
         <div className="flex min-h-[330px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-10 text-center">
-          <div className="relative grid h-32 w-40 place-items-center" aria-hidden="true">
-            <div className="grid h-28 w-28 place-items-center rounded-[2rem] bg-blue-50 text-blue-600">
-              <Globe2 size={58} strokeWidth={1.4} />
-            </div>
-            <span className="absolute bottom-1 right-3 grid h-10 w-10 place-items-center rounded-xl border border-white bg-blue-600 text-white shadow-md">
-              <FileSearch size={21} strokeWidth={1.8} />
-            </span>
-          </div>
+          <img src={urlImage} alt="" className="h-40 w-40 object-contain" aria-hidden="true" />
           <h2 className="mt-6 text-lg font-semibold text-slate-900">
             새로운 웹사이트를 분석해 보세요.
           </h2>
@@ -587,42 +543,17 @@ export default function UrlAnalysisPage() {
               </button>
             </div>
             {error ? (
-              <p role="alert" className="mt-2 text-left text-xs text-red-600">
+              <p role="alert" className="mt-2 text-center text-xs text-red-600">
                 {error}
               </p>
             ) : (
-              <p className="mt-2 text-left text-xs text-slate-500">
+              <p className="mt-2 text-center text-xs text-slate-500">
                 http:// 또는 https://로 시작하는 주소를 입력해 주세요.
               </p>
             )}
           </form>
         </div>
       </section>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {metrics.map(metric => {
-          const Icon = metric.icon;
-          return (
-            <div
-              key={metric.label}
-              className="flex min-w-0 items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-900/5"
-            >
-              <span
-                className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${metric.color}`}
-              >
-                <Icon className="h-5 w-5" strokeWidth={1.8} />
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm text-slate-500">{metric.label}</p>
-                <p className="mt-1 text-2xl font-semibold leading-7 tracking-tight">
-                  {metric.value}
-                </p>
-                <p className="mt-1 truncate text-xs text-slate-400">{metric.note}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
 
       <section ref={historyRef} className="min-w-0 scroll-mt-6" aria-label="URL 분석 이력">
         <form
@@ -757,7 +688,6 @@ export default function UrlAnalysisPage() {
             </p>
           )}
         </div>
-        
       </section>
       {selected && (
         <DetailModal key={selected.id} item={selected} onClose={() => setSelectedId(null)} />

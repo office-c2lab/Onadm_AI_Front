@@ -318,14 +318,7 @@ export default function MyToolsPage() {
       />
 
       <section className="mt-4" aria-label="승인된 도구 목록">
-        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 className="text-[17px] font-bold text-slate-900">승인된 도구</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              승인 완료되어 운영 중인 도구를 관리할 수 있습니다.
-            </p>
-          </div>
-        </div>
+       
 
         {filteredTools.length > 0 ? (
           <div className="grid gap-2">

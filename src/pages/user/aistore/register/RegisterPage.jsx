@@ -601,12 +601,7 @@ export default function RegisterPage() {
         }}
       />
 
-      <header className="mb-5">
-        <h1 className="text-xl font-bold text-slate-900">새 도구 등록</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          개발한 AI 도구를 등록하고 사내 스토어에 배포해 보세요.
-        </p>
-      </header>
+     
 
       <section className="flex min-h-[330px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-10 text-center">
         <img src={projectImage} alt="" className="h-32 w-40 object-contain" aria-hidden="true" />
@@ -921,14 +916,7 @@ export default function RegisterPage() {
       )}
 
       <section className="mt-7">
-        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 className="text-[17px] font-bold text-slate-900">등록 및 심사 목록</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              신규 도구의 심사 상태를 확인합니다. 승인된 도구는 내 도구에서 관리하세요.
-            </p>
-          </div>
-        </div>
+        
 
         {filteredUploads.length ? (
           <div className="grid gap-2">

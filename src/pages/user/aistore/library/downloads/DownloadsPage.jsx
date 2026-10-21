@@ -33,7 +33,7 @@ export default function DownloadsPage() {
   return (
     <>
       <section className="mt-7">
-        <h2 className="mb-3 text-lg font-semibold text-slate-900">다운로드한 도구</h2>
+       
         {actionMessage && (
           <p role="status" className="mb-3 rounded-lg bg-blue-50 px-4 py-2.5 text-sm text-blue-700">
             {actionMessage}

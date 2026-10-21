@@ -6,7 +6,6 @@ import AppSearchField from '../../components/AppSearchField.jsx';
 import FixedPaginationBar from '../../components/FixedPaginationBar.jsx';
 import SectionCard from '../../components/SectionCard.jsx';
 import {
-  MonitoringDropdown,
   MonitoringIconButtonTooltip,
   MonitoringResetButton,
 } from '../../components/monitoring/MonitoringListComponents.jsx';
@@ -187,35 +186,23 @@ function UserDetailPanel({
             <TextInput value={draft.name} onChange={value => updateDraft({ name: value })} />
           </DetailField>
           <DetailField label="부서">
-            <MonitoringDropdown
+            <CustomDropdown
               value={draft.department}
-              displayValue={draft.department || '부서 선택'}
               onChange={value => updateDraft({ department: value })}
               options={detailDepartmentOptions}
               ariaLabel="부서 선택"
-              widthClass="w-full"
-              placement="right"
-              verticalPlacement="top"
-              triggerTextClassName="text-[13px]"
-              optionTextClassName="text-[13px]"
-              selectedOptionTextClassName="text-[13px]"
-              triggerClassName="h-10 rounded-md border-[#D7DDE8] bg-white shadow-none hover:border-[#B6D9FF] hover:bg-[#F8FBFF] active:border-[#8BC6FF] active:bg-[#EFF6FF] focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+              placeholder="부서 선택"
+              className="w-full [&>button]:min-h-10 [&>button]:rounded-md"
             />
           </DetailField>
           <DetailField label="직책">
-            <MonitoringDropdown
+            <CustomDropdown
               value={draft.position}
-              displayValue={draft.position || '직책 선택'}
               onChange={value => updateDraft({ position: value })}
               options={detailPositionOptions}
               ariaLabel="직책 선택"
-              widthClass="w-full"
-              placement="right"
-              verticalPlacement="top"
-              triggerTextClassName="text-[13px]"
-              optionTextClassName="text-[13px]"
-              selectedOptionTextClassName="text-[13px]"
-              triggerClassName="h-10 rounded-md border-[#D7DDE8] bg-white shadow-none hover:border-[#B6D9FF] hover:bg-[#F8FBFF] active:border-[#8BC6FF] active:bg-[#EFF6FF] focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+              placeholder="직책 선택"
+              className="w-full [&>button]:min-h-10 [&>button]:rounded-md"
             />
           </DetailField>
         </DetailSection>

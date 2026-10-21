@@ -1,5 +1,6 @@
 import { GripVertical, Info, Minus, Plus, X } from 'lucide-react';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
 
 import AppButton from '../AppButton.jsx';
 import AppSearchField from '../AppSearchField.jsx';
@@ -7,7 +8,6 @@ import AppToggle from '../AppToggle.jsx';
 import FixedPaginationBar from '../FixedPaginationBar.jsx';
 import {
   MonitoringActionButton,
-  MonitoringDropdown,
   MonitoringIconButtonTooltip,
   MonitoringResetButton,
 } from '../monitoring/MonitoringListComponents.jsx';
@@ -1594,13 +1594,12 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
         {toolbarAction ? <div className="flex shrink-0 justify-start">{toolbarAction}</div> : null}
 
         <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:justify-end">
-          <MonitoringDropdown
+          <CustomDropdown
             value={selectedCategory}
             options={categoryOptions}
             onChange={handleChangeCategory}
             ariaLabel={isPrivacyVariant ? '개인정보 키워드 분류 필터' : '파일 확장자 분류 필터'}
-            widthClass="w-full lg:w-[12rem] lg:shrink-0"
-            triggerClassName="h-12 rounded-xl border-slate-200 bg-white shadow-none"
+            className="w-full lg:w-[12rem] lg:shrink-0 [&>button]:h-12 [&>button]:rounded-xl"
           />
 
           <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-[38rem]">

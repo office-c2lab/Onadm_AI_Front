@@ -24,7 +24,7 @@ export default function FavoritesPage() {
   return (
     <>
       <section className="mt-7">
-        <h2 className="mb-3 text-lg font-semibold text-slate-900">저장한 도구</h2>
+        
 
         {savedTools.length > 0 ? (
           <div className="grid gap-2 md:grid-cols-2">
