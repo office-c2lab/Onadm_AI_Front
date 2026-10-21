@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import {
   Atom,
@@ -42,17 +41,9 @@ const adminMenus = [
     ],
   },
   {
-    label: 'Control 내부',
+    label: 'Control',
     icon: ShieldCheck,
     children: [
-      {
-        label: 'AI 사용 현황',
-        to: '/admin/control/internal/usage',
-      },
-      {
-        label: 'LLM 모델 관리',
-        to: '/admin/control/internal/models',
-      },
       {
         label: 'CSO 분류 관리',
         to: '/admin/control/internal/classification',
@@ -62,42 +53,19 @@ const adminMenus = [
         to: '/admin/control/internal/policies',
       },
       {
-        label: '사용량 및 한도 관리',
-        to: '/admin/control/internal/limits',
+        label: 'Control 내부',
+        to: '/admin/control/internal/usage',
+        activePaths: [
+          '/admin/control/internal/usage',
+          '/admin/control/internal/models',
+          '/admin/control/internal/limits',
+          '/admin/control/internal/history',
+        ],
       },
       {
-        label: 'AI 요청 이력',
-        to: '/admin/control/internal/history',
-      },
-    ],
-  },
-  {
-    label: 'Control 외부',
-    icon: ShieldCheck,
-    children: [
-      {
-        label: '통제 대시보드',
+        label: 'Control 외부',
         to: '/admin/control/external/dashboard',
-      },
-      {
-        label: '프롬프트 모니터링',
-        to: '/admin/control/external/monitoring',
-      },
-      {
-        label: '외부 AI 사용자 관리',
-        to: '/admin/control/external/users',
-      },
-      {
-        label: '외부 AI 정책 관리',
-        to: '/admin/control/external/policies',
-      },
-      {
-        label: '서비스·도메인 관리',
-        to: '/admin/control/external/domains',
-      },
-      {
-        label: '배포 및 운영지원',
-        to: '/admin/control/external/support',
+        activePrefix: '/admin/control/external',
       },
     ],
   },
@@ -175,28 +143,35 @@ const adminMenus = [
 function isPathActive(target, pathname) {
   if (!target) return false;
 
-  return (
-    pathname === target ||
-    pathname.startsWith(`${target}/`)
-  );
+  return pathname === target || pathname.startsWith(`${target}/`);
 }
 
 function isMenuActive(menu, pathname) {
-  return menu.children?.some(item =>
-    isPathActive(item.to, pathname)
-  ) ?? false;
+  return (
+    menu.children?.some(
+      item =>
+        isPathActive(item.to, pathname) ||
+        item.activePaths?.includes(pathname) ||
+        (item.activePrefix && pathname.startsWith(item.activePrefix))
+    ) ?? false
+  );
 }
 
 // ================================
 // 하위 메뉴
 // ================================
 function SidebarSubLink({ item, onNavigate }) {
+  const location = useLocation();
+
   return (
     <NavLink
       to={item.to}
       onClick={onNavigate}
       className={({ isActive }) => {
-        const active = isActive;
+        const active =
+          isActive ||
+          item.activePaths?.includes(location.pathname) ||
+          (item.activePrefix && location.pathname.startsWith(item.activePrefix));
 
         return `group flex min-h-8 w-full items-center gap-2
           rounded-lg py-1.5 pl-9 pr-2.5
@@ -207,14 +182,9 @@ function SidebarSubLink({ item, onNavigate }) {
           }`;
       }}
     >
-      <span
-        className="h-1 w-1 shrink-0 rounded-full bg-current opacity-50"
-        aria-hidden="true"
-      />
+      <span className="h-1 w-1 shrink-0 rounded-full bg-current opacity-50" aria-hidden="true" />
 
-      <span className="min-w-0 flex-1 leading-5">
-        {item.label}
-      </span>
+      <span className="min-w-0 flex-1 leading-5">{item.label}</span>
     </NavLink>
   );
 }
@@ -223,12 +193,7 @@ function SidebarSubLink({ item, onNavigate }) {
 // 상위 메뉴
 // ================================
 
-function SidebarGroup({
-  menu,
-  expanded,
-  onToggle,
-  onNavigate,
-}) {
+function SidebarGroup({ menu, expanded, onToggle, onNavigate }) {
   const Icon = menu.icon;
   const location = useLocation();
 
@@ -251,24 +216,16 @@ function SidebarGroup({
           }`}
       >
         <Icon
-          className={`h-[18px] w-[18px] shrink-0 ${
-            active
-              ? 'text-[#0d0d0d]'
-              : 'text-[#404040]'
-          }`}
+          className={`h-[18px] w-[18px] shrink-0 ${active ? 'text-[#0d0d0d]' : 'text-[#404040]'}`}
           strokeWidth={1.75}
           aria-hidden="true"
         />
 
-        <span className="min-w-0 flex-1 truncate">
-          {menu.label}
-        </span>
+        <span className="min-w-0 flex-1 truncate">{menu.label}</span>
 
         <ChevronDown
           className={`h-3.5 w-3.5 shrink-0
-            transition-transform duration-200 ${
-              expanded ? 'rotate-180' : ''
-            } ${
+            transition-transform duration-200 ${expanded ? 'rotate-180' : ''} ${
               active ? 'text-[#0d0d0d]' : 'text-[#999]'
             }`}
           strokeWidth={1.75}
@@ -279,11 +236,7 @@ function SidebarGroup({
       {expanded && (
         <div className="mt-0.5 flex flex-col gap-0.5">
           {menu.children.map(item => (
-            <SidebarSubLink
-              key={item.to ?? item.label}
-              item={item}
-              onNavigate={onNavigate}
-            />
+            <SidebarSubLink key={item.to ?? item.label} item={item} onNavigate={onNavigate} />
           ))}
         </div>
       )}
@@ -294,10 +247,7 @@ function SidebarGroup({
 // ================================
 // 접힌 관리자 사이드바
 // ================================
-export function AdminSidebarRail({
-  onOpen,
-  onNavigate,
-}) {
+export function AdminSidebarRail({ onOpen, onNavigate }) {
   const location = useLocation();
 
   return (
@@ -331,10 +281,7 @@ export function AdminSidebarRail({
             aria-expanded="false"
             title="사이드바 열기"
           >
-            <PanelLeft
-              className="h-[18px] w-[18px]"
-              strokeWidth={1.7}
-            />
+            <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.7} />
           </button>
         </div>
 
@@ -346,10 +293,7 @@ export function AdminSidebarRail({
         >
           {adminMenus.map(menu => {
             const Icon = menu.icon;
-            const active = isMenuActive(
-              menu,
-              location.pathname
-            );
+            const active = isMenuActive(menu, location.pathname);
 
             const destination = menu.children.find(item => item.to)?.to;
 
@@ -361,18 +305,12 @@ export function AdminSidebarRail({
                 className={`grid h-9 w-9 shrink-0
                   place-items-center rounded-lg
                   transition-colors ${
-                    active
-                      ? 'bg-[#e8e8e8] text-[#0d0d0d]'
-                      : 'text-[#333] hover:bg-[#ececec]'
+                    active ? 'bg-[#e8e8e8] text-[#0d0d0d]' : 'text-[#333] hover:bg-[#ececec]'
                   }`}
                 aria-label={menu.label}
                 title={menu.label}
               >
-                <Icon
-                  className="h-[18px] w-[18px]"
-                  strokeWidth={1.75}
-                  aria-hidden="true"
-                />
+                <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
               </NavLink>
             );
           })}
@@ -387,11 +325,7 @@ export function AdminSidebarRail({
           aria-label="ONDAM AI 관리자 계정"
           title="ONDAM AI 관리자"
         >
-          <Atom
-            className="h-4 w-4"
-            strokeWidth={1.8}
-            aria-hidden="true"
-          />
+          <Atom className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
         </div>
       </div>
     </aside>
@@ -401,17 +335,11 @@ export function AdminSidebarRail({
 // ================================
 // 펼쳐진 관리자 사이드바
 // ================================
-export default function AdminSidebar({
-  className = '',
-  onNavigate,
-  onClose,
-}) {
+export default function AdminSidebar({ className = '', onNavigate, onClose }) {
   const location = useLocation();
 
   const [expandedMenus, setExpandedMenus] = useState(() =>
-    adminMenus
-      .filter(menu => isMenuActive(menu, location.pathname))
-      .map(menu => menu.label)
+    adminMenus.filter(menu => isMenuActive(menu, location.pathname)).map(menu => menu.label)
   );
 
   // 현재 페이지가 속한 그룹 자동 펼침
@@ -422,16 +350,14 @@ export default function AdminSidebar({
 
     if (activeMenus.length === 0) return;
 
-    setExpandedMenus(prev => [
-      ...new Set([...prev, ...activeMenus]),
-    ]);
+    // Route changes are the external navigation signal that keeps the active group visible.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setExpandedMenus(prev => [...new Set([...prev, ...activeMenus])]);
   }, [location.pathname]);
 
   const toggleMenu = label => {
     setExpandedMenus(prev =>
-      prev.includes(label)
-        ? prev.filter(item => item !== label)
-        : [...prev, label]
+      prev.includes(label) ? prev.filter(item => item !== label) : [...prev, label]
     );
   };
 
@@ -464,10 +390,7 @@ export default function AdminSidebar({
           aria-controls="admin-sidebar"
           aria-expanded="true"
         >
-          <PanelLeft
-            className="h-[18px] w-[18px]"
-            strokeWidth={1.7}
-          />
+          <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.7} />
         </button>
       </header>
 
@@ -500,11 +423,7 @@ export default function AdminSidebar({
             className="grid h-8 w-8 shrink-0 place-items-center
               rounded-full bg-[#e3e3e3] text-[#4b4b4b]"
           >
-            <Atom
-              className="h-4 w-4"
-              strokeWidth={1.8}
-              aria-hidden="true"
-            />
+            <Atom className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
           </span>
 
           <span className="min-w-0 flex-1">

@@ -556,9 +556,8 @@ export default function ModelsPage() {
   const openManage = item => setModal({ mode: 'manage', item });
 
   return (
-    <div className="garim-external-root min-h-dvh bg-[#f9f9f9] text-[#111827]">
-      <div className="mx-auto flex min-h-dvh w-full max-w-[88rem] flex-col px-[var(--app-page-x)] pb-8 pt-[var(--app-page-top)]">
-       
+    <div className="garim-external-root min-h-full bg-[#f9f9f9] text-[#111827]">
+      <div className="mx-auto flex min-h-full w-full max-w-[88rem] flex-col px-[var(--app-page-x)] pb-8 pt-[var(--app-page-top)]">
         <nav className="mb-5 flex gap-7 border-b border-slate-200" aria-label="모델 설정 유형">
           {tabs.map(tab => (
             <button
