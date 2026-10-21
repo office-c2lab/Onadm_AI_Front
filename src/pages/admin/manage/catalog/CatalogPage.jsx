@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { GripVertical, Megaphone, Star } from 'lucide-react';
-import { SearchField, StatusBadge, ToolAvatar, cardClass } from '../components.jsx';
-import { catalogItems } from '../data.js';
+import { StatusBadge, cardClass } from '../components.jsx';
 
 const collections = [
   {
@@ -15,45 +14,12 @@ const collections = [
 ];
 
 export default function CatalogPage() {
-  const [tab, setTab] = useState('게시 관리');
-  const [query, setQuery] = useState('');
-  const [items, setItems] = useState(catalogItems);
-  const [notice, setNotice] = useState('');
-  const rows = useMemo(
-    () => items.filter(item => item.name.toLowerCase().includes(query.toLowerCase())),
-    [items, query]
-  );
-
-  const togglePublish = id => {
-    setItems(current =>
-      current.map(item =>
-        item.id === id
-          ? { ...item, publication: item.publication === '게시 중' ? '숨김' : '게시 중' }
-          : item
-      )
-    );
-    setNotice('스토어 노출 상태를 변경했습니다.');
-  };
+  const [tab, setTab] = useState('추천·컬렉션');
 
   return (
     <div className="space-y-5">
-      {notice ? (
-        <div
-          role="status"
-          className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
-        >
-          {notice}
-        </div>
-      ) : null}
-      {tab === '게시 관리' ? (
-        <div className="sticky top-0 z-20 -mx-4 bg-[#f9f9f9]/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
-          <div className="mx-auto flex max-w-xl items-center">
-            <SearchField value={query} onChange={setQuery} placeholder="게시 가능한 앱 검색" />
-          </div>
-        </div>
-      ) : null}
       <div className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {['게시 관리', '추천·컬렉션', '카테고리·태그'].map(item => (
+        {['추천·컬렉션', '카테고리·태그'].map(item => (
           <button
             key={item}
             onClick={() => setTab(item)}
@@ -63,45 +29,6 @@ export default function CatalogPage() {
           </button>
         ))}
       </div>
-
-      {tab === '게시 관리' ? (
-        <section>
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-[17px] font-bold text-slate-900">승인된 도구</h2>
-            <span className="text-xs text-slate-400">{rows.length}개</span>
-          </div>
-          <div className="grid gap-2">
-            {rows.map(item => (
-              <div
-                key={item.id}
-                className="group flex min-h-[82px] flex-col gap-4 rounded-xl border border-transparent px-3 py-3 transition hover:border-slate-100 hover:bg-white hover:shadow-sm sm:flex-row sm:items-center"
-              >
-                <ToolAvatar type={item.type} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold text-slate-900">{item.name}</p>
-                    <StatusBadge>{item.publication}</StatusBadge>
-                  </div>
-                  <p className="mt-1 truncate text-xs text-slate-500">{item.summary}</p>
-                  <p className="mt-1 text-[11px] text-slate-400">
-                    {item.category} · {item.visibility} 공개 · v{item.version}
-                  </p>
-                </div>
-                <label className="flex cursor-pointer items-center gap-3">
-                  <span className="text-xs font-medium text-slate-500">스토어 노출</span>
-                  <input
-                    className="peer sr-only"
-                    type="checkbox"
-                    checked={item.publication === '게시 중'}
-                    onChange={() => togglePublish(item.id)}
-                  />
-                  <span className="relative h-6 w-11 rounded-full bg-slate-200 transition peer-checked:bg-blue-600 after:absolute after:top-1 after:left-1 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" />
-                </label>
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : null}
 
       {tab === '추천·컬렉션' ? (
         <div className="grid gap-4 lg:grid-cols-3">

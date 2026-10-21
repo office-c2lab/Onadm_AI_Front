@@ -35,6 +35,7 @@ export function StatusBadge({ children }) {
     승인: 'bg-emerald-50 text-emerald-700',
     통과: 'bg-emerald-50 text-emerald-700',
     '게시 중': 'bg-blue-50 text-blue-700',
+    '게시 대기': 'bg-violet-50 text-violet-700',
     '시행 중': 'bg-blue-50 text-blue-700',
     '검사 중': 'bg-blue-50 text-blue-700',
     '검토 중': 'bg-blue-50 text-blue-700',

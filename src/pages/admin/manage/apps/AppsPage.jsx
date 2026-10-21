@@ -3,13 +3,7 @@ import { Ban, ExternalLink, RefreshCw } from 'lucide-react';
 import { Drawer, EmptyState, SearchField, StatusBadge, ToolAvatar } from '../components.jsx';
 import { appRecords } from '../data.js';
 
-const publishedApps = appRecords.filter(
-  item =>
-    item.scan === '통과' &&
-    item.approval === '승인' &&
-    item.publication === '게시 중' &&
-    item.operation === '정상'
-);
+const publicationTabs = ['전체', '게시 중', '게시 대기', '숨김'];
 
 const detailRows = item => [
   ['자산 ID', item.id],
@@ -25,15 +19,40 @@ export default function AppsPage() {
   const [query, setQuery] = useState('');
   const [type, setType] = useState('전체 유형');
   const [selected, setSelected] = useState(null);
+  const [publication, setPublication] = useState('게시 중');
+  const [apps, setApps] = useState(appRecords);
+
+  const approvedApps = useMemo(
+    () => apps.filter(item => item.scan === '통과' && item.approval === '승인'),
+    [apps]
+  );
 
   const rows = useMemo(
     () =>
-      publishedApps.filter(item => {
+      approvedApps.filter(item => {
         const text = `${item.name} ${item.id} ${item.owner} ${item.department}`.toLowerCase();
-        return text.includes(query.toLowerCase()) && (type === '전체 유형' || item.type === type);
+        const publicationMatches =
+          publication === '전체' ||
+          (publication === '게시 대기'
+            ? item.publication === '미게시'
+            : item.publication === publication);
+        return (
+          text.includes(query.toLowerCase()) &&
+          (type === '전체 유형' || item.type === type) &&
+          publicationMatches
+        );
       }),
-    [query, type]
+    [approvedApps, publication, query, type]
   );
+
+  const setAppPublication = (app, nextStatus) => {
+    setApps(current =>
+      current.map(item => (item.id === app.id ? { ...item, publication: nextStatus } : item))
+    );
+    setSelected(current =>
+      current?.id === app.id ? { ...current, publication: nextStatus } : current
+    );
+  };
 
   return (
     <div className="space-y-5">
@@ -51,6 +70,25 @@ export default function AppsPage() {
               type="button"
               onClick={() => setType(item)}
               className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${type === item ? 'bg-[#ededed] font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      <nav
+        aria-label="스토어 게시 상태"
+        className="overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        <div className="flex w-max min-w-full justify-center gap-1">
+          {publicationTabs.map(item => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setPublication(item)}
+              aria-pressed={publication === item}
+              className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${publication === item ? 'bg-[#ededed] font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
             >
               {item}
             </button>
@@ -84,14 +122,9 @@ export default function AppsPage() {
                   </div>
                 </div>
                 <div className="relative z-10 flex items-center gap-2">
-                  <StatusBadge>{item.operation}</StatusBadge>
-                  <button
-                    type="button"
-                    onClick={() => setSelected(item)}
-                    className="inline-flex h-8 cursor-pointer items-center rounded-lg bg-blue-50 px-2.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-100"
-                  >
-                    관리
-                  </button>
+                  <StatusBadge>
+                    {item.publication === '미게시' ? '게시 대기' : item.publication}
+                  </StatusBadge>
                 </div>
               </article>
             ))}
@@ -136,7 +169,10 @@ export default function AppsPage() {
             {[
               ['보안검사', selected.scan],
               ['관리자 승인', selected.approval],
-              ['스토어 게시', selected.publication],
+              [
+                '스토어 게시',
+                selected.publication === '미게시' ? '게시 대기' : selected.publication,
+              ],
             ].map(([label, value]) => (
               <div key={label} className="rounded-xl border border-slate-200 p-3">
                 <p className="text-[11px] text-slate-400">{label}</p>
@@ -145,6 +181,35 @@ export default function AppsPage() {
                 </div>
               </div>
             ))}
+          </div>
+          <div className="mt-5 flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
+            <div>
+              <p className="text-sm font-semibold text-slate-800">스토어 노출</p>
+              <p className="mt-1 text-xs text-slate-500">
+                {selected.publication === '게시 중'
+                  ? '스토어에 게시되어 있습니다.'
+                  : '현재 스토어에 노출되지 않습니다.'}
+              </p>
+            </div>
+            <label className="flex cursor-pointer items-center gap-3">
+              <span className="text-xs font-medium text-slate-500">
+                {selected.publication === '게시 중'
+                  ? '게시 중'
+                  : selected.publication === '미게시'
+                    ? '게시 대기'
+                    : '숨김'}
+              </span>
+              <input
+                className="peer sr-only"
+                type="checkbox"
+                checked={selected.publication === '게시 중'}
+                onChange={event =>
+                  setAppPublication(selected, event.target.checked ? '게시 중' : '숨김')
+                }
+                aria-label={`${selected.name} 스토어 노출`}
+              />
+              <span className="relative h-6 w-11 rounded-full bg-slate-200 transition peer-checked:bg-blue-600 after:absolute after:top-1 after:left-1 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" />
+            </label>
           </div>
           <button className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-blue-600">
             전체 감사 로그 보기 <ExternalLink size={13} />

@@ -79,7 +79,7 @@ const adminMenus = [
         to: '/admin/manage/security',
       },
       {
-        label: '스토어 구성',
+        label: '스토어 진열 관리',
         to: '/admin/manage/catalog',
       },
       {
