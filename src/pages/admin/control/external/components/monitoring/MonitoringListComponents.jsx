@@ -1,8 +1,8 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Download, RotateCcw } from 'lucide-react';
-import caretDownIcon from '../../assets/icons/caret_down.svg';
-import searchIcon from '../../assets/icons/search-data.svg';
+import caretDownIcon from '../../../../../../assets/icons/caret_down.svg';
+import searchIcon from '../../../../../../assets/icons/search-data.svg';
 import ServiceLogoBadge from '../ServiceLogoBadge.jsx';
 import { primaryButtonClassName } from '../AppButton.jsx';
 import {
@@ -906,4 +906,3 @@ export function MonitoringDomainTable({ rows, renderLogo, renderToggle, classNam
     </div>
   );
 }
-

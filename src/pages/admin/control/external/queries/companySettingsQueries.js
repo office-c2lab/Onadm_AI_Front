@@ -1,10 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  getDownloadSettings,
-  getTemplateSettings,
-  patchDownloadSettings,
-  patchTemplateSettings,
-} from '../api/companySettings.js';
+import { delay, mockStore } from '../data/mockStore.js';
+
+const getTemplateSettings = () => delay(mockStore.template);
+const getDownloadSettings = () => delay(mockStore.download);
+const patchTemplateSettings = template => {
+  mockStore.template = { ...mockStore.template, ...template };
+  return delay(mockStore.template);
+};
+const patchDownloadSettings = settings => {
+  mockStore.download = { ...mockStore.download, ...settings };
+  return delay(mockStore.download);
+};
 
 export const companySettingsQueryKeys = {
   all: ['company-settings'],
@@ -47,4 +53,3 @@ export function usePatchDownloadSettingsMutation() {
     },
   });
 }
-

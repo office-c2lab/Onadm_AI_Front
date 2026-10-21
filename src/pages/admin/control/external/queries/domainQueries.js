@@ -1,5 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getDomains, patchDomainEnabled } from '../api/domains.js';
+import { delay, mockStore } from '../data/mockStore.js';
+
+const getDomains = () => delay({ domains: mockStore.domains });
+const patchDomainEnabled = ({ serviceCode, enabled }) => {
+  const domain = mockStore.domains.find(item => item.service_code === serviceCode);
+  if (domain) domain.enabled = enabled;
+  return delay(domain);
+};
 
 export const domainQueryKeys = {
   all: ['domains'],
@@ -21,4 +28,3 @@ export function usePatchDomainEnabledMutation() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: domainQueryKeys.all }),
   });
 }
-

@@ -26,8 +26,8 @@ import {
   usePatchClientMetadataMutation,
   useRegisteredClientsQuery,
 } from '../queries/userManagementQueries.js';
-import macIcon from '../assets/icons/mac.svg';
-import windowIcon from '../assets/icons/window.svg';
+import macIcon from '../../../../../assets/icons/mac.svg';
+import windowIcon from '../../../../../assets/icons/window.svg';
 
 const DEFAULT_DEPARTMENT_OPTION = '전체 부서';
 const DEFAULT_POSITION_OPTION = '전체 직책';

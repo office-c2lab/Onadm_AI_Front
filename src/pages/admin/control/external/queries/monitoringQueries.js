@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { exportMonitoringEvents, getMonitoringEvents } from '../api/monitoring.js';
+import { mockStore } from '../data/mockStore.js';
 
 export const MONITORING_EVENTS_LIMIT = 1000;
 export const MONITORING_EVENTS_REFETCH_INTERVAL = 5000;
@@ -8,6 +8,36 @@ export const monitoringQueryKeys = {
   all: ['monitoring'],
   events: params => [...monitoringQueryKeys.all, 'events', params],
 };
+
+function getMonitoringEvents({ status = 'all', q = '' } = {}) {
+  const query = q.trim().toLowerCase();
+  const events = mockStore.events.filter(event => {
+    const statusMatches =
+      status === 'all' ||
+      (status === 'normal' ? ['정상', '허용'].includes(event.status) : event.status === '차단');
+    return statusMatches && (!query || JSON.stringify(event).toLowerCase().includes(query));
+  });
+  return Promise.resolve({ events: structuredClone(events), total: events.length });
+}
+
+function exportMonitoringEvents({ ids = [] }) {
+  const events = ids.length
+    ? mockStore.events.filter(event => ids.includes(event.id))
+    : mockStore.events;
+  const csvText = [
+    'ID,시간,서비스,사용자,상태',
+    ...events.map(event =>
+      [
+        event.id,
+        event.time_kst,
+        event.service,
+        event.user_name,
+        event.status === '허용' ? '정상' : event.status,
+      ].join(',')
+    ),
+  ].join('\n');
+  return Promise.resolve({ csvText, filename: 'ondam-ai-monitoring.csv' });
+}
 
 function saveCsv(csvText, filename) {
   const csvContent = typeof csvText === 'string' ? csvText : String(csvText ?? '');
@@ -55,4 +85,3 @@ export function useMonitoringEventsExportMutation() {
     onSuccess: ({ csvText, filename }) => saveCsv(csvText, filename),
   });
 }
-

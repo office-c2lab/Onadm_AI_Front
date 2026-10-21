@@ -1,16 +1,45 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  createPiiProtectionCategory,
-  deletePiiProtectionCategory,
-  getFileUploadExtensions,
-  getPiiProtectionCategories,
-  getPiiProtectionCategory,
-  getPolicies,
-  patchPolicyEnabled,
-  patchPiiProtectionCategory,
-  putPiiProtectionCategory,
-  putFileUploadExtensions,
-} from '../api/policies.js';
+import { delay, mockStore } from '../data/mockStore.js';
+
+const getPolicies = () =>
+  delay({
+    policies: mockStore.policies,
+    applied_services: ['ChatGPT', 'Gemini', 'Claude', 'Genspark', 'MS Copilot'],
+  });
+const patchPolicyEnabled = ({ code, enabled }) => {
+  const policy = mockStore.policies.find(item => item.code === code);
+  if (policy) policy.enabled = enabled;
+  return delay(policy);
+};
+const getFileUploadExtensions = () => delay({ extensions: mockStore.extensions });
+const putFileUploadExtensions = ({ blockedExtensions }) => {
+  mockStore.extensions.forEach(item => {
+    item.blocked = blockedExtensions.includes(item.extension);
+  });
+  return delay({ extensions: mockStore.extensions });
+};
+const getPiiProtectionCategories = () => delay({ categories: mockStore.piiCategories });
+const getPiiProtectionCategory = categoryId =>
+  delay({
+    category: mockStore.piiCategories.find(item => String(item.id) === String(categoryId)),
+  });
+const createPiiProtectionCategory = payload => {
+  const item = { id: Date.now(), ...payload };
+  mockStore.piiCategories.push(item);
+  return delay(item);
+};
+const putPiiProtectionCategory = ({ categoryId, payload }) => {
+  const item = mockStore.piiCategories.find(value => String(value.id) === String(categoryId));
+  if (item) Object.assign(item, payload);
+  return delay(item);
+};
+const patchPiiProtectionCategory = putPiiProtectionCategory;
+const deletePiiProtectionCategory = categoryId => {
+  mockStore.piiCategories = mockStore.piiCategories.filter(
+    item => String(item.id) !== String(categoryId)
+  );
+  return delay({ success: true });
+};
 
 export const policyQueryKeys = {
   all: ['policies'],
@@ -121,4 +150,3 @@ export function useDeletePiiProtectionCategoryMutation() {
       queryClient.invalidateQueries({ queryKey: policyQueryKeys.piiProtectionCategories() }),
   });
 }
-

@@ -1,5 +1,3 @@
-import { API_BASE_URL } from '../api/client.js';
-
 export const defaultCompanyTemplate = {
   logoPath: '',
   logoSrc: '/logo.png',
@@ -13,10 +11,9 @@ function resolveLogoSrc(logoPath) {
   if (!logoPath) return defaultCompanyTemplate.logoSrc;
   if (/^(https?:|data:|blob:)/.test(logoPath)) return logoPath;
 
-  const baseUrl = API_BASE_URL.replace(/\/+$/, '');
   const assetPath = logoPath.startsWith('/') ? logoPath : `/${logoPath}`;
 
-  return `${baseUrl}${assetPath}`;
+  return assetPath;
 }
 
 export function normalizeTemplateSettings(settings = {}) {
@@ -42,4 +39,3 @@ export function createTemplateSettingsPayload(template) {
     logo_file: template.logoFile,
   };
 }
-

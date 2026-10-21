@@ -1,8 +1,8 @@
-import claudeLogo from '../assets/icons/claude-color.svg';
-import copilotLogo from '../assets/icons/copilot-color.svg';
-import geminiLogo from '../assets/icons/gemini-color.svg';
-import gensparkLogo from '../assets/icons/gensparkLogo.js';
-import openaiLogo from '../assets/icons/openai.svg';
+import claudeLogo from '../../../../../assets/icons/claude-color.svg';
+import copilotLogo from '../../../../../assets/icons/copilot-color.svg';
+import geminiLogo from '../../../../../assets/icons/gemini-color.svg';
+import gensparkLogo from '../../../../../assets/icons/gensparkLogo.js';
+import openaiLogo from '../../../../../assets/icons/openai.svg';
 
 export const ALL_SERVICE_LOGO_NAMES = ['ChatGPT', 'Gemini', 'Claude', 'Genspark', 'MS Copilot'];
 
@@ -86,4 +86,3 @@ export default function ServiceLogoBadge({
     </div>
   );
 }
-

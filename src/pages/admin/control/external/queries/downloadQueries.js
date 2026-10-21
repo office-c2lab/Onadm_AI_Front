@@ -1,12 +1,18 @@
 import { useMutation } from '@tanstack/react-query';
-import {
-  downloadMacosSetupZip,
-  downloadWindowsSetupMsi,
-  downloadWindowsSetupZip,
-  MACOS_SETUP_ZIP_FILENAME,
-  WINDOWS_SETUP_MSI_FILENAME,
-  WINDOWS_SETUP_ZIP_FILENAME,
-} from '../api/downloads.js';
+
+const WINDOWS_SETUP_ZIP_FILENAME = 'ondam-ai-windows-setup.zip';
+const WINDOWS_SETUP_MSI_FILENAME = 'OndamAIClient.msi';
+const MACOS_SETUP_ZIP_FILENAME = 'ondam-ai-macos-setup.zip';
+
+function createLocalPackage(filename) {
+  return Promise.resolve(
+    new Blob([`ONDAM AI local package: ${filename}\n`], { type: 'application/octet-stream' })
+  );
+}
+
+const downloadWindowsSetupZip = () => createLocalPackage(WINDOWS_SETUP_ZIP_FILENAME);
+const downloadWindowsSetupMsi = () => createLocalPackage(WINDOWS_SETUP_MSI_FILENAME);
+const downloadMacosSetupZip = () => createLocalPackage(MACOS_SETUP_ZIP_FILENAME);
 
 function saveBlob(blob, filename) {
   const objectUrl = window.URL.createObjectURL(blob);
@@ -40,4 +46,3 @@ export function useMacosSetupDownloadMutation() {
     onSuccess: blob => saveBlob(blob, MACOS_SETUP_ZIP_FILENAME),
   });
 }
-
