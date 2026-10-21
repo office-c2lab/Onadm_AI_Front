@@ -256,62 +256,6 @@ function ReviewDetails({ upload }) {
             />
           </div>
 
-          {upload.description && (
-            <div className="border-b border-slate-100 px-4 py-5 text-sm sm:px-6">
-              <h5 className="font-semibold text-slate-900">
-                {upload.requestType === '업데이트' ? '업데이트 요청 정보' : '등록 정보'}
-              </h5>
-              <p className="mt-2 text-xs text-slate-500">
-                {upload.type} · {upload.category} · v{upload.version}
-              </p>
-              <dl className="mt-4 space-y-4">
-                {[
-                  ['한 줄 설명', upload.summary],
-                  ['상세 설명', upload.description],
-                  ['주요 기능', upload.features],
-                  ['사용 방법', upload.instructions],
-                ]
-                  .filter(([, value]) => value)
-                  .map(([label, value]) => (
-                    <div key={label}>
-                      <dt className="text-xs font-semibold text-slate-700">{label}</dt>
-                      <dd className="mt-1 whitespace-pre-wrap leading-6 text-slate-600">{value}</dd>
-                    </div>
-                  ))}
-              </dl>
-              {upload.supportEnvironment && (
-                <div className="mt-5">
-                  <h6 className="text-xs font-semibold text-slate-700">지원 환경</h6>
-                  <dl className="mt-2 divide-y divide-slate-100">
-                    {SUPPORT_ENVIRONMENT_FIELDS.filter(
-                      field => upload.supportEnvironment[field.key]
-                    ).map(field => (
-                      <div key={field.key} className="grid grid-cols-[8rem_1fr] gap-3 py-2 text-xs">
-                        <dt className="text-slate-500">{field.label}</dt>
-                        <dd className="text-slate-700">{upload.supportEnvironment[field.key]}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </div>
-              )}
-              {upload.screenshots?.length > 0 && (
-                <div className="mt-5">
-                  <h6 className="text-xs font-semibold text-slate-700">화면 이미지</h6>
-                  <div className="mt-2 grid grid-cols-3 gap-2">
-                    {upload.screenshots.map((screenshot, index) => (
-                      <img
-                        key={`${screenshot.name}-${index}`}
-                        src={screenshot.data}
-                        alt={`${upload.name} 화면 이미지 ${index + 1}`}
-                        className="aspect-video w-full rounded-lg border border-slate-200 object-cover"
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
           <ol className="divide-y divide-slate-100">
             {steps.map((step, index) => {
               const state = getStepState(upload.status, index);
