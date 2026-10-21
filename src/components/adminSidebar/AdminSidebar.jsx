@@ -71,23 +71,19 @@ const adminMenus = [
     icon: Boxes,
     children: [
       {
-        label: 'AI App·Agent 관리',
+        label: '앱·에이전트 관리',
         to: '/admin/manage/apps',
       },
       {
-        label: '보안검사 관리',
+        label: '심사 관리',
         to: '/admin/manage/security',
       },
       {
-        label: '승인 관리',
-        to: '/admin/manage/approvals',
-      },
-      {
-        label: 'App Catalog 관리',
+        label: '스토어 구성',
         to: '/admin/manage/catalog',
       },
       {
-        label: '검사 정책 관리',
+        label: '등록·검사 정책',
         to: '/admin/manage/policies',
       },
     ],

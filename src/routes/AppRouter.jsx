@@ -189,6 +189,7 @@ export default function AppRouter() {
           {/* Manage */}
           <Route path="manage">
             <Route index element={<Navigate to="apps" replace />} />
+            <Route path="overview" element={<Navigate to="/admin/manage/apps" replace />} />
             <Route path="apps" element={<AppsPage />} />
             <Route path="security" element={<SecurityPage />} />
             <Route path="approvals" element={<ApprovalsPage />} />

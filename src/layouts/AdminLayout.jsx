@@ -16,7 +16,9 @@ export default function AdminLayout() {
   ].includes(location.pathname);
   const usesOwnPageLayout =
     isExternalControl || isInternalTabbedPage || location.pathname === '/admin/users';
-  const isTopFlushPage = location.pathname === '/admin/discover/intelligence';
+  const isTopFlushPage =
+    location.pathname === '/admin/discover/intelligence' ||
+    location.pathname.startsWith('/admin/manage');
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     return window.localStorage.getItem('admin-sidebar-open') !== 'false';
   });
