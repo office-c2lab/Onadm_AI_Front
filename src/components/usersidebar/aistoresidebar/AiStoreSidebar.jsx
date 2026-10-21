@@ -1,5 +1,6 @@
 import { Atom, CircleHelp, Grid2X2, LibraryBig, PanelLeft, Plus, Store } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import UserServiceSwitcher from '../UserServiceSwitcher.jsx';
 
 const toolItems = [
   { label: '내 도구', to: '/user/aistore/mytools', icon: Grid2X2 },
@@ -117,13 +118,7 @@ export default function AiStoreSidebar({ className = '', onNavigate, onClose }) 
       aria-label="AI App Store 메뉴"
     >
       <header className="flex h-16 shrink-0 items-center gap-1 px-3">
-        <div className="flex min-w-0 flex-1 items-center ">
-          <img
-            src="/logo.png"
-            alt="ONDAM AI"
-            className="h-12 w-auto max-w-[165px] object-contain"
-          />
-        </div>
+        <UserServiceSwitcher />
 
         <button
           type="button"

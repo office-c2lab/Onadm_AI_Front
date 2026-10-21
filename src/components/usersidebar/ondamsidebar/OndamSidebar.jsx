@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import {
   Blocks,
   CalendarClock,
-  ChevronDown,
   ChevronRight,
   Compass,
   Ellipsis,
@@ -13,6 +12,7 @@ import {
   SquarePen,
   X,
 } from 'lucide-react';
+import UserServiceSwitcher from '../UserServiceSwitcher.jsx';
 
 const primaryItems = [
   { id: 'schedule', label: '예약', icon: CalendarClock },
@@ -157,15 +157,7 @@ export default function OndamSidebar({
       aria-label="ONDAM AI 채팅 메뉴"
     >
       <header className="flex h-14 shrink-0 items-center gap-1 px-3">
-        <button
-          type="button"
-          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-lg px-1.5 py-2 text-left hover:bg-[#eeeeee]"
-          aria-label="AI 모델 선택"
-        >
-          <img src="/simbol.png" alt="" className="h-6 w-6 object-contain" />
-          <span className="truncate text-[15px] font-semibold tracking-[-0.01em]">ONDAM AI</span>
-          <ChevronDown className="h-3.5 w-3.5 text-[#777]" strokeWidth={1.8} aria-hidden="true" />
-        </button>
+        <UserServiceSwitcher />
 
         <button
           type="button"
