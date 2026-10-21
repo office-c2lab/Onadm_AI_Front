@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
+import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
 import AppButton from '../../components/AppButton.jsx';
 import AppSearchField from '../../components/AppSearchField.jsx';
 import FixedPaginationBar from '../../components/FixedPaginationBar.jsx';
@@ -404,6 +405,22 @@ export default function UserPage() {
 
     return [DEFAULT_POSITION_OPTION, ...positions];
   }, [detailPositionItems, users]);
+  const departmentFilterOptions = useMemo(
+    () =>
+      departmentOptions.map(option => ({
+        value: option,
+        label: option === DEFAULT_DEPARTMENT_OPTION ? '전체' : option,
+      })),
+    [departmentOptions]
+  );
+  const positionFilterOptions = useMemo(
+    () =>
+      positionOptions.map(option => ({
+        value: option,
+        label: option === DEFAULT_POSITION_OPTION ? '전체' : option,
+      })),
+    [positionOptions]
+  );
 
   const selectedUser = users.find(user => user.id === selectedId) ?? null;
 
@@ -503,24 +520,20 @@ export default function UserPage() {
         <div className="flex flex-col gap-4 pt-1">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex w-full flex-col gap-3 lg:flex-1 lg:flex-row">
-              <MonitoringDropdown
+              <CustomDropdown
                 value={department}
                 onChange={handleChangeDepartment}
-                options={departmentOptions}
+                options={departmentFilterOptions}
                 ariaLabel="전체 부서"
-                widthClass="w-full lg:w-[clamp(10rem,13vw,12rem)] lg:shrink-0"
-                triggerClassName="h-12 rounded-xl border-slate-200 bg-white shadow-none"
-                optionLabelMap={{ [DEFAULT_DEPARTMENT_OPTION]: '전체' }}
+                className="w-full lg:w-[clamp(10rem,13vw,12rem)] lg:shrink-0 [&>button]:h-12 [&>button]:rounded-xl"
               />
 
-              <MonitoringDropdown
+              <CustomDropdown
                 value={position}
                 onChange={handleChangePosition}
-                options={positionOptions}
+                options={positionFilterOptions}
                 ariaLabel="전체 직책"
-                widthClass="w-full lg:w-[clamp(10rem,13vw,12rem)] lg:shrink-0"
-                triggerClassName="h-12 rounded-xl border-slate-200 bg-white shadow-none"
-                optionLabelMap={{ [DEFAULT_POSITION_OPTION]: '전체' }}
+                className="w-full lg:w-[clamp(10rem,13vw,12rem)] lg:shrink-0 [&>button]:h-12 [&>button]:rounded-xl"
               />
 
               <div className="flex flex-1 flex-col gap-3 sm:min-w-[20rem] sm:flex-row lg:w-[clamp(18rem,30vw,24rem)] lg:min-w-0 lg:flex-none">

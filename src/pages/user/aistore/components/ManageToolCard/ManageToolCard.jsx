@@ -2,6 +2,10 @@ import React from 'react';
 
 import { Bookmark, Bot, Boxes, FileText, Workflow, X } from 'lucide-react';
 import ToolInfoModalShell from '../ToolInfoModalShell.jsx';
+import {
+  EMPTY_SUPPORT_ENVIRONMENT,
+  SUPPORT_ENVIRONMENT_FIELDS,
+} from '../toolRegistrationConfig.js';
 
 const statusStyle = {
   '승인 완료': 'bg-emerald-50 text-emerald-700',
@@ -130,9 +134,14 @@ export function ToolDetailModal({ tool, onClose, mine = false }) {
       ['도구 유형', tool.type],
       ['카테고리', tool.category],
       ['상세 설명', tool.description || tool.summary],
+      ['주요 기능', tool.features],
       ['사용 방법', tool.instructions],
       ['버전', tool.version],
     ];
+    const supportEnvironment = {
+      ...EMPTY_SUPPORT_ENVIRONMENT,
+      ...tool.supportEnvironment,
+    };
 
     return (
       <ToolInfoModalShell
@@ -170,7 +179,7 @@ export function ToolDetailModal({ tool, onClose, mine = false }) {
             {fields.map(([label, value], index) => (
               <div
                 key={label}
-                className={`min-w-0 text-sm ${[0, 1, 4, 5, 6].includes(index) ? 'sm:col-span-2' : ''}`}
+                className={`min-w-0 text-sm ${[0, 1, 4, 5, 6, 7].includes(index) ? 'sm:col-span-2' : ''}`}
               >
                 <dt className="font-medium text-slate-700">{label}</dt>
                 <dd className="mt-2 min-h-11 whitespace-pre-wrap break-words rounded-lg border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-slate-700">
@@ -187,6 +196,36 @@ export function ToolDetailModal({ tool, onClose, mine = false }) {
               </div>
             )}
           </dl>
+
+          {tool.screenshots?.length > 0 && (
+            <div className="mt-6 text-sm">
+              <p className="font-medium text-slate-700">화면 이미지</p>
+              <div className="mt-2 grid grid-cols-3 gap-3">
+                {tool.screenshots.map((screenshot, index) => (
+                  <img
+                    key={`${screenshot.name}-${index}`}
+                    src={screenshot.data}
+                    alt={`${tool.name} 화면 이미지 ${index + 1}`}
+                    className="aspect-video w-full rounded-lg border border-slate-200 bg-slate-50 object-cover"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-6 border-t border-slate-100 pt-6">
+            <h3 className="text-sm font-semibold text-slate-900">지원 환경</h3>
+            <dl className="mt-3 divide-y divide-slate-100 rounded-lg border border-slate-200 px-3">
+              {SUPPORT_ENVIRONMENT_FIELDS.map(field => (
+                <div key={field.key} className="grid grid-cols-[7rem_1fr] gap-3 py-3 text-sm">
+                  <dt className="text-slate-500">{field.label}</dt>
+                  <dd className="break-words text-slate-700">
+                    {supportEnvironment[field.key] || '정보 없음'}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
 
           {tool.review && (
             <p className="mt-6 rounded-lg bg-blue-50 px-4 py-3 text-xs leading-6 text-blue-800">

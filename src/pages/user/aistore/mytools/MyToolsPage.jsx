@@ -10,15 +10,18 @@ import {
   Image as ImageIcon,
   Languages,
   MessageSquareText,
-  Plus,
   Search,
   Workflow,
 } from 'lucide-react';
-import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import { ToolDetailModal } from '../components/ManageToolCard/ManageToolCard.jsx';
 import ToolInfoModalShell from '../components/ToolInfoModalShell.jsx';
-import { categories, toolTypes, useMyTools } from '../data/manageStore.js';
+import ToolRegistrationFields from '../components/ToolRegistrationFields.jsx';
+import {
+  EMPTY_SUPPORT_ENVIRONMENT,
+  MAX_SCREENSHOTS,
+} from '../components/toolRegistrationConfig.js';
+import { useMyTools } from '../data/manageStore.js';
 import { addReviewRequest, formatReviewDate } from '../data/reviewRequests.js';
 
 const toolVisuals = {
@@ -65,25 +68,35 @@ function MyToolIcon({ tool }) {
 
 function EditToolModal({ tool, onClose, onSave }) {
   const iconInputRef = useRef(null);
+  const screenshotInputRef = useRef(null);
   const [form, setForm] = useState(() => ({
     name: tool.name || '',
     summary: tool.summary || '',
     type: tool.type || 'AI App',
     category: tool.category || '기타',
     description: tool.description || tool.summary || '',
+    features: tool.features || '',
     instructions: tool.instructions || '',
     version: tool.version || '1.0.0',
     iconData: tool.iconData || '',
     iconName: tool.iconName || '',
+    screenshots: tool.screenshots || [],
+    supportEnvironment: {
+      ...EMPTY_SUPPORT_ENVIRONMENT,
+      ...tool.supportEnvironment,
+    },
   }));
   const [error, setError] = useState('');
-  const typeOptions = [...new Set([form.type, ...toolTypes.filter(type => type !== '전체 유형')])];
-  const categoryOptions = [
-    ...new Set([form.category, ...categories.filter(category => category !== '전체'), '기타']),
-  ];
 
   const updateForm = (field, value) => {
     setForm(current => ({ ...current, [field]: value }));
+  };
+
+  const updateEnvironment = (field, value) => {
+    setForm(current => ({
+      ...current,
+      supportEnvironment: { ...current.supportEnvironment, [field]: value },
+    }));
   };
 
   const selectIcon = file => {
@@ -110,15 +123,67 @@ function EditToolModal({ tool, onClose, onSave }) {
     reader.readAsDataURL(file);
   };
 
+  const selectScreenshots = async fileList => {
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+    if (files.length + form.screenshots.length > MAX_SCREENSHOTS) {
+      setError(`화면 이미지는 최대 ${MAX_SCREENSHOTS}장까지 등록할 수 있습니다.`);
+      return;
+    }
+    if (files.some(file => !['image/png', 'image/jpeg', 'image/webp'].includes(file.type))) {
+      setError('화면 이미지는 PNG, JPG 또는 WEBP 형식만 사용할 수 있습니다.');
+      return;
+    }
+    if (files.some(file => file.size > 500 * 1024)) {
+      setError('화면 이미지는 장당 500KB 이하로 선택해 주세요.');
+      return;
+    }
+
+    try {
+      const screenshots = await Promise.all(
+        files.map(
+          file =>
+            new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () =>
+                resolve({
+                  name: file.name,
+                  data: typeof reader.result === 'string' ? reader.result : '',
+                });
+              reader.onerror = () => reject(new Error('이미지를 읽지 못했습니다.'));
+              reader.readAsDataURL(file);
+            })
+        )
+      );
+      setForm(current => ({
+        ...current,
+        screenshots: [...current.screenshots, ...screenshots].slice(0, MAX_SCREENSHOTS),
+      }));
+      setError('');
+    } catch {
+      setError('화면 이미지를 불러오지 못했습니다. 다시 선택해 주세요.');
+    }
+  };
+
   const submit = event => {
     event.preventDefault();
     if (
       !form.name.trim() ||
       !form.summary.trim() ||
       !form.description.trim() ||
+      !form.features.trim() ||
+      !form.instructions.trim() ||
       !form.version.trim()
     ) {
-      setError('도구 이름, 한 줄 설명, 상세 설명, 버전을 입력해 주세요.');
+      setError('도구 이름, 설명, 주요 기능, 사용 방법, 버전을 입력해 주세요.');
+      return;
+    }
+    if (
+      !form.supportEnvironment.audience.trim() ||
+      !form.supportEnvironment.operatingSystem.trim() ||
+      !form.supportEnvironment.browser.trim()
+    ) {
+      setError('지원 환경의 사용 가능 대상, 운영체제, 브라우저를 입력해 주세요.');
       return;
     }
     try {
@@ -169,6 +234,18 @@ function EditToolModal({ tool, onClose, onSave }) {
           event.target.value = '';
         }}
       />
+      <input
+        ref={screenshotInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        multiple
+        className="sr-only"
+        tabIndex={-1}
+        onChange={event => {
+          void selectScreenshots(event.target.files);
+          event.target.value = '';
+        }}
+      />
       {error && (
         <p
           role="alert"
@@ -195,102 +272,15 @@ function EditToolModal({ tool, onClose, onSave }) {
             )}
           </div>
         </div>
-        <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-            도구 이름 <span className="text-red-500">*</span>
-            <input
-              value={form.name}
-              onChange={event => updateForm('name', event.target.value)}
-              required
-              maxLength={60}
-              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-          </label>
-          <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-            한 줄 설명 <span className="text-red-500">*</span>
-            <input
-              value={form.summary}
-              onChange={event => updateForm('summary', event.target.value)}
-              required
-              maxLength={130}
-              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-          </label>
-          <div className="text-sm font-medium text-slate-700">
-            <span>
-              도구 유형 <span className="text-red-500">*</span>
-            </span>
-            <CustomDropdown
-              value={form.type}
-              options={typeOptions}
-              onChange={value => updateForm('type', value)}
-              ariaLabel="도구 유형 선택"
-              className="mt-2"
-            />
-          </div>
-          <div className="text-sm font-medium text-slate-700">
-            <span>
-              카테고리 <span className="text-red-500">*</span>
-            </span>
-            <CustomDropdown
-              value={form.category}
-              options={categoryOptions}
-              onChange={value => updateForm('category', value)}
-              ariaLabel="카테고리 선택"
-              className="mt-2"
-            />
-          </div>
-          <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-            상세 설명 <span className="text-red-500">*</span>
-            <textarea
-              value={form.description}
-              onChange={event => updateForm('description', event.target.value)}
-              rows={4}
-              required
-              className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-          </label>
-          <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-            사용 방법
-            <textarea
-              value={form.instructions}
-              onChange={event => updateForm('instructions', event.target.value)}
-              rows={3}
-              className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-          </label>
-          <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-            버전 <span className="text-red-500">*</span>
-            <input
-              value={form.version}
-              onChange={event => updateForm('version', event.target.value)}
-              required
-              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-          </label>
-          <div className="text-sm font-medium text-slate-700 sm:col-span-2">
-            도구 아이콘 <span className="text-xs font-normal text-slate-400">(선택)</span>
-            <button
-              type="button"
-              onClick={() => iconInputRef.current?.click()}
-              className="mt-2 flex w-full items-center gap-3 rounded-lg border border-dashed border-slate-200 px-4 py-3 text-left text-sm font-normal text-slate-500 hover:border-blue-300 hover:bg-blue-50/30"
-            >
-              {form.iconData ? (
-                <img
-                  src={form.iconData}
-                  alt="업로드한 도구 아이콘 미리보기"
-                  className="h-10 w-10 shrink-0 rounded-lg border border-slate-200 bg-white object-cover"
-                />
-              ) : (
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600">
-                  <Plus size={18} aria-hidden="true" />
-                </span>
-              )}
-              <span className="min-w-0 truncate">
-                {form.iconName || 'PNG, JPG 또는 WEBP 이미지 (최대 2MB)'}
-              </span>
-            </button>
-          </div>
+        <div className="mt-6">
+          <ToolRegistrationFields
+            form={form}
+            setForm={setForm}
+            updateForm={updateForm}
+            updateEnvironment={updateEnvironment}
+            iconInputRef={iconInputRef}
+            screenshotInputRef={screenshotInputRef}
+          />
         </div>
       </div>
     </ToolInfoModalShell>

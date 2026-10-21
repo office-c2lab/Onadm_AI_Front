@@ -1,8 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Bookmark } from 'lucide-react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { publishedTools, useDownloads, useFavorites } from '../../data/manageStore.js';
-import { ToolDetailModal } from '../../components/ManageToolCard/ManageToolCard.jsx';
 import LibraryToolRow from '../components/LibraryToolRow.jsx';
 
 export default function FavoritesPage() {
@@ -10,7 +9,7 @@ export default function FavoritesPage() {
   const { keyword } = useOutletContext();
   const { favorites, toggleFavorite } = useFavorites();
   const { downloads, addDownload } = useDownloads();
-  const [selected, setSelected] = useState(null);
+  const openDetail = tool => navigate(`/user/aistore/store/${tool.id}`);
 
   const savedTools = useMemo(() => {
     const query = keyword.trim().toLowerCase();
@@ -35,7 +34,7 @@ export default function FavoritesPage() {
                 tool={tool}
                 mode="favorites"
                 downloaded={downloads.includes(tool.id)}
-                onDetail={setSelected}
+                onDetail={openDetail}
                 onDownload={addDownload}
                 onRemove={toggleFavorite}
               />
@@ -60,8 +59,6 @@ export default function FavoritesPage() {
           </div>
         )}
       </section>
-
-      <ToolDetailModal tool={selected} onClose={() => setSelected(null)} />
     </>
   );
 }

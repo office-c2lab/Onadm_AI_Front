@@ -2,15 +2,14 @@ import { useMemo, useState } from 'react';
 import { Download } from 'lucide-react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { publishedTools, useDownloads } from '../../data/manageStore.js';
-import { ToolDetailModal } from '../../components/ManageToolCard/ManageToolCard.jsx';
 import LibraryToolRow from '../components/LibraryToolRow.jsx';
 
 export default function DownloadsPage() {
   const navigate = useNavigate();
   const { keyword } = useOutletContext();
   const { downloads, installedVersions, removeDownload, updateDownload } = useDownloads();
-  const [selected, setSelected] = useState(null);
   const [actionMessage, setActionMessage] = useState('');
+  const openDetail = tool => navigate(`/user/aistore/store/${tool.id}`);
 
   const openTool = tool => {
     if (tool.launchUrl) {
@@ -51,7 +50,7 @@ export default function DownloadsPage() {
                 updateAvailable={Boolean(
                   installedVersions[tool.id] && installedVersions[tool.id] !== tool.version
                 )}
-                onDetail={setSelected}
+                onDetail={openDetail}
                 onUpdate={tool => {
                   updateDownload(tool);
                   setActionMessage(
@@ -80,8 +79,6 @@ export default function DownloadsPage() {
           </div>
         )}
       </section>
-
-      <ToolDetailModal tool={selected} onClose={() => setSelected(null)} />
     </>
   );
 }

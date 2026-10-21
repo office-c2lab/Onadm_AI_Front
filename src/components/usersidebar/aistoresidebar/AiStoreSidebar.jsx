@@ -37,9 +37,15 @@ function SidebarLink({ item, onNavigate }) {
   );
 }
 
-function SectionLabel({ children }) {
+function SectionLabel({ children, isFirst = false }) {
   return (
-    <p className="mb-1 mt-5 px-2.5 text-[12px] font-medium leading-5 text-[#8f8f8f]">{children}</p>
+    <p
+      className={`mb-1 px-2.5 text-[12px] font-medium leading-5 text-[#8f8f8f] ${
+        isFirst ? 'mt-0' : 'mt-5'
+      }`}
+    >
+      {children}
+    </p>
   );
 }
 
@@ -117,7 +123,7 @@ export default function AiStoreSidebar({ className = '', onNavigate, onClose }) 
       className={`flex h-full min-h-screen w-[260px] shrink-0 flex-col border-r border-black/5 bg-white text-[#0d0d0d] ${className}`.trim()}
       aria-label="AI App Store 메뉴"
     >
-      <header className="flex h-16 shrink-0 items-center gap-1 px-3">
+      <header className="flex h-14 shrink-0 items-center gap-1 px-3">
         <UserServiceSwitcher />
 
         <button
@@ -131,9 +137,9 @@ export default function AiStoreSidebar({ className = '', onNavigate, onClose }) 
         </button>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4 pt-1 [scrollbar-color:#d9d9d9_transparent] [scrollbar-width:thin]">
+      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4 [scrollbar-color:#d9d9d9_transparent] [scrollbar-width:thin]">
         <nav aria-label="주요 메뉴">
-          <SectionLabel>AI APP Store</SectionLabel>
+          <SectionLabel isFirst>AI APP Store</SectionLabel>
           <div className="space-y-0.5">
             {storeItems.map(item => (
               <SidebarLink key={item.to} item={item} onNavigate={onNavigate} />
