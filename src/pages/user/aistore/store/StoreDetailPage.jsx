@@ -110,10 +110,11 @@ export default function StoreDetailPage() {
               type="button"
               onClick={() => addDownload(tool.id)}
               disabled={isAdded}
+              aria-label={`${tool.name} ${isAdded ? '다운로드 됨' : '다운로드'}`}
               className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:bg-blue-50 disabled:text-blue-700"
             >
               {isAdded ? <Check size={17} /> : <Download size={17} />}
-              {isAdded ? '라이브러리에 추가됨' : '라이브러리에 추가'}
+              {isAdded ? '다운로드 됨' : '다운로드'}
             </button>
           </div>
         </header>
