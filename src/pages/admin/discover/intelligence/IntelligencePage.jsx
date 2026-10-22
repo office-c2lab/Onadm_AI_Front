@@ -1,3 +1,4 @@
+import DialogLayer from '../../../../components/ui/DialogLayer.jsx';
 import { useMemo, useState } from 'react';
 import {
   CheckCircle2,
@@ -176,7 +177,7 @@ function DetailModal({ item, blocked, onToggleBlocked, onClose }) {
   const Icon = item.icon;
 
   return (
-    <div className="fixed inset-0 z-[100] grid place-items-center p-4">
+    <DialogLayer onClose={onClose} className="fixed inset-0 z-[100] grid place-items-center p-4">
       <button
         type="button"
         aria-label="상세 닫기"
@@ -250,7 +251,7 @@ function DetailModal({ item, blocked, onToggleBlocked, onClose }) {
           </button>
         </footer>
       </section>
-    </div>
+    </DialogLayer>
   );
 }
 
@@ -281,8 +282,8 @@ export default function IntelligencePage() {
 
   return (
     <div className="w-full">
-      <div className="sticky top-0 z-30 -mx-5 bg-[#f9f9f9]/95 px-5 py-3 backdrop-blur md:-mx-8 md:px-8">
-        <label className="mx-auto flex h-11 w-full max-w-xl items-center gap-3 rounded-lg bg-[#edf2f7] px-4 text-slate-500 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20">
+      <div className="sticky top-0 z-30 -mx-5 bg-canvas/95 px-5 py-3 backdrop-blur md:-mx-8 md:px-8">
+        <label className="mx-auto flex h-11 w-full max-w-xl items-center gap-3 rounded-lg bg-search-surface px-4 text-slate-500 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20">
           <Search size={19} strokeWidth={2} aria-hidden="true" />
           <input
             type="search"
@@ -304,7 +305,7 @@ export default function IntelligencePage() {
               onClick={() => setActiveTab(tab.id)}
               className={`rounded-full px-4 py-1 text-sm transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-[#ededed] font-medium text-[#333]'
+                  ? 'bg-tab-active font-medium text-palette-neutral-27'
                   : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
               }`}
             >

@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
 import { BellRing, ChevronRight, FileCheck2, Plus, ScanSearch, Workflow } from 'lucide-react';
-import { Drawer, SearchField, StatusBadge, cardClass } from '../components.jsx';
+import Drawer from '../../../../components/ui/Drawer.jsx';
+import SearchField from '../../../../components/ui/ValueSearchField.jsx';
+import StatusBadge from '../../../../components/ui/StatusBadge.jsx';
+import { cardClass } from '../../../../styles/surfaces.js';
 import { policyRows } from '../data.js';
 
 const settingGroups = [
@@ -59,7 +62,7 @@ export default function PoliciesPage() {
           {notice}
         </div>
       ) : null}
-      <div className="sticky top-0 z-20 -mx-4 bg-[#f9f9f9]/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
+      <div className="sticky top-0 z-20 -mx-4 bg-canvas/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
         <div className="mx-auto flex max-w-xl items-center">
           <SearchField value={query} onChange={setQuery} placeholder="검사 정책 검색" />
         </div>
@@ -72,7 +75,7 @@ export default function PoliciesPage() {
               type="button"
               onClick={() => setScope(item)}
               aria-pressed={scope === item}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${scope === item ? 'bg-[#ededed] font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+              className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${scope === item ? 'bg-tab-active font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
             >
               {item}
             </button>
@@ -94,14 +97,14 @@ export default function PoliciesPage() {
             </div>
             <h2 className="mt-4 text-sm font-bold text-slate-900">{title}</h2>
             <p className="mt-1 min-h-10 text-xs leading-5 text-slate-500">{description}</p>
-            <p className="mt-3 text-[11px] font-semibold text-blue-600">{value}</p>
+            <p className="mt-3 text-micro font-semibold text-blue-600">{value}</p>
           </button>
         ))}
       </div>
       <section>
         <div className="mb-3 flex items-end justify-between gap-4">
           <div>
-            <h2 className="flex items-center gap-0.5 text-[17px] font-bold text-slate-900">
+            <h2 className="flex items-center gap-0.5 text-size-17px font-bold text-slate-900">
               검사 정책 <ChevronRight size={18} />
             </h2>
           </div>
@@ -125,12 +128,12 @@ export default function PoliciesPage() {
               className="group flex flex-col rounded-xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/5"
             >
               <div className="flex items-start justify-between gap-3">
-                <span className="grid size-12 place-items-center rounded-xl bg-[#EEF4FF] text-[#2463D3]">
+                <span className="grid size-12 place-items-center rounded-xl bg-palette-blue-14 text-palette-blue-83">
                   <FileCheck2 size={23} strokeWidth={1.7} />
                 </span>
                 <StatusBadge>{item.status}</StatusBadge>
               </div>
-              <h3 className="mt-4 text-[15px] font-semibold text-slate-900">{item.name}</h3>
+              <h3 className="mt-4 text-body font-semibold text-slate-900">{item.name}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-500">
                 {item.scope} 대상 · 검사 항목 {item.checks}개
               </p>
@@ -187,7 +190,7 @@ export default function PoliciesPage() {
               ['담당 조직', selected.owner],
             ].map(([label, value]) => (
               <div key={label} className="rounded-xl border border-slate-200 p-3">
-                <p className="text-[11px] text-slate-400">{label}</p>
+                <p className="text-micro text-slate-400">{label}</p>
                 <p className="mt-2 text-sm font-semibold text-slate-800">{value}</p>
               </div>
             ))}

@@ -1,6 +1,8 @@
+import SharedToolAvatar from '../../../../../components/ui/ToolAvatar.jsx';
+import DialogLayer from '../../../../../components/ui/DialogLayer.jsx';
 import React from 'react';
 
-import { Bookmark, Bot, Boxes, FileText, Workflow, X } from 'lucide-react';
+import { Bookmark, X } from 'lucide-react';
 import ToolInfoModalShell from '../ToolInfoModalShell.jsx';
 import {
   EMPTY_SUPPORT_ENVIRONMENT,
@@ -16,28 +18,8 @@ const statusStyle = {
   반려: 'bg-red-50 text-red-600',
 };
 
-function ToolGlyph({ type }) {
-  if (type === '자동화 도구') {
-    return <Workflow size={22} strokeWidth={1.7} />;
-  }
-
-  if (type === 'AI Agent') {
-    return <Bot size={22} strokeWidth={1.7} />;
-  }
-
-  if (type === '일반 업무 도구') {
-    return <Boxes size={22} strokeWidth={1.7} />;
-  }
-
-  return <FileText size={22} strokeWidth={1.7} />;
-}
-
-export function ToolAvatar({ type }) {
-  return (
-    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#EEF4FF] text-[#2463D3]">
-      <ToolGlyph type={type} />
-    </div>
-  );
+export function ToolAvatar(props) {
+  return <SharedToolAvatar {...props} variant="store" />;
 }
 
 export function ToolCard({ tool, favorite, onToggleFavorite, onDetail }) {
@@ -59,7 +41,7 @@ export function ToolCard({ tool, favorite, onToggleFavorite, onDetail }) {
         </button>
       </div>
 
-      <h3 className="mt-4 text-[15px] font-semibold text-slate-900">{tool.name}</h3>
+      <h3 className="mt-4 text-body font-semibold text-slate-900">{tool.name}</h3>
 
       <p className="mt-2 min-h-12 text-sm leading-6 text-slate-500">{tool.summary}</p>
 
@@ -98,7 +80,7 @@ export function ManageToolCard({ tool, onDetail }) {
         </span>
       </div>
 
-      <h3 className="mt-4 text-[15px] font-semibold text-slate-900">{tool.name}</h3>
+      <h3 className="mt-4 text-body font-semibold text-slate-900">{tool.name}</h3>
       <p className="mt-2 min-h-12 text-sm leading-6 text-slate-500">{tool.summary}</p>
 
       <div className="mt-4 flex flex-wrap gap-1.5 text-xs text-slate-600">
@@ -243,13 +225,9 @@ export function ToolDetailModal({ tool, onClose, mine = false }) {
   ];
 
   return (
-    <div
+    <DialogLayer
+      onClose={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
-      onMouseDown={e => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
-      }}
     >
       <section
         role="dialog"
@@ -308,6 +286,6 @@ export function ToolDetailModal({ tool, onClose, mine = false }) {
           </button>
         </div>
       </section>
-    </div>
+    </DialogLayer>
   );
 }

@@ -97,7 +97,7 @@ function formatSize(bytes) {
 function ZipIcon({ large = false }) {
   return (
     <span
-      className={`flex shrink-0 flex-col items-center justify-center rounded-lg bg-blue-50 font-semibold text-blue-600 ${large ? 'h-14 w-14 gap-0.5 text-[11px]' : 'h-12 w-12 text-[9px]'}`}
+      className={`flex shrink-0 flex-col items-center justify-center rounded-lg bg-blue-50 font-semibold text-blue-600 ${large ? 'h-14 w-14 gap-0.5 text-micro' : 'h-12 w-12 text-size-9px'}`}
       aria-hidden="true"
     >
       <FileArchive size={large ? 24 : 17} strokeWidth={1.8} />

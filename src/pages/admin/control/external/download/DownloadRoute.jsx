@@ -1,9 +1,8 @@
 import DownloadPage from './DownloadPage.jsx';
-import '../garim.css';
 
 export default function DownloadRoute() {
   return (
-    <div className="garim-external-root min-h-screen bg-white text-[#111827]">
+    <div className="app-control-scope min-h-screen bg-white text-text-primary">
       <DownloadPage />
     </div>
   );

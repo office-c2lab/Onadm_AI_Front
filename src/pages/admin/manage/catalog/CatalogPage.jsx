@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { GripVertical, Megaphone, Star } from 'lucide-react';
-import { StatusBadge, cardClass } from '../components.jsx';
+import StatusBadge from '../../../../components/ui/StatusBadge.jsx';
+import { cardClass } from '../../../../styles/surfaces.js';
 
 const collections = [
   {
@@ -23,7 +24,7 @@ export default function CatalogPage() {
           <button
             key={item}
             onClick={() => setTab(item)}
-            className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${tab === item ? 'bg-[#ededed] font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+            className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${tab === item ? 'bg-tab-active font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
           >
             {item}
           </button>

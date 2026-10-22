@@ -9,17 +9,17 @@ export const trendData = Array.from({ length: 31 }, (_, index) => ({
 }));
 
 export const trendSeries = [
-  ['gpt', 'GPT', '#075DF6'],
-  ['claude', 'Claude', '#17B6C8'],
-  ['gemini', 'Gemini', '#8B72F8'],
+  ['gpt', 'GPT', 'var(--color-brand)'],
+  ['claude', 'Claude', 'var(--color-palette-cyan-04)'],
+  ['gemini', 'Gemini', 'var(--color-chart-violet)'],
 ];
 
 export const modelUsage = [
-  ['GPT-4o', '18,422,110', '34.9%', '#2678f5'],
-  ['Claude 3.5 Sonnet', '12,981,200', '24.6%', '#27bfd0'],
-  ['Gemini 2.0 Flash', '9,112,450', '17.3%', '#8b72f8'],
-  ['Llama 3.1 70B', '6,331,000', '12.0%', '#ffa940'],
-  ['DeepSeek R1', '5,942,130', '11.2%', '#5b9cff'],
+  ['GPT-4o', '18,422,110', '34.9%', 'var(--color-chart-blue)'],
+  ['Claude 3.5 Sonnet', '12,981,200', '24.6%', 'var(--color-chart-cyan)'],
+  ['Gemini 2.0 Flash', '9,112,450', '17.3%', 'var(--color-chart-violet)'],
+  ['Llama 3.1 70B', '6,331,000', '12.0%', 'var(--color-chart-orange)'],
+  ['DeepSeek R1', '5,942,130', '11.2%', 'var(--color-palette-blue-59)'],
 ];
 
 export const providers = [
@@ -577,38 +577,38 @@ export const usageMetrics = [
     title: '총 사용 크레딧',
     value: '52,788,890',
     delta: '12.5%',
-    color: '#3485ff',
+    color: 'var(--color-palette-blue-70)',
     bars: [14, 20, 18, 30, 22, 28, 34, 24, 31, 38, 27, 39],
   },
   {
     title: '총 AI 요청 수',
     value: '152,847',
     delta: '8.3%',
-    color: '#fb7185',
+    color: 'var(--color-rose-400)',
     bars: [11, 16, 14, 21, 17, 24, 19, 27, 23, 30, 24, 34],
   },
   {
     title: '총 토큰 사용량',
     value: '184,217,382',
     delta: '6.9%',
-    color: '#9b7bff',
+    color: 'var(--color-palette-blue-53)',
     bars: [15, 23, 19, 28, 25, 32, 27, 37, 31, 40, 34, 43],
   },
   {
     title: '활성 사용자',
     value: '124',
     delta: '4.2%',
-    color: '#34c98b',
+    color: 'var(--color-palette-green-02)',
     bars: [12, 17, 14, 22, 19, 28, 24, 31, 25, 34, 29, 38],
   },
 ];
 export const usageRequestTypes = [
-  { name: '채팅', value: 68.4, count: '104,543건', color: '#2678f5' },
-  { name: '코드 생성', value: 12.8, count: '19,573건', color: '#9b7bff' },
-  { name: '요약', value: 8.1, count: '12,380건', color: '#4f95ff' },
-  { name: '번역', value: 5.6, count: '8,559건', color: '#ffa940' },
-  { name: '이미지 생성', value: 3.1, count: '4,738건', color: '#27bfd0' },
-  { name: '기타', value: 2.0, count: '3,054건', color: '#aebbd0' },
+  { name: '채팅', value: 68.4, count: '104,543건', color: 'var(--color-chart-blue)' },
+  { name: '코드 생성', value: 12.8, count: '19,573건', color: 'var(--color-palette-blue-53)' },
+  { name: '요약', value: 8.1, count: '12,380건', color: 'var(--color-palette-blue-65)' },
+  { name: '번역', value: 5.6, count: '8,559건', color: 'var(--color-chart-orange)' },
+  { name: '이미지 생성', value: 3.1, count: '4,738건', color: 'var(--color-chart-cyan)' },
+  { name: '기타', value: 2.0, count: '3,054건', color: 'var(--color-palette-blue-52)' },
 ];
 export const usageTokenSummary = {
   input: '128,441,221',

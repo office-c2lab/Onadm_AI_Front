@@ -1,27 +1,29 @@
+import useDraftState from '../../../../../../hooks/useDraftState.js';
+import DialogLayer from '../../../../../../components/ui/DialogLayer.jsx';
 import { GripVertical, Info, Minus, Plus, X } from 'lucide-react';
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useMemo, useRef, useState } from 'react';
 import CustomDropdown from '../../../../../../components/dropdown/CustomDropdown.jsx';
 
-import AppButton from '../AppButton.jsx';
-import AppSearchField from '../AppSearchField.jsx';
-import AppToggle from '../AppToggle.jsx';
-import FixedPaginationBar from '../FixedPaginationBar.jsx';
+import AppButton from '../../../../../../components/ui/Button.jsx';
+import AppSearchField from '../../../../../../components/ui/SearchField.jsx';
+import AppToggle from '../../../../../../components/ui/Toggle.jsx';
+import FixedPaginationBar from '../../../../../../components/pagination/FixedPaginationBar.jsx';
 import {
   MonitoringActionButton,
   MonitoringIconButtonTooltip,
   MonitoringResetButton,
 } from '../monitoring/MonitoringListComponents.jsx';
 import {
-  monitoringTableBodyClass,
-  monitoringTableCellClass,
-  monitoringTableClass,
-  monitoringTableHeadClass,
-  monitoringTableHeaderCellClass,
-  monitoringTableHeaderRowClass,
-  monitoringTableRowClass,
-  monitoringTableSurfaceClass,
-} from '../monitoring/monitoringTableStyles.js';
-import SectionCard from '../SectionCard.jsx';
+  tableBodyClass,
+  tableCellClass,
+  tableClass,
+  tableHeadClass,
+  tableHeaderCellClass,
+  tableHeaderRowClass,
+  tableRowClass,
+  tableSurfaceClass,
+} from '../../../../../../styles/table.js';
+import SectionCard from '../../../../../../components/ui/SectionCard.jsx';
 import { DROPDOWN_SETTING_CATEGORIES } from '../../constants/dropdownSettings.js';
 import useAdaptiveRowsPerPage from '../../hooks/useAdaptiveRowsPerPage.js';
 import {
@@ -158,9 +160,9 @@ function SummaryCard({ title, value }) {
 
   return (
     <div className="inline-flex h-[var(--app-control-lg)] items-center justify-between gap-[var(--app-gap-xs)] rounded-[var(--app-radius-lg)] border border-slate-200 bg-white px-[var(--app-pad-md)] whitespace-nowrap text-slate-600">
-      <span className="text-[clamp(0.9rem,1vw,0.98rem)] font-bold tracking-[-0.02em]">{title}</span>
-      <span className="text-[clamp(0.9rem,1vw,0.98rem)] font-black tracking-[-0.02em]">
-        <span className="text-[#075DF6]">{numberValue}</span> {unitValue}
+      <span className="text-button font-bold tracking-title">{title}</span>
+      <span className="text-button font-black tracking-title">
+        <span className="text-brand">{numberValue}</span> {unitValue}
       </span>
     </div>
   );
@@ -170,7 +172,7 @@ function FieldLabel({ children, required = false, htmlFor }) {
   return (
     <label htmlFor={htmlFor} className="text-sm font-semibold text-slate-700">
       {children}
-      {required ? <span className="ml-1 text-[#EF4444]">*</span> : null}
+      {required ? <span className="ml-1 text-red-500">*</span> : null}
     </label>
   );
 }
@@ -195,7 +197,7 @@ function ItemModal({
       : `${draft.name || meta.label}의 기본 정보를 변경합니다.`;
 
   return (
-    <div className="app-modal-stage z-50">
+    <DialogLayer onClose={onClose} className="app-modal-stage z-50">
       <button
         type="button"
         className="app-modal-backdrop"
@@ -214,21 +216,18 @@ function ItemModal({
           <div>
             <h2
               id="settings-modal-title"
-              className="text-[clamp(1.1rem,1.55vw,1.4rem)] font-bold tracking-[-0.03em] text-slate-900"
+              className="text-fluid-53 font-bold tracking-heading text-slate-900"
             >
               {modalTitle}
             </h2>
-            <p
-              id="settings-modal-description"
-              className="mt-1 text-[clamp(0.82rem,1vw,0.92rem)] text-slate-500"
-            >
+            <p id="settings-modal-description" className="mt-1 text-fluid-45 text-slate-500">
               {modalDescription}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#111827] transition hover:bg-slate-100"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-text-primary transition hover:bg-slate-100"
             aria-label="닫기"
           >
             <X className="h-5 w-5" />
@@ -250,7 +249,7 @@ function ItemModal({
                   autoFocus
                   onChange={event => onChange({ name: event.target.value })}
                   placeholder={`예) ${category === 'departments' ? '전략기획팀' : '책임 매니저'}`}
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-20 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 pr-20 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-focus-border focus:ring-4 focus:ring-focus-ring"
                 />
                 <span className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-xs text-slate-400">
                   {draft.name.length} / 50
@@ -268,7 +267,7 @@ function ItemModal({
                   rows={4}
                   onChange={event => onChange({ description: event.target.value })}
                   placeholder={`${meta.label}의 역할이나 담당 업무를 간단히 입력하세요.`}
-                  className="min-h-[7rem] w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 pb-8 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+                  className="min-h-[7rem] w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 pb-8 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-focus-border focus:ring-4 focus:ring-focus-ring"
                 />
                 <span className="pointer-events-none absolute right-4 bottom-3 text-xs text-slate-400">
                   {draft.description.length} / 200
@@ -305,7 +304,7 @@ function ItemModal({
           </div>
         </div>
       </section>
-    </div>
+    </DialogLayer>
   );
 }
 
@@ -317,7 +316,7 @@ function PrivacyKeywordModal({ draft, isSaving = false, onChange, onClose, onSav
   const isSaveDisabled = isSaving || !draft.category.trim() || !hasKeyword;
 
   return (
-    <div className="app-modal-stage z-50">
+    <DialogLayer onClose={onClose} className="app-modal-stage z-50">
       <button
         type="button"
         className="app-modal-backdrop"
@@ -329,11 +328,14 @@ function PrivacyKeywordModal({ draft, isSaving = false, onChange, onClose, onSav
         role="dialog"
         aria-modal="true"
         aria-labelledby="privacy-keyword-modal-title"
-        className="app-modal-panel app-modal-panel--xl border-[#E2E8F0]"
+        className="app-modal-panel app-modal-panel--xl border-slate-200"
       >
         <div className="app-modal-header flex items-center justify-between border-b border-slate-200">
           <div>
-            <h2 id="privacy-keyword-modal-title" className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-slate-900">
+            <h2
+              id="privacy-keyword-modal-title"
+              className="text-modal-title font-bold text-slate-900"
+            >
               개인정보 분류 추가
             </h2>
             <p className="mt-1 text-sm text-slate-400">
@@ -343,7 +345,7 @@ function PrivacyKeywordModal({ draft, isSaving = false, onChange, onClose, onSav
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#111827] transition hover:bg-slate-100"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-text-primary transition hover:bg-slate-100"
             aria-label="닫기"
           >
             <X className="h-5 w-5" />
@@ -352,8 +354,8 @@ function PrivacyKeywordModal({ draft, isSaving = false, onChange, onClose, onSav
 
         <div className="app-modal-body !p-0">
           <div className="grid bg-white">
-            <section className="border-b border-[#E3E8F2] px-5 sm:px-6">
-              <div className="grid divide-y divide-[#E3E8F2] lg:grid-cols-[minmax(12rem,1fr)_auto_auto] lg:items-stretch lg:divide-x lg:divide-y-0">
+            <section className="border-b border-divider px-5 sm:px-6">
+              <div className="grid divide-y divide-divider lg:grid-cols-[minmax(12rem,1fr)_auto_auto] lg:items-stretch lg:divide-x lg:divide-y-0">
                 <div className="grid gap-2 py-5 lg:pr-5">
                   <FieldLabel htmlFor="privacy-keyword-category" required>
                     분류
@@ -366,7 +368,7 @@ function PrivacyKeywordModal({ draft, isSaving = false, onChange, onClose, onSav
                     autoFocus
                     onChange={event => onChange({ category: event.target.value })}
                     placeholder="예) 성함"
-                    className="h-10 w-full rounded-md border border-[#D7DDE8] bg-white px-3 text-[13px] font-medium text-[#344054] outline-none transition focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+                    className="h-10 w-full rounded-md border border-palette-blue-44 bg-white px-3 text-compact font-medium text-text-secondary outline-none transition focus:border-focus-border focus:ring-4 focus:ring-focus-ring"
                   />
                 </div>
 
@@ -383,18 +385,18 @@ function PrivacyKeywordModal({ draft, isSaving = false, onChange, onClose, onSav
                           aria-pressed={isSelected}
                           onClick={() => onChange({ action })}
                           className={`inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-bold transition ${
-                            isSelected ? 'text-[#075DF6]' : 'text-[#64748B] hover:text-[#075DF6]'
+                            isSelected ? 'text-brand' : 'text-slate-500 hover:text-brand'
                           }`.trim()}
                         >
                           <span
                             className={`flex h-4 w-4 items-center justify-center rounded-full border transition ${
-                              isSelected ? 'border-[#075DF6]' : 'border-slate-300'
+                              isSelected ? 'border-brand' : 'border-slate-300'
                             }`.trim()}
                             aria-hidden="true"
                           >
                             <span
                               className={`h-2 w-2 rounded-full transition ${
-                                isSelected ? 'bg-[#075DF6]' : 'bg-transparent'
+                                isSelected ? 'bg-brand' : 'bg-transparent'
                               }`.trim()}
                             />
                           </span>
@@ -422,7 +424,7 @@ function PrivacyKeywordModal({ draft, isSaving = false, onChange, onClose, onSav
             </section>
 
             <section className="px-5 py-5 sm:px-6">
-              <h3 className="mb-4 text-[14px] font-bold text-[#23304A]">포함 키워드</h3>
+              <h3 className="mb-4 text-body-sm font-bold text-palette-blue-109">포함 키워드</h3>
               <div className="grid gap-2 pr-1">
                 {keywordValues.map((keyword, index) => {
                   const canRemove = keywordValues.length > 1;
@@ -440,12 +442,12 @@ function PrivacyKeywordModal({ draft, isSaving = false, onChange, onClose, onSav
                           onChange({ keywords: nextKeywords });
                         }}
                         placeholder={index === 0 ? '예) 김가림' : '키워드 입력'}
-                        className="h-10 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+                        className="h-10 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-focus-border focus:ring-4 focus:ring-focus-ring"
                       />
                       <button
                         type="button"
                         onClick={() => onChange({ keywords: [...keywordValues, ''] })}
-                        className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#075DF6] transition hover:bg-[#F8FBFF] ${
+                        className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-brand transition hover:bg-surface-hover ${
                           isLast ? '' : 'invisible'
                         }`.trim()}
                         aria-label="키워드 입력 추가"
@@ -461,7 +463,7 @@ function PrivacyKeywordModal({ draft, isSaving = false, onChange, onClose, onSav
                               : [''],
                           })
                         }
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#EF4444] transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
                         aria-label="키워드 입력 삭제"
                         disabled={!canRemove && !keyword.trim()}
                       >
@@ -488,7 +490,7 @@ function PrivacyKeywordModal({ draft, isSaving = false, onChange, onClose, onSav
           </AppButton>
         </div>
       </section>
-    </div>
+    </DialogLayer>
   );
 }
 
@@ -516,7 +518,7 @@ function PrivacyKeywordDetailModal({
   const isSaveDisabled = isSaving || !draft.category.trim() || !hasKeyword;
 
   return (
-    <div className="app-modal-stage z-50">
+    <DialogLayer onClose={onClose} className="app-modal-stage z-50">
       <button
         type="button"
         className="app-modal-backdrop"
@@ -528,11 +530,14 @@ function PrivacyKeywordDetailModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="privacy-detail-modal-title"
-        className="app-modal-panel app-modal-panel--xl border-[#E2E8F0]"
+        className="app-modal-panel app-modal-panel--xl border-slate-200"
       >
         <div className="app-modal-header flex items-center justify-between border-b border-slate-200">
           <div>
-            <h2 id="privacy-detail-modal-title" className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-slate-900">
+            <h2
+              id="privacy-detail-modal-title"
+              className="text-modal-title font-bold text-slate-900"
+            >
               개인정보 분류 상세 설정
             </h2>
             <p className="mt-1 text-sm text-slate-400">
@@ -543,7 +548,7 @@ function PrivacyKeywordDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#111827] transition hover:bg-slate-100"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-text-primary transition hover:bg-slate-100"
             aria-label="닫기"
           >
             <X className="h-5 w-5" />
@@ -552,8 +557,8 @@ function PrivacyKeywordDetailModal({
 
         <div className="app-modal-body !p-0">
           <div className="grid bg-white">
-            <section className="border-b border-[#E3E8F2] px-5 sm:px-6">
-              <div className="grid divide-y divide-[#E3E8F2] lg:grid-cols-[minmax(12rem,1fr)_auto_auto] lg:items-stretch lg:divide-x lg:divide-y-0">
+            <section className="border-b border-divider px-5 sm:px-6">
+              <div className="grid divide-y divide-divider lg:grid-cols-[minmax(12rem,1fr)_auto_auto] lg:items-stretch lg:divide-x lg:divide-y-0">
                 <div className="grid gap-2 py-5 lg:pr-5">
                   <FieldLabel htmlFor="privacy-detail-category" required>
                     분류
@@ -564,7 +569,7 @@ function PrivacyKeywordDetailModal({
                     value={draft.category}
                     maxLength={50}
                     onChange={event => onChange({ category: event.target.value })}
-                    className="h-10 w-full rounded-md border border-[#D7DDE8] bg-white px-3 text-[13px] font-medium text-[#344054] outline-none transition focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+                    className="h-10 w-full rounded-md border border-palette-blue-44 bg-white px-3 text-compact font-medium text-text-secondary outline-none transition focus:border-focus-border focus:ring-4 focus:ring-focus-ring"
                     placeholder="예) 성함"
                   />
                 </div>
@@ -582,18 +587,18 @@ function PrivacyKeywordDetailModal({
                           aria-pressed={isSelected}
                           onClick={() => onChange({ action })}
                           className={`inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-bold transition ${
-                            isSelected ? 'text-[#075DF6]' : 'text-[#64748B] hover:text-[#075DF6]'
+                            isSelected ? 'text-brand' : 'text-slate-500 hover:text-brand'
                           }`.trim()}
                         >
                           <span
                             className={`flex h-4 w-4 items-center justify-center rounded-full border transition ${
-                              isSelected ? 'border-[#075DF6]' : 'border-slate-300'
+                              isSelected ? 'border-brand' : 'border-slate-300'
                             }`.trim()}
                             aria-hidden="true"
                           >
                             <span
                               className={`h-2 w-2 rounded-full transition ${
-                                isSelected ? 'bg-[#075DF6]' : 'bg-transparent'
+                                isSelected ? 'bg-brand' : 'bg-transparent'
                               }`.trim()}
                             />
                           </span>
@@ -621,9 +626,9 @@ function PrivacyKeywordDetailModal({
             </section>
 
             <section className="px-5 py-5 sm:px-6">
-              <h3 className="mb-4 text-[14px] font-bold text-[#23304A]">포함 키워드</h3>
+              <h3 className="mb-4 text-body-sm font-bold text-palette-blue-109">포함 키워드</h3>
               <form
-                className="mb-4 flex flex-col gap-3 border-b border-[#E3E8F2] pb-4 sm:flex-row"
+                className="mb-4 flex flex-col gap-3 border-b border-divider pb-4 sm:flex-row"
                 onSubmit={event => {
                   event.preventDefault();
                   setKeywordSearchQuery(keywordSearchInput);
@@ -658,12 +663,12 @@ function PrivacyKeywordDetailModal({
                           onChange({ keywords: nextKeywords });
                         }}
                         placeholder="예) 김가림"
-                        className="h-10 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+                        className="h-10 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-focus-border focus:ring-4 focus:ring-focus-ring"
                       />
                       <button
                         type="button"
                         onClick={() => onChange({ keywords: [...keywordValues, ''] })}
-                        className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#075DF6] transition hover:bg-[#F8FBFF] ${
+                        className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-brand transition hover:bg-surface-hover ${
                           isLast ? '' : 'invisible'
                         }`.trim()}
                         aria-label="키워드 입력 추가"
@@ -679,7 +684,7 @@ function PrivacyKeywordDetailModal({
                               : [''],
                           })
                         }
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#EF4444] transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
                         aria-label="키워드 입력 삭제"
                         disabled={!canRemove && !keyword.trim()}
                       >
@@ -689,7 +694,7 @@ function PrivacyKeywordDetailModal({
                   );
                 })}
                 {!visibleKeywordEntries.length ? (
-                  <div className="rounded-xl border border-dashed border-[#DCEAF1] px-4 py-5 text-center text-sm font-semibold text-[#94A3B8]">
+                  <div className="rounded-xl border border-dashed border-palette-blue-34 px-4 py-5 text-center text-sm font-semibold text-slate-400">
                     검색 조건에 맞는 키워드가 없습니다.
                   </div>
                 ) : null}
@@ -722,7 +727,7 @@ function PrivacyKeywordDetailModal({
           </div>
         </div>
       </section>
-    </div>
+    </DialogLayer>
   );
 }
 
@@ -737,7 +742,7 @@ function PrivacyCategoryDeleteModal({ target, isSaving = false, onClose, onConfi
   ];
 
   return (
-    <div className="app-modal-stage z-[90]">
+    <DialogLayer onClose={onClose} className="app-modal-stage z-[90]">
       <button
         type="button"
         aria-label="개인정보 분류 삭제 닫기"
@@ -750,40 +755,43 @@ function PrivacyCategoryDeleteModal({ target, isSaving = false, onClose, onConfi
         aria-labelledby="delete-privacy-category-modal-title"
         className="app-modal-panel"
       >
-        <div className="app-modal-header flex items-center justify-between gap-[var(--app-gap-md)] border-b border-[#E7EBF4]">
-          <h3 id="delete-privacy-category-modal-title" className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-[#111827]">
+        <div className="app-modal-header flex items-center justify-between gap-[var(--app-gap-md)] border-b border-border-subtle">
+          <h3
+            id="delete-privacy-category-modal-title"
+            className="text-modal-title font-bold text-text-primary"
+          >
             개인정보 분류 삭제
           </h3>
           <button
             type="button"
             aria-label="닫기"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#8A93A5] transition hover:bg-[#F4F6FA] hover:text-[#075DF6]"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-palette-blue-73 transition hover:bg-palette-blue-13 hover:text-brand"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="app-modal-body">
-          <div className="space-y-1.5 text-sm font-semibold leading-6 text-[#4B5563]">
+          <div className="space-y-1.5 text-sm font-semibold leading-6 text-gray-600">
             <p>선택한 개인정보 분류를 삭제하시겠습니까?</p>
             <p>삭제하면 해당 분류에 포함된 키워드도 함께 제거됩니다.</p>
           </div>
 
           <div className="mt-6">
             <div className="flex items-center gap-3">
-              <span className="shrink-0 text-sm font-bold text-[#111827]">삭제 대상</span>
-              <span className="h-px flex-1 bg-[#E7EBF4]" />
+              <span className="shrink-0 text-sm font-bold text-text-primary">삭제 대상</span>
+              <span className="h-px flex-1 bg-border-subtle" />
             </div>
 
-            <dl className="mt-3 rounded-lg border border-[#E1E6EF] px-5 py-4">
+            <dl className="mt-3 rounded-lg border border-palette-blue-33 px-5 py-4">
               {deleteRows.map(row => (
                 <div
                   key={row.label}
-                  className="grid min-h-7 grid-cols-[7.2rem_1fr] items-center gap-2 text-[13px]"
+                  className="grid min-h-7 grid-cols-[7.2rem_1fr] items-center gap-2 text-compact"
                 >
-                  <dt className="font-extrabold text-[#526078]">{row.label}</dt>
-                  <dd className="truncate font-semibold text-[#2D3748]" title={row.value}>
+                  <dt className="font-extrabold text-text-action">{row.label}</dt>
+                  <dd className="truncate font-semibold text-palette-blue-107" title={row.value}>
                     {row.value}
                   </dd>
                 </div>
@@ -792,7 +800,7 @@ function PrivacyCategoryDeleteModal({ target, isSaving = false, onClose, onConfi
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-[#E7EBF4] px-6 py-4">
+        <div className="flex justify-end gap-3 border-t border-border-subtle px-6 py-4">
           <AppButton variant="secondary" onClick={onClose} className="h-11 min-w-[4.5rem]">
             취소
           </AppButton>
@@ -806,7 +814,7 @@ function PrivacyCategoryDeleteModal({ target, isSaving = false, onClose, onConfi
           </AppButton>
         </div>
       </div>
-    </div>
+    </DialogLayer>
   );
 }
 
@@ -964,15 +972,15 @@ export function DropdownSettingsContent({ toolbarAction = null }) {
       previewTable.style.borderSpacing = '0';
       previewTable.style.overflow = 'hidden';
       previewTable.style.borderRadius = '12px';
-      previewTable.style.background = '#D9ECFF';
-      previewTable.style.boxShadow = '0 22px 55px rgba(7, 93, 246, 0.42)';
+      previewTable.style.background = 'var(--color-palette-blue-30)';
+      previewTable.style.boxShadow = 'var(--shadow-drag-preview)';
       previewTable.style.zIndex = '9999';
       previewTable.style.pointerEvents = 'none';
       previewTable.style.opacity = '1';
-      previewRow.style.background = '#D9ECFF';
+      previewRow.style.background = 'var(--color-palette-blue-30)';
       previewCells.forEach(cell => {
-        cell.style.background = '#D9ECFF';
-        cell.style.borderColor = '#5AB3FF';
+        cell.style.background = 'var(--color-palette-blue-30)';
+        cell.style.borderColor = 'var(--color-palette-blue-60)';
       });
 
       previewBody.appendChild(previewRow);
@@ -1133,7 +1141,7 @@ export function DropdownSettingsContent({ toolbarAction = null }) {
       </div>
 
       <div className="relative z-10 flex flex-col gap-4">
-        <div className="flex flex-col gap-2 border-b border-[#E2E8F0] lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-2 border-b border-slate-200 lg:flex-row lg:items-end lg:justify-between">
           <div className="overflow-x-auto">
             <div className="flex h-12 min-w-max items-end gap-7">
               {CATEGORIES.map(category => {
@@ -1145,12 +1153,12 @@ export function DropdownSettingsContent({ toolbarAction = null }) {
                     type="button"
                     onClick={() => handleChangeCategory(category.key)}
                     className={`relative flex h-12 min-w-[4rem] items-center justify-center px-1 text-sm font-black transition ${
-                      isActive ? 'text-[#075DF6]' : 'text-slate-600 hover:text-[#075DF6]'
+                      isActive ? 'text-brand' : 'text-slate-600 hover:text-brand'
                     }`.trim()}
                   >
                     {category.label}
                     {isActive ? (
-                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#075DF6]" />
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand" />
                     ) : null}
                   </button>
                 );
@@ -1158,8 +1166,8 @@ export function DropdownSettingsContent({ toolbarAction = null }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 pb-3 text-[0.82rem] font-semibold text-[#64748B]">
-            <Info className="h-4 w-4 shrink-0 text-[#64748B]" aria-hidden="true" />
+          <div className="flex items-center gap-2 pb-3 text-size-0-82rem font-semibold text-slate-500">
+            <Info className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
             <span>설정 항목을 탭으로 전환해 관리할 수 있습니다.</span>
           </div>
         </div>
@@ -1199,18 +1207,18 @@ export function DropdownSettingsContent({ toolbarAction = null }) {
         </div>
       </div>
 
-      <div ref={tableAreaRef} className={monitoringTableSurfaceClass}>
+      <div ref={tableAreaRef} className={tableSurfaceClass}>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[min(100%,60rem)] table-fixed border-separate border-spacing-0 text-left">
-            <thead className="bg-[linear-gradient(180deg,#F8FAFF_0%,#F2F5FC_100%)]">
-              <tr className="text-sm font-black text-[#4A5578]">
-                <th className="w-[6%] border-b border-[#E2E8F0] px-3 py-3" />
-                <th className="w-[24%] border-b border-[#E2E8F0] px-3 py-3">
+            <thead className="bg-[linear-gradient(180deg,var(--color-table-header-start)_0%,var(--color-table-header-end)_100%)]">
+              <tr className="text-sm font-black text-palette-blue-96">
+                <th className="w-[6%] border-b border-slate-200 px-3 py-3" />
+                <th className="w-[24%] border-b border-slate-200 px-3 py-3">
                   {activeMeta.fieldLabel}
                 </th>
-                <th className="w-[34%] border-b border-[#E2E8F0] px-3 py-3">설명</th>
-                <th className="w-[16%] border-b border-[#E2E8F0] px-3 py-3 text-center">인원수</th>
-                <th className="w-[20%] border-b border-[#E2E8F0] px-3 py-3 text-center">생성일</th>
+                <th className="w-[34%] border-b border-slate-200 px-3 py-3">설명</th>
+                <th className="w-[16%] border-b border-slate-200 px-3 py-3 text-center">인원수</th>
+                <th className="w-[20%] border-b border-slate-200 px-3 py-3 text-center">생성일</th>
               </tr>
             </thead>
             <tbody className="text-sm text-slate-700">
@@ -1220,17 +1228,17 @@ export function DropdownSettingsContent({ toolbarAction = null }) {
                   onDragOver={event => handleDragOver(event, item.id)}
                   onDrop={event => handleDrop(event, item.id)}
                   onClick={() => handleOpenEditModal(item)}
-                  className={`relative cursor-pointer bg-white transition hover:bg-[#F8FBFF] ${
-                    dragState.itemId === item.id ? '[&>td]:bg-[#B8DEFF]' : ''
+                  className={`relative cursor-pointer bg-white transition hover:bg-surface-hover ${
+                    dragState.itemId === item.id ? '[&>td]:bg-palette-blue-45' : ''
                   } ${
                     dragState.overItemId === item.id && dragState.position === 'before'
-                      ? '[&>td]:bg-[#E8F3FF]'
+                      ? '[&>td]:bg-palette-blue-19'
                       : dragState.overItemId === item.id && dragState.position === 'after'
-                        ? '[&>td]:bg-[#E8F3FF]'
+                        ? '[&>td]:bg-palette-blue-19'
                         : ''
                   }`.trim()}
                 >
-                  <td className="border-b border-[#E2E8F0] px-3 py-3 text-center text-[#61708E]">
+                  <td className="border-b border-slate-200 px-3 py-3 text-center text-palette-blue-86">
                     <button
                       type="button"
                       draggable
@@ -1240,24 +1248,24 @@ export function DropdownSettingsContent({ toolbarAction = null }) {
                       onDragEnd={handleDragEnd}
                       aria-label={`${item.name} 순서 변경`}
                       title="누른 상태로 드래그하여 순서 변경"
-                      className="mx-auto inline-flex h-7 w-7 cursor-grab items-center justify-center rounded-lg text-[#61708E] transition hover:bg-[#E8F3FF] hover:text-[#075DF6] active:cursor-grabbing"
+                      className="mx-auto inline-flex h-7 w-7 cursor-grab items-center justify-center rounded-lg text-palette-blue-86 transition hover:bg-palette-blue-19 hover:text-brand active:cursor-grabbing"
                     >
                       <GripVertical className="h-4 w-4" />
                     </button>
                   </td>
-                  <td className="border-b border-[#E2E8F0] px-3 py-3">
+                  <td className="border-b border-slate-200 px-3 py-3">
                     <span className="font-black text-slate-800">{item.name}</span>
                   </td>
                   <td
-                    className="truncate border-b border-[#E2E8F0] px-3 py-3 font-semibold text-[#64748B]"
+                    className="truncate border-b border-slate-200 px-3 py-3 font-semibold text-slate-500"
                     title={item.description}
                   >
                     {item.description || '-'}
                   </td>
-                  <td className="border-b border-[#E2E8F0] px-3 py-3 text-center font-semibold text-[#50607F]">
+                  <td className="border-b border-slate-200 px-3 py-3 text-center font-semibold text-palette-blue-95">
                     {item.memberCount.toLocaleString()}명
                   </td>
-                  <td className="border-b border-[#E2E8F0] px-3 py-3 text-center font-semibold text-[#50607F]">
+                  <td className="border-b border-slate-200 px-3 py-3 text-center font-semibold text-palette-blue-95">
                     {item.createdAt}
                   </td>
                 </tr>
@@ -1266,7 +1274,7 @@ export function DropdownSettingsContent({ toolbarAction = null }) {
           </table>
         </div>
         {isLoading || !filteredItems.length ? (
-          <section className="border-t border-dashed border-[#DCEAF1] px-6 py-4 text-center text-sm text-[#94A3B8]">
+          <section className="border-t border-dashed border-palette-blue-34 px-6 py-4 text-center text-sm text-slate-400">
             {isLoading ? '드롭다운 항목을 불러오는 중입니다.' : '등록된 항목이 없습니다.'}
           </section>
         ) : null}
@@ -1323,7 +1331,10 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
     usePatchPiiProtectionCategoryMutation();
   const { mutate: deletePiiCategory, isPending: isDeletingPiiCategory } =
     useDeletePiiProtectionCategoryMutation();
-  const extensions = Array.isArray(data?.extensions) ? data.extensions : [];
+  const extensions = useMemo(
+    () => (Array.isArray(data?.extensions) ? data.extensions : []),
+    [data]
+  );
   const privacyRows = useMemo(
     () => getPiiCategoryEntries(piiCategoriesData).map(normalizePiiCategory),
     [piiCategoriesData]
@@ -1331,10 +1342,37 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
   const rows = isPrivacyVariant ? privacyRows : extensions;
   const showLoading = isPrivacyVariant ? isPiiCategoriesLoading : isLoading;
   const showError = isPrivacyVariant ? isPiiCategoriesError : isError;
-  const [blockedExtensions, setBlockedExtensions] = useState([]);
-  const [privacyActions, setPrivacyActions] = useState({});
+  const protectionSource = useMemo(() => ({ rows, isPrivacyVariant }), [rows, isPrivacyVariant]);
+  const [blockedExtensions, setBlockedExtensions] = useDraftState(protectionSource, source =>
+    source.rows
+      .filter(item => (source.isPrivacyVariant ? item.enabled : item.blocked))
+      .map(item => String(source.isPrivacyVariant ? item.id : item.extension))
+  );
+  const [privacyActions, setPrivacyActions] = useDraftState(protectionSource, source =>
+    Object.fromEntries(source.rows.map(item => [item.id, item.action ?? PRIVACY_ACTION_OPTIONS[0]]))
+  );
   const [privacyModalState, setPrivacyModalState] = useState({ mode: null, draft: null });
-  const [privacyDetailDraft, setPrivacyDetailDraft] = useState(null);
+  const detailSource = useMemo(
+    () => ({ isPrivacyVariant, piiCategoryDetailData, selectedPrivacyRowId }),
+    [isPrivacyVariant, piiCategoryDetailData, selectedPrivacyRowId]
+  );
+  const [privacyDetailDraft, setPrivacyDetailDraft] = useDraftState(
+    detailSource,
+    (source, previous = null) => {
+      if (!source.isPrivacyVariant || !source.selectedPrivacyRowId) return previous;
+      const category = getPiiCategoryEntries(source.piiCategoryDetailData).map(
+        normalizePiiCategory
+      )[0];
+      if (!category) return previous;
+      return {
+        id: category.id,
+        category: category.category,
+        keywords: category.keywords.length ? category.keywords : [''],
+        action: category.action,
+        enabled: category.enabled,
+      };
+    }
+  );
   const [privacyDeleteTarget, setPrivacyDeleteTarget] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(ALL_FILE_EXTENSION_CATEGORIES);
   const [searchInput, setSearchInput] = useState('');
@@ -1351,37 +1389,6 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
     isPatchingPiiCategory ||
     isDeletingPiiCategory ||
     isPiiCategoryDetailFetching;
-
-  useEffect(() => {
-    setBlockedExtensions(
-      rows
-        .filter(item => (isPrivacyVariant ? item.enabled : item.blocked))
-        .map(item => String(isPrivacyVariant ? item.id : item.extension))
-    );
-  }, [isPrivacyVariant, rows]);
-
-  useEffect(() => {
-    if (!isPrivacyVariant) return;
-
-    setPrivacyActions(
-      Object.fromEntries(rows.map(item => [item.id, item.action ?? PRIVACY_ACTION_OPTIONS[0]]))
-    );
-  }, [isPrivacyVariant, rows]);
-
-  useEffect(() => {
-    if (!isPrivacyVariant || !selectedPrivacyRowId) return;
-
-    const category = getPiiCategoryEntries(piiCategoryDetailData).map(normalizePiiCategory)[0];
-    if (!category) return;
-
-    setPrivacyDetailDraft({
-      id: category.id,
-      category: category.category,
-      keywords: category.keywords.length ? category.keywords : [''],
-      action: category.action,
-      enabled: category.enabled,
-    });
-  }, [isPrivacyVariant, piiCategoryDetailData, selectedPrivacyRowId]);
 
   const blockedSet = useMemo(() => new Set(blockedExtensions), [blockedExtensions]);
   const categoryOptions = useMemo(() => {
@@ -1420,7 +1427,7 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
     safePage * rowsPerPage
   );
   const getTableCellClass = (index, className = '') =>
-    monitoringTableCellClass(
+    tableCellClass(
       index,
       `${isPrivacyVariant ? 'py-[calc(var(--app-pad-xs)*0.7)]' : ''} ${className}`.trim()
     );
@@ -1634,9 +1641,9 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
         </div>
       </div>
 
-      <div ref={tableAreaRef} className={monitoringTableSurfaceClass}>
+      <div ref={tableAreaRef} className={tableSurfaceClass}>
         <div className="overflow-x-auto">
-          <table className={`min-w-[min(100%,53.75rem)] ${monitoringTableClass} text-left`}>
+          <table className={`min-w-[min(100%,53.75rem)] ${tableClass} text-left`}>
             {isPrivacyVariant ? (
               <colgroup>
                 <col className="w-[36%]" />
@@ -1653,27 +1660,19 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
                 <col className="w-[10%]" />
               </colgroup>
             )}
-            <thead className={monitoringTableHeadClass}>
-              <tr className={monitoringTableHeaderRowClass}>
-                <th className={monitoringTableHeaderCellClass}>
-                  {isPrivacyVariant ? '분류' : '확장자'}
-                </th>
-                {isPrivacyVariant ? null : <th className={monitoringTableHeaderCellClass}>정보</th>}
-                <th className={monitoringTableHeaderCellClass}>
+            <thead className={tableHeadClass}>
+              <tr className={tableHeaderRowClass}>
+                <th className={tableHeaderCellClass}>{isPrivacyVariant ? '분류' : '확장자'}</th>
+                {isPrivacyVariant ? null : <th className={tableHeaderCellClass}>정보</th>}
+                <th className={tableHeaderCellClass}>
                   {isPrivacyVariant ? '포함 키워드' : '분류'}
                 </th>
-                {isPrivacyVariant ? null : (
-                  <th className={monitoringTableHeaderCellClass}>MIME 타입</th>
-                )}
-                {isPrivacyVariant ? (
-                  <th className={monitoringTableHeaderCellClass}>처리 방식</th>
-                ) : null}
-                <th className={monitoringTableHeaderCellClass}>
-                  {isPrivacyVariant ? '사용' : '차단'}
-                </th>
+                {isPrivacyVariant ? null : <th className={tableHeaderCellClass}>MIME 타입</th>}
+                {isPrivacyVariant ? <th className={tableHeaderCellClass}>처리 방식</th> : null}
+                <th className={tableHeaderCellClass}>{isPrivacyVariant ? '사용' : '차단'}</th>
               </tr>
             </thead>
-            <tbody className={monitoringTableBodyClass}>
+            <tbody className={tableBodyClass}>
               {visibleExtensions.map((item, index) => {
                 const extension = String(isPrivacyVariant ? item.id : item.extension);
                 const keywords = Array.isArray(item.keywords) ? item.keywords : [];
@@ -1688,25 +1687,29 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
                       onClick={
                         isPrivacyVariant ? () => handleOpenPrivacyEditModal(item) : undefined
                       }
-                      className={monitoringTableRowClass({
+                      className={tableRowClass({
                         selected: isSelectedPrivacyRow,
                         striped: index % 2 === 1,
                         interactive: isPrivacyVariant,
                       })}
                     >
                       <td className={getTableCellClass(index, 'whitespace-nowrap')}>
-                        <span className="pl-2 font-black text-[#075DF6]">
+                        <span className="pl-2 font-black text-brand">
                           {isPrivacyVariant ? item.category : `.${extension}`}
                         </span>
                       </td>
                       {isPrivacyVariant ? null : (
                         <td className={getTableCellClass(index)}>
-                          <span className="font-black text-[#172033]">{item.label ?? '-'}</span>
+                          <span className="font-black text-palette-blue-115">
+                            {item.label ?? '-'}
+                          </span>
                         </td>
                       )}
-                      <td className={getTableCellClass(index, 'font-semibold text-[#50607F]')}>
+                      <td
+                        className={getTableCellClass(index, 'font-semibold text-palette-blue-95')}
+                      >
                         {isPrivacyVariant ? (
-                          <span className="pl-2 font-black text-[#075DF6]">
+                          <span className="pl-2 font-black text-brand">
                             {keywordCount.toLocaleString()}개
                           </span>
                         ) : (
@@ -1717,7 +1720,7 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
                         <td
                           className={getTableCellClass(
                             index,
-                            'truncate font-semibold text-[#64748B]'
+                            'truncate font-semibold text-slate-500'
                           )}
                           title={mimeTypes.join(', ')}
                         >
@@ -1743,21 +1746,19 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
                                     handleChangePrivacyAction(extension, action);
                                   }}
                                   disabled={isSavingPiiCategory}
-                                  className={`inline-flex h-[calc(var(--app-control-xs)*0.9)] items-center gap-[calc(var(--app-gap-xs)*0.8)] rounded-[var(--app-radius-md)] border border-transparent bg-transparent px-[var(--app-pad-xs)] text-[clamp(0.76rem,0.88vw,0.82rem)] font-bold whitespace-nowrap transition ${
-                                    isSelected
-                                      ? 'text-[#075DF6]'
-                                      : 'text-[#64748B] hover:text-[#075DF6]'
+                                  className={`inline-flex h-[calc(var(--app-control-xs)*0.9)] items-center gap-[calc(var(--app-gap-xs)*0.8)] rounded-[var(--app-radius-md)] border border-transparent bg-transparent px-[var(--app-pad-xs)] text-fluid-37 font-bold whitespace-nowrap transition ${
+                                    isSelected ? 'text-brand' : 'text-slate-500 hover:text-brand'
                                   }`.trim()}
                                 >
                                   <span
                                     className={`flex h-4 w-4 items-center justify-center rounded-full border transition ${
-                                      isSelected ? 'border-[#075DF6]' : 'border-slate-300'
+                                      isSelected ? 'border-brand' : 'border-slate-300'
                                     }`.trim()}
                                     aria-hidden="true"
                                   >
                                     <span
                                       className={`h-2 w-2 rounded-full transition ${
-                                        isSelected ? 'bg-[#075DF6]' : 'bg-transparent'
+                                        isSelected ? 'bg-brand' : 'bg-transparent'
                                       }`.trim()}
                                     />
                                   </span>
@@ -1792,7 +1793,7 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
         </div>
 
         {showLoading || showError || !filteredExtensions.length ? (
-          <section className="border-t border-dashed border-[#DCEAF1] px-6 py-4 text-center text-sm font-semibold text-[#94A3B8]">
+          <section className="border-t border-dashed border-palette-blue-34 px-6 py-4 text-center text-sm font-semibold text-slate-400">
             {showLoading
               ? `${isPrivacyVariant ? '개인정보 키워드' : '파일 확장자'} 정보를 불러오는 중입니다.`
               : showError
@@ -1846,4 +1847,3 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
     </>
   );
 }
-

@@ -1,5 +1,6 @@
+import RouteTabs from '../components/ui/RouteTabs.jsx';
 import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import SearchHeader from '../components/search/SearchHeader.jsx';
 
 const tabs = [
@@ -21,24 +22,12 @@ export default function LibraryLayout() {
         ariaLabel="라이브러리 도구 검색"
       />
 
-      <nav className="mt-5 flex items-center gap-1" aria-label="라이브러리 탭">
-        {tabs.map(tab => (
-          <NavLink
-            key={tab.to}
-            to={tab.to}
-            end
-            className={({ isActive }) =>
-              `rounded-full px-4 py-1 text-sm transition-colors ${
-                isActive
-                  ? 'bg-[#ededed] font-medium text-[#333]'
-                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
-              }`
-            }
-          >
-            {tab.label}
-          </NavLink>
-        ))}
-      </nav>
+      <RouteTabs
+        tabs={tabs}
+        ariaLabel="라이브러리 탭"
+        className="mt-5 flex items-center gap-1"
+        end
+      />
 
       <Outlet context={{ keyword }} />
     </div>

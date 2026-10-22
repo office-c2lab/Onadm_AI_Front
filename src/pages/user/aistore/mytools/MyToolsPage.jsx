@@ -318,8 +318,6 @@ export default function MyToolsPage() {
       />
 
       <section className="mt-4" aria-label="승인된 도구 목록">
-       
-
         {filteredTools.length > 0 ? (
           <div className="grid gap-2">
             {filteredTools.map(tool => (

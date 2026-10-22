@@ -61,13 +61,13 @@ export default function NewChatView({ onSubmit }) {
           </div>
         </div>
 
-        <h1 className="text-center text-[26px] font-medium tracking-[-0.025em] text-[#0d0d0d] sm:text-[28px]">
+        <h1 className="text-center text-size-26px font-medium tracking-detail-06 text-ink sm:text-display-sm">
           오늘은 어떤 생각이 드나요?
         </h1>
 
         <form
           onSubmit={submitPrompt}
-          className="mt-8 flex min-h-[58px] w-full items-center rounded-[30px] border border-[#dedede] bg-white p-1.5 pl-2 shadow-[0_2px_10px_rgba(0,0,0,0.06)] transition-shadow focus-within:shadow-[0_3px_14px_rgba(0,0,0,0.09)]"
+          className="mt-8 flex min-h-[58px] w-full items-center rounded-detail-06 border border-palette-neutral-08 bg-white p-1.5 pl-2 shadow-detail-09 transition-shadow focus-within:shadow-detail-10"
         >
           <input
             ref={fileInputRef}
@@ -79,7 +79,7 @@ export default function NewChatView({ onSubmit }) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-[#2f2f2f] hover:bg-[#f0f0f0]"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-palette-neutral-29 hover:bg-palette-neutral-04"
             aria-label="파일 첨부"
             title="파일 첨부"
           >
@@ -90,7 +90,7 @@ export default function NewChatView({ onSubmit }) {
             ref={inputRef}
             value={prompt}
             onChange={event => setPrompt(event.target.value)}
-            className="min-w-0 flex-1 bg-transparent px-1.5 text-[15px] text-[#222] outline-none placeholder:text-[#888]"
+            className="min-w-0 flex-1 bg-transparent px-1.5 text-body text-palette-neutral-30 outline-none placeholder:text-palette-neutral-16"
             placeholder="ONDAM AI에게 물어보세요"
             aria-label="메시지"
           />
@@ -98,7 +98,7 @@ export default function NewChatView({ onSubmit }) {
           <button
             type="button"
             onClick={() => setModel(value => (value === 'High' ? 'Fast' : 'High'))}
-            className="hidden h-10 shrink-0 items-center gap-1 rounded-full px-3 text-[14px] text-[#777] hover:bg-[#f3f3f3] sm:flex"
+            className="hidden h-10 shrink-0 items-center gap-1 rounded-full px-3 text-body-sm text-palette-neutral-18 hover:bg-palette-neutral-01 sm:flex"
             aria-label={`응답 모드: ${model}`}
           >
             {model}
@@ -109,7 +109,9 @@ export default function NewChatView({ onSubmit }) {
             type="button"
             onClick={() => setIsListening(value => !value)}
             className={`grid h-10 w-10 shrink-0 place-items-center rounded-full transition-colors ${
-              isListening ? 'bg-[#fee9e7] text-[#d93025]' : 'text-[#2f2f2f] hover:bg-[#f0f0f0]'
+              isListening
+                ? 'bg-palette-red-03 text-palette-red-09'
+                : 'text-palette-neutral-29 hover:bg-palette-neutral-04'
             }`}
             aria-label={isListening ? '음성 입력 중지' : '음성 입력'}
             aria-pressed={isListening}
@@ -121,7 +123,7 @@ export default function NewChatView({ onSubmit }) {
           <button
             type={prompt.trim() ? 'submit' : 'button'}
             onClick={!prompt.trim() ? () => setIsListening(value => !value) : undefined}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#3c7cf6] text-white transition hover:bg-[#2f6fe8] disabled:opacity-50"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-palette-blue-71 text-white transition hover:bg-palette-blue-78 disabled:opacity-50"
             aria-label={prompt.trim() ? '메시지 보내기' : '음성 대화 시작'}
             title={prompt.trim() ? '메시지 보내기' : '음성 대화 시작'}
           >
@@ -142,10 +144,10 @@ export default function NewChatView({ onSubmit }) {
                 key={suggestion.id}
                 type="button"
                 onClick={() => selectSuggestion(suggestion)}
-                className="group flex min-h-11 w-full items-center gap-4 rounded-xl px-4 py-2 text-left text-[14px] text-[#777] transition-colors hover:bg-white hover:text-[#303030] hover:shadow-sm sm:text-[15px]"
+                className="group flex min-h-11 w-full items-center gap-4 rounded-xl px-4 py-2 text-left text-body-sm text-palette-neutral-18 transition-colors hover:bg-white hover:text-palette-neutral-28 hover:shadow-sm sm:text-body"
               >
                 <Icon
-                  className="h-[18px] w-[18px] shrink-0 text-[#6f7784] group-hover:text-[#3c7cf6]"
+                  className="h-[18px] w-[18px] shrink-0 text-palette-neutral-17 group-hover:text-palette-blue-71"
                   strokeWidth={1.7}
                   aria-hidden="true"
                 />

@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react';
-import AppToggle from '../components/AppToggle.jsx';
-import FixedPaginationBar from '../components/FixedPaginationBar.jsx';
+import AppToggle from '../../../../../components/ui/Toggle.jsx';
+import FixedPaginationBar from '../../../../../components/pagination/FixedPaginationBar.jsx';
 import {
   APP_PAGE_HORIZONTAL_PADDING_CLASS,
   APP_PAGE_INNER_WIDTH_CLASS,
   APP_PAGE_OUTER_WIDTH_CLASS,
-} from '../constants/contentLayout.js';
+} from '../../../../../styles/layout.js';
 import { MonitoringDomainTable } from '../components/monitoring/MonitoringListComponents.jsx';
-import ServiceLogoBadge from '../components/ServiceLogoBadge.jsx';
+import ServiceLogoBadge from '../../../../../components/identity/ServiceLogoBadge.jsx';
 import useAdaptiveRowsPerPage from '../hooks/useAdaptiveRowsPerPage.js';
 import { useDomainsQuery, usePatchDomainEnabledMutation } from '../queries/domainQueries.js';
 
@@ -87,7 +87,7 @@ export default function DomainPage() {
       >
         <section
           ref={tableAreaRef}
-          className="rounded-[var(--app-radius-xl)] border border-[#E6EAF4] bg-[radial-gradient(circle_at_top,#FFFFFF_0%,#FBFCFF_72%,#F6F8FD_100%)] p-0 shadow-[0_1.5rem_3.75rem_rgba(15,23,42,0.08)]"
+          className="rounded-[var(--app-radius-xl)] border border-palette-blue-27 bg-[radial-gradient(circle_at_top,var(--color-white)_0%,var(--color-surface-radial-start)_72%,var(--color-surface-radial-end)_100%)] p-0 shadow-detail-11"
         >
           <MonitoringDomainTable
             rows={visibleDomains}
@@ -95,7 +95,7 @@ export default function DomainPage() {
               <ServiceLogoBadge
                 name={domain.name}
                 url={domain.url}
-                className="h-[var(--app-control-md)] w-[var(--app-control-md)] rounded-[var(--app-radius-sm)] !border-[#8BC6FF] bg-[#F7FBFF] shadow-[0_0.625rem_1.5rem_rgba(7, 93, 246,0.08)]"
+                className="h-[var(--app-control-md)] w-[var(--app-control-md)] rounded-[var(--app-radius-sm)] !border-focus-border bg-palette-blue-05 shadow-detail-05"
               />
             )}
             renderToggle={domain => (
@@ -108,7 +108,7 @@ export default function DomainPage() {
             )}
           />
           {statusMessage ? (
-            <div className="border-t border-[#EEF1F6] bg-white px-[var(--app-pad-lg)] py-[var(--app-pad-md)] text-center text-[clamp(0.82rem,0.95vw,0.9rem)] font-semibold text-[#667085]">
+            <div className="border-t border-palette-blue-22 bg-white px-[var(--app-pad-lg)] py-[var(--app-pad-md)] text-center text-control font-semibold text-text-muted">
               {statusMessage}
             </div>
           ) : null}
@@ -125,4 +125,3 @@ export default function DomainPage() {
     </div>
   );
 }
-

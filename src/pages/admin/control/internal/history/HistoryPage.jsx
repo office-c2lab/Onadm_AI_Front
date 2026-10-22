@@ -1,21 +1,20 @@
+import Badge from '../../../../../components/ui/Badge.jsx';
+import DataTable from '../../../../../components/ui/DataTable.jsx';
+import DialogLayer from '../../../../../components/ui/DialogLayer.jsx';
 import { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 
 import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
-import AppButton from '../../external/components/AppButton.jsx';
-import AppSearchField from '../../external/components/AppSearchField.jsx';
-import FixedPaginationBar from '../../external/components/FixedPaginationBar.jsx';
-import PageLayout from '../../components/PageLayout.jsx';
+import AppButton from '../../../../../components/ui/Button.jsx';
+import AppSearchField from '../../../../../components/ui/SearchField.jsx';
+import FixedPaginationBar from '../../../../../components/pagination/FixedPaginationBar.jsx';
+import PageLayout from '../../../../../components/layout/PageLayout.jsx';
 import {
-  monitoringTableCellClass,
-  monitoringTableClass,
-  monitoringTableHeadClass,
-  monitoringTableHeaderCellClass,
-  monitoringTableHeaderRowClass,
-  monitoringTableRowClass,
-  monitoringTableSurfaceClass,
-} from '../../external/components/monitoring/monitoringTableStyles.js';
-import '../../external/garim.css';
+  tableCellClass,
+  tableHeaderRowClass,
+  tableRowClass,
+  tableSurfaceClass,
+} from '../../../../../styles/table.js';
 
 import { agentRows, historyTabCounts, llmRows, toolRows } from '../data.js';
 const PAGE_SIZE = 9;
@@ -97,16 +96,11 @@ const filterConfig = {
 
 function StatusBadge({ value }) {
   const tone = ['성공', '승인'].includes(value)
-    ? 'bg-emerald-50 text-emerald-600'
+    ? 'green'
     : ['실패', '거절'].includes(value)
-      ? 'bg-rose-50 text-rose-500'
-      : 'bg-amber-50 text-amber-600';
-
-  return (
-    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${tone}`}>
-      {value}
-    </span>
-  );
+      ? 'failure'
+      : 'amber';
+  return <Badge tone={tone}>{value}</Badge>;
 }
 
 function StackedValue({ primary, secondary }) {
@@ -217,61 +211,39 @@ function LogTable({ tab, query, status, onDetail }) {
     });
   }, [config.rows, query, status]);
   return (
-    <section className={monitoringTableSurfaceClass}>
-      <div className="flex items-center gap-3 border-b border-[#E7EBF4] px-5 py-4">
+    <section className={tableSurfaceClass}>
+      <div className="flex items-center gap-3 border-b border-border-subtle px-5 py-4">
         <h2 className="text-sm font-bold text-slate-900">{config.title}</h2>
         <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
           {tabInfo.count.toLocaleString()}건
         </span>
       </div>
-      <div className="overflow-x-auto">
-        <table className={`${monitoringTableClass} min-w-[68rem]`}>
-          <colgroup>
-            {config.widths.map((width, index) => (
-              <col key={index} style={{ width }} />
-            ))}
-          </colgroup>
-          <thead className={monitoringTableHeadClass}>
-            <tr
-              className={`${monitoringTableHeaderRowClass} !text-[clamp(0.74rem,0.84vw,0.84rem)]`}
-            >
-              {config.columns.map(column => (
-                <th key={column} className={monitoringTableHeaderCellClass}>
-                  {column}
-                </th>
+      <DataTable
+        label={config.title}
+        columns={config.columns}
+        widths={config.widths}
+        headerRowClassName={`${tableHeaderRowClass} !text-table-compact`}
+        bodyClassName="text-table-compact leading-table-heading text-text-secondary"
+        className="min-w-[68rem]"
+      >
+        {filteredRows.length ? (
+          filteredRows.map((row, rowIndex) => (
+            <tr key={`${tab}-${row[0]}`} className={tableRowClass({ striped: rowIndex % 2 === 1 })}>
+              {renderCells(tab, row, onDetail).map((cell, cellIndex) => (
+                <td key={cellIndex} className={tableCellClass(rowIndex, 'align-middle')}>
+                  {cell}
+                </td>
               ))}
             </tr>
-          </thead>
-          <tbody className="text-[clamp(0.74rem,0.84vw,0.84rem)] leading-[1.4] text-[#344054]">
-            {filteredRows.length ? (
-              filteredRows.map((row, rowIndex) => (
-                <tr
-                  key={`${tab}-${row[0]}`}
-                  className={monitoringTableRowClass({ striped: rowIndex % 2 === 1 })}
-                >
-                  {renderCells(tab, row, onDetail).map((cell, cellIndex) => (
-                    <td
-                      key={cellIndex}
-                      className={monitoringTableCellClass(rowIndex, 'align-middle')}
-                    >
-                      {cell}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={config.columns.length}
-                  className="h-56 text-center text-sm text-slate-400"
-                >
-                  검색 결과가 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={config.columns.length} className="h-56 text-center text-sm text-slate-400">
+              검색 결과가 없습니다.
+            </td>
+          </tr>
+        )}
+      </DataTable>
     </section>
   );
 }
@@ -281,7 +253,7 @@ function DetailModal({ tab, row, onClose }) {
   const labels = tableConfig[tab].columns.filter(label => label !== '상세');
 
   return (
-    <div className="app-modal-stage z-[100]">
+    <DialogLayer onClose={onClose} className="app-modal-stage z-[100]">
       <button
         type="button"
         aria-label="상세 닫기"
@@ -315,7 +287,7 @@ function DetailModal({ tab, row, onClose }) {
           ))}
         </div>
       </div>
-    </div>
+    </DialogLayer>
   );
 }
 
@@ -345,10 +317,10 @@ export default function HistoryPage() {
       : 'xl:grid-cols-[9rem_repeat(4,minmax(0,1fr))_5.25rem]';
 
   return (
-    <div className="garim-external-root min-h-full bg-[#f9f9f9] text-[#111827]">
-      <div className="bg-[#f9f9f9]/95">
+    <div className="app-control-scope min-h-full bg-canvas text-text-primary">
+      <div className="bg-canvas/95">
         <nav
-          className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-4 overflow-x-auto border-b border-[#E2E8F0] px-[var(--app-page-x)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-4 overflow-x-auto border-b border-slate-200 px-[var(--app-page-x)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           aria-label="AI 요청 이력 유형"
         >
           {tabs.map(tab => (
@@ -358,8 +330,8 @@ export default function HistoryPage() {
               onClick={() => changeTab(tab.id)}
               className={`relative flex h-12 shrink-0 items-center justify-center border-b-2 px-3 text-sm font-black transition-colors ${
                 activeTab === tab.id
-                  ? 'border-[#075DF6] text-[#075DF6]'
-                  : 'border-transparent text-slate-600 hover:text-[#075DF6]'
+                  ? 'border-brand text-brand'
+                  : 'border-transparent text-slate-600 hover:text-brand'
               }`}
             >
               {tab.label}
@@ -385,7 +357,7 @@ export default function HistoryPage() {
                   : ['전체 상태', '성공', '실패']
               }
               ariaLabel="상태 선택"
-              className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)] [&>button]:font-semibold"
+              className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-control [&>button]:font-semibold"
             />
           </label>
           {filterConfig[activeTab].map(filter => (

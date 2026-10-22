@@ -17,7 +17,7 @@ export default function GamgikModalDemo() {
   return (
     <div
       className={`relative min-h-screen overflow-hidden px-4 py-6 transition-colors duration-500 sm:px-8 ${
-        isDark ? 'bg-[#03040a] text-white' : 'bg-white text-slate-900'
+        isDark ? 'bg-character-night text-white' : 'bg-white text-slate-900'
       }`}
     >
       <button

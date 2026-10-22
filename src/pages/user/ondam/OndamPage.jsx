@@ -1,3 +1,5 @@
+import usePersistentSidebar from '../../../hooks/usePersistentSidebar.js';
+import SidebarFrame from '../../../components/layout/SidebarFrame.jsx';
 import { useState } from 'react';
 import OndamSidebar, {
   OndamSidebarRail,
@@ -5,23 +7,12 @@ import OndamSidebar, {
 import NewChatView from './components/NewChatView.jsx';
 
 export default function OndamPage() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    return window.localStorage.getItem('ondam-sidebar-open') !== 'false';
-  });
+  const [isSidebarOpen, setSidebarOpen] = usePersistentSidebar('ondam-sidebar-open');
   const [activeChatId, setActiveChatId] = useState(null);
 
-  const setSidebarOpen = isOpen => {
-    setIsSidebarOpen(isOpen);
-    window.localStorage.setItem('ondam-sidebar-open', String(isOpen));
-  };
-
   return (
-    <div className="flex h-dvh overflow-hidden bg-[#f9f9f9] text-[#0d0d0d]">
-      <div
-        className={`h-dvh shrink-0 overflow-hidden transition-[width] duration-200 ease-out ${
-          isSidebarOpen ? 'w-[292px]' : 'w-12'
-        }`}
-      >
+    <div className="flex h-dvh overflow-hidden bg-canvas text-ink">
+      <SidebarFrame open={isSidebarOpen} variant="chat" className="">
         {isSidebarOpen ? (
           <OndamSidebar
             activeChatId={activeChatId}
@@ -35,9 +26,9 @@ export default function OndamPage() {
             onNewChat={() => setActiveChatId(null)}
           />
         )}
-      </div>
+      </SidebarFrame>
 
-      <main className="min-w-0 flex-1 overflow-y-auto bg-[#f9f9f9]" aria-label="AI 채팅 영역">
+      <main className="min-w-0 flex-1 overflow-y-auto bg-canvas" aria-label="AI 채팅 영역">
         {!activeChatId && <NewChatView />}
       </main>
     </div>

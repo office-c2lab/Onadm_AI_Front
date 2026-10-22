@@ -1,32 +1,33 @@
+import { inputClass } from '../../../../../styles/fields.js';
+import Badge from '../../../../../components/ui/Badge.jsx';
+import DataTable from '../../../../../components/ui/DataTable.jsx';
+import DialogLayer from '../../../../../components/ui/DialogLayer.jsx';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, Check, Plus, Save, X } from 'lucide-react';
 import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
-import AppButton from '../../external/components/AppButton.jsx';
-import AppSearchField from '../../external/components/AppSearchField.jsx';
-import FixedPaginationBar from '../../external/components/FixedPaginationBar.jsx';
-import PageLayout from '../../components/PageLayout.jsx';
+import AppButton from '../../../../../components/ui/Button.jsx';
+import AppSearchField from '../../../../../components/ui/SearchField.jsx';
+import FixedPaginationBar from '../../../../../components/pagination/FixedPaginationBar.jsx';
+import PageLayout from '../../../../../components/layout/PageLayout.jsx';
 import {
-  monitoringTableCellClass,
-  monitoringTableClass,
-  monitoringTableHeadClass,
-  monitoringTableHeaderCellClass,
-  monitoringTableHeaderRowClass,
-  monitoringTableRowClass,
-  monitoringTableSurfaceClass,
-} from '../../external/components/monitoring/monitoringTableStyles.js';
+  tableCellClass,
+  tableClass,
+  tableHeadClass,
+  tableHeaderCellClass,
+  tableHeaderRowClass,
+  tableRowClass,
+  tableSurfaceClass,
+} from '../../../../../styles/table.js';
 
 import { initialPolicies, initialTiers, initialTransactions, users } from '../data.js';
-const inputClass =
-  'h-[var(--app-control-lg)] w-full rounded-[var(--app-radius-lg)] border border-slate-200 bg-white px-[var(--app-pad-md)] text-[clamp(0.82rem,0.95vw,0.9rem)] text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8BC6FF] focus:ring-[clamp(0.2rem,0.32vw,0.25rem)] focus:ring-[#DEEEFF]';
-const fieldLabelClass = 'mb-1.5 block text-[0.8rem] font-semibold text-[#5C6784]';
-const panelClass =
-  'overflow-hidden rounded-[22px] border border-[#E2E8F4] bg-white shadow-[0_12px_34px_rgba(15,23,42,0.06)]';
+const fieldLabelClass = 'mb-1.5 block text-size-0-8rem font-semibold text-palette-blue-91';
+const panelClass = 'overflow-hidden rounded-card border border-border-card bg-white shadow-card';
 
 function PanelHeading({ title, action }) {
   return (
-    <header className="flex min-h-14 items-center justify-between gap-3 border-b border-[#E7EBF4] px-5 py-3">
-      <h2 className="text-[1.12rem] font-bold tracking-[-0.03em] text-[#11182E] xl:text-[1.18rem]">
+    <header className="flex min-h-14 items-center justify-between gap-3 border-b border-border-subtle px-5 py-3">
+      <h2 className="text-size-1-12rem font-bold tracking-heading text-heading xl:text-size-1-18rem">
         {title}
       </h2>
       {action}
@@ -54,17 +55,10 @@ function CurrencyInput({ label, value, suffix, onChange }) {
 }
 
 function StatusPill({ children, tone = 'green' }) {
-  const tones = {
-    green: 'bg-emerald-50 text-emerald-600',
-    red: 'bg-rose-50 text-rose-600',
-    gray: 'bg-slate-100 text-slate-500',
-  };
   return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-1 text-[0.78rem] font-bold ${tones[tone]}`}
-    >
+    <Badge tone={tone} size="compact">
       {children}
-    </span>
+    </Badge>
   );
 }
 
@@ -73,11 +67,11 @@ function TierModal({ tier, onClose, onSave }) {
   const [credits, setCredits] = useState(tier?.credits ?? '');
 
   return (
-    <div className="app-modal-stage z-[100]">
+    <DialogLayer onClose={onClose} className="app-modal-stage z-[100]">
       <button type="button" className="app-modal-backdrop" onClick={onClose} aria-label="닫기" />
       <section role="dialog" aria-modal="true" className="app-modal-panel app-modal-panel--sm">
         <header className="app-modal-header flex items-center justify-between border-b border-slate-200">
-          <h2 className="text-[1.12rem] font-bold tracking-[-0.02em] text-[#11182E]">
+          <h2 className="text-size-1-12rem font-bold tracking-title text-heading">
             {tier ? '지급 기준 관리' : '지급 기준 등록'}
           </h2>
           <button
@@ -128,7 +122,7 @@ function TierModal({ tier, onClose, onSave }) {
           </footer>
         </form>
       </section>
-    </div>
+    </DialogLayer>
   );
 }
 
@@ -145,68 +139,42 @@ function TransactionTable({ rows, typeFilter, userQuery, requestQuery }) {
   );
 
   return (
-    <section className={monitoringTableSurfaceClass}>
-      <div className="overflow-x-auto">
-        <table aria-label="크레딧 변동 내역" className={`${monitoringTableClass} min-w-[68rem]`}>
-          <colgroup>
-            {['8%', '18%', '8%', '10%', '10%', '17%', '11%', '18%'].map((width, index) => (
-              <col key={index} style={{ width }} />
-            ))}
-          </colgroup>
-          <thead className={monitoringTableHeadClass}>
-            <tr className={monitoringTableHeaderRowClass}>
-              {[
-                '로그 ID',
-                '사용자',
-                '직급',
-                '유형',
-                '변동',
-                '잔액 변화',
-                '요청 ID',
-                '처리 주체',
-              ].map(column => (
-                <th key={column} scope="col" className={monitoringTableHeaderCellClass}>
-                  {column}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="text-[clamp(0.82rem,0.95vw,0.94rem)] leading-[1.45] text-[#344054]">
-            {filteredRows.map((row, index) => (
-              <tr key={row.id} className={monitoringTableRowClass({ striped: index % 2 === 1 })}>
-                <td className={monitoringTableCellClass(index, 'text-slate-500')}>{row.id}</td>
-                <td className={monitoringTableCellClass(index, 'font-medium text-slate-700')}>
-                  {row.user}
-                </td>
-                <td className={monitoringTableCellClass(index, 'text-slate-500')}>{row.role}</td>
-                <td className={monitoringTableCellClass(index)}>
-                  <StatusPill tone={row.type === '지급' ? 'green' : 'red'}>{row.type}</StatusPill>
-                </td>
-                <td
-                  className={monitoringTableCellClass(
-                    index,
-                    `font-bold ${row.type === '지급' ? 'text-emerald-600' : 'text-rose-500'}`
-                  )}
-                >
-                  {row.delta}
-                </td>
-                <td className={monitoringTableCellClass(index, 'text-slate-500')}>{row.balance}</td>
-                <td className={monitoringTableCellClass(index, 'text-slate-500')}>
-                  {row.requestId}
-                </td>
-                <td className={monitoringTableCellClass(index, 'text-slate-400')}>{row.actor}</td>
-              </tr>
-            ))}
-            {filteredRows.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="h-56 text-center text-slate-400">
-                  조건에 맞는 변동 내역이 없습니다.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
-      </div>
+    <section className={tableSurfaceClass}>
+      <DataTable
+        label="크레딧 변동 내역"
+        columns={['로그 ID', '사용자', '직급', '유형', '변동', '잔액 변화', '요청 ID', '처리 주체']}
+        widths={['8%', '18%', '8%', '10%', '10%', '17%', '11%', '18%']}
+        className="min-w-[68rem]"
+      >
+        {filteredRows.map((row, index) => (
+          <tr key={row.id} className={tableRowClass({ striped: index % 2 === 1 })}>
+            <td className={tableCellClass(index, 'text-slate-500')}>{row.id}</td>
+            <td className={tableCellClass(index, 'font-medium text-slate-700')}>{row.user}</td>
+            <td className={tableCellClass(index, 'text-slate-500')}>{row.role}</td>
+            <td className={tableCellClass(index)}>
+              <StatusPill tone={row.type === '지급' ? 'green' : 'red'}>{row.type}</StatusPill>
+            </td>
+            <td
+              className={tableCellClass(
+                index,
+                `font-bold ${row.type === '지급' ? 'text-emerald-600' : 'text-rose-500'}`
+              )}
+            >
+              {row.delta}
+            </td>
+            <td className={tableCellClass(index, 'text-slate-500')}>{row.balance}</td>
+            <td className={tableCellClass(index, 'text-slate-500')}>{row.requestId}</td>
+            <td className={tableCellClass(index, 'text-slate-400')}>{row.actor}</td>
+          </tr>
+        ))}
+        {filteredRows.length === 0 ? (
+          <tr>
+            <td colSpan={8} className="h-56 text-center text-slate-400">
+              조건에 맞는 변동 내역이 없습니다.
+            </td>
+          </tr>
+        ) : null}
+      </DataTable>
     </section>
   );
 }
@@ -397,7 +365,7 @@ export default function LimitsPage() {
 
       <section className={panelClass}>
         <PanelHeading title="직급별 지급 기준" />
-        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#E7EBF4] px-4 py-3">
+        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border-subtle px-4 py-3">
           <label className="w-40">
             <span className={fieldLabelClass}>직급</span>
             <CustomDropdown
@@ -405,7 +373,7 @@ export default function LimitsPage() {
               onChange={setTierFilter}
               options={['전체 직급', ...tiers.map(tier => tier.name)]}
               ariaLabel="직급 필터"
-              className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)]"
+              className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-control"
             />
           </label>
           <AppButton
@@ -416,22 +384,22 @@ export default function LimitsPage() {
           </AppButton>
         </div>
         <div className="overflow-x-auto">
-          <table className={`${monitoringTableClass} min-w-[58rem]`}>
-            <thead className={monitoringTableHeadClass}>
-              <tr className={monitoringTableHeaderRowClass}>
+          <table className={`${tableClass} min-w-[58rem]`}>
+            <thead className={tableHeadClass}>
+              <tr className={tableHeaderRowClass}>
                 {[
                   ['직급', '38%'],
                   ['월 지급 크레딧', '27%'],
                   ['지급 상태', '16%'],
                   ['최근 변경', '19%'],
                 ].map(([title, width]) => (
-                  <th key={title} style={{ width }} className={monitoringTableHeaderCellClass}>
+                  <th key={title} style={{ width }} className={tableHeaderCellClass}>
                     {title}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="text-[clamp(0.82rem,0.95vw,0.94rem)] leading-[1.45] text-[#344054]">
+            <tbody className="text-table leading-table text-text-secondary">
               {visibleTiers.map((tier, index) => (
                 <tr
                   key={tier.id}
@@ -444,24 +412,24 @@ export default function LimitsPage() {
                       setTierModal({ tier });
                     }
                   }}
-                  className={monitoringTableRowClass({
+                  className={tableRowClass({
                     striped: index % 2 === 1,
                     interactive: true,
                   })}
                 >
-                  <td className={monitoringTableCellClass(index)}>
+                  <td className={tableCellClass(index)}>
                     <span className="block font-semibold text-slate-800">{tier.name}</span>
-                    <span className="mt-0.5 block text-[0.76rem] text-slate-400">#{tier.id}</span>
+                    <span className="mt-0.5 block text-size-0-76rem text-slate-400">
+                      #{tier.id}
+                    </span>
                   </td>
-                  <td className={monitoringTableCellClass(index, 'font-semibold text-slate-700')}>
+                  <td className={tableCellClass(index, 'font-semibold text-slate-700')}>
                     {tier.credits}
                   </td>
-                  <td className={monitoringTableCellClass(index)}>
+                  <td className={tableCellClass(index)}>
                     <StatusPill>활성</StatusPill>
                   </td>
-                  <td className={monitoringTableCellClass(index, 'text-slate-400')}>
-                    {tier.updatedAt}
-                  </td>
+                  <td className={tableCellClass(index, 'text-slate-400')}>{tier.updatedAt}</td>
                 </tr>
               ))}
             </tbody>
@@ -476,7 +444,7 @@ export default function LimitsPage() {
             <PanelHeading
               title="수동 지급·회수"
               action={
-                <span className="text-[11px] text-slate-500">
+                <span className="text-micro text-slate-500">
                   지급 가능 <strong className="ml-1 text-slate-700">52,788,890</strong>
                 </span>
               }
@@ -507,7 +475,7 @@ export default function LimitsPage() {
                     onChange={setSelectedUser}
                     options={users}
                     ariaLabel="대상 사용자"
-                    className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)]"
+                    className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-control"
                   />
                 </label>
                 <label>
@@ -520,7 +488,7 @@ export default function LimitsPage() {
                       placeholder="수량 입력"
                       className={`${inputClass} pr-14`}
                     />
-                    <span className="absolute inset-y-0 right-3 flex items-center text-[11px] text-slate-400">
+                    <span className="absolute inset-y-0 right-3 flex items-center text-micro text-slate-400">
                       크레딧
                     </span>
                   </div>
@@ -577,7 +545,7 @@ export function CreditHistoryPage() {
             onChange={setTypeFilter}
             options={['전체', '지급', '차감']}
             ariaLabel="변동 유형"
-            className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)] [&>button]:font-semibold"
+            className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-control [&>button]:font-semibold"
           />
         </label>
         <label className="min-w-0">

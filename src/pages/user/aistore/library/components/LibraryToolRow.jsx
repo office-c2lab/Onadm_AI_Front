@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Download, ExternalLink, MoreVertical, RefreshCw } from 'lucide-react';
-import StoreToolIcon from '../../components/StoreToolIcon.jsx';
+import StoreToolIcon from '../../../../../components/tools/StoreToolIcon.jsx';
 import ToolHoverPreview from '../../components/ToolHoverPreview.jsx';
 
 export default function LibraryToolRow({

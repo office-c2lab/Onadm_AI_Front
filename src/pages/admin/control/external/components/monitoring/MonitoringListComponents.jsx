@@ -3,33 +3,33 @@ import { createPortal } from 'react-dom';
 import { Download, RotateCcw } from 'lucide-react';
 import caretDownIcon from '../../../../../../assets/icons/caret_down.svg';
 import searchIcon from '../../../../../../assets/icons/search-data.svg';
-import ServiceLogoBadge from '../ServiceLogoBadge.jsx';
-import { primaryButtonClassName } from '../AppButton.jsx';
+import ServiceLogoBadge from '../../../../../../components/identity/ServiceLogoBadge.jsx';
+import { primaryButtonClassName } from '../../../../../../components/ui/Button.jsx';
 import {
-  monitoringTableCellClass,
-  monitoringTableClass,
-  monitoringTableBodyClass,
-  monitoringTableHeadClass,
-  monitoringTableHeaderCellClass,
-  monitoringTableHeaderRowClass,
-  monitoringTableRowClass,
-  monitoringTableScrollClass,
-  monitoringTableSurfaceClass,
-} from './monitoringTableStyles.js';
+  tableCellClass,
+  tableClass,
+  tableBodyClass,
+  tableHeadClass,
+  tableHeaderCellClass,
+  tableHeaderRowClass,
+  tableRowClass,
+  tableScrollClass,
+  tableSurfaceClass,
+} from '../../../../../../styles/table.js';
 import {
   APP_BODY_TEXT_CLASS,
   APP_BUTTON_TEXT_CLASS,
   APP_META_TEXT_CLASS,
   APP_PANEL_TITLE_CLASS,
   APP_SMALL_META_TEXT_CLASS,
-} from '../../constants/contentLayout.js';
+} from '../../../../../../styles/layout.js';
 import { getStatusTextClassName } from '../../constants/statusColors.js';
 
 const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
-const monitoringCompactHeaderCellClass = `${monitoringTableHeaderCellClass} !py-1`;
+const monitoringCompactHeaderCellClass = `${tableHeaderCellClass} !py-1`;
 
 function monitoringCompactTableCellClass(index, className = '') {
-  return monitoringTableCellClass(index, `!py-3 ${className}`);
+  return tableCellClass(index, `!py-3 ${className}`);
 }
 
 function parseDateString(value) {
@@ -122,19 +122,19 @@ export function MonitoringActionButton({
     variant === 'primary'
       ? primaryButtonClassName
       : variant === 'outline'
-        ? 'border border-slate-200 bg-white text-[#075DF6] hover:border-[#B6D9FF] hover:bg-[#F8FBFF]'
+        ? 'border border-slate-200 bg-white text-brand hover:border-toggle-off hover:bg-surface-hover'
         : variant === 'csvDownload'
-          ? 'border border-slate-200 bg-white font-bold tracking-[-0.02em] text-[#075DF6] shadow-[0_6px_14px_rgba(7, 93, 246,0.16)] hover:border-[#B6D9FF] hover:bg-[#F8FBFF] active:bg-[#EFF6FF]'
+          ? 'border border-slate-200 bg-white font-bold tracking-title text-brand shadow-detail-12 hover:border-toggle-off hover:bg-surface-hover active:bg-selection'
           : variant === 'soft'
-            ? 'border border-[#D5E5EE] bg-[#E6F0F5] text-[#2A6F8F]'
+            ? 'border border-palette-blue-41 bg-palette-blue-26 text-palette-blue-98'
             : variant === 'ghost'
-              ? 'border border-[#31A4BD]/25 bg-[#31A4BD]/10 text-[#8AD4E4]'
+              ? 'border border-palette-cyan-03/25 bg-palette-cyan-03/10 text-palette-cyan-01'
               : primaryButtonClassName;
   const disabledClassName =
     variant === 'csvDownload'
-      ? 'border border-slate-200 bg-white font-bold tracking-[-0.02em] text-[#9CA3AF] shadow-none'
+      ? 'border border-slate-200 bg-white font-bold tracking-title text-palette-neutral-13 shadow-none'
       : variant === 'outline'
-        ? 'border border-slate-200 bg-white text-[#9CA3AF]'
+        ? 'border border-slate-200 bg-white text-palette-neutral-13'
         : activeClassName;
   const className = disabled ? disabledClassName : activeClassName;
 
@@ -150,7 +150,7 @@ export function MonitoringActionButton({
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
       {...buttonProps}
-      className={`inline-flex ${heightClass} ${widthClass} items-center justify-center rounded-[var(--app-radius-lg)] px-[var(--app-pad-md)] whitespace-nowrap ${APP_BUTTON_TEXT_CLASS} font-semibold leading-[150%] transition ${
+      className={`inline-flex ${heightClass} ${widthClass} items-center justify-center rounded-[var(--app-radius-lg)] px-[var(--app-pad-md)] whitespace-nowrap ${APP_BUTTON_TEXT_CLASS} font-semibold leading-detail-01 transition ${
         disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
       } ${interactionClassName} ${className}`.trim()}
     >
@@ -164,7 +164,7 @@ export function MonitoringResetButton({
   onClick,
   heightClass = 'h-[var(--app-control-lg)]',
   widthClass = 'w-fit',
-  textClassName = 'shadow-[0_0.625rem_1.5rem_rgba(7, 93, 246,0.18)]',
+  textClassName = 'shadow-detail-07',
   ...buttonProps
 }) {
   const hasLabel = Boolean(children);
@@ -177,10 +177,10 @@ export function MonitoringResetButton({
       {...buttonProps}
       className={`inline-flex ${heightClass} ${widthClass} items-center justify-center gap-[var(--app-gap-xs)] rounded-[var(--app-radius-lg)] border border-slate-200 bg-white ${
         hasLabel ? 'px-[var(--app-pad-md)]' : 'px-0'
-      } ${textClassName} whitespace-nowrap text-[#075DF6] transition ${
+      } ${textClassName} whitespace-nowrap text-brand transition ${
         disabled
           ? 'cursor-not-allowed'
-          : 'cursor-pointer hover:border-[#B6D9FF] hover:bg-[#F8FBFF] active:bg-[#EFF6FF]'
+          : 'cursor-pointer hover:border-toggle-off hover:bg-surface-hover active:bg-selection'
       }`.trim()}
     >
       <RotateCcw
@@ -197,7 +197,7 @@ export function MonitoringIconButtonTooltip({ label, children }) {
   return (
     <div className="group relative inline-flex">
       {children}
-      <span className="pointer-events-none absolute top-[calc(100%+0.5rem)] left-1/2 z-50 -translate-x-1/2 rounded-lg border border-[#B6D9FF] bg-white px-2.5 py-1.5 text-[12px] font-bold whitespace-nowrap text-[#075DF6] opacity-0 shadow-[0_10px_24px_rgba(7, 93, 246,0.14)] transition group-hover:opacity-100 group-focus-within:opacity-100">
+      <span className="pointer-events-none absolute top-[calc(100%+0.5rem)] left-1/2 z-50 -translate-x-1/2 rounded-lg border border-toggle-off bg-white px-2.5 py-1.5 text-caption font-bold whitespace-nowrap text-brand opacity-0 shadow-detail-13 transition group-hover:opacity-100 group-focus-within:opacity-100">
         {label}
       </span>
     </div>
@@ -210,7 +210,7 @@ export function DateRangePicker({
   endDate,
   onChange,
   widthClass = 'min-w-[clamp(8rem,9vw,8.625rem)]',
-  labelClassName = 'text-[clamp(0.76rem,0.9vw,0.82rem)] font-semibold tracking-[-0.01em] text-[#5C6784]',
+  labelClassName = 'text-fluid-38 font-semibold tracking-label text-palette-blue-91',
   triggerHeightClass = 'h-[var(--app-control-lg)]',
 }) {
   const rootRef = useRef(null);
@@ -279,15 +279,15 @@ export function DateRangePicker({
             setSelectionStep('start');
             setIsOpen(open => !open);
           }}
-          className={`flex ${triggerHeightClass} w-full cursor-pointer items-center justify-center rounded-[var(--app-radius-lg)] border pr-[calc(var(--app-pad-md)*1.2)] pl-[calc(var(--app-pad-xs)*0.75)] text-[clamp(0.7rem,0.78vw,0.76rem)] font-medium whitespace-nowrap text-[#344054] outline-none transition ${
+          className={`flex ${triggerHeightClass} w-full cursor-pointer items-center justify-center rounded-[var(--app-radius-lg)] border pr-[calc(var(--app-pad-md)*1.2)] pl-[calc(var(--app-pad-xs)*0.75)] text-fluid-41 font-medium whitespace-nowrap text-text-secondary outline-none transition ${
             isOpen
-              ? 'border-[#8BC6FF] bg-[#EFF6FF] ring-[clamp(0.2rem,0.32vw,0.25rem)] ring-[#DEEEFF]'
-              : 'border-slate-200 bg-white hover:border-[#B6D9FF] hover:bg-[#F8FBFF] active:border-[#8BC6FF] active:bg-[#EFF6FF] focus:border-[#8BC6FF] focus:ring-[clamp(0.2rem,0.32vw,0.25rem)] focus:ring-[#DEEEFF]'
+              ? 'border-focus-border bg-selection ring-[clamp(0.2rem,0.32vw,0.25rem)] ring-focus-ring'
+              : 'border-slate-200 bg-white hover:border-toggle-off hover:bg-surface-hover active:border-focus-border active:bg-selection focus:border-focus-border focus:ring-[clamp(0.2rem,0.32vw,0.25rem)] focus:ring-focus-ring'
           }`.trim()}
         >
           {dateLabel}
         </button>
-        <span className="pointer-events-none absolute top-1/2 right-[calc(var(--app-pad-xs)*0.8)] -translate-y-1/2 text-[#667085]">
+        <span className="pointer-events-none absolute top-1/2 right-[calc(var(--app-pad-xs)*0.8)] -translate-y-1/2 text-text-muted">
           <svg
             className="h-[var(--app-icon-xs)] w-[var(--app-icon-xs)]"
             viewBox="0 0 16 16"
@@ -312,8 +312,8 @@ export function DateRangePicker({
       </div>
 
       {isOpen ? (
-        <div className="absolute top-[calc(100%+var(--app-gap-xs))] left-0 z-40 w-[min(20rem,calc(100vw-(var(--app-page-x)*2)))] rounded-[var(--app-radius-lg)] border border-[#E3E7F0] bg-white p-[var(--app-pad-sm)] shadow-[0_1rem_2.25rem_rgba(15,23,42,0.12)]">
-          <div className="mb-[var(--app-gap-sm)] rounded-[var(--app-radius-md)] bg-[#F7F8FC] px-[var(--app-pad-sm)] py-[var(--app-pad-xs)] text-[clamp(0.7rem,0.85vw,0.75rem)] font-semibold text-[#657086]">
+        <div className="absolute top-[calc(100%+var(--app-gap-xs))] left-0 z-40 w-[min(20rem,calc(100vw-(var(--app-page-x)*2)))] rounded-[var(--app-radius-lg)] border border-palette-blue-31 bg-white p-[var(--app-pad-sm)] shadow-detail-14">
+          <div className="mb-[var(--app-gap-sm)] rounded-[var(--app-radius-md)] bg-palette-blue-08 px-[var(--app-pad-sm)] py-[var(--app-pad-xs)] text-fluid-42 font-semibold text-palette-blue-88">
             {selectionStep === 'start' ? '시작일을 선택하세요' : '종료일을 선택하세요'}
           </div>
           <div className="mb-[var(--app-gap-sm)] flex items-center justify-between">
@@ -322,12 +322,12 @@ export function DateRangePicker({
               onClick={() =>
                 setViewDate(current => new Date(current.getFullYear(), current.getMonth() - 1, 1))
               }
-              className="flex h-[var(--app-control-xs)] w-[var(--app-control-xs)] cursor-pointer items-center justify-center rounded-full text-[#5C6B7A] transition hover:bg-[#F8FBFF]"
+              className="flex h-[var(--app-control-xs)] w-[var(--app-control-xs)] cursor-pointer items-center justify-center rounded-full text-palette-blue-92 transition hover:bg-surface-hover"
               aria-label="이전 달"
             >
               ‹
             </button>
-            <div className="text-[clamp(0.82rem,0.95vw,0.9rem)] font-bold text-[#2D3C4B]">
+            <div className="text-control font-bold text-palette-blue-106">
               {viewDate.getFullYear()}.{String(viewDate.getMonth() + 1).padStart(2, '0')}
             </div>
             <button
@@ -335,14 +335,14 @@ export function DateRangePicker({
               onClick={() =>
                 setViewDate(current => new Date(current.getFullYear(), current.getMonth() + 1, 1))
               }
-              className="flex h-[var(--app-control-xs)] w-[var(--app-control-xs)] cursor-pointer items-center justify-center rounded-full text-[#5C6B7A] transition hover:bg-[#F8FBFF]"
+              className="flex h-[var(--app-control-xs)] w-[var(--app-control-xs)] cursor-pointer items-center justify-center rounded-full text-palette-blue-92 transition hover:bg-surface-hover"
               aria-label="다음 달"
             >
               ›
             </button>
           </div>
 
-          <div className="grid grid-cols-7 gap-[calc(var(--app-gap-xs)/2)] text-center text-[clamp(0.64rem,0.76vw,0.7rem)] font-semibold text-[#8D99AE]">
+          <div className="grid grid-cols-7 gap-[calc(var(--app-gap-xs)/2)] text-center text-fluid-32 font-semibold text-palette-blue-67">
             {WEEKDAY_LABELS.map(day => (
               <span key={day} className="py-[calc(var(--app-pad-xs)/2)]">
                 {day}
@@ -362,14 +362,14 @@ export function DateRangePicker({
                   key={date.toISOString()}
                   type="button"
                   onClick={() => handleSelectDate(date)}
-                  className={`flex h-[var(--app-control-xs)] cursor-pointer items-center justify-center rounded-[var(--app-radius-md)] text-[clamp(0.7rem,0.85vw,0.75rem)] font-medium transition ${
+                  className={`flex h-[var(--app-control-xs)] cursor-pointer items-center justify-center rounded-[var(--app-radius-md)] text-fluid-42 font-medium transition ${
                     isSelected
-                      ? 'bg-[#075DF6] text-white shadow-[0_8px_18px_rgba(7, 93, 246,0.18)]'
+                      ? 'bg-brand text-white shadow-detail-15'
                       : isInRange
-                        ? 'bg-[#EFF6FF] text-[#075DF6]'
+                        ? 'bg-selection text-brand'
                         : isCurrentMonth
-                          ? 'text-[#314153] hover:bg-[#F8FBFF]'
-                          : 'text-[#BCC6D1] hover:bg-[#F6F8FC]'
+                          ? 'text-palette-blue-104 hover:bg-surface-hover'
+                          : 'text-palette-blue-50 hover:bg-palette-blue-10'
                   }`.trim()}
                 >
                   {date.getDate()}
@@ -401,14 +401,14 @@ export function MonitoringCsvActionMenu({
       </MonitoringActionButton>
 
       {isOpen ? (
-        <div className="absolute top-[calc(100%+var(--app-gap-xs))] right-0 z-20 flex min-w-[clamp(11.5rem,14.6vw,13.125rem)] flex-col gap-[var(--app-gap-xs)] rounded-[var(--app-radius-lg)] border border-[#D8E4EC] bg-white p-[var(--app-pad-sm)] shadow-[0_1rem_2.5rem_rgba(0,0,0,0.18)]">
+        <div className="absolute top-[calc(100%+var(--app-gap-xs))] right-0 z-20 flex min-w-[clamp(11.5rem,14.6vw,13.125rem)] flex-col gap-[var(--app-gap-xs)] rounded-[var(--app-radius-lg)] border border-palette-blue-40 bg-white p-[var(--app-pad-sm)] shadow-detail-16">
           <MonitoringActionButton
             variant="csvDownload"
             onClick={onDownloadClick}
             widthClass="w-full min-w-0"
             heightClass="h-[var(--app-control-lg)]"
           >
-            <span className="inline-flex items-center gap-[var(--app-gap-xs)] text-[clamp(0.9rem,1vw,0.98rem)] font-bold tracking-[-0.02em]">
+            <span className="inline-flex items-center gap-[var(--app-gap-xs)] text-button font-bold tracking-title">
               <Download
                 className="h-[var(--app-icon-xs)] w-[var(--app-icon-xs)]"
                 strokeWidth={2.8}
@@ -427,10 +427,10 @@ export function MonitoringTagChip({ children, active = false, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[var(--app-control-xs)] w-full cursor-pointer items-center justify-center rounded-[var(--app-radius-md)] px-[var(--app-pad-md)] sm:w-[clamp(6.25rem,7.5vw,6.75rem)] sm:min-w-[clamp(6.25rem,7.5vw,6.75rem)] ${APP_BUTTON_TEXT_CLASS} font-bold leading-[150%] transition ${
+      className={`flex h-[var(--app-control-xs)] w-full cursor-pointer items-center justify-center rounded-[var(--app-radius-md)] px-[var(--app-pad-md)] sm:w-[clamp(6.25rem,7.5vw,6.75rem)] sm:min-w-[clamp(6.25rem,7.5vw,6.75rem)] ${APP_BUTTON_TEXT_CLASS} font-bold leading-detail-01 transition ${
         active
-          ? 'bg-[#31A4BD] text-white shadow-[0_0_4px_rgba(90,208,222,0.8)]'
-          : 'border border-[#01557D] bg-transparent text-[#014069] hover:bg-[#01557D]/10'
+          ? 'bg-palette-cyan-03 text-white shadow-detail-17'
+          : 'border border-palette-blue-105 bg-transparent text-palette-blue-110 hover:bg-palette-blue-105/10'
       }`.trim()}
     >
       {children}
@@ -445,7 +445,7 @@ export function MonitoringDropdown({
   options,
   ariaLabel,
   widthClass = 'w-full sm:w-[clamp(12rem,15.3vw,13.75rem)]',
-  triggerClassName = 'h-[var(--app-control-lg)] rounded-[var(--app-radius-lg)] border-slate-200 bg-white shadow-none hover:border-[#B6D9FF] hover:bg-[#F8FBFF] active:border-[#8BC6FF] active:bg-[#EFF6FF] focus:border-[#8BC6FF] focus:ring-[clamp(0.2rem,0.32vw,0.25rem)] focus:ring-[#DEEEFF]',
+  triggerClassName = 'h-[var(--app-control-lg)] rounded-[var(--app-radius-lg)] border-slate-200 bg-white shadow-none hover:border-toggle-off hover:bg-surface-hover active:border-focus-border active:bg-selection focus:border-focus-border focus:ring-[clamp(0.2rem,0.32vw,0.25rem)] focus:ring-focus-ring',
   placement = 'bottom',
   verticalPlacement = 'auto',
   triggerTextClassName = APP_BODY_TEXT_CLASS,
@@ -558,7 +558,7 @@ export function MonitoringDropdown({
           <div
             ref={menuRef}
             style={overlayStyle}
-            className="z-[100] rounded-[var(--app-radius-lg)] drop-shadow-[0_1rem_2rem_rgba(15,23,42,0.12)]"
+            className="z-[100] rounded-[var(--app-radius-lg)] drop-shadow-detail-18"
           >
             <div className="rounded-[var(--app-radius-lg)] border border-slate-200 bg-white px-[calc(var(--app-pad-xs)*0.55)] py-[calc(var(--app-pad-xs)*0.65)]">
               <div
@@ -575,8 +575,8 @@ export function MonitoringDropdown({
                       type="button"
                       className={`flex h-[var(--app-control-sm)] w-full shrink-0 cursor-pointer items-center gap-[var(--app-gap-xs)] px-[calc(var(--app-pad-md)*0.9)] text-left whitespace-nowrap transition ${
                         isSelected
-                          ? `app-solid-button rounded-[var(--app-radius-md)] bg-[#075DF6] ${selectedOptionTextClassName} font-bold leading-[150%] text-white`
-                          : `rounded-[var(--app-radius-sm)] bg-white ${optionTextClassName} font-normal leading-5 tracking-[0.01em] text-[#484848] hover:bg-[#F7F8FC]`
+                          ? `app-solid-button rounded-[var(--app-radius-md)] bg-brand ${selectedOptionTextClassName} font-bold leading-detail-01 text-white`
+                          : `rounded-[var(--app-radius-sm)] bg-white ${optionTextClassName} font-normal leading-5 tracking-detail-05 text-palette-neutral-23 hover:bg-palette-blue-08`
                       }`.trim()}
                       onClick={() => {
                         onChange(option);
@@ -602,13 +602,13 @@ export function MonitoringDropdown({
         aria-expanded={isOpen}
         className={`flex w-full cursor-pointer items-center gap-[var(--app-gap-xs)] border pr-[var(--app-pad-xs)] pl-0 text-left transition ${triggerClassName} ${
           isOpen
-            ? 'border-[#8BC6FF] bg-[#EFF6FF] ring-[clamp(0.2rem,0.32vw,0.25rem)] ring-[#DEEEFF]'
+            ? 'border-focus-border bg-selection ring-[clamp(0.2rem,0.32vw,0.25rem)] ring-focus-ring'
             : ''
         }`.trim()}
         onClick={() => setIsOpen(open => !open)}
       >
         <span
-          className={`flex flex-1 items-center px-[var(--app-pad-md)] ${triggerTextClassName} font-medium leading-5 tracking-[0.01em] text-[#344054]`}
+          className={`flex flex-1 items-center px-[var(--app-pad-md)] ${triggerTextClassName} font-medium leading-5 tracking-detail-05 text-text-secondary`}
         >
           {displayValue}
         </span>
@@ -632,7 +632,7 @@ export function MonitoringSearchField({
 }) {
   return (
     <label
-      className={`flex h-[var(--app-control-xs)] items-center gap-[var(--app-gap-xs)] rounded-[var(--app-radius-sm)] bg-[#F9FBFF] px-[var(--app-pad-sm)] ${APP_SMALL_META_TEXT_CLASS} text-[#B5B7C0] ${widthClass}`.trim()}
+      className={`flex h-[var(--app-control-xs)] items-center gap-[var(--app-gap-xs)] rounded-[var(--app-radius-sm)] bg-palette-blue-04 px-[var(--app-pad-sm)] ${APP_SMALL_META_TEXT_CLASS} text-palette-neutral-11 ${widthClass}`.trim()}
     >
       <img
         src={searchIcon}
@@ -645,7 +645,7 @@ export function MonitoringSearchField({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className={`w-full min-w-0 bg-transparent ${APP_BODY_TEXT_CLASS} text-[#3D3C42] outline-none placeholder:text-[#B5B7C0]`}
+        className={`w-full min-w-0 bg-transparent ${APP_BODY_TEXT_CLASS} text-palette-neutral-25 outline-none placeholder:text-palette-neutral-11`}
       />
     </label>
   );
@@ -656,7 +656,7 @@ function MonitoringResultChip({ result }) {
 
   return (
     <span
-      className={`inline-flex items-center text-[clamp(0.86rem,1vw,0.94rem)] font-semibold whitespace-nowrap ${resultTextClassName}`}
+      className={`inline-flex items-center text-fluid-47 font-semibold whitespace-nowrap ${resultTextClassName}`}
     >
       {result}
     </span>
@@ -678,9 +678,9 @@ export function MonitoringDataTable({
   const allRowsSelected = rows.length > 0 && rows.every(row => selectedRowIds.includes(row.id));
 
   return (
-    <div className={`${monitoringTableSurfaceClass} ${className}`.trim()}>
-      <div className={monitoringTableScrollClass}>
-        <table className={`min-w-[min(100%,61.25rem)] ${monitoringTableClass} xl:min-w-0`}>
+    <div className={`${tableSurfaceClass} ${className}`.trim()}>
+      <div className={tableScrollClass}>
+        <table className={`min-w-[min(100%,61.25rem)] ${tableClass} xl:min-w-0`}>
           <colgroup>
             <col className="w-[4%]" />
             <col className="w-[4%]" />
@@ -692,15 +692,15 @@ export function MonitoringDataTable({
             <col className="w-[12%]" />
             <col className="w-[10%]" />
           </colgroup>
-          <thead className={monitoringTableHeadClass}>
-            <tr className={monitoringTableHeaderRowClass}>
+          <thead className={tableHeadClass}>
+            <tr className={tableHeaderRowClass}>
               <th className={`${monitoringCompactHeaderCellClass} px-0 text-center align-middle`}>
                 <input
                   type="checkbox"
                   checked={allRowsSelected}
                   onChange={() => onToggleAllRowsSelection?.(rows.map(row => row.id))}
                   aria-label="현재 페이지 전체 선택"
-                  className="mx-auto block h-[var(--app-icon-xs)] w-[var(--app-icon-xs)] cursor-pointer rounded border-slate-300 accent-[#075DF6]"
+                  className="mx-auto block h-[var(--app-icon-xs)] w-[var(--app-icon-xs)] cursor-pointer rounded border-slate-300 accent-brand"
                 />
               </th>
               <th className={`${monitoringCompactHeaderCellClass} px-0 text-center`}>No.</th>
@@ -729,7 +729,7 @@ export function MonitoringDataTable({
               </th>
             </tr>
           </thead>
-          <tbody className={`${monitoringTableBodyClass} ${bodyClassName}`.trim()}>
+          <tbody className={`${tableBodyClass} ${bodyClassName}`.trim()}>
             {rows.map((row, index) => {
               const isSelected = activeRowId === row.id;
               const isChecked = selectedRowIds.includes(row.id);
@@ -737,7 +737,7 @@ export function MonitoringDataTable({
               return (
                 <Fragment key={row.id}>
                   <tr
-                    className={monitoringTableRowClass({
+                    className={tableRowClass({
                       selected: isSelected,
                       striped: isStriped,
                       interactive: true,
@@ -756,13 +756,13 @@ export function MonitoringDataTable({
                         checked={isChecked}
                         onChange={() => onToggleRowSelection?.(row.id)}
                         aria-label={`${row.aiType} 행 선택`}
-                        className="mx-auto block h-[var(--app-icon-xs)] w-[var(--app-icon-xs)] cursor-pointer rounded border-slate-300 accent-[#075DF6]"
+                        className="mx-auto block h-[var(--app-icon-xs)] w-[var(--app-icon-xs)] cursor-pointer rounded border-slate-300 accent-brand"
                       />
                     </td>
                     <td
                       className={monitoringCompactTableCellClass(
                         index,
-                        'px-0 text-center text-[#667085]'
+                        'px-0 text-center text-text-muted'
                       )}
                     >
                       {row.no ?? rowNumberStart + index}
@@ -770,7 +770,7 @@ export function MonitoringDataTable({
                     <td
                       className={monitoringCompactTableCellClass(
                         index,
-                        'px-[var(--app-pad-sm)] text-[#475467]'
+                        'px-[var(--app-pad-sm)] text-text-label'
                       )}
                     >
                       <div className="whitespace-nowrap">{row.detectedAt}</div>
@@ -778,14 +778,14 @@ export function MonitoringDataTable({
                     <td
                       className={monitoringCompactTableCellClass(
                         index,
-                        'px-[var(--app-pad-sm)] text-[#475467]'
+                        'px-[var(--app-pad-sm)] text-text-label'
                       )}
                     >
                       <div className="flex items-center justify-center">
                         <ServiceLogoBadge
                           name={row.aiType}
                           variant="compact"
-                          className="h-7 w-7 !border-[#8BC6FF] bg-[#F7FBFF] shadow-[0_0.625rem_1.5rem_rgba(7, 93, 246,0.08)]"
+                          className="h-7 w-7 !border-focus-border bg-palette-blue-05 shadow-detail-05"
                           iconClassName="h-[var(--app-icon-sm)] w-[var(--app-icon-sm)]"
                         />
                       </div>
@@ -806,7 +806,7 @@ export function MonitoringDataTable({
                     <td
                       className={monitoringCompactTableCellClass(
                         index,
-                        'px-[var(--app-pad-sm)] text-[#23304A]'
+                        'px-[var(--app-pad-sm)] text-palette-blue-109'
                       )}
                     >
                       <div className="overflow-hidden text-ellipsis whitespace-nowrap">
@@ -816,7 +816,7 @@ export function MonitoringDataTable({
                     <td
                       className={monitoringCompactTableCellClass(
                         index,
-                        'px-[var(--app-pad-sm)] text-[#23304A]'
+                        'px-[var(--app-pad-sm)] text-palette-blue-109'
                       )}
                     >
                       <div className="overflow-hidden text-ellipsis whitespace-nowrap">
@@ -826,7 +826,7 @@ export function MonitoringDataTable({
                     <td
                       className={monitoringCompactTableCellClass(
                         index,
-                        'px-[var(--app-pad-sm)] text-[#23304A]'
+                        'px-[var(--app-pad-sm)] text-palette-blue-109'
                       )}
                     >
                       <div className="overflow-hidden text-ellipsis whitespace-nowrap">
@@ -836,7 +836,7 @@ export function MonitoringDataTable({
                     <td
                       className={monitoringCompactTableCellClass(
                         index,
-                        'px-[var(--app-pad-sm)] text-[#23304A]'
+                        'px-[var(--app-pad-sm)] text-palette-blue-109'
                       )}
                     >
                       <div className="overflow-hidden text-ellipsis whitespace-nowrap">
@@ -846,7 +846,10 @@ export function MonitoringDataTable({
                   </tr>
                   {isSelected && renderExpandedRow ? (
                     <tr>
-                      <td colSpan={9} className="border-t border-[#E5EBF5] bg-white px-0 py-0">
+                      <td
+                        colSpan={9}
+                        className="border-t border-palette-blue-28 bg-white px-0 py-0"
+                      >
                         {renderExpandedRow(row)}
                       </td>
                     </tr>
@@ -866,7 +869,7 @@ export function MonitoringDomainTable({ rows, renderLogo, renderToggle, classNam
     <div className={`flex min-h-0 w-full flex-col pb-0 ${className}`.trim()}>
       <div className="min-h-0 w-full overflow-x-auto">
         <div className="min-w-[min(100%,47.5rem)] rounded-[var(--app-radius-xl)]">
-          <div className="grid h-[var(--app-control-lg)] w-full grid-cols-[minmax(15rem,1.45fr)_minmax(16rem,2fr)_minmax(7rem,0.5fr)] items-center rounded-t-[var(--app-radius-xl)] border-b border-[#E7EBF4] bg-[linear-gradient(180deg,#F8FAFF_0%,#F2F5FC_100%)] px-[var(--app-pad-lg)] text-[clamp(0.82rem,0.95vw,0.9rem)] font-semibold tracking-[-0.01em] text-[#59627A]">
+          <div className="grid h-[var(--app-control-lg)] w-full grid-cols-[minmax(15rem,1.45fr)_minmax(16rem,2fr)_minmax(7rem,0.5fr)] items-center rounded-t-[var(--app-radius-xl)] border-b border-border-subtle bg-[linear-gradient(180deg,var(--color-table-header-start)_0%,var(--color-table-header-end)_100%)] px-[var(--app-pad-lg)] text-control font-semibold tracking-label text-palette-blue-93">
             <span>서비스</span>
             <span>URL</span>
             <span className="text-center">사용/비사용</span>
@@ -877,19 +880,19 @@ export function MonitoringDomainTable({ rows, renderLogo, renderToggle, classNam
               return (
                 <div
                   key={row.id}
-                  className={`grid min-h-[clamp(3.75rem,4.6vw,4.125rem)] w-full grid-cols-[minmax(15rem,1.45fr)_minmax(16rem,2fr)_minmax(7rem,0.5fr)] items-center bg-white px-[var(--app-pad-lg)] text-[clamp(0.82rem,0.95vw,0.9rem)] leading-[150%] text-[#334155] ${
-                    index === 0 ? '' : 'border-t border-[#EEF1F6]'
+                  className={`grid min-h-[clamp(3.75rem,4.6vw,4.125rem)] w-full grid-cols-[minmax(15rem,1.45fr)_minmax(16rem,2fr)_minmax(7rem,0.5fr)] items-center bg-white px-[var(--app-pad-lg)] text-control leading-detail-01 text-slate-700 ${
+                    index === 0 ? '' : 'border-t border-palette-blue-22'
                   }`.trim()}
                 >
                   <div className="flex items-center gap-[var(--app-gap-sm)] py-[var(--app-pad-sm)] pr-[var(--app-pad-md)]">
                     {renderLogo(row)}
-                    <div className="truncate font-semibold text-[#1F2A44]">{row.name}</div>
+                    <div className="truncate font-semibold text-palette-blue-111">{row.name}</div>
                   </div>
                   <a
                     href={row.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="truncate pr-[var(--app-pad-md)] text-[#667085] underline decoration-transparent transition hover:text-[#075DF6] hover:decoration-[#075DF6]"
+                    className="truncate pr-[var(--app-pad-md)] text-text-muted underline decoration-transparent transition hover:text-brand hover:decoration-[var(--color-brand)]"
                     title={row.url}
                   >
                     {row.url}

@@ -1,23 +1,17 @@
+import { inputClass } from '../../../../../styles/fields.js';
+import Badge from '../../../../../components/ui/Badge.jsx';
+import DataTable from '../../../../../components/ui/DataTable.jsx';
+import DialogLayer from '../../../../../components/ui/DialogLayer.jsx';
 import { useMemo, useState } from 'react';
 import { Eye, EyeOff, Plus, X } from 'lucide-react';
 
 import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
 import geminiIcon from '../../../../../assets/icons/gemini-color.svg';
 import openaiIcon from '../../../../../assets/icons/openai.svg';
-import AppButton from '../../external/components/AppButton.jsx';
-import AppSearchField from '../../external/components/AppSearchField.jsx';
-import PageLayout from '../../components/PageLayout.jsx';
-import {
-  monitoringTableCellClass,
-  monitoringTableClass,
-  monitoringTableBodyClass,
-  monitoringTableHeadClass,
-  monitoringTableHeaderCellClass,
-  monitoringTableHeaderRowClass,
-  monitoringTableRowClass,
-  monitoringTableSurfaceClass,
-} from '../../external/components/monitoring/monitoringTableStyles.js';
-import '../../external/garim.css';
+import AppButton from '../../../../../components/ui/Button.jsx';
+import AppSearchField from '../../../../../components/ui/SearchField.jsx';
+import PageLayout from '../../../../../components/layout/PageLayout.jsx';
+import { tableCellClass, tableRowClass, tableSurfaceClass } from '../../../../../styles/table.js';
 
 import { providers, models, prompts } from '../data.js';
 const tabs = [
@@ -27,19 +21,6 @@ const tabs = [
 
 const providerIcons = { openai: openaiIcon, google: geminiIcon, deepseek: null };
 
-function Badge({ children, tone = 'green' }) {
-  const tones = {
-    green: 'bg-emerald-50 text-emerald-600',
-    gray: 'bg-slate-100 text-slate-500',
-    blue: 'bg-blue-50 text-blue-600',
-  };
-  return (
-    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${tones[tone]}`}>
-      {children}
-    </span>
-  );
-}
-
 function ProviderIdentity({ icon, name, code }) {
   return (
     <div className="flex items-center gap-3">
@@ -48,7 +29,7 @@ function ProviderIdentity({ icon, name, code }) {
       </span>
       <div className="min-w-0">
         <p className="truncate font-bold text-slate-900">{name}</p>
-        <span className="mt-1 inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[0.72rem] font-bold text-slate-600">
+        <span className="mt-1 inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-size-0-72rem font-bold text-slate-600">
           {code}
         </span>
       </div>
@@ -60,7 +41,7 @@ function ProviderIcon({ icon }) {
   return icon ? (
     <img src={icon} alt="" className="h-5 w-5" />
   ) : (
-    <span className="grid h-5 w-5 place-items-center rounded-md bg-[#596CFF] text-[0.72rem] font-black text-white">
+    <span className="grid h-5 w-5 place-items-center rounded-md bg-palette-blue-61 text-size-0-72rem font-black text-white">
       D
     </span>
   );
@@ -75,26 +56,10 @@ function activateOnRowKeyDown(event, onActivate) {
 
 function TableShell({ title, columns, widths, children }) {
   return (
-    <section className={monitoringTableSurfaceClass}>
-      <div className="overflow-x-auto">
-        <table aria-label={title} className={`${monitoringTableClass} min-w-[62rem]`}>
-          <colgroup>
-            {widths.map((width, index) => (
-              <col key={index} style={{ width }} />
-            ))}
-          </colgroup>
-          <thead className={monitoringTableHeadClass}>
-            <tr className={monitoringTableHeaderRowClass}>
-              {columns.map(column => (
-                <th key={column} scope="col" className={monitoringTableHeaderCellClass}>
-                  {column}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className={monitoringTableBodyClass}>{children}</tbody>
-        </table>
-      </div>
+    <section className={tableSurfaceClass}>
+      <DataTable label={title} columns={columns} widths={widths} className="min-w-[62rem]">
+        {children}
+      </DataTable>
     </section>
   );
 }
@@ -113,19 +78,19 @@ function ProviderTable({ rows, onManage }) {
           aria-label={`${provider.name} 제공자 관리 열기`}
           onClick={() => onManage(provider)}
           onKeyDown={event => activateOnRowKeyDown(event, () => onManage(provider))}
-          className={monitoringTableRowClass({ striped: rowIndex % 2 === 1, interactive: true })}
+          className={tableRowClass({ striped: rowIndex % 2 === 1, interactive: true })}
         >
-          <td className={monitoringTableCellClass(rowIndex)}>
+          <td className={tableCellClass(rowIndex)}>
             <ProviderIdentity icon={provider.icon} name={provider.name} code={provider.code} />
           </td>
-          <td className={monitoringTableCellClass(rowIndex)}>{provider.endpoint}</td>
-          <td className={monitoringTableCellClass(rowIndex)}>
+          <td className={tableCellClass(rowIndex)}>{provider.endpoint}</td>
+          <td className={tableCellClass(rowIndex)}>
             <Badge>{provider.key}</Badge>
           </td>
-          <td className={monitoringTableCellClass(rowIndex)}>
+          <td className={tableCellClass(rowIndex)}>
             <Badge>{provider.status}</Badge>
           </td>
-          <td className={monitoringTableCellClass(rowIndex)}>{provider.modifiedAt}</td>
+          <td className={tableCellClass(rowIndex)}>{provider.modifiedAt}</td>
         </tr>
       ))}
     </TableShell>
@@ -146,9 +111,9 @@ function ModelTable({ rows, onManage }) {
           aria-label={`${model[0]} 모델 관리 열기`}
           onClick={() => onManage(model)}
           onKeyDown={event => activateOnRowKeyDown(event, () => onManage(model))}
-          className={monitoringTableRowClass({ striped: rowIndex % 2 === 1, interactive: true })}
+          className={tableRowClass({ striped: rowIndex % 2 === 1, interactive: true })}
         >
-          <td className={monitoringTableCellClass(rowIndex)}>
+          <td className={tableCellClass(rowIndex)}>
             <div className="flex items-center gap-3">
               <span className="grid h-9 w-9 place-items-center rounded-lg bg-slate-50">
                 <ProviderIcon icon={providerIcons[model[2]]} />
@@ -159,14 +124,14 @@ function ModelTable({ rows, onManage }) {
               </div>
             </div>
           </td>
-          <td className={monitoringTableCellClass(rowIndex)}>{model[3]}</td>
-          <td className={monitoringTableCellClass(rowIndex)}>
+          <td className={tableCellClass(rowIndex)}>{model[3]}</td>
+          <td className={tableCellClass(rowIndex)}>
             <Badge>{model[4]}</Badge>
           </td>
-          <td className={monitoringTableCellClass(rowIndex)}>
+          <td className={tableCellClass(rowIndex)}>
             <Badge tone={model[5] === '사용' ? 'green' : 'gray'}>{model[5]}</Badge>
           </td>
-          <td className={monitoringTableCellClass(rowIndex)}>{model[6]}</td>
+          <td className={tableCellClass(rowIndex)}>{model[6]}</td>
         </tr>
       ))}
     </TableShell>
@@ -187,16 +152,14 @@ function PromptTable({ rows, onManage }) {
           aria-label={`${prompt[0]} 프롬프트 관리 열기`}
           onClick={() => onManage(prompt)}
           onKeyDown={event => activateOnRowKeyDown(event, () => onManage(prompt))}
-          className={monitoringTableRowClass({ striped: rowIndex % 2 === 1, interactive: true })}
+          className={tableRowClass({ striped: rowIndex % 2 === 1, interactive: true })}
         >
-          <td className={monitoringTableCellClass(rowIndex, 'font-bold text-slate-900')}>
-            {prompt[0]}
-          </td>
-          <td className={monitoringTableCellClass(rowIndex)}>{prompt[1]}</td>
-          <td className={monitoringTableCellClass(rowIndex)}>
+          <td className={tableCellClass(rowIndex, 'font-bold text-slate-900')}>{prompt[0]}</td>
+          <td className={tableCellClass(rowIndex)}>{prompt[1]}</td>
+          <td className={tableCellClass(rowIndex)}>
             <Badge tone={prompt[2] === '활성' ? 'green' : 'gray'}>{prompt[2]}</Badge>
           </td>
-          <td className={monitoringTableCellClass(rowIndex)}>{prompt[3]}</td>
+          <td className={tableCellClass(rowIndex)}>{prompt[3]}</td>
         </tr>
       ))}
     </TableShell>
@@ -219,7 +182,7 @@ function TextField({ value, onChange, placeholder, type = 'text' }) {
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="h-[var(--app-control-lg)] w-full rounded-[var(--app-radius-lg)] border border-slate-200 bg-white px-[var(--app-pad-md)] text-[clamp(0.82rem,0.95vw,0.9rem)] text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8BC6FF] focus:ring-[clamp(0.2rem,0.32vw,0.25rem)] focus:ring-[#DEEEFF]"
+      className={inputClass}
     />
   );
 }
@@ -244,7 +207,7 @@ function ManagementModal({ tab, item, mode, onClose }) {
         : `시스템 프롬프트 ${isCreate ? '등록' : '관리'}`;
 
   return (
-    <div className="app-modal-stage z-[100]">
+    <DialogLayer onClose={onClose} className="app-modal-stage z-[100]">
       <button type="button" className="app-modal-backdrop" aria-label="닫기" onClick={onClose} />
       <div role="dialog" aria-modal="true" className="app-modal-panel app-modal-panel--lg">
         <header className="app-modal-header flex items-start justify-between border-b border-slate-200">
@@ -338,7 +301,7 @@ function ManagementModal({ tab, item, mode, onClose }) {
                   value={draft.body}
                   onChange={event => updateDraft('body', event.target.value)}
                   placeholder="시스템 프롬프트 입력"
-                  className="min-h-40 w-full resize-y rounded-xl border border-slate-200 p-3.5 text-sm text-slate-700 outline-none focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+                  className="min-h-40 w-full resize-y rounded-xl border border-slate-200 p-3.5 text-sm text-slate-700 outline-none focus:border-focus-border focus:ring-4 focus:ring-focus-ring"
                 />
               </Field>
             </>
@@ -353,7 +316,7 @@ function ManagementModal({ tab, item, mode, onClose }) {
           </AppButton>
         </footer>
       </div>
-    </div>
+    </DialogLayer>
   );
 }
 
@@ -409,11 +372,11 @@ export default function ModelsPage({ initialTab = 'providers' }) {
   const openManage = item => setModal({ mode: 'manage', item });
 
   return (
-    <div className="garim-external-root min-h-full bg-[#f9f9f9] text-[#111827]">
-      <div className="bg-[#f9f9f9]/95">
+    <div className="app-control-scope min-h-full bg-canvas text-text-primary">
+      <div className="bg-canvas/95">
         {!isPromptPage ? (
           <nav
-            className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-4 overflow-x-auto border-b border-[#E2E8F0] px-[var(--app-page-x)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-4 overflow-x-auto border-b border-slate-200 px-[var(--app-page-x)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             aria-label="모델 설정 유형"
           >
             {tabs.map(tab => (
@@ -423,8 +386,8 @@ export default function ModelsPage({ initialTab = 'providers' }) {
                 onClick={() => changeTab(tab.id)}
                 className={`relative flex h-12 shrink-0 items-center justify-center border-b-2 px-3 text-sm font-black transition-colors ${
                   activeTab === tab.id
-                    ? 'border-[#075DF6] text-[#075DF6]'
-                    : 'border-transparent text-slate-600 hover:text-[#075DF6]'
+                    ? 'border-brand text-brand'
+                    : 'border-transparent text-slate-600 hover:text-brand'
                 }`}
               >
                 {tab.label}

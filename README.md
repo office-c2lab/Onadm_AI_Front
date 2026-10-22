@@ -1,16 +1,25 @@
-# React + Vite
+# ONDAM AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React·Vite·Tailwind 기반 사용자 AI Store/채팅과 관리자 화면입니다.
 
-Currently, two official plugins are available:
+```bash
+npm install
+npm run dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+공통 컴포넌트와 디자인 토큰의 수정 위치·사용 기준은 [디자인 시스템 가이드](docs/design-system.md), 화면·모달·테이블별 목록은 [UI 인벤토리](docs/ui-inventory.md)에 정리되어 있습니다.
 
-## React Compiler
+```bash
+npm run lint:check
+npm run check:ui
+npm test
+npm run build
+npm run audit:ui
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+브라우저 회귀 검사는 Chromium을 준비한 뒤 실행합니다.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npx playwright install chromium
+npm run test:ui
+```

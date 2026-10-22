@@ -1,0 +1,235 @@
+.app-control-scope {
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: var(--color-canvas);
+  /*
+   * Scale the rem-based UI to 110% of a 1920 x 1080 reference viewport.
+   * The smaller viewport axis wins so short laptop screens do not overflow,
+   * while the limits keep the interface readable at either extreme.
+   */
+  font-size: var(--control-font-size);
+}
+
+@media (max-width: 767px) {
+  .app-control-scope {
+    font-size: var(--control-font-size-mobile);
+  }
+}
+
+.app-solid-button,
+.app-solid-button * {
+  font-weight: var(--font-weight-bold);
+}
+
+.app-solid-button svg {
+  stroke-width: 2.8;
+}
+
+.app-modal-stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--app-modal-inset);
+}
+
+.app-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--effect-01);
+  backdrop-filter: blur(4px);
+}
+
+.app-modal-panel {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  width: min(calc(100vw - (var(--app-modal-inset) * 2)), var(--app-modal-width-md));
+  max-height: min(calc(100dvh - (var(--app-modal-inset) * 2)), var(--app-modal-max-height));
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--effect-02);
+  border-radius: var(--app-modal-radius);
+  background: var(--color-white);
+  box-shadow: 0 1.75rem 4.5rem var(--effect-03);
+}
+
+.app-modal-panel--sm {
+  --app-modal-width-md: var(--app-modal-width-sm);
+}
+
+.app-modal-panel--lg {
+  --app-modal-width-md: var(--app-modal-width-lg);
+}
+
+.app-modal-panel--xl {
+  --app-modal-width-md: var(--app-modal-width-xl);
+}
+
+.app-modal-header {
+  padding: var(--app-pad-lg);
+}
+
+.app-modal-body {
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--app-pad-lg);
+}
+
+.app-modal-footer {
+  padding: var(--app-pad-md) var(--app-pad-lg);
+}
+
+.hover-scrollbar {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-palette-blue-49) var(--color-palette-blue-20);
+}
+
+.hover-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.hover-scrollbar::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: var(--color-palette-blue-20);
+}
+
+.hover-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--color-palette-blue-49);
+}
+
+.hover-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-focus-border);
+}
+
+.monitoring-detail-scroll {
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+  scrollbar-color: var(--color-focus-border) var(--color-selection);
+}
+
+.monitoring-detail-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.monitoring-detail-scroll::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: var(--color-selection);
+}
+
+.monitoring-detail-scroll::-webkit-scrollbar-thumb {
+  min-height: 32px;
+  border: 2px solid var(--color-selection);
+  border-radius: 999px;
+  background: var(--color-focus-border);
+}
+
+.monitoring-detail-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand);
+}
+
+.policy-strength-control {
+  position: relative;
+}
+
+.policy-strength-ticks {
+  pointer-events: none;
+  position: absolute;
+  top: 0.625rem;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  height: 0.5rem;
+}
+
+.policy-strength-tick {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: var(--color-focus-border);
+  box-shadow: 0 0 0 0.125rem var(--color-selection);
+}
+
+.policy-strength-tick-active {
+  background: var(--color-brand);
+  box-shadow: 0 0 0 0.125rem var(--color-white);
+}
+
+.policy-strength-tick-current {
+  opacity: 0;
+}
+
+.policy-strength-range {
+  position: relative;
+  z-index: 2;
+  height: 1.75rem;
+  appearance: none;
+  background: transparent;
+}
+
+.policy-strength-range:focus {
+  outline: none;
+}
+
+.policy-strength-range::-webkit-slider-runnable-track {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--color-brand) 0%,
+    var(--color-brand) var(--range-progress),
+    var(--color-track) var(--range-progress),
+    var(--color-track) 100%
+  );
+  box-shadow: inset 0 1px 2px var(--effect-04);
+}
+
+.policy-strength-range::-webkit-slider-thumb {
+  position: relative;
+  z-index: 4;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: -0.625rem;
+  appearance: none;
+  border: 0.25rem solid var(--color-white);
+  border-radius: 999px;
+  background: var(--color-brand);
+  box-shadow:
+    0 0 0 0.0625rem var(--effect-05),
+    0 0.25rem 0.75rem var(--effect-06);
+}
+
+.policy-strength-range:focus-visible::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 0.0625rem var(--effect-05),
+    0 0 0 0.25rem var(--effect-07),
+    0 0.25rem 0.75rem var(--effect-06);
+}
+
+.policy-strength-range::-moz-range-track {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--color-track);
+  box-shadow: inset 0 1px 2px var(--effect-04);
+}
+
+.policy-strength-range::-moz-range-progress {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--color-brand);
+}
+
+.policy-strength-range::-moz-range-thumb {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 0.25rem solid var(--color-white);
+  border-radius: 999px;
+  background: var(--color-brand);
+  box-shadow:
+    0 0 0 0.0625rem var(--effect-05),
+    0 0.25rem 0.75rem var(--effect-06);
+}

@@ -1,7 +1,7 @@
 import { Check, Sparkles } from 'lucide-react';
 import StoreToolIcon from './StoreToolIcon.jsx';
 
-export const storePreviewTabs = ['시작 화면', '작업 설정', '결과 확인'];
+import { storePreviewTabs } from './storePreviewConfig.js';
 
 export function StoreToolPreviewScreen({ tool, activeIndex }) {
   const tags = tool.storeTags?.slice(0, 3) ?? [tool.category];
@@ -11,13 +11,13 @@ export function StoreToolPreviewScreen({ tool, activeIndex }) {
       <div className="hidden w-32 shrink-0 border-r border-slate-100 bg-slate-50/80 p-3 sm:block">
         <div className="flex items-center gap-2 border-b border-slate-200 pb-4">
           <StoreToolIcon tool={tool} small />
-          <span className="truncate text-[10px] font-bold text-slate-800">{tool.name}</span>
+          <span className="truncate text-tiny font-bold text-slate-800">{tool.name}</span>
         </div>
         <div className="mt-5 space-y-2">
           {storePreviewTabs.map((tab, index) => (
             <div
               key={tab}
-              className={`rounded-md px-2 py-2 text-[10px] font-medium ${index === activeIndex ? 'bg-blue-100 text-blue-700' : 'text-slate-400'}`}
+              className={`rounded-md px-2 py-2 text-tiny font-medium ${index === activeIndex ? 'bg-blue-100 text-blue-700' : 'text-slate-400'}`}
             >
               {tab}
             </div>
@@ -28,12 +28,12 @@ export function StoreToolPreviewScreen({ tool, activeIndex }) {
       <div className="min-w-0 flex-1 p-5 sm:p-7">
         <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
-            <p className="text-[10px] font-semibold text-blue-600">{tool.type}</p>
+            <p className="text-tiny font-semibold text-blue-600">{tool.type}</p>
             <h3 className="mt-1 text-sm font-bold text-slate-900 sm:text-base">
               {storePreviewTabs[activeIndex]}
             </h3>
           </div>
-          <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-semibold text-blue-600">
+          <span className="rounded-full bg-blue-50 px-3 py-1.5 text-tiny font-semibold text-blue-600">
             {tool.storeCategory || tool.category}
           </span>
         </div>
@@ -52,7 +52,7 @@ export function StoreToolPreviewScreen({ tool, activeIndex }) {
               {tags.map(tag => (
                 <div key={tag} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <div className="h-2 w-1/3 rounded bg-blue-200" />
-                  <p className="mt-2 text-[11px] font-medium text-slate-700">{tag}</p>
+                  <p className="mt-2 text-micro font-medium text-slate-700">{tag}</p>
                 </div>
               ))}
             </div>

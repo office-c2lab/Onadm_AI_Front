@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import banner1 from '../../../../assets/images/banner1.png';
 import banner2 from '../../../../assets/images/banner2.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
-import StoreToolIcon from '../components/StoreToolIcon.jsx';
+import StoreToolIcon from '../../../../components/tools/StoreToolIcon.jsx';
 import ToolHoverPreview from '../components/ToolHoverPreview.jsx';
 import { publishedTools, storeCategories, useFavorites } from '../data/manageStore.js';
 
@@ -24,7 +24,7 @@ function SectionTitle({ children, viewAll = false }) {
   return (
     <div className="mb-2 flex items-end justify-between gap-4">
       <div>
-        <h2 className="flex items-center gap-0.5 text-[17px] font-bold text-slate-900">
+        <h2 className="flex items-center gap-0.5 text-size-17px font-bold text-slate-900">
           {children} <ChevronRight size={18} aria-hidden="true" />
         </h2>
       </div>
@@ -60,7 +60,7 @@ function FeaturedCard({ tool, favorite, onFavorite, onDetail, previewAlign }) {
         onClick={() => onDetail(tool)}
         className="flex h-[96px] w-full flex-col items-start rounded-b-xl px-4 py-3 text-left"
       >
-        <h3 className="truncate text-[15px] font-semibold leading-5 text-slate-900">{tool.name}</h3>
+        <h3 className="truncate text-body font-semibold leading-5 text-slate-900">{tool.name}</h3>
         <span className="mt-1 block truncate text-xs text-slate-500">
           {tool.storeCategory || tool.category}
         </span>
@@ -143,7 +143,7 @@ export default function StorePage() {
               aria-pressed={selectedCategory === category}
               className={`shrink-0 cursor-pointer whitespace-nowrap rounded-full px-4 py-1 text-sm transition-colors ${
                 selectedCategory === category
-                  ? 'bg-[#ededed] font-medium text-[#333]'
+                  ? 'bg-tab-active font-medium text-palette-neutral-27'
                   : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
               }`}
             >
@@ -168,9 +168,9 @@ export default function StorePage() {
               alt=""
               className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.015]"
             />
-            <span className="absolute inset-0 bg-gradient-to-r from-[#102e65]/40 via-transparent to-transparent" />
+            <span className="absolute inset-0 bg-gradient-to-r from-palette-blue-108/40 via-transparent to-transparent" />
             <span className="relative flex h-full flex-col items-start justify-center px-7 text-white md:px-8">
-              <span className="rounded-full bg-blue-500 px-2 py-1 text-[11px] font-semibold text-white">
+              <span className="rounded-full bg-blue-500 px-2 py-1 text-micro font-semibold text-white">
                 AI Report Agent
               </span>
               <strong className="mt-2.5 text-xl font-bold tracking-tight md:text-2xl">
@@ -194,7 +194,7 @@ export default function StorePage() {
                 className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
               />
               <span className="relative flex h-full flex-col items-start justify-center px-6">
-                <span className="rounded-full bg-blue-500 px-2 py-1 text-[11px] font-semibold text-white">
+                <span className="rounded-full bg-blue-500 px-2 py-1 text-micro font-semibold text-white">
                   AI Agent
                 </span>
                 <strong className="mt-2 text-lg font-bold text-slate-800">
@@ -209,7 +209,7 @@ export default function StorePage() {
               className="flex min-h-[100px] items-center justify-between gap-2 rounded-lg bg-gradient-to-br from-emerald-50 to-cyan-100 p-4 text-left hover:brightness-[0.98] lg:min-h-0"
             >
               <span className="min-w-0 flex-1">
-                <span className="rounded-full bg-emerald-500 px-2 py-1 text-[11px] font-semibold text-white">
+                <span className="rounded-full bg-emerald-500 px-2 py-1 text-micro font-semibold text-white">
                   데이터 분석
                 </span>
                 <strong className="mt-2 line-clamp-2 text-base leading-5 text-slate-800">
@@ -225,7 +225,7 @@ export default function StorePage() {
               className="flex min-h-[100px] items-center justify-between gap-2 rounded-lg bg-gradient-to-br from-indigo-50 to-violet-100 p-4 text-left hover:brightness-[0.98] lg:min-h-0"
             >
               <span className="min-w-0 flex-1">
-                <span className="rounded-full bg-indigo-500 px-2 py-1 text-[11px] font-semibold text-white">
+                <span className="rounded-full bg-indigo-500 px-2 py-1 text-micro font-semibold text-white">
                   생산성
                 </span>
                 <strong className="mt-2 line-clamp-2 text-base leading-5 text-slate-800">

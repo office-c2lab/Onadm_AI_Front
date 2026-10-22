@@ -1,9 +1,11 @@
 import { DropdownSettingsContent } from '../../control/external/components/settings/SettingsContent.jsx';
-import '../../control/external/garim.css';
 
 export default function DepartmentsPage() {
   return (
-    <div className="garim-external-root w-full !bg-transparent" style={{ fontSize: '16px' }}>
+    <div
+      className="app-control-scope w-full !bg-transparent"
+      style={{ fontSize: 'var(--text-body-md)' }}
+    >
       <header className="mb-6">
         <h1 className="text-2xl font-semibold text-slate-900">부서 관리</h1>
         <p className="mt-2 text-sm text-slate-500">

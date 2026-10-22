@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import RouteTabs from '../../../../components/ui/RouteTabs.jsx';
 
 const tabSets = {
   internal: [
@@ -23,25 +23,10 @@ export default function ControlTabNav({ type, className = '' }) {
   const tabs = tabSets[type] ?? [];
 
   return (
-    <nav
+    <RouteTabs
+      tabs={tabs}
+      ariaLabel={type === 'internal' ? 'Control 내부 페이지' : 'Control 외부 페이지'}
       className={`flex items-center justify-center gap-1 overflow-x-auto py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className}`.trim()}
-      aria-label={type === 'internal' ? 'Control 내부 페이지' : 'Control 외부 페이지'}
-    >
-      {tabs.map(tab => (
-        <NavLink
-          key={tab.to}
-          to={tab.to}
-          className={({ isActive }) =>
-            `shrink-0 rounded-full px-4 py-1 text-sm transition-colors ${
-              isActive
-                ? 'bg-[#ededed] font-medium text-[#333]'
-                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
-            }`
-          }
-        >
-          {tab.label}
-        </NavLink>
-      ))}
-    </nav>
+    />
   );
 }

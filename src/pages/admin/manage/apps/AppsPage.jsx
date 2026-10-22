@@ -1,15 +1,17 @@
 import { useMemo, useState } from 'react';
 import { Ban, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
-import { Drawer, EmptyState, SearchField, StatusBadge, ToolAvatar } from '../components.jsx';
+import Drawer from '../../../../components/ui/Drawer.jsx';
+import EmptyState from '../../../../components/ui/EmptyState.jsx';
+import SearchField from '../../../../components/ui/ValueSearchField.jsx';
+import StatusBadge from '../../../../components/ui/StatusBadge.jsx';
+import ToolAvatar from '../../../../components/ui/ToolAvatar.jsx';
 import { appRecords } from '../data.js';
 import {
   detailContent,
   supportedEnvironment,
 } from '../../../user/aistore/data/storeDetailContent.js';
-import {
-  StoreToolPreviewScreen,
-  storePreviewTabs,
-} from '../../../user/aistore/components/StoreToolPreviewScreen.jsx';
+import { StoreToolPreviewScreen } from '../../../../components/tools/StoreToolPreviewScreen.jsx';
+import { storePreviewTabs } from '../../../../components/tools/storePreviewConfig.js';
 
 const publicationTabs = ['전체', '게시 중', '숨김'];
 
@@ -75,7 +77,7 @@ export default function AppsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="sticky top-0 z-20 -mx-4 bg-[#f9f9f9]/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
+      <div className="sticky top-0 z-20 -mx-4 bg-canvas/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
         <div className="mx-auto flex max-w-xl items-center">
           <SearchField value={query} onChange={setQuery} placeholder="이름, ID, 소유자 검색" />
         </div>
@@ -92,7 +94,7 @@ export default function AppsPage() {
               type="button"
               onClick={() => setPublication(item)}
               aria-pressed={publication === item}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${publication === item ? 'bg-[#ededed] font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+              className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${publication === item ? 'bg-tab-active font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
             >
               {item}
             </button>
@@ -270,7 +272,7 @@ export default function AppsPage() {
                 ['스토어 게시', selected.publication === '게시 중' ? '게시 중' : '숨김'],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-xl border border-slate-200 p-3">
-                  <p className="text-[11px] text-slate-400">{label}</p>
+                  <p className="text-micro text-slate-400">{label}</p>
                   <div className="mt-2">
                     <StatusBadge>{value}</StatusBadge>
                   </div>

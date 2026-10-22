@@ -64,7 +64,7 @@ export default function ReviewProgress({ upload, stageStates, steps = reviewStep
         <div>
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-semibold text-slate-900">심사 진행 내역</h4>
-            <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${runStatusStyle}`}>
+            <span className={`rounded-full px-2.5 py-1 text-micro font-medium ${runStatusStyle}`}>
               {runStatus}
             </span>
           </div>
@@ -129,7 +129,7 @@ export default function ReviewProgress({ upload, stageStates, steps = reviewStep
                 </span>
               </button>
               {isOpen && (
-                <div className="border-t border-slate-100 bg-slate-50/80 px-4 py-3 font-mono text-[11px] leading-5 text-slate-600 sm:px-14 sm:text-xs">
+                <div className="border-t border-slate-100 bg-slate-50/80 px-4 py-3 font-mono text-micro leading-5 text-slate-600 sm:px-14 sm:text-xs">
                   <p className="mb-2 font-sans text-slate-500">{step.description}</p>
                   {step.checks.map((check, checkIndex) => {
                     const checkState = getCheckState(state, checkIndex);

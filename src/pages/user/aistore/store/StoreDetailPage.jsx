@@ -11,8 +11,9 @@ import {
   FileText,
   ShieldCheck,
 } from 'lucide-react';
-import StoreToolIcon from '../components/StoreToolIcon.jsx';
-import { StoreToolPreviewScreen, storePreviewTabs } from '../components/StoreToolPreviewScreen.jsx';
+import StoreToolIcon from '../../../../components/tools/StoreToolIcon.jsx';
+import { StoreToolPreviewScreen } from '../../../../components/tools/StoreToolPreviewScreen.jsx';
+import { storePreviewTabs } from '../../../../components/tools/storePreviewConfig.js';
 import { publishedTools, useDownloads, useFavorites } from '../data/manageStore.js';
 import { detailContent, supportedEnvironment } from '../data/storeDetailContent.js';
 

@@ -2,14 +2,10 @@ import {
   APP_PAGE_HORIZONTAL_PADDING_CLASS,
   APP_PAGE_INNER_WIDTH_CLASS,
   APP_PAGE_OUTER_WIDTH_CLASS,
-} from '../constants/contentLayout.js';
+} from '../../styles/layout.js';
 import GlassPagination from './GlassPagination.jsx';
 
-export default function FixedPaginationBar({
-  currentPage,
-  totalPages,
-  onPageChange,
-}) {
+export default function FixedPaginationBar({ currentPage, totalPages, onPageChange }) {
   if (totalPages <= 0) {
     return null;
   }
@@ -28,8 +24,8 @@ export default function FixedPaginationBar({
           left-[var(--ondam-admin-sidebar-width,0px)]
           z-20
           border-t
-          border-[#E5E8ED]
-          bg-[#f9f9f9]
+          border-palette-blue-32
+          bg-canvas
           py-3
         "
       >

@@ -1,29 +1,11 @@
 'use client';
 
+import './character.css';
+import { ORB_THEMES } from '../../styles/artworkTokens.js';
+
 import React, { useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-
-const ORB_THEMES = {
-  light: {
-    bodyTop: '#168BFF',
-    bodyMid: '#075DF6',
-    bodyBottom: '#063CC8',
-    rimWhite: '#E9FDFF',
-    rimPurple: '#36E9FF',
-    bottomBlue: '#00E5FF',
-    outerGlow: '#15DFFF',
-  },
-  dark: {
-    bodyTop: '#343CA8',
-    bodyMid: '#20246D',
-    bodyBottom: '#080B24',
-    rimWhite: '#F6F0FF',
-    rimPurple: '#A58BFF',
-    bottomBlue: '#4E6BFF',
-    outerGlow: '#8B6CFF',
-  },
-};
 
 function OrbPlane({ speed = 0.95, motion = 0.78, themeMode = 'light' }) {
   const materialRef = useRef(null);
@@ -320,131 +302,6 @@ export function GarimReferenceOrb({
 
       <div className="garim-orb-reflection" />
       <div className="garim-orb-bottom-glow" />
-
-      <style>{`
-        .garim-reference-orb {
-          position: relative;
-          display: grid;
-          place-items: center;
-          isolation: isolate;
-          overflow: visible;
-          pointer-events: none;
-        }
-
-        .garim-reference-orb canvas {
-          position: relative;
-          z-index: 2;
-        }
-
-        .garim-orb-reflection {
-          position: absolute;
-          left: 50%;
-          bottom: 4.5%;
-          width: 27%;
-          height: 13%;
-          transform: translateX(-50%) scaleY(0.72);
-          transform-origin: 50% 0%;
-          border-radius: 50%;
-          background:
-            radial-gradient(
-              ellipse at 50% 0%,
-              rgba(233, 253, 255, 0.66) 0%,
-              rgba(54, 233, 255, 0.42) 18%,
-              rgba(22, 139, 255, 0.28) 42%,
-              rgba(7, 93, 246, 0.12) 62%,
-              rgba(7, 93, 246, 0) 80%
-            );
-          filter: blur(7px);
-          opacity: 0.72;
-          mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.7) 38%, transparent 100%);
-          -webkit-mask-image: linear-gradient(
-            to bottom,
-            black 0%,
-            rgba(0, 0, 0, 0.7) 38%,
-            transparent 100%
-          );
-          z-index: 1;
-          animation: garimOrbReflection var(--orb-float-duration) linear infinite;
-        }
-
-        .garim-reference-orb.is-dark .garim-orb-reflection {
-          background:
-            radial-gradient(
-              ellipse at 50% 0%,
-              rgba(246, 240, 255, 0.44) 0%,
-              rgba(165, 139, 255, 0.34) 22%,
-              rgba(78, 107, 255, 0.2) 48%,
-              rgba(78, 107, 255, 0) 80%
-            );
-        }
-
-        .garim-orb-bottom-glow {
-          position: absolute;
-          left: 50%;
-          bottom: 13.5%;
-          width: 34%;
-          height: 7%;
-          transform: translateX(-50%);
-          border-radius: 999px;
-          background: radial-gradient(
-            ellipse,
-            rgba(6, 60, 200, 0.42) 0%,
-            rgba(7, 93, 246, 0.22) 38%,
-            rgba(54, 233, 255, 0.1) 62%,
-            rgba(54, 233, 255, 0) 78%
-          );
-          filter: blur(13px);
-          z-index: 1;
-          animation: garimOrbFloorGlow var(--orb-float-duration) linear infinite;
-        }
-
-        .garim-reference-orb.is-dark .garim-orb-bottom-glow {
-          bottom: 14.5%;
-          width: 30%;
-          height: 6%;
-          background: radial-gradient(
-            ellipse,
-            rgba(78, 107, 255, 0.56) 0%,
-            rgba(139, 108, 255, 0.22) 42%,
-            rgba(78, 107, 255, 0) 76%
-          );
-          filter: blur(17px);
-        }
-
-        @keyframes garimOrbFloorGlow {
-          0%, 50%, 100% {
-            opacity: var(--floor-glow-near);
-            transform: translateX(-50%) scaleX(1);
-          }
-
-          25% {
-            opacity: var(--floor-glow-far);
-            transform: translateX(-50%) scaleX(0.88);
-          }
-
-          75% {
-            opacity: var(--floor-glow-near);
-            transform: translateX(-50%) scaleX(1.08);
-          }
-        }
-
-        @keyframes garimOrbReflection {
-          0%, 50%, 100% {
-            transform: translateX(-50%) scaleX(1) scaleY(0.72);
-            opacity: var(--reflection-near);
-          }
-
-          25% {
-            transform: translateX(-50%) scaleX(0.9) scaleY(0.66);
-            opacity: var(--reflection-far);
-          }
-
-          75% {
-            transform: translateX(-50%) scaleX(1.06) scaleY(0.76);
-            opacity: var(--reflection-near);
-          }
-        }
-      `}</style>
     </div>
   );
 }
@@ -457,7 +314,8 @@ export default function GarimReferenceOrbPreview() {
         margin: 0,
         display: 'grid',
         placeItems: 'center',
-        background: 'radial-gradient(circle at 50% 48%, #EFF6FF 0%, #FFFFFF 58%, #F8FAFC 100%)',
+        background:
+          'radial-gradient(circle at 50% 48%, var(--color-selection) 0%, var(--color-white) 58%, var(--color-slate-50) 100%)',
       }}
     >
       <GarimReferenceOrb size={460} speed={0.95} motion={0.78} />

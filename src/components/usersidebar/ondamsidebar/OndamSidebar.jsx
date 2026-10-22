@@ -46,8 +46,10 @@ function MenuButton({ icon: Icon, label, isActive = false, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-9 w-full items-center gap-3 rounded-lg px-2.5 text-left text-[14px] transition-colors ${
-        isActive ? 'bg-[#e8e8e8] text-[#0d0d0d]' : 'text-[#202020] hover:bg-[#ececec]'
+      className={`flex h-9 w-full items-center gap-3 rounded-lg px-2.5 text-left text-body-sm transition-colors ${
+        isActive
+          ? 'bg-palette-neutral-06 text-ink'
+          : 'text-palette-neutral-31 hover:bg-sidebar-hover'
       }`}
     >
       <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} aria-hidden="true" />
@@ -62,8 +64,10 @@ function ConversationButton({ chat, isActive, onSelect, onOpenMenu }) {
       <button
         type="button"
         onClick={() => onSelect?.(chat)}
-        className={`flex h-9 w-full items-center rounded-lg px-2.5 pr-10 text-left text-[14px] transition-colors ${
-          isActive ? 'bg-[#e8e8e8] text-[#0d0d0d]' : 'text-[#202020] hover:bg-[#ececec]'
+        className={`flex h-9 w-full items-center rounded-lg px-2.5 pr-10 text-left text-body-sm transition-colors ${
+          isActive
+            ? 'bg-palette-neutral-06 text-ink'
+            : 'text-palette-neutral-31 hover:bg-sidebar-hover'
         }`}
         aria-current={isActive ? 'page' : undefined}
         title={chat.title}
@@ -77,7 +81,7 @@ function ConversationButton({ chat, isActive, onSelect, onOpenMenu }) {
           event.stopPropagation();
           onOpenMenu?.(chat);
         }}
-        className={`absolute right-1.5 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-md text-[#555] transition hover:bg-[#dcdcdc] focus:opacity-100 ${
+        className={`absolute right-1.5 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-md text-palette-neutral-20 transition hover:bg-palette-neutral-09 focus:opacity-100 ${
           isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}
         aria-label={`${chat.title} 옵션`}
@@ -91,14 +95,14 @@ function ConversationButton({ chat, isActive, onSelect, onOpenMenu }) {
 export function OndamSidebarRail({ onOpen, onNewChat }) {
   return (
     <aside
-      className="flex h-dvh w-12 flex-col border-r border-black/5 bg-white text-[#0d0d0d]"
+      className="flex h-dvh w-12 flex-col border-r border-black/5 bg-white text-ink"
       aria-label="접힌 ONDAM AI 채팅 메뉴"
     >
       <div className="flex flex-1 flex-col items-center gap-2 py-3">
         <button
           type="button"
           onClick={onOpen}
-          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#ececec]"
+          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-sidebar-hover"
           aria-label="사이드바 열기"
           title="사이드바 열기"
         >
@@ -107,7 +111,7 @@ export function OndamSidebarRail({ onOpen, onNewChat }) {
         <button
           type="button"
           onClick={onNewChat}
-          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#ececec]"
+          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-sidebar-hover"
           aria-label="새 채팅"
           title="새 채팅"
         >
@@ -116,7 +120,7 @@ export function OndamSidebarRail({ onOpen, onNewChat }) {
       </div>
 
       <div className="flex justify-center border-t border-black/5 py-3">
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-[#e3e3e3] text-[11px] font-semibold text-[#4b4b4b]">
+        <span className="grid h-8 w-8 place-items-center rounded-full bg-palette-neutral-07 text-micro font-semibold text-palette-neutral-22">
           ON
         </span>
       </div>
@@ -153,7 +157,7 @@ export default function OndamSidebar({
 
   return (
     <aside
-      className="flex h-dvh w-[292px] shrink-0 flex-col border-r border-black/5 bg-white text-[#0d0d0d]"
+      className="flex h-dvh w-[var(--layout-chat-sidebar-width)] shrink-0 flex-col border-r border-black/5 bg-white text-ink"
       aria-label="ONDAM AI 채팅 메뉴"
     >
       <header className="flex h-14 shrink-0 items-center gap-1 px-3">
@@ -162,7 +166,7 @@ export default function OndamSidebar({
         <button
           type="button"
           onClick={() => setIsSearchOpen(value => !value)}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-[#404040] hover:bg-[#ececec]"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-palette-neutral-24 hover:bg-sidebar-hover"
           aria-label="채팅 검색"
           aria-expanded={isSearchOpen}
           title="채팅 검색"
@@ -173,7 +177,7 @@ export default function OndamSidebar({
         <button
           type="button"
           onClick={onClose}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-[#404040] hover:bg-[#ececec]"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-palette-neutral-24 hover:bg-sidebar-hover"
           aria-label="사이드바 닫기"
           title="사이드바 닫기"
         >
@@ -185,7 +189,7 @@ export default function OndamSidebar({
         {isSearchOpen && (
           <div className="relative mb-1">
             <Search
-              className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#777]"
+              className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-palette-neutral-18"
               strokeWidth={1.7}
               aria-hidden="true"
             />
@@ -195,13 +199,13 @@ export default function OndamSidebar({
               value={query}
               onChange={event => setQuery(event.target.value)}
               placeholder="채팅 검색"
-              className="h-9 w-full rounded-lg border border-[#d9d9d9] bg-white pl-8 pr-8 text-[13px] outline-none placeholder:text-[#999] focus:border-[#aaa]"
+              className="h-9 w-full rounded-lg border border-palette-neutral-10 bg-white pl-8 pr-8 text-compact outline-none placeholder:text-palette-neutral-14 focus:border-palette-neutral-12"
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery('')}
-                className="absolute right-1.5 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-md hover:bg-[#eee]"
+                className="absolute right-1.5 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-md hover:bg-palette-neutral-05"
                 aria-label="검색어 지우기"
               >
                 <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -228,12 +232,12 @@ export default function OndamSidebar({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3 [scrollbar-color:#d8d8d8_transparent] [scrollbar-width:thin]">
+      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3 [scrollbar-color:var(--color-scrollbar-chat)_transparent] [scrollbar-width:thin]">
         <section className="pt-3" aria-labelledby="ondam-projects-heading">
           <button
             type="button"
             onClick={() => setIsProjectsOpen(value => !value)}
-            className="flex h-8 w-full items-center gap-1 rounded-lg px-2.5 text-left text-[12px] font-medium text-[#777] hover:bg-[#ececec] hover:text-[#3d3d3d]"
+            className="flex h-8 w-full items-center gap-1 rounded-lg px-2.5 text-left text-caption font-medium text-palette-neutral-18 hover:bg-sidebar-hover hover:text-palette-neutral-26"
             aria-expanded={isProjectsOpen}
           >
             <span id="ondam-projects-heading" className="flex-1">
@@ -253,7 +257,7 @@ export default function OndamSidebar({
                   key={project.id}
                   type="button"
                   onClick={() => onSelectMenu?.(`project:${project.id}`)}
-                  className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] text-[#303030] hover:bg-[#ececec]"
+                  className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-compact text-palette-neutral-28 hover:bg-sidebar-hover"
                 >
                   <Folder className="h-4 w-4 shrink-0" strokeWidth={1.7} aria-hidden="true" />
                   <span className="truncate">{project.title}</span>
@@ -264,7 +268,10 @@ export default function OndamSidebar({
         </section>
 
         <section className="pt-5" aria-labelledby="ondam-recent-heading">
-          <h2 id="ondam-recent-heading" className="mb-1 px-2.5 text-[12px] font-medium text-[#777]">
+          <h2
+            id="ondam-recent-heading"
+            className="mb-1 px-2.5 text-caption font-medium text-palette-neutral-18"
+          >
             최근
           </h2>
           <div className="space-y-0.5">
@@ -278,7 +285,7 @@ export default function OndamSidebar({
               />
             ))}
             {filteredChats.length === 0 && (
-              <p className="px-2.5 py-5 text-center text-[12px] text-[#999]">
+              <p className="px-2.5 py-5 text-center text-caption text-palette-neutral-14">
                 일치하는 채팅이 없습니다.
               </p>
             )}
@@ -289,17 +296,19 @@ export default function OndamSidebar({
       <div className="shrink-0 border-t border-black/5 p-2">
         <button
           type="button"
-          className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left hover:bg-[#ececec]"
+          className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left hover:bg-sidebar-hover"
           onClick={() => onSelectMenu?.('account')}
         >
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#e3e3e3] text-[11px] font-semibold text-[#4b4b4b]">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-palette-neutral-07 text-micro font-semibold text-palette-neutral-22">
             {user.name.slice(0, 2).toUpperCase()}
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[13px] font-medium leading-[18px]">
+            <span className="block truncate text-compact font-medium leading-detail-02">
               {user.name}
             </span>
-            <span className="block truncate text-[11px] leading-4 text-[#777]">{user.plan}</span>
+            <span className="block truncate text-micro leading-4 text-palette-neutral-18">
+              {user.plan}
+            </span>
           </span>
         </button>
       </div>

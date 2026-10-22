@@ -1,5 +1,6 @@
+import useEntryAnimation from '../../../../../hooks/useEntryAnimation.js';
 import { ChartLine, ChartPie } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   CartesianGrid,
   Cell,
@@ -15,9 +16,9 @@ import {
 
 import { DateRangePicker } from '../components/monitoring/MonitoringListComponents.jsx';
 import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
-import ServiceLogoBadge from '../components/ServiceLogoBadge.jsx';
+import ServiceLogoBadge from '../../../../../components/identity/ServiceLogoBadge.jsx';
 import { STATUS_COLORS } from '../constants/statusColors.js';
-import PageLayout from '../../components/PageLayout.jsx';
+import PageLayout from '../../../../../components/layout/PageLayout.jsx';
 
 const dashboardTabs = [
   { key: 'all', label: '전체', description: '각 항목 탐지 현황을 한눈에 확인합니다.' },
@@ -47,27 +48,27 @@ const organizationViewOptions = [
 ];
 
 const POLICY_CHART_COLORS = {
-  first: '#06318F',
-  second: '#0648BB',
-  third: '#168BFF',
-  fourth: '#75BEFF',
-  fifth: '#B8DEFF',
+  first: 'var(--color-palette-blue-99)',
+  second: 'var(--color-palette-blue-97)',
+  third: 'var(--color-palette-blue-79)',
+  fourth: 'var(--color-palette-blue-55)',
+  fifth: 'var(--color-palette-blue-45)',
 };
 
 const ORGANIZATION_CHART_COLORS = {
-  first: '#075DF6',
-  second: '#168BFF',
-  third: '#75BEFF',
-  fourth: '#6FB0FF',
-  fifth: '#A9D6FF',
+  first: 'var(--color-brand)',
+  second: 'var(--color-palette-blue-79)',
+  third: 'var(--color-palette-blue-55)',
+  fourth: 'var(--color-palette-blue-56)',
+  fifth: 'var(--color-palette-blue-47)',
 };
 
 const SERVICE_CHART_COLORS = {
-  chatgpt: '#111827',
-  gemini: '#4285F4',
-  claude: '#D97706',
-  genspark: '#6B7280',
-  copilot: '#84CC16',
+  chatgpt: 'var(--color-text-primary)',
+  gemini: 'var(--color-palette-blue-69)',
+  claude: 'var(--color-amber-600)',
+  genspark: 'var(--color-gray-500)',
+  copilot: 'var(--color-lime-500)',
 };
 
 const donutSegments = [
@@ -517,7 +518,7 @@ function getAllOrganizationChartData(view) {
 function DashboardPanel({ title, actions, children, className = '' }) {
   const titleNode =
     typeof title === 'string' ? (
-      <h2 className="text-[1.12rem] font-bold tracking-[-0.03em] text-[#11182E] xl:text-[1.18rem]">
+      <h2 className="text-size-1-12rem font-bold tracking-heading text-heading xl:text-size-1-18rem">
         {title}
       </h2>
     ) : (
@@ -527,7 +528,7 @@ function DashboardPanel({ title, actions, children, className = '' }) {
   return (
     <section
       className={cn(
-        'min-w-0 rounded-[22px] border border-[#E2E8F4] bg-white px-5 py-5 shadow-[0_12px_34px_rgba(15,23,42,0.06)] xl:px-6',
+        'min-w-0 rounded-card border border-border-card bg-white px-5 py-5 shadow-card xl:px-6',
         className
       )}
     >
@@ -563,10 +564,10 @@ function DashboardChartViewSwitch({ view, onChange }) {
             title={item.label}
             onClick={() => onChange(item.value)}
             className={cn(
-              'inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-[8px] transition',
+              'inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-detail-03 transition',
               isActive
-                ? 'bg-[#EFF6FF] text-[#075DF6]'
-                : 'text-[#8A94A6] hover:bg-[#F4F9FF] hover:text-[#075DF6]'
+                ? 'bg-selection text-brand'
+                : 'text-palette-blue-72 hover:bg-palette-blue-09 hover:text-brand'
             )}
           >
             <Icon className="h-4.5 w-4.5" strokeWidth={2.4} aria-hidden="true" />
@@ -587,7 +588,7 @@ function OrganizationTitleDropdown({ value, onChange, suffix = '별' }) {
         label: `${option.label}${suffix}`,
       }))}
       ariaLabel="전체 탭 사용자 그래프 기준"
-      className="w-[9.5rem] [&>button]:min-h-9 [&>button]:rounded-lg [&>button]:text-[1rem] [&>button]:font-bold"
+      className="w-[9.5rem] [&>button]:min-h-9 [&>button]:rounded-lg [&>button]:text-size-1rem [&>button]:font-bold"
     />
   );
 }
@@ -596,7 +597,7 @@ function DashboardTabs({ activeTab, onChange }) {
   const activeDescription = dashboardTabs.find(tab => tab.key === activeTab)?.description ?? '';
 
   return (
-    <div className="border-b border-[#E2E8F0]">
+    <div className="border-b border-slate-200">
       <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
         <div className="overflow-x-auto">
           <div className="flex h-12 min-w-max items-end gap-7">
@@ -610,12 +611,12 @@ function DashboardTabs({ activeTab, onChange }) {
                   onClick={() => onChange(tab.key)}
                   className={cn(
                     'relative flex h-12 min-w-[4rem] cursor-pointer items-center justify-center px-1 text-sm font-black transition',
-                    isActive ? 'text-[#075DF6]' : 'text-slate-600 hover:text-[#075DF6]'
+                    isActive ? 'text-brand' : 'text-slate-600 hover:text-brand'
                   )}
                 >
                   {tab.label}
                   {isActive ? (
-                    <span className="absolute right-0 bottom-0 left-0 h-0.5 bg-[#075DF6]" />
+                    <span className="absolute right-0 bottom-0 left-0 h-0.5 bg-brand" />
                   ) : null}
                 </button>
               );
@@ -623,7 +624,7 @@ function DashboardTabs({ activeTab, onChange }) {
           </div>
         </div>
 
-        <p className="pb-3 text-[0.86rem] font-semibold text-[#64748B]">{activeDescription}</p>
+        <p className="pb-3 text-size-0-86rem font-semibold text-slate-500">{activeDescription}</p>
       </div>
     </div>
   );
@@ -633,20 +634,20 @@ function SummaryCard({ title, value, change, trend }) {
   const isUp = trend === 'up';
 
   return (
-    <article className="rounded-[18px] border border-[#E2E8F4] bg-white px-5 py-5 shadow-[0_10px_28px_rgba(15,23,42,0.05)] xl:px-3 xl:py-4 2xl:px-5 2xl:py-5">
+    <article className="rounded-metric border border-border-card bg-white px-5 py-5 shadow-detail-06 xl:px-3 xl:py-4 2xl:px-5 2xl:py-5">
       <div>
-        <p className="truncate text-[0.96rem] font-semibold text-[#20273D] xl:text-[0.78rem] 2xl:text-[0.96rem]">
+        <p className="truncate text-size-0-96rem font-semibold text-palette-blue-113 xl:text-size-0-78rem 2xl:text-size-0-96rem">
           {title}
         </p>
       </div>
       <div className="mt-5 flex min-w-0 items-end justify-between gap-2 whitespace-nowrap xl:mt-4 2xl:mt-5">
-        <strong className="min-w-0 text-[2.25rem] leading-none font-black tracking-[-0.05em] text-[#0E1731] xl:text-[1.75rem] 2xl:text-[2.25rem]">
+        <strong className="min-w-0 text-size-2-25rem leading-none font-black tracking-display text-palette-blue-116 xl:text-size-1-75rem 2xl:text-size-2-25rem">
           {value}
         </strong>
         <span
           className={cn(
-            'inline-flex shrink-0 items-center gap-1 pb-0.5 text-[0.95rem] font-bold xl:text-[0.78rem] 2xl:text-[0.95rem]',
-            isUp ? 'text-[#2BB658]' : 'text-[#FF4B57]'
+            'inline-flex shrink-0 items-center gap-1 pb-0.5 text-size-0-95rem font-bold xl:text-size-0-78rem 2xl:text-size-0-95rem',
+            isUp ? 'text-palette-green-03' : 'text-palette-red-06'
           )}
         >
           {change}
@@ -701,20 +702,22 @@ function LegendToggle({ label, color, pressed, onClick, value, className = '' })
       title="표시 전환"
       onClick={onClick}
       className={cn(
-        'inline-flex h-[var(--app-control-xs)] cursor-pointer items-center gap-[var(--app-gap-xs)] rounded-full border px-[var(--app-pad-sm)] text-left text-[clamp(0.76rem,0.9vw,0.82rem)] font-bold transition hover:border-[#C9D3E8] hover:bg-[#F8FBFF] active:scale-[0.98]',
+        'inline-flex h-[var(--app-control-xs)] cursor-pointer items-center gap-[var(--app-gap-xs)] rounded-full border px-[var(--app-pad-sm)] text-left text-fluid-38 font-bold transition hover:border-palette-blue-46 hover:bg-surface-hover active:scale-[0.98]',
         pressed
-          ? 'border-[#D9E0F1] bg-white text-[#33415B]'
-          : 'border-[#E7ECF5] bg-[#F8FAFD] text-[#A5AEC0] opacity-80',
+          ? 'border-palette-blue-38 bg-white text-palette-blue-101'
+          : 'border-palette-blue-24 bg-palette-blue-06 text-palette-blue-58 opacity-80',
         className
       )}
     >
       <span
         className="h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-white transition"
-        style={{ background: pressed ? color : '#AEB8CA' }}
+        style={{ background: pressed ? color : 'var(--color-palette-blue-54)' }}
       />
       <span className="min-w-0 truncate">{label}</span>
       {value ? (
-        <span className={cn('shrink-0', pressed ? 'text-[#16213A]' : 'text-[#A5AEC0]')}>
+        <span
+          className={cn('shrink-0', pressed ? 'text-palette-blue-114' : 'text-palette-blue-58')}
+        >
           {value}
         </span>
       ) : null}
@@ -732,7 +735,7 @@ function DashboardChartFilter({ items, hiddenLabels, onToggle }) {
           color={item.color}
           pressed={!hiddenLabels.includes(item.label)}
           onClick={() => onToggle(item.label)}
-          className="h-[var(--app-control-lg)] rounded-[var(--app-radius-lg)] px-[var(--app-pad-md)] text-[clamp(0.82rem,0.95vw,0.9rem)]"
+          className="h-[var(--app-control-lg)] rounded-[var(--app-radius-lg)] px-[var(--app-pad-md)] text-control"
         />
       ))}
     </div>
@@ -752,10 +755,10 @@ function DashboardUserViewControls({ value, onChange }) {
             aria-pressed={isActive}
             onClick={() => onChange(option.value)}
             className={cn(
-              'inline-flex h-[var(--app-control-lg)] min-w-[4.25rem] cursor-pointer items-center justify-center rounded-[var(--app-radius-lg)] border px-[var(--app-pad-md)] text-[clamp(0.82rem,0.95vw,0.9rem)] font-black whitespace-nowrap transition',
+              'inline-flex h-[var(--app-control-lg)] min-w-[4.25rem] cursor-pointer items-center justify-center rounded-[var(--app-radius-lg)] border px-[var(--app-pad-md)] text-control font-black whitespace-nowrap transition',
               isActive
-                ? 'border-[#075DF6] bg-[#075DF6] text-white shadow-[0_8px_18px_rgba(7, 93, 246,0.2)]'
-                : 'border-[#D9E0F1] bg-white text-[#647089] hover:border-[#B6D9FF] hover:bg-[#F8FBFF] hover:text-[#075DF6]'
+                ? 'border-brand bg-brand text-white shadow-detail-19'
+                : 'border-palette-blue-38 bg-white text-palette-blue-87 hover:border-toggle-off hover:bg-surface-hover hover:text-brand'
             )}
           >
             {option.label}
@@ -774,12 +777,12 @@ function DonutTooltip({ active, payload }) {
   const segment = payload[0].payload;
 
   return (
-    <div className="rounded-xl border border-[#E5EAF3] bg-white px-3 py-2 text-[0.82rem] font-bold shadow-[0_14px_30px_rgba(15,23,42,0.12)]">
-      <div className="flex items-center gap-2 text-[#1F2942]">
+    <div className="rounded-xl border border-palette-blue-29 bg-white px-3 py-2 text-size-0-82rem font-bold shadow-tooltip">
+      <div className="flex items-center gap-2 text-palette-blue-112">
         <ChartTooltipDot color={segment.color} />
         <span>{segment.label}</span>
       </div>
-      <div className="mt-1 text-[#647089]">
+      <div className="mt-1 text-palette-blue-87">
         {segment.value}% · {segment.count}
       </div>
     </div>
@@ -839,14 +842,14 @@ function DonutChart({
             </PieChart>
           </ResponsiveContainer>
           <div className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center justify-center">
-            <span className="text-[0.82rem] font-semibold text-[#55627E]">
+            <span className="text-size-0-82rem font-semibold text-palette-blue-94">
               {selectedSegment ? selectedSegment.label : '전체 처리'}
             </span>
-            <strong className="mt-1 text-[1.65rem] font-black tracking-[-0.05em] text-[#10182E]">
+            <strong className="mt-1 text-size-1-65rem font-black tracking-display text-palette-blue-117">
               {selectedSegment ? selectedSegment.count : `${totalCount.toLocaleString()}건`}
             </strong>
             {selectedSegment ? (
-              <span className="mt-1 text-[0.82rem] font-bold text-[#647089]">
+              <span className="mt-1 text-size-0-82rem font-bold text-palette-blue-87">
                 {selectedSegment.value}%
               </span>
             ) : null}
@@ -868,13 +871,13 @@ function LineChartTooltip({ active, label, payload, seriesList = [] }) {
   );
 
   return (
-    <div className="rounded-xl border border-[#E5EAF3] bg-white px-3 py-2 text-[0.82rem] font-bold shadow-[0_14px_30px_rgba(15,23,42,0.12)]">
-      <div className="mb-1.5 text-[#1F2942]">{label}</div>
+    <div className="rounded-xl border border-palette-blue-29 bg-white px-3 py-2 text-size-0-82rem font-bold shadow-tooltip">
+      <div className="mb-1.5 text-palette-blue-112">{label}</div>
       <div className="grid gap-1.5">
         {visiblePayload.map(item => (
           <div
             key={item.dataKey}
-            className="flex items-center justify-between gap-4 text-[#647089]"
+            className="flex items-center justify-between gap-4 text-palette-blue-87"
           >
             <span className="flex items-center gap-2">
               <ChartTooltipDot
@@ -882,7 +885,7 @@ function LineChartTooltip({ active, label, payload, seriesList = [] }) {
               />
               <span>{item.name}</span>
             </span>
-            <span className="text-[#1F2942]">{item.value}</span>
+            <span className="text-palette-blue-112">{item.value}</span>
           </div>
         ))}
       </div>
@@ -899,8 +902,8 @@ function renderLineSeries(series, isAnimationActive) {
       name={series.label}
       stroke={series.color}
       strokeWidth={2.8}
-      dot={{ r: 4, strokeWidth: 2, fill: '#FFFFFF', stroke: series.color }}
-      activeDot={{ r: 5, strokeWidth: 2, fill: '#FFFFFF', stroke: series.color }}
+      dot={{ r: 4, strokeWidth: 2, fill: 'var(--color-white)', stroke: series.color }}
+      activeDot={{ r: 5, strokeWidth: 2, fill: 'var(--color-white)', stroke: series.color }}
       isAnimationActive={isAnimationActive}
       animationBegin={80}
       animationDuration={chartAnimationDuration}
@@ -917,30 +920,38 @@ function DashboardLineChart({ seriesList, hiddenLabels = [], isAnimationActive =
     <div className="relative h-[clamp(15.5rem,19.9vw,17.875rem)]">
       <ResponsiveContainer width="100%" height="100%">
         <RechartsLineChart data={data} margin={{ top: 22, right: 18, bottom: 4, left: -8 }}>
-          <CartesianGrid stroke="#E8EDF7" vertical={false} />
+          <CartesianGrid stroke="var(--color-palette-blue-23)" vertical={false} />
           <XAxis
             dataKey="date"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: '#71809D', fontSize: 12, fontWeight: 700 }}
+            tick={{
+              fill: 'var(--color-palette-blue-80)',
+              fontSize: 'var(--text-caption)',
+              fontWeight: 'var(--font-weight-bold)',
+            }}
             dy={10}
           />
           <YAxis
             domain={[0, 'dataMax + 20']}
             axisLine={false}
             tickLine={false}
-            tick={{ fill: '#71809D', fontSize: 12, fontWeight: 700 }}
+            tick={{
+              fill: 'var(--color-palette-blue-80)',
+              fontSize: 'var(--text-caption)',
+              fontWeight: 'var(--font-weight-bold)',
+            }}
             width={42}
           />
           <Tooltip
-            cursor={{ stroke: '#D6E9FF', strokeWidth: 1 }}
+            cursor={{ stroke: 'var(--color-track)', strokeWidth: 1 }}
             content={<LineChartTooltip seriesList={seriesList} />}
           />
           {visibleSeries.map(series => renderLineSeries(series, isAnimationActive))}
         </RechartsLineChart>
       </ResponsiveContainer>
       {!visibleSeries.length ? (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm font-bold text-[#9AA6BD]">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm font-bold text-palette-blue-62">
           표시할 범례를 선택하세요
         </div>
       ) : null}
@@ -962,7 +973,7 @@ function ChartLegend({ seriesList }) {
       {seriesList.map(series => (
         <span
           key={series.key ?? series.label}
-          className="inline-flex h-8 items-center gap-2 rounded-full bg-white px-3 text-[0.82rem] font-bold text-[#33415B]"
+          className="inline-flex h-8 items-center gap-2 rounded-full bg-white px-3 text-size-0-82rem font-bold text-palette-blue-101"
         >
           <span
             className="h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-white"
@@ -977,17 +988,17 @@ function ChartLegend({ seriesList }) {
 
 const detailMetricHeaderClass = 'w-[8.5rem] min-w-[8.5rem] px-4 py-3 text-right';
 const detailMetricCellClass =
-  'w-[8.5rem] min-w-[8.5rem] border-b border-[#EEF2F7] px-4 py-3 text-right';
+  'w-[8.5rem] min-w-[8.5rem] border-b border-border-row px-4 py-3 text-right';
 const detailRankHeaderClass = 'w-14 min-w-14 px-2 py-3 text-center';
 const detailRankCellClass =
-  'w-14 min-w-14 border-b border-[#EEF2F7] px-2 py-3 text-center text-[#8A94A6]';
+  'w-14 min-w-14 border-b border-border-row px-2 py-3 text-center text-palette-blue-72';
 const chartAnimationDuration = 520;
 
 function StatusCountCell({ value, color }) {
   return (
     <td className={detailMetricCellClass}>
       <span style={{ color }}>{value.toLocaleString()}</span>
-      <span className="text-[#33415B]">건</span>
+      <span className="text-palette-blue-101">건</span>
     </td>
   );
 }
@@ -1012,10 +1023,10 @@ function DashboardDetailTable({
 
   if (variant === 'status') {
     return (
-      <div className="overflow-x-auto rounded-[var(--app-radius-lg)] border border-[#ECEFF5] bg-white shadow-[0_0.5rem_1.5rem_rgba(15,23,42,0.06)]">
+      <div className="overflow-x-auto rounded-[var(--app-radius-lg)] border border-border-panel bg-white shadow-table">
         <table className="w-full min-w-[34rem] border-separate border-spacing-0 text-left">
           <thead>
-            <tr className="bg-[linear-gradient(180deg,#F8FAFF_0%,#F2F5FC_100%)] text-[0.82rem] font-black text-[#59627A]">
+            <tr className="bg-[linear-gradient(180deg,var(--color-table-header-start)_0%,var(--color-table-header-end)_100%)] text-size-0-82rem font-black text-palette-blue-93">
               <th className={detailRankHeaderClass}>순위</th>
               <th className="px-4 py-3">{subjectLabel}</th>
               <th className="px-4 py-3 text-right">전체 횟수</th>
@@ -1024,9 +1035,9 @@ function DashboardDetailTable({
           </thead>
           <tbody>
             {rows.map((row, index) => (
-              <tr key={row.label} className="text-[0.9rem] font-bold text-[#33415B]">
+              <tr key={row.label} className="text-size-0-9rem font-bold text-palette-blue-101">
                 <td className={detailRankCellClass}>{index + 1}</td>
-                <td className="border-b border-[#EEF2F7] px-4 py-3 text-[#11182E]">
+                <td className="border-b border-border-row px-4 py-3 text-heading">
                   <span className="inline-flex items-center gap-2">
                     <span
                       className="h-2.5 w-2.5 rounded-full"
@@ -1035,10 +1046,10 @@ function DashboardDetailTable({
                     {row.label}
                   </span>
                 </td>
-                <td className="border-b border-[#EEF2F7] px-4 py-3 text-right text-[#11182E]">
+                <td className="border-b border-border-row px-4 py-3 text-right text-heading">
                   {row.total.toLocaleString()}건
                 </td>
-                <td className="border-b border-[#EEF2F7] px-4 py-3 text-right text-[#075DF6]">
+                <td className="border-b border-border-row px-4 py-3 text-right text-brand">
                   {row.ratio}%
                 </td>
               </tr>
@@ -1050,10 +1061,10 @@ function DashboardDetailTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-[var(--app-radius-lg)] border border-[#ECEFF5] bg-white shadow-[0_0.5rem_1.5rem_rgba(15,23,42,0.06)]">
+    <div className="overflow-x-auto rounded-[var(--app-radius-lg)] border border-border-panel bg-white shadow-table">
       <table className="w-full min-w-[50rem] border-separate border-spacing-0 text-left">
         <thead>
-          <tr className="bg-[linear-gradient(180deg,#F8FAFF_0%,#F2F5FC_100%)] text-[0.82rem] font-black text-[#59627A]">
+          <tr className="bg-[linear-gradient(180deg,var(--color-table-header-start)_0%,var(--color-table-header-end)_100%)] text-size-0-82rem font-black text-palette-blue-93">
             <th className={detailRankHeaderClass}>순위</th>
             <th className="px-4 py-3">{subjectLabel}</th>
             {showEnabledColumn ? <th className="px-4 py-3 text-center">사용 여부</th> : null}
@@ -1072,9 +1083,9 @@ function DashboardDetailTable({
         </thead>
         <tbody>
           {rows.map((row, index) => (
-            <tr key={row.label} className="text-[0.9rem] font-bold text-[#33415B]">
+            <tr key={row.label} className="text-size-0-9rem font-bold text-palette-blue-101">
               <td className={detailRankCellClass}>{index + 1}</td>
-              <td className="border-b border-[#EEF2F7] px-4 py-3 text-[#11182E]">
+              <td className="border-b border-border-row px-4 py-3 text-heading">
                 {subjectVariant === 'service' ? (
                   <span className="inline-flex min-w-0 items-center gap-2.5">
                     <ServiceLogoBadge name={row.label} variant="compact" />
@@ -1087,19 +1098,19 @@ function DashboardDetailTable({
               {showEnabledColumn ? (
                 <td
                   className={cn(
-                    'border-b border-[#EEF2F7] px-4 py-3 text-center font-black',
-                    row.enabled ? 'text-[#075DF6]' : 'text-[#8A94A6]'
+                    'border-b border-border-row px-4 py-3 text-center font-black',
+                    row.enabled ? 'text-brand' : 'text-palette-blue-72'
                   )}
                 >
                   {row.enabled ? 'ON' : 'OFF'}
                 </td>
               ) : null}
               {showMembersColumn ? (
-                <td className="border-b border-[#EEF2F7] px-4 py-3 text-right text-[#11182E]">
+                <td className="border-b border-border-row px-4 py-3 text-right text-heading">
                   {row.members.toLocaleString()}명
                 </td>
               ) : null}
-              <td className={cn(detailMetricCellClass, 'text-[#11182E]')}>
+              <td className={cn(detailMetricCellClass, 'text-heading')}>
                 {row.total.toLocaleString()}건
               </td>
               <StatusCountCell value={row.statuses.normal} color={STATUS_COLORS.normal} />
@@ -1127,23 +1138,14 @@ export default function DashboardPage() {
   const [hiddenDonutSegmentLabels, setHiddenDonutSegmentLabels] = useState([]);
   const [hiddenPolicyLabels, setHiddenPolicyLabels] = useState([]);
   const [hiddenServiceLabels, setHiddenServiceLabels] = useState([]);
-  const [chartEntryVersion, setChartEntryVersion] = useState(0);
-  const [shouldAnimateCharts, setShouldAnimateCharts] = useState(true);
   const detailChartEntrySignature = `${activeDashboardTab}:${userChartView}`;
 
-  useEffect(() => {
-    setChartEntryVersion(current => current + 1);
-    setShouldAnimateCharts(true);
-
-    const timeoutId = window.setTimeout(() => {
-      setShouldAnimateCharts(false);
-    }, chartAnimationDuration + 160);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [detailChartEntrySignature]);
+  const { version: chartEntryVersion, active: shouldAnimateCharts } = useEntryAnimation(
+    detailChartEntrySignature,
+    chartAnimationDuration + 160
+  );
 
   const isAllTab = activeDashboardTab === 'all';
-  const isStatusTab = activeDashboardTab === 'status';
   const showSubTabCharts = ['status', 'policy', 'service', 'organization'].includes(
     activeDashboardTab
   );
@@ -1368,7 +1370,7 @@ export default function DashboardPage() {
             </DashboardPanel>
           </section>
           <section className="grid gap-3">
-            <h2 className="px-1 text-[1.12rem] font-bold tracking-[-0.03em] text-[#11182E] xl:text-[1.18rem]">
+            <h2 className="px-1 text-size-1-12rem font-bold tracking-heading text-heading xl:text-size-1-18rem">
               {subTabChartConfig.tableTitle}
             </h2>
             <DashboardDetailTable

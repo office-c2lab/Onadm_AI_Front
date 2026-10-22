@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   Trash2,
 } from 'lucide-react';
-import AppButton from '../components/AppButton.jsx';
+import AppButton from '../../../../../components/ui/Button.jsx';
 import downloadBannerImage from '../../../../../assets/images/downloadbanner.png';
 import packIcon from '../../../../../assets/images/pac.png';
 import { useTemplateSettingsQuery } from '../queries/companySettingsQueries.js';
@@ -69,7 +69,7 @@ const verifyItems = [
 function Section({ children, className = '', ...props }) {
   return (
     <section
-      className={`scroll-mt-28 rounded-[18px] border border-[#E5EAF3] bg-white p-8 shadow-[0_16px_42px_rgba(15,23,42,0.07)] ${className}`.trim()}
+      className={`scroll-mt-28 rounded-metric border border-palette-blue-29 bg-white p-8 shadow-detail-20 ${className}`.trim()}
       {...props}
     >
       {children}
@@ -80,8 +80,8 @@ function Section({ children, className = '', ...props }) {
 function SectionHeader({ title, description }) {
   return (
     <div className="max-w-[52rem]">
-      <h2 className="text-[1.75rem] font-black tracking-[-0.03em] text-slate-900">{title}</h2>
-      <p className="mt-3 whitespace-pre-line text-base font-semibold leading-7 text-[#526078]">
+      <h2 className="text-size-1-75rem font-black tracking-heading text-slate-900">{title}</h2>
+      <p className="mt-3 whitespace-pre-line text-base font-semibold leading-7 text-text-action">
         {description}
       </p>
     </div>
@@ -92,14 +92,14 @@ function CompactGuideCard({ icon, number, title, description }) {
   const Icon = icon;
 
   return (
-    <div className="relative flex min-h-[13rem] flex-col items-center justify-center rounded-[14px] border border-[#E3E8F2] bg-white px-6 py-6 text-center shadow-[0_12px_28px_rgba(15,23,42,0.07)]">
-      <span className="absolute left-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#075DF6] text-sm font-black text-white shadow-[0_8px_18px_rgba(7,93,246,0.22)]">
+    <div className="relative flex min-h-[13rem] flex-col items-center justify-center rounded-detail-05 border border-divider bg-white px-6 py-6 text-center shadow-detail-21">
+      <span className="absolute left-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-brand text-sm font-black text-white shadow-detail-22">
         {number}
       </span>
-      <Icon className="h-12 w-12 text-[#075DF6]" />
+      <Icon className="h-12 w-12 text-brand" />
       <div className="mt-5 min-h-[5rem]">
         <h3 className="text-lg font-black text-slate-900">{title}</h3>
-        <p className="mt-3 whitespace-pre-line text-sm font-semibold leading-6 text-[#526078]">
+        <p className="mt-3 whitespace-pre-line text-sm font-semibold leading-6 text-text-action">
           {description}
         </p>
       </div>
@@ -134,23 +134,23 @@ export default function DownloadPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F3F6FA] text-[#111827]">
+    <main className="min-h-screen bg-palette-blue-16 text-text-primary">
       <header className="sticky top-0 z-30 h-[4.5rem] bg-black">
         <div className="mx-auto flex h-full max-w-[min(100%,80rem)] items-center justify-between px-8">
           <div className="flex items-center">
             <img src={template.logoSrc} alt="ONDAM AI" className="h-8 w-auto" />
           </div>
           <nav className="hidden items-center gap-10 text-sm font-bold text-white md:flex">
-            <a href="#apply" className="transition hover:text-[#B8DEFF]">
+            <a href="#apply" className="transition hover:text-palette-blue-45">
               설치 안내
             </a>
-            <a href="#pack-download" className="transition hover:text-[#B8DEFF]">
+            <a href="#pack-download" className="transition hover:text-palette-blue-45">
               다운로드
             </a>
-            <a href="#delete" className="transition hover:text-[#B8DEFF]">
+            <a href="#delete" className="transition hover:text-palette-blue-45">
               삭제 안내
             </a>
-            <a href="#contact" className="transition hover:text-[#B8DEFF]">
+            <a href="#contact" className="transition hover:text-palette-blue-45">
               문의하기
             </a>
           </nav>
@@ -158,18 +158,18 @@ export default function DownloadPage() {
       </header>
 
       <section
-        className="relative flex min-h-[25rem] items-center justify-center overflow-hidden bg-[#080B28] bg-cover px-6 text-white"
+        className="relative flex min-h-[25rem] items-center justify-center overflow-hidden bg-palette-blue-119 bg-cover px-6 text-white"
         style={{
           backgroundImage: `url(${downloadBannerImage})`,
           backgroundPosition: 'center bottom',
         }}
       >
         <div className="relative z-10 mx-auto max-w-[min(100%,51.25rem)] text-center">
-          <h1 className="text-[clamp(2.4rem,5vw,4.2rem)] font-bold leading-tight tracking-[-0.02em]">
-            운영지원
-          </h1>
+          <h1 className="text-fluid-58 font-bold leading-tight tracking-title">운영지원</h1>
           <p className="mx-auto mt-6 max-w-[42rem] text-xl font-semibold leading-8 ">
-            ONDAM AI 적용에 필요한 압축 파일을 다운로드하고<br />실행 및 적용 방법을 확인해 주세요.
+            ONDAM AI 적용에 필요한 압축 파일을 다운로드하고
+            <br />
+            실행 및 적용 방법을 확인해 주세요.
           </p>
           <div className="mt-9 flex flex-wrap justify-center">
             <AppButton
@@ -217,22 +217,22 @@ export default function DownloadPage() {
             }
           />
 
-          <div className="mt-8 rounded-xl border border-[#DDE4EF] bg-[#FAFBFF] p-6">
+          <div className="mt-8 rounded-xl border border-palette-blue-35 bg-palette-blue-03 p-6">
             <div className="grid gap-6 lg:grid-cols-[10rem_1fr_auto] lg:items-center">
               <img src={packIcon} alt="" className="h-40 w-40 object-contain" />
               <div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="break-all text-[clamp(1.35rem,3vw,2rem)] font-black tracking-[-0.03em] text-slate-900">
+                  <h3 className="break-all text-fluid-54 font-black tracking-heading text-slate-900">
                     Windows 설정 패키지
                   </h3>
                 </div>
-                <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm font-bold text-[#64728C]">
+                <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm font-bold text-palette-blue-84">
                   <span>버전 v0.1.0</span>
                   <span>업데이트 2026.07.08</span>
                   <span>파일 형식 .zip</span>
                   <span>크기 4KB</span>
                 </div>
-                <p className="mt-6 text-base font-semibold text-[#526078]">
+                <p className="mt-6 text-base font-semibold text-text-action">
                   ONDAM AI 정책 및 환경 설정 적용을 위한 압축 파일입니다.
                 </p>
               </div>
@@ -249,22 +249,22 @@ export default function DownloadPage() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-xl border border-[#DDE4EF] bg-[#FAFBFF] p-6">
+          <div className="mt-6 rounded-xl border border-palette-blue-35 bg-palette-blue-03 p-6">
             <div className="grid gap-6 lg:grid-cols-[10rem_1fr_auto] lg:items-center">
               <img src={packIcon} alt="" className="h-40 w-40 object-contain" />
               <div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="break-all text-[clamp(1.35rem,3vw,2rem)] font-black tracking-[-0.03em] text-slate-900">
+                  <h3 className="break-all text-fluid-54 font-black tracking-heading text-slate-900">
                     Windows 설치 프로그램
                   </h3>
                 </div>
-                <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm font-bold text-[#64728C]">
+                <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm font-bold text-palette-blue-84">
                   <span>버전 v0.1.0</span>
                   <span>업데이트 2026.07.21</span>
                   <span>파일 형식 .msi</span>
                   <span>크기 340KB</span>
                 </div>
-                <p className="mt-6 text-base font-semibold text-[#526078]">
+                <p className="mt-6 text-base font-semibold text-text-action">
                   ONDAM AI를 설치할 수 있는 Windows 설치 파일입니다.
                 </p>
               </div>
@@ -281,22 +281,22 @@ export default function DownloadPage() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-xl border border-[#DDE4EF] bg-[#FAFBFF] p-6">
+          <div className="mt-6 rounded-xl border border-palette-blue-35 bg-palette-blue-03 p-6">
             <div className="grid gap-6 lg:grid-cols-[10rem_1fr_auto] lg:items-center">
               <img src={packIcon} alt="" className="h-40 w-40 object-contain" />
               <div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="break-all text-[clamp(1.35rem,3vw,2rem)] font-black tracking-[-0.03em] text-slate-900">
+                  <h3 className="break-all text-fluid-54 font-black tracking-heading text-slate-900">
                     macOS 설정 패키지
                   </h3>
                 </div>
-                <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm font-bold text-[#64728C]">
+                <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm font-bold text-palette-blue-84">
                   <span>버전 v0.1.0</span>
                   <span>업데이트 2026.07.08</span>
                   <span>파일 형식 .zip</span>
                   <span>크기 6KB</span>
                 </div>
-                <p className="mt-6 text-base font-semibold text-[#526078]">
+                <p className="mt-6 text-base font-semibold text-text-action">
                   macOS 환경에서 ONDAM AI 정책 및 환경 설정을 적용하기 위한 압축 파일입니다.
                 </p>
               </div>
@@ -323,15 +323,15 @@ export default function DownloadPage() {
             {cautionItems.map(([title, description]) => (
               <div
                 key={title}
-                className="flex min-h-[5.75rem] items-start gap-4 rounded-[10px] border border-[#E3E8F2] bg-[#FAFBFF] px-5 py-4"
+                className="flex min-h-[5.75rem] items-start gap-4 rounded-control border border-divider bg-palette-blue-03 px-5 py-4"
               >
                 <CircleCheck
-                  className="mt-1 h-5 w-5 shrink-0 fill-[#168BFF] text-[#168BFF] [&>path:last-child]:stroke-white"
+                  className="mt-1 h-5 w-5 shrink-0 fill-palette-blue-79 text-palette-blue-79 [&>path:last-child]:stroke-white"
                   strokeWidth={3}
                 />
                 <div className="min-w-0">
                   <p className="text-base font-black text-slate-900">{title}</p>
-                  <p className="mt-1 whitespace-pre-line text-sm font-semibold leading-6 text-[#526078]">
+                  <p className="mt-1 whitespace-pre-line text-sm font-semibold leading-6 text-text-action">
                     {description}
                   </p>
                 </div>
@@ -380,15 +380,15 @@ export default function DownloadPage() {
             {verifyItems.map(([title, description]) => (
               <div
                 key={title}
-                className="flex min-h-[5.75rem] items-start gap-4 rounded-[10px] border border-[#E3E8F2] bg-[#FAFBFF] px-5 py-4"
+                className="flex min-h-[5.75rem] items-start gap-4 rounded-control border border-divider bg-palette-blue-03 px-5 py-4"
               >
                 <CircleCheck
-                  className="mt-1 h-5 w-5 shrink-0 fill-[#168BFF] text-[#168BFF] [&>path:last-child]:stroke-white"
+                  className="mt-1 h-5 w-5 shrink-0 fill-palette-blue-79 text-palette-blue-79 [&>path:last-child]:stroke-white"
                   strokeWidth={3}
                 />
                 <div className="min-w-0">
                   <h3 className="text-base font-black text-slate-900">{title}</h3>
-                  <p className="mt-1 text-sm font-semibold leading-6 text-[#526078]">
+                  <p className="mt-1 text-sm font-semibold leading-6 text-text-action">
                     {description}
                   </p>
                 </div>
@@ -403,38 +403,38 @@ export default function DownloadPage() {
             description="압축 파일 다운로드, 실행 또는 적용 중 문제가 발생하면 관리자에게 문의해 주세요."
           />
           <div className="mt-8 grid gap-4 lg:grid-cols-[1.3fr_1fr_1fr]">
-            <div className="flex items-center gap-5 rounded-[10px] border border-[#E3E8F2] bg-[#FAFBFF] px-10 py-7">
+            <div className="flex items-center gap-5 rounded-control border border-divider bg-palette-blue-03 px-10 py-7">
               <img src={template.logoSrc} alt="" className="h-20 w-20 shrink-0 object-contain" />
               <div>
                 <p className="text-base font-black text-slate-900">{template.companyName}</p>
-                <p className="mt-2 text-base font-bold leading-7 text-[#526078]">
+                <p className="mt-2 text-base font-bold leading-7 text-text-action">
                   {template.companyDescription}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-5 rounded-[10px] border border-[#E3E8F2] bg-[#FAFBFF] px-10 py-7">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#075DF6] text-[#F2F8FF]">
+            <div className="flex items-center gap-5 rounded-control border border-divider bg-palette-blue-03 px-10 py-7">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand text-palette-blue-11">
                 <Mail className="h-8 w-8" />
               </div>
               <div>
                 <p className="text-base font-black text-slate-900">이메일</p>
-                <p className="mt-2 text-base font-bold text-[#526078]">{template.adminEmail}</p>
+                <p className="mt-2 text-base font-bold text-text-action">{template.adminEmail}</p>
               </div>
             </div>
-            <div className="flex items-center gap-5 rounded-[10px] border border-[#E3E8F2] bg-[#FAFBFF] px-10 py-7">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#075DF6] text-[#F2F8FF]">
+            <div className="flex items-center gap-5 rounded-control border border-divider bg-palette-blue-03 px-10 py-7">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand text-palette-blue-11">
                 <Phone className="h-8 w-8" />
               </div>
               <div>
                 <p className="text-base font-black text-slate-900">전화</p>
-                <p className="mt-2 text-base font-bold text-[#526078]">{template.adminPhone}</p>
+                <p className="mt-2 text-base font-bold text-text-action">{template.adminPhone}</p>
               </div>
             </div>
           </div>
         </Section>
       </div>
 
-      <footer className="mt-2 bg-[#101722]">
+      <footer className="mt-2 bg-palette-blue-118">
         <div className="mx-auto flex max-w-[min(100%,80rem)] flex-col gap-4 px-8 py-8 text-sm font-semibold text-white/62 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-8">
             <div className="flex items-center">
@@ -448,4 +448,3 @@ export default function DownloadPage() {
     </main>
   );
 }
-

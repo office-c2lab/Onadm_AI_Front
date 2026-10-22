@@ -12,10 +12,10 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import AppButton from '../components/AppButton.jsx';
-import AppSearchField from '../components/AppSearchField.jsx';
-import FixedPaginationBar from '../components/FixedPaginationBar.jsx';
-import { getServiceLogo } from '../components/ServiceLogoBadge.jsx';
+import AppButton from '../../../../../components/ui/Button.jsx';
+import AppSearchField from '../../../../../components/ui/SearchField.jsx';
+import FixedPaginationBar from '../../../../../components/pagination/FixedPaginationBar.jsx';
+import { getServiceLogo } from '../../../../../components/identity/serviceLogos.js';
 import {
   DateRangePicker,
   MonitoringActionButton,
@@ -27,7 +27,7 @@ import {
   APP_PAGE_HORIZONTAL_PADDING_CLASS,
   APP_PAGE_INNER_WIDTH_CLASS,
   APP_PAGE_OUTER_WIDTH_CLASS,
-} from '../constants/contentLayout.js';
+} from '../../../../../styles/layout.js';
 import { getStatusTextClassName as getStatusColorClassName } from '../constants/statusColors.js';
 import useAdaptiveRowsPerPage from '../hooks/useAdaptiveRowsPerPage.js';
 import { useDropdownSelectOptionsQuery } from '../queries/dropdownSettingsQueries.js';
@@ -80,9 +80,10 @@ function normalizeMonitoringEvent(event, index) {
   if (event.detectedAt) {
     const originalPrompt = getOriginalPromptDetail(event);
     const forwardedPrompt = getForwardedPromptDetail(event);
-    const displayPrompt = getLogStatusCategory(event) === 'normal' && (!forwardedPrompt || forwardedPrompt === '-')
-      ? originalPrompt
-      : forwardedPrompt;
+    const displayPrompt =
+      getLogStatusCategory(event) === 'normal' && (!forwardedPrompt || forwardedPrompt === '-')
+        ? originalPrompt
+        : forwardedPrompt;
     const eventId = event.id ?? event.event_id ?? event.no ?? `${event.detectedAt}-${index}`;
 
     return {
@@ -110,9 +111,8 @@ function normalizeMonitoringEvent(event, index) {
   const isNormal = result === '정상';
   const originalPrompt = getOriginalPromptDetail(event);
   const forwardedPrompt = getForwardedPromptDetail(event);
-  const displayPrompt = isNormal && (!forwardedPrompt || forwardedPrompt === '-')
-    ? originalPrompt
-    : forwardedPrompt;
+  const displayPrompt =
+    isNormal && (!forwardedPrompt || forwardedPrompt === '-') ? originalPrompt : forwardedPrompt;
   const answer = event.ai_response ?? '-';
   const userName =
     event.username ?? event.user_name ?? event.user ?? event.user_id ?? event.userId ?? '-';
@@ -441,16 +441,16 @@ function splitDetailLines(value) {
 }
 
 function DetailSectionLabel({ children }) {
-  return <div className="text-[13px] font-bold tracking-[-0.01em] text-[#075DF6]">{children}</div>;
+  return <div className="text-compact font-bold tracking-label text-brand">{children}</div>;
 }
 
 function DetailSummaryItem({ label, value, valueNode = null, valueClassName = '' }) {
   return (
     <div className="min-w-0">
-      <p className="text-[11px] font-semibold text-[#7C86A7]">{label}</p>
+      <p className="text-micro font-semibold text-palette-blue-77">{label}</p>
       {valueNode ?? (
         <p
-          className={`truncate pt-1 text-[13px] font-semibold tracking-[-0.01em] text-[#2E3A59] ${valueClassName}`.trim()}
+          className={`truncate pt-1 text-compact font-semibold tracking-label text-palette-blue-102 ${valueClassName}`.trim()}
         >
           {value}
         </p>
@@ -472,7 +472,7 @@ function ServiceSummaryValue({ service }) {
           loading="lazy"
         />
       ) : null}
-      <span className="truncate text-[13px] font-semibold tracking-[-0.01em] text-[#2E3A59]">
+      <span className="truncate text-compact font-semibold tracking-label text-palette-blue-102">
         {service}
       </span>
     </div>
@@ -852,17 +852,15 @@ function UserScopeFilterDropdown({
             }`.trim()}
           >
             <div className="flex min-h-[3.25rem] items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3">
-              <p className="text-sm font-semibold text-slate-900">
-                사용자 및 조직 필터
-              </p>
+              <p className="text-sm font-semibold text-slate-900">사용자 및 조직 필터</p>
               <button
                 type="button"
                 aria-expanded={isSelectionPanelOpen}
                 onClick={() => setIsSelectionPanelOpen(current => !current)}
-                className={`inline-flex h-[var(--app-control-xs)] shrink-0 items-center gap-1.5 rounded-[var(--app-radius-md)] border px-2.5 text-[clamp(0.74rem,0.84vw,0.8rem)] font-bold transition ${
+                className={`inline-flex h-[var(--app-control-xs)] shrink-0 items-center gap-1.5 rounded-[var(--app-radius-md)] border px-2.5 text-fluid-34 font-bold transition ${
                   isSelectionPanelOpen
-                    ? 'border-[#B6D9FF] bg-[#EFF6FF] text-[#075DF6]'
-                    : 'border-[#D7DEEA] bg-white text-[#667085] hover:border-[#B6D9FF] hover:text-[#075DF6]'
+                    ? 'border-toggle-off bg-selection text-brand'
+                    : 'border-palette-blue-43 bg-white text-text-muted hover:border-toggle-off hover:text-brand'
                 }`.trim()}
               >
                 선택 항목
@@ -942,7 +940,7 @@ function UserScopeFilterDropdown({
                         );
                       })}
                       {!filteredOptions.length ? (
-                        <p className="px-2 py-5 text-center text-[clamp(0.76rem,0.86vw,0.82rem)] font-medium text-[#98A2B3]">
+                        <p className="px-2 py-5 text-center text-fluid-36 font-medium text-text-disabled">
                           검색 결과가 없습니다.
                         </p>
                       ) : null}
@@ -957,7 +955,7 @@ function UserScopeFilterDropdown({
                   <button
                     type="button"
                     onClick={handleClearAll}
-                    className="h-[var(--app-control-md)] rounded-[var(--app-radius-md)] px-3 text-[clamp(0.78rem,0.88vw,0.84rem)] font-bold text-[#075DF6] transition hover:bg-[#EFF6FF]"
+                    className="h-[var(--app-control-md)] rounded-[var(--app-radius-md)] px-3 text-fluid-39 font-bold text-brand transition hover:bg-selection"
                   >
                     전체 초기화
                   </button>
@@ -967,7 +965,7 @@ function UserScopeFilterDropdown({
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="h-[var(--app-control-md)] min-w-[5rem] rounded-[var(--app-radius-md)] border border-[#D7DEEA] bg-white px-4 text-[clamp(0.8rem,0.9vw,0.86rem)] font-bold text-[#667085] transition hover:border-[#BCC7D8] hover:bg-[#F8FAFC]"
+                  className="h-[var(--app-control-md)] min-w-[5rem] rounded-[var(--app-radius-md)] border border-palette-blue-43 bg-white px-4 text-fluid-48 font-bold text-text-muted transition hover:border-palette-blue-48 hover:bg-slate-50"
                 >
                   취소
                 </button>
@@ -984,16 +982,12 @@ function UserScopeFilterDropdown({
           {isSelectionPanelOpen ? (
             <aside className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-900/10">
               <div className="flex min-h-[3.25rem] items-center border-b border-slate-200 bg-white px-4 py-3">
-                <p className="text-sm font-semibold text-slate-700">
-                  선택 항목
-                </p>
+                <p className="text-sm font-semibold text-slate-700">선택 항목</p>
               </div>
-              <div className="divide-y divide-[#E7EBF4] px-[var(--app-pad-md)]">
+              <div className="divide-y divide-border-subtle px-[var(--app-pad-md)]">
                 {activeFilterRows.map(row => (
                   <div key={row.queryKey} className="py-[var(--app-pad-sm)]">
-                    <p className="mb-2 text-[clamp(0.74rem,0.84vw,0.8rem)] font-black text-[#667085]">
-                      {row.title}
-                    </p>
+                    <p className="mb-2 text-fluid-34 font-black text-text-muted">{row.title}</p>
                     {row.filters.length ? (
                       <div className="flex min-w-0 flex-wrap gap-2">
                         {row.filters.map(filter => (
@@ -1002,7 +996,7 @@ function UserScopeFilterDropdown({
                             type="button"
                             onClick={() => handleRemoveActiveFilter(filter)}
                             aria-label={`${filter.title} ${filter.label} 필터 해제`}
-                            className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-[#B6D9FF] bg-[#EFF6FF] px-2.5 py-1 text-[clamp(0.74rem,0.84vw,0.8rem)] font-bold text-[#075DF6] transition hover:bg-[#DEEEFF]"
+                            className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-toggle-off bg-selection px-2.5 py-1 text-fluid-34 font-bold text-brand transition hover:bg-focus-ring"
                           >
                             <span className="truncate">{filter.label}</span>
                             <X className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
@@ -1010,9 +1004,7 @@ function UserScopeFilterDropdown({
                         ))}
                       </div>
                     ) : (
-                      <span className="text-[clamp(0.74rem,0.84vw,0.8rem)] font-medium text-[#98A2B3]">
-                        전체
-                      </span>
+                      <span className="text-fluid-34 font-medium text-text-disabled">전체</span>
                     )}
                   </div>
                 ))}
@@ -1043,13 +1035,13 @@ function PromptVisibilityToggle({ showOriginal, onToggle, label }) {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[13px] font-bold text-[#075DF6]">{buttonText}</span>
+      <span className="text-compact font-bold text-brand">{buttonText}</span>
       <button
         type="button"
         aria-label={buttonText}
         aria-pressed={showOriginal}
         onClick={onToggle}
-        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#F4F6FA] text-[#075DF6] transition hover:bg-[#EFF6FF]"
+        className="flex h-8 w-8 items-center justify-center rounded-lg bg-palette-blue-13 text-brand transition hover:bg-selection"
       >
         <ToggleIcon className="h-4 w-4" />
       </button>
@@ -1060,8 +1052,8 @@ function PromptVisibilityToggle({ showOriginal, onToggle, label }) {
 function DetailPanelText({ children, subtle = false }) {
   return (
     <div
-      className={`monitoring-detail-scroll max-h-[min(28vh,13.75rem)] min-w-0 overflow-y-auto rounded-[var(--app-radius-sm)] border border-[#D6E9FF] bg-[#FCFDFF] px-[var(--app-pad-sm)] py-[var(--app-pad-xs)] text-[clamp(0.74rem,0.87vw,0.78rem)] leading-[1.7] whitespace-pre-wrap break-words [overflow-wrap:anywhere] ${
-        subtle ? 'text-[#5B6686]' : 'text-[#2F3A56]'
+      className={`monitoring-detail-scroll max-h-[min(28vh,13.75rem)] min-w-0 overflow-y-auto rounded-[var(--app-radius-sm)] border border-track bg-palette-blue-02 px-[var(--app-pad-sm)] py-[var(--app-pad-xs)] text-fluid-35 leading-detail-05 whitespace-pre-wrap break-words [overflow-wrap:anywhere] ${
+        subtle ? 'text-palette-blue-90' : 'text-palette-blue-103'
       }`.trim()}
     >
       {children}
@@ -1071,14 +1063,14 @@ function DetailPanelText({ children, subtle = false }) {
 
 function getUserBubbleClassName(statusCategory) {
   if (statusCategory === 'masking') {
-    return 'rounded-tr-[4px] border border-[#FACC15] bg-[#FEF3C7] text-[#854D0E]';
+    return 'rounded-tr-[4px] border border-palette-yellow-03 bg-palette-yellow-01 text-palette-orange-04';
   }
 
   if (statusCategory === 'block') {
-    return 'rounded-tr-[4px] border border-[#FDA4AF] bg-[#FEE2E2] text-[#991B1B]';
+    return 'rounded-tr-[4px] border border-palette-red-05 bg-palette-red-04 text-palette-red-10';
   }
 
-  return 'rounded-tr-[4px] bg-[#075DF6] text-white';
+  return 'rounded-tr-[4px] bg-brand text-white';
 }
 
 function escapeRegExp(value) {
@@ -1098,7 +1090,7 @@ function HighlightedConversationText({ text, searchTerm }) {
     part.toLowerCase() === normalizedSearchTerm.toLowerCase() ? (
       <mark
         key={`${part}-${index}`}
-        className="rounded-[3px] bg-[#FDE68A] px-0.5 font-bold text-[#78350F]"
+        className="rounded-detail-07 bg-palette-yellow-02 px-0.5 font-bold text-palette-orange-05"
       >
         {part}
       </mark>
@@ -1152,7 +1144,7 @@ function ConversationMessage({
       }`.trim()}
     >
       {isAssistant ? (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#B6D9FF] bg-white text-[#075DF6] shadow-[0_6px_14px_rgba(7, 93, 246,0.12)]">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-toggle-off bg-white text-brand shadow-detail-23">
           {assistantLogo ? (
             <img
               src={assistantLogo}
@@ -1170,11 +1162,11 @@ function ConversationMessage({
           isAssistant ? 'items-start' : 'items-end'
         }`.trim()}
       >
-        <span className="px-1 text-[11px] font-bold text-[#64728C]">{label}</span>
+        <span className="px-1 text-micro font-bold text-palette-blue-84">{label}</span>
         <div
-          className={`min-w-0 rounded-[14px] px-4 py-3 text-[clamp(0.74rem,0.87vw,0.78rem)] leading-[1.7] whitespace-pre-wrap break-words shadow-[0_8px_20px_rgba(15,23,42,0.06)] [overflow-wrap:anywhere] ${
+          className={`min-w-0 rounded-detail-05 px-4 py-3 text-fluid-35 leading-detail-05 whitespace-pre-wrap break-words shadow-detail-24 [overflow-wrap:anywhere] ${
             isAssistant
-              ? 'rounded-tl-[4px] border border-[#D6E9FF] bg-white text-[#2F3A56]'
+              ? 'rounded-tl-[4px] border border-track bg-white text-palette-blue-103'
               : getUserBubbleClassName(statusCategory)
           }`.trim()}
         >
@@ -1182,7 +1174,7 @@ function ConversationMessage({
         </div>
       </div>
       {isAssistant ? null : (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#075DF6] text-white">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-white">
           <Icon className="h-4 w-4" />
         </div>
       )}
@@ -1201,7 +1193,7 @@ function DetailConversationPreview({
   const serviceLogo = service ? getServiceLogo(service) : null;
 
   return (
-    <div className="monitoring-detail-scroll max-h-[min(44vh,22rem)] min-w-0 overflow-y-auto rounded-[10px] border border-[#E2E8F0] bg-[#F8FBFF] px-4 py-4">
+    <div className="monitoring-detail-scroll max-h-[min(44vh,22rem)] min-w-0 overflow-y-auto rounded-control border border-slate-200 bg-surface-hover px-4 py-4">
       <div className="flex min-w-0 flex-col gap-4">
         <ConversationMessage
           role="user"
@@ -1227,11 +1219,11 @@ function DetailConversationPreview({
 
 function DetailBulletList({ items, showMarkers = true, itemClassName = '' }) {
   return (
-    <ul className="monitoring-detail-scroll max-h-[min(28vh,13.75rem)] min-w-0 space-y-[var(--app-gap-xs)] overflow-y-auto rounded-[var(--app-radius-sm)] border border-[#D6E9FF] bg-[#FCFDFF] px-[var(--app-pad-sm)] py-[var(--app-pad-xs)] text-[clamp(0.74rem,0.87vw,0.78rem)] leading-[1.65] text-[#2F3A56]">
+    <ul className="monitoring-detail-scroll max-h-[min(28vh,13.75rem)] min-w-0 space-y-[var(--app-gap-xs)] overflow-y-auto rounded-[var(--app-radius-sm)] border border-track bg-palette-blue-02 px-[var(--app-pad-sm)] py-[var(--app-pad-xs)] text-fluid-35 leading-detail-06 text-palette-blue-103">
       {items.map(item => (
         <li key={item} className="flex min-w-0 gap-2">
           {showMarkers ? (
-            <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-[#075DF6]" />
+            <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-brand" />
           ) : null}
           <span className={`min-w-0 break-words [overflow-wrap:anywhere] ${itemClassName}`.trim()}>
             {item}
@@ -1733,7 +1725,7 @@ export function MonitoringLogView({
                     <MonitoringResetButton
                       onClick={handleResetFilters}
                       widthClass="w-[var(--app-control-lg)] min-w-[var(--app-control-lg)]"
-                      textClassName="shadow-[0_0.625rem_1.5rem_rgba(7, 93, 246,0.18)]"
+                      textClassName="shadow-detail-07"
                       aria-label="초기화"
                     />
                   </MonitoringIconButtonTooltip>
@@ -1765,15 +1757,15 @@ export function MonitoringLogView({
               </div>
             </div>
             <div className="mt-[var(--app-gap-lg)] flex items-center justify-between gap-[var(--app-gap-sm)]">
-              <p className="text-base font-semibold text-[#526078]">
+              <p className="text-base font-semibold text-text-action">
                 전체 로그 갯수 :{' '}
-                <span className="text-lg font-bold text-[#075DF6]">
+                <span className="text-lg font-bold text-brand">
                   {filteredLogs.length.toLocaleString()}
                 </span>{' '}
                 건
               </p>
               {downloadErrorMessage ? (
-                <p className="text-sm font-semibold text-[#E11D48]">{downloadErrorMessage}</p>
+                <p className="text-sm font-semibold text-rose-600">{downloadErrorMessage}</p>
               ) : null}
             </div>
           </div>
@@ -1803,41 +1795,41 @@ export function MonitoringLogView({
                       <div className="px-4 py-4">
                         <DetailSummaryItem label="탐지 일시" value={row.detectedAt} />
                       </div>
-                      <div className="border-t border-[#E7EBF5] px-4 py-4 md:border-t-0 md:border-l md:border-[#E7EBF5]">
+                      <div className="border-t border-palette-blue-25 px-4 py-4 md:border-t-0 md:border-l md:border-palette-blue-25">
                         <DetailSummaryItem
                           label="서비스"
                           value={row.aiType}
                           valueNode={<ServiceSummaryValue service={row.aiType} />}
                         />
                       </div>
-                      <div className="border-t border-[#E7EBF5] px-4 py-4 xl:border-t-0 xl:border-l xl:border-[#E7EBF5]">
+                      <div className="border-t border-palette-blue-25 px-4 py-4 xl:border-t-0 xl:border-l xl:border-palette-blue-25">
                         <DetailSummaryItem
                           label="처리 상태"
                           value={detail.actionStatus}
                           valueClassName={getStatusTextClassName(row)}
                         />
                       </div>
-                      <div className="border-t border-[#E7EBF5] px-4 py-4 md:border-t md:border-[#E7EBF5] xl:border-t-0 xl:border-l xl:border-[#E7EBF5]">
+                      <div className="border-t border-palette-blue-25 px-4 py-4 md:border-t md:border-palette-blue-25 xl:border-t-0 xl:border-l xl:border-palette-blue-25">
                         <DetailSummaryItem label="적용 정책" value={detail.policyName} />
                       </div>
-                      <div className="border-t border-[#E7EBF5] px-4 py-4">
+                      <div className="border-t border-palette-blue-25 px-4 py-4">
                         <DetailSummaryItem label="IP" value={row.userIp} />
                       </div>
-                      <div className="border-t border-[#E7EBF5] px-4 py-4 md:border-l md:border-[#E7EBF5]">
+                      <div className="border-t border-palette-blue-25 px-4 py-4 md:border-l md:border-palette-blue-25">
                         <DetailSummaryItem label="사용자명" value={row.userId ?? '-'} />
                       </div>
-                      <div className="border-t border-[#E7EBF5] px-4 py-4 xl:border-l xl:border-[#E7EBF5]">
+                      <div className="border-t border-palette-blue-25 px-4 py-4 xl:border-l xl:border-palette-blue-25">
                         <DetailSummaryItem label="부서" value={row.department ?? '-'} />
                       </div>
-                      <div className="border-t border-[#E7EBF5] px-4 py-4 md:border-l md:border-[#E7EBF5] xl:border-l xl:border-[#E7EBF5]">
+                      <div className="border-t border-palette-blue-25 px-4 py-4 md:border-l md:border-palette-blue-25 xl:border-l xl:border-palette-blue-25">
                         <DetailSummaryItem label="직책" value={row.position ?? '-'} />
                       </div>
                     </div>
                   </section>
 
-                  <section className="border-t border-[#E7EBF5] bg-white">
+                  <section className="border-t border-palette-blue-25 bg-white">
                     <div className="grid lg:grid-cols-2">
-                      <div className="min-w-0 border-b border-[#E7EBF5] lg:col-span-2">
+                      <div className="min-w-0 border-b border-palette-blue-25 lg:col-span-2">
                         <DetailPanel
                           title="입력 프롬프트 및 답변"
                           action={
@@ -1879,22 +1871,22 @@ export function MonitoringLogView({
                           />
                         </DetailPanel>
                       </div>
-                      <div className="min-w-0 border-b border-[#E7EBF5] lg:border-r lg:border-[#E7EBF5]">
+                      <div className="min-w-0 border-b border-palette-blue-25 lg:border-r lg:border-palette-blue-25">
                         <DetailPanel title="첨부된 파일">
                           <DetailFileList files={row.attachedFiles ?? []} />
                         </DetailPanel>
                       </div>
-                      <div className="min-w-0 border-b border-[#E7EBF5]">
+                      <div className="min-w-0 border-b border-palette-blue-25">
                         <DetailPanel title="첨부 파일 분석 결과">
                           <DetailAnalysisList results={row.attachmentAnalysisResults ?? []} />
                         </DetailPanel>
                       </div>
-                      <div className="min-w-0 border-b border-[#E7EBF5] lg:border-r lg:border-[#E7EBF5]">
+                      <div className="min-w-0 border-b border-palette-blue-25 lg:border-r lg:border-palette-blue-25">
                         <DetailPanel title="탐지 근거">
                           <DetailBulletList items={detail.evidenceLines} showMarkers={false} />
                         </DetailPanel>
                       </div>
-                      <div className="min-w-0 border-b border-[#E7EBF5]">
+                      <div className="min-w-0 border-b border-palette-blue-25">
                         <DetailPanel title="조치 내용">
                           <DetailBulletList
                             items={detail.actionLines}
@@ -1912,7 +1904,7 @@ export function MonitoringLogView({
           />
 
           {statusMessage ? (
-            <section className="mt-2 shrink-0 border-t border-dashed border-[#DCEAF1] px-6 py-4 text-center text-sm text-[#94A3B8]">
+            <section className="mt-2 shrink-0 border-t border-dashed border-palette-blue-34 px-6 py-4 text-center text-sm text-slate-400">
               {statusMessage}
             </section>
           ) : null}
@@ -1931,4 +1923,3 @@ export function MonitoringLogView({
 export default function MonitoringPage() {
   return <MonitoringLogView useStatusFilter />;
 }
-

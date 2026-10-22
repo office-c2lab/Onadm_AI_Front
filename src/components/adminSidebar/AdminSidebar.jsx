@@ -174,10 +174,10 @@ function SidebarSubLink({ item, onNavigate }) {
 
         return `group flex min-h-8 w-full items-center gap-2
           rounded-lg py-1.5 pl-9 pr-2.5
-          text-[13px] transition-colors ${
+          text-compact transition-colors ${
             active
-              ? 'bg-[#e8e8e8] font-medium text-[#0d0d0d]'
-              : 'text-[#777] hover:bg-[#f3f3f3] hover:text-[#0d0d0d]'
+              ? 'bg-palette-neutral-06 font-medium text-ink'
+              : 'text-palette-neutral-18 hover:bg-palette-neutral-01 hover:text-ink'
           }`;
       }}
     >
@@ -198,13 +198,13 @@ function SidebarGroup({ menu, expanded, onToggle, onNavigate }) {
   const active = isMenuActive(menu, location.pathname);
 
   const menuClassName = `group flex h-9 w-full items-center gap-2.5
-    rounded-lg px-2.5 text-left text-[16px]
-    transition-colors ${active ? 'bg-[#e8e8e8] ' : 'font-normal text-[#333] hover:bg-[#f1f1f1]'}`;
+    rounded-lg px-2.5 text-left text-body-md
+    transition-colors ${active ? 'bg-palette-neutral-06 ' : 'font-normal text-palette-neutral-27 hover:bg-palette-neutral-03'}`;
 
   const menuContent = (
     <>
       <Icon
-        className={`h-[18px] w-[18px] shrink-0 ${active ? 'text-[#0d0d0d]' : 'text-[#404040]'}`}
+        className={`h-[18px] w-[18px] shrink-0 ${active ? 'text-ink' : 'text-palette-neutral-24'}`}
         strokeWidth={1.75}
         aria-hidden="true"
       />
@@ -240,7 +240,7 @@ function SidebarGroup({ menu, expanded, onToggle, onNavigate }) {
             <ChevronDown
               className={`h-3.5 w-3.5 shrink-0
                 transition-transform duration-200 ${expanded ? 'rotate-180' : ''} ${
-                  active ? 'text-[#0d0d0d]' : 'text-[#999]'
+                  active ? 'text-ink' : 'text-palette-neutral-14'
                 }`}
               strokeWidth={1.75}
               aria-hidden="true"
@@ -270,7 +270,7 @@ export function AdminSidebarRail({ onOpen, onNavigate }) {
     <aside
       id="admin-sidebar-rail"
       className="flex h-full min-h-0 w-12 shrink-0 flex-col
-        border-r border-black/5 bg-white text-[#0d0d0d]"
+        border-r border-black/5 bg-white text-ink"
       aria-label="접힌 관리자 메뉴"
     >
       <div className="flex min-h-0 flex-1 flex-col items-center gap-1 px-1.5 py-3">
@@ -290,7 +290,7 @@ export function AdminSidebarRail({ onOpen, onNavigate }) {
             className="absolute inset-0 grid place-items-center
               rounded-lg bg-white opacity-0
               transition-[opacity,background-color]
-              hover:bg-[#ececec] focus:opacity-100
+              hover:bg-sidebar-hover focus:opacity-100
               group-hover:opacity-100"
             aria-label="사이드바 열기"
             aria-controls="admin-sidebar"
@@ -323,7 +323,9 @@ export function AdminSidebarRail({ onOpen, onNavigate }) {
                 className={`grid h-9 w-9 shrink-0
                   place-items-center rounded-lg
                   transition-colors ${
-                    active ? 'bg-[#e8e8e8] text-[#0d0d0d]' : 'text-[#333] hover:bg-[#ececec]'
+                    active
+                      ? 'bg-palette-neutral-06 text-ink'
+                      : 'text-palette-neutral-27 hover:bg-sidebar-hover'
                   }`}
                 aria-label={menu.label}
                 title={menu.label}
@@ -339,7 +341,7 @@ export function AdminSidebarRail({ onOpen, onNavigate }) {
       <div className="flex shrink-0 justify-center border-t border-black/5 px-1.5 py-3">
         <div
           className="grid h-8 w-8 place-items-center
-            rounded-full bg-[#e3e3e3] text-[#4b4b4b]"
+            rounded-full bg-palette-neutral-07 text-palette-neutral-22"
           aria-label="ONDAM AI 관리자 계정"
           title="ONDAM AI 관리자"
         >
@@ -384,9 +386,9 @@ export default function AdminSidebar({ className = '', onNavigate, onClose }) {
   return (
     <aside
       id="admin-sidebar"
-      className={`flex h-full min-h-0 w-[260px] shrink-0
+      className={`flex h-full min-h-0 w-[var(--layout-sidebar-width)] shrink-0
         flex-col border-r border-black/5 bg-white
-        text-[#0d0d0d] ${className}`.trim()}
+        text-ink ${className}`.trim()}
       aria-label="ONDAM AI 관리자 메뉴"
     >
       {/* 로고 */}
@@ -403,9 +405,9 @@ export default function AdminSidebar({ className = '', onNavigate, onClose }) {
           type="button"
           onClick={onClose}
           className="grid h-9 w-9 shrink-0 place-items-center
-            rounded-lg text-[#5d5d5d]
-            transition-colors hover:bg-[#ececec]
-            hover:text-[#0d0d0d]"
+            rounded-lg text-palette-neutral-19
+            transition-colors hover:bg-sidebar-hover
+            hover:text-ink"
           aria-label="사이드바 닫기"
           aria-controls="admin-sidebar"
           aria-expanded="true"
@@ -417,7 +419,7 @@ export default function AdminSidebar({ className = '', onNavigate, onClose }) {
       {/* 메뉴 */}
       <div
         className="min-h-0 flex-1 overflow-y-auto px-2 pb-4 pt-2
-          [scrollbar-color:#d9d9d9_transparent]
+          [scrollbar-color:var(--color-scrollbar)_transparent]
           [scrollbar-width:thin]"
       >
         <nav aria-label="관리자 주요 메뉴">
@@ -441,22 +443,22 @@ export default function AdminSidebar({ className = '', onNavigate, onClose }) {
         >
           <span
             className="grid h-8 w-8 shrink-0 place-items-center
-              rounded-full bg-[#e3e3e3] text-[#4b4b4b]"
+              rounded-full bg-palette-neutral-07 text-palette-neutral-22"
           >
             <Atom className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
           </span>
 
           <span className="min-w-0 flex-1">
             <span
-              className="block truncate text-[13px]
-                font-medium leading-[18px]"
+              className="block truncate text-compact
+                font-medium leading-detail-02"
             >
               ONDAM AI
             </span>
 
             <span
-              className="block truncate text-[11px]
-                leading-4 text-[#777]"
+              className="block truncate text-micro
+                leading-4 text-palette-neutral-18"
             >
               Administrator
             </span>

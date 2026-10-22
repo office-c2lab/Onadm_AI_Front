@@ -1,0 +1,76 @@
+:root {
+  --app-header-height: clamp(2.75rem, 3.9vw, 3.6rem);
+  --app-sidebar-width: clamp(10.5rem, 13.6vw, 12.75rem);
+  --app-sidebar-mobile-width: min(72vw, 13rem);
+  --app-page-outer-width: 88rem;
+  --app-page-inner-width: 74rem;
+  --app-page-x: clamp(0.875rem, 2vw, 1.5rem);
+  --app-page-y: clamp(1rem, 1.6vw, 1.4rem);
+  --app-page-top: clamp(1.1rem, 2vw, 1.8rem);
+  --app-page-bottom: clamp(2rem, 4vw, 3rem);
+  --app-gap-xs: clamp(0.35rem, 0.55vw, 0.5rem);
+  --app-gap-sm: clamp(0.5rem, 0.75vw, 0.75rem);
+  --app-gap-md: clamp(0.75rem, 1vw, 1rem);
+  --app-gap-lg: clamp(1rem, 1.4vw, 1.5rem);
+  --app-pad-xs: clamp(0.45rem, 0.65vw, 0.65rem);
+  --app-pad-sm: clamp(0.625rem, 0.9vw, 0.9rem);
+  --app-pad-md: clamp(0.875rem, 1.2vw, 1.25rem);
+  --app-pad-lg: clamp(1.125rem, 1.65vw, 1.75rem);
+  --app-control-xs: clamp(2rem, 2.5vw, 2.25rem);
+  --app-control-sm: clamp(2.25rem, 2.8vw, 2.5rem);
+  --app-control-md: clamp(2.5rem, 3.15vw, 2.75rem);
+  --app-control-lg: clamp(2.75rem, 3.4vw, 3rem);
+  --app-control-xl: clamp(3rem, 3.75vw, 3.25rem);
+  --app-radius-sm: clamp(0.375rem, 0.55vw, 0.5rem);
+  --app-radius-md: clamp(0.5rem, 0.75vw, 0.75rem);
+  --app-radius-lg: clamp(0.75rem, 1vw, 1rem);
+  --app-radius-xl: clamp(1rem, 1.45vw, 1.375rem);
+  --app-icon-xs: clamp(0.875rem, 1.1vw, 1rem);
+  --app-icon-sm: clamp(1rem, 1.25vw, 1.125rem);
+  --app-icon-md: clamp(1.125rem, 1.55vw, 1.375rem);
+  --app-icon-lg: clamp(1.5rem, 2.3vw, 2rem);
+  --app-table-min-width: min(100%, 64rem);
+  --app-modal-inset: clamp(0.875rem, 1.8vw, 1.5rem);
+  --app-modal-width-sm: clamp(22rem, 28vw, 25.5rem);
+  --app-modal-width-md: clamp(28rem, 37vw, 34rem);
+  --app-modal-width-lg: clamp(34rem, 44vw, 40rem);
+  --app-modal-width-xl: clamp(44rem, 58vw, 56rem);
+  --app-modal-max-height: clamp(34rem, 72vh, 46rem);
+  --app-modal-radius: clamp(0.625rem, 1vw, 1.125rem);
+  --layout-sidebar-width: 260px;
+  --layout-chat-sidebar-width: 292px;
+  --layout-sidebar-rail-width: 48px;
+  --control-font-size: clamp(13.2px, min(0.916667vw, 1.62963vh), 22px);
+  --control-font-size-mobile: clamp(15.4px, calc(13.2px + 0.30558vw), 17.6px);
+  --z-sidebar: 30;
+  --z-modal: 50;
+  --z-modal-raised: 100;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --app-header-height: clamp(3rem, 13vw, 3.4rem);
+    --app-sidebar-mobile-width: min(78vw, 15rem);
+    --app-page-outer-width: 100%;
+    --app-page-inner-width: 100%;
+    --app-page-x: clamp(0.875rem, 4.2vw, 1.25rem);
+    --app-page-y: clamp(0.875rem, 4vw, 1.2rem);
+    --app-page-top: clamp(1rem, 4.8vw, 1.5rem);
+    --app-table-min-width: min(58rem, 240vw);
+    --app-modal-inset: clamp(0.75rem, 4vw, 1rem);
+    --app-modal-width-sm: 100%;
+    --app-modal-width-md: 100%;
+    --app-modal-width-lg: 100%;
+    --app-modal-width-xl: 100%;
+  }
+}
+
+@media (min-width: 1441px) {
+  :root {
+    --app-page-outer-width: 88rem;
+    --app-page-inner-width: 74rem;
+  }
+}

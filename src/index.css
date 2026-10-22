@@ -1,4 +1,19 @@
 @import 'tailwindcss';
+@import './styles/tokens.css';
+@import './styles/artwork-tokens.css';
+@import './styles/layout-tokens.css';
+@import './styles/components.css';
+@import './styles/control.css';
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-focus-border);
+    outline-offset: 2px;
+  }
+}
 
 button:not(:disabled),
 a[href],

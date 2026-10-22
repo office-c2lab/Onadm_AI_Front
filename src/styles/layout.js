@@ -1,0 +1,10 @@
+export const APP_PAGE_OUTER_WIDTH_CLASS = 'max-w-[var(--app-page-outer-width)]';
+export const APP_PAGE_INNER_WIDTH_CLASS = 'max-w-[var(--app-page-inner-width)]';
+export const APP_PAGE_HORIZONTAL_PADDING_CLASS = 'px-[var(--app-page-x)]';
+export const APP_PAGE_TITLE_CLASS = 'text-page-title';
+export const APP_PAGE_TITLE_SUPPORT_CLASS = 'text-page-description';
+export const APP_PANEL_TITLE_CLASS = 'text-panel-title';
+export const APP_BODY_TEXT_CLASS = 'text-fluid-body';
+export const APP_META_TEXT_CLASS = 'text-meta';
+export const APP_SMALL_META_TEXT_CLASS = 'text-meta-sm';
+export const APP_BUTTON_TEXT_CLASS = 'text-button';

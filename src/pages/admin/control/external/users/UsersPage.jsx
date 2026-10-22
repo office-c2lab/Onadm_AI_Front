@@ -1,25 +1,26 @@
+import DialogLayer from '../../../../../components/ui/DialogLayer.jsx';
 import { Fragment, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
-import AppButton from '../components/AppButton.jsx';
-import AppSearchField from '../components/AppSearchField.jsx';
-import FixedPaginationBar from '../components/FixedPaginationBar.jsx';
-import SectionCard from '../components/SectionCard.jsx';
+import AppButton from '../../../../../components/ui/Button.jsx';
+import AppSearchField from '../../../../../components/ui/SearchField.jsx';
+import FixedPaginationBar from '../../../../../components/pagination/FixedPaginationBar.jsx';
+import SectionCard from '../../../../../components/ui/SectionCard.jsx';
 import {
   MonitoringIconButtonTooltip,
   MonitoringResetButton,
 } from '../components/monitoring/MonitoringListComponents.jsx';
 import {
-  monitoringTableCellClass,
-  monitoringTableClass,
-  monitoringTableHeadClass,
-  monitoringTableHeaderCellClass,
-  monitoringTableHeaderRowClass,
-  monitoringTableRowClass,
-  monitoringTableSurfaceClass,
-} from '../components/monitoring/monitoringTableStyles.js';
+  tableCellClass,
+  tableClass,
+  tableHeadClass,
+  tableHeaderCellClass,
+  tableHeaderRowClass,
+  tableRowClass,
+  tableSurfaceClass,
+} from '../../../../../styles/table.js';
 import useAdaptiveRowsPerPage from '../hooks/useAdaptiveRowsPerPage.js';
-import PageLayout from '../../components/PageLayout.jsx';
+import PageLayout from '../../../../../components/layout/PageLayout.jsx';
 import { useDropdownSelectOptionsQuery } from '../queries/dropdownSettingsQueries.js';
 import {
   useDeleteClientMutation,
@@ -103,8 +104,8 @@ function createUserDraft(user) {
 
 function DetailField({ label, children }) {
   return (
-    <div className="grid grid-cols-[4.4rem_1fr] items-center gap-3 text-[13px]">
-      <span className="font-semibold text-[#5E6A84]">{label}</span>
+    <div className="grid grid-cols-[4.4rem_1fr] items-center gap-3 text-compact">
+      <span className="font-semibold text-palette-blue-89">{label}</span>
       {children}
     </div>
   );
@@ -116,15 +117,15 @@ function TextInput({ value, onChange }) {
       type="text"
       value={value}
       onChange={event => onChange(event.target.value)}
-      className="h-10 w-full rounded-md border border-[#D7DDE8] bg-white px-3 text-[13px] font-medium text-[#344054] outline-none transition focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+      className="h-10 w-full rounded-md border border-palette-blue-44 bg-white px-3 text-compact font-medium text-text-secondary outline-none transition focus:border-focus-border focus:ring-4 focus:ring-focus-ring"
     />
   );
 }
 
 function DetailSection({ title, children, className = '' }) {
   return (
-    <section className={`border-[#E3E8F2] px-5 py-5 ${className}`.trim()}>
-      <h3 className="mb-4 text-[14px] font-bold text-[#23304A]">{title}</h3>
+    <section className={`border-divider px-5 py-5 ${className}`.trim()}>
+      <h3 className="mb-4 text-body-sm font-bold text-palette-blue-109">{title}</h3>
       <div className="space-y-3.5">{children}</div>
     </section>
   );
@@ -209,12 +210,12 @@ function UserDetailPanel({
 
         <DetailSection title="IP 정보" className="border-t xl:border-t-0">
           <DetailField label="고정 IP">
-            <div className="flex h-10 cursor-default select-none items-center rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-[13px] font-semibold text-[#344054]">
+            <div className="flex h-10 cursor-default select-none items-center rounded-md border border-slate-200 bg-slate-50 px-3 text-compact font-semibold text-text-secondary">
               {user.ip}
             </div>
           </DetailField>
           <DetailField label="운영체제">
-            <div className="flex h-10 cursor-default select-none items-center gap-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-[13px] font-semibold text-[#344054]">
+            <div className="flex h-10 cursor-default select-none items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-compact font-semibold text-text-secondary">
               {osIcon ? (
                 <img
                   src={osIcon.src}
@@ -255,7 +256,7 @@ function DeleteIpModal({ user, isDeleting = false, errorMessage = '', onClose, o
   ];
 
   return (
-    <div className="app-modal-stage z-[90]">
+    <DialogLayer onClose={onClose} className="app-modal-stage z-[90]">
       <button
         type="button"
         aria-label="등록 IP 삭제 닫기"
@@ -268,25 +269,22 @@ function DeleteIpModal({ user, isDeleting = false, errorMessage = '', onClose, o
         aria-labelledby="delete-ip-modal-title"
         className="app-modal-panel"
       >
-        <div className="app-modal-header flex items-center justify-between gap-[var(--app-gap-md)] border-b border-[#E7EBF4]">
-          <h3
-            id="delete-ip-modal-title"
-            className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-[#111827]"
-          >
+        <div className="app-modal-header flex items-center justify-between gap-[var(--app-gap-md)] border-b border-border-subtle">
+          <h3 id="delete-ip-modal-title" className="text-modal-title font-bold text-text-primary">
             등록 IP 삭제
           </h3>
           <button
             type="button"
             aria-label="닫기"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#8A93A5] transition hover:bg-[#F4F6FA] hover:text-[#075DF6]"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-palette-blue-73 transition hover:bg-palette-blue-13 hover:text-brand"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="app-modal-body">
-          <div className="space-y-1.5 text-sm font-semibold leading-6 text-[#4B5563]">
+          <div className="space-y-1.5 text-sm font-semibold leading-6 text-gray-600">
             <p>선택한 IP 등록 정보를 삭제하시겠습니까?</p>
             <p>사용자 정보도 함께 제거됩니다.</p>
             <p>적용 해제는 사용자 PC에서 삭제 파일 실행이 필요합니다.</p>
@@ -294,18 +292,18 @@ function DeleteIpModal({ user, isDeleting = false, errorMessage = '', onClose, o
 
           <div className="mt-6">
             <div className="flex items-center gap-3">
-              <span className="shrink-0 text-sm font-bold text-[#111827]">삭제 대상</span>
-              <span className="h-px flex-1 bg-[#E7EBF4]" />
+              <span className="shrink-0 text-sm font-bold text-text-primary">삭제 대상</span>
+              <span className="h-px flex-1 bg-border-subtle" />
             </div>
 
-            <dl className="mt-3 rounded-lg border border-[#E1E6EF] px-5 py-4">
+            <dl className="mt-3 rounded-lg border border-palette-blue-33 px-5 py-4">
               {deleteRows.map(row => (
                 <div
                   key={row.label}
-                  className="grid min-h-7 grid-cols-[7.2rem_1fr] items-center gap-2 text-[13px]"
+                  className="grid min-h-7 grid-cols-[7.2rem_1fr] items-center gap-2 text-compact"
                 >
-                  <dt className="font-extrabold text-[#526078]">{row.label}</dt>
-                  <dd className="truncate font-semibold text-[#2D3748]" title={row.value}>
+                  <dt className="font-extrabold text-text-action">{row.label}</dt>
+                  <dd className="truncate font-semibold text-palette-blue-107" title={row.value}>
                     {row.value}
                   </dd>
                 </div>
@@ -314,13 +312,13 @@ function DeleteIpModal({ user, isDeleting = false, errorMessage = '', onClose, o
           </div>
 
           {errorMessage ? (
-            <p className="mt-4 rounded-lg bg-[#FFF1F2] px-4 py-3 text-sm font-semibold text-[#E11D48]">
+            <p className="mt-4 rounded-lg bg-palette-red-01 px-4 py-3 text-sm font-semibold text-rose-600">
               {errorMessage}
             </p>
           ) : null}
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-[#E7EBF4] px-6 py-4">
+        <div className="flex justify-end gap-3 border-t border-border-subtle px-6 py-4">
           <AppButton
             variant="secondary"
             onClick={onClose}
@@ -339,7 +337,7 @@ function DeleteIpModal({ user, isDeleting = false, errorMessage = '', onClose, o
           </AppButton>
         </div>
       </div>
-    </div>
+    </DialogLayer>
   );
 }
 
@@ -546,40 +544,30 @@ export default function UserPage() {
         </div>
 
         <SectionCard className="overflow-hidden">
-          <div ref={tableAreaRef} className={monitoringTableSurfaceClass}>
+          <div ref={tableAreaRef} className={tableSurfaceClass}>
             <div className="overflow-hidden">
-              <table className={`${monitoringTableClass} text-left`}>
-                <thead className={monitoringTableHeadClass}>
-                  <tr className={monitoringTableHeaderRowClass}>
-                    <th className={`${monitoringTableHeaderCellClass} w-[4%] px-4`} />
-                    <th
-                      className={`${monitoringTableHeaderCellClass} w-[18%] whitespace-nowrap px-3`}
-                    >
+              <table className={`${tableClass} text-left`}>
+                <thead className={tableHeadClass}>
+                  <tr className={tableHeaderRowClass}>
+                    <th className={`${tableHeaderCellClass} w-[4%] px-4`} />
+                    <th className={`${tableHeaderCellClass} w-[18%] whitespace-nowrap px-3`}>
                       IP 주소
                     </th>
                     <th
-                      className={`${monitoringTableHeaderCellClass} w-[10%] whitespace-nowrap px-3 !text-center`}
+                      className={`${tableHeaderCellClass} w-[10%] whitespace-nowrap px-3 !text-center`}
                     >
                       운영체제
                     </th>
-                    <th
-                      className={`${monitoringTableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}
-                    >
+                    <th className={`${tableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}>
                       사용자명
                     </th>
-                    <th
-                      className={`${monitoringTableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}
-                    >
+                    <th className={`${tableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}>
                       부서
                     </th>
-                    <th
-                      className={`${monitoringTableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}
-                    >
+                    <th className={`${tableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}>
                       직책
                     </th>
-                    <th
-                      className={`${monitoringTableHeaderCellClass} w-[20%] whitespace-nowrap px-3`}
-                    >
+                    <th className={`${tableHeaderCellClass} w-[20%] whitespace-nowrap px-3`}>
                       최초 등록일
                     </th>
                   </tr>
@@ -595,39 +583,36 @@ export default function UserPage() {
                           onClick={() =>
                             setSelectedId(current => (current === user.id ? null : user.id))
                           }
-                          className={monitoringTableRowClass({
+                          className={tableRowClass({
                             selected: isSelected,
                             striped: index % 2 === 1,
                             interactive: true,
                           })}
                         >
-                          <td className={monitoringTableCellClass(index, 'px-4 align-middle')}>
+                          <td className={tableCellClass(index, 'px-4 align-middle')}>
                             <button
                               type="button"
                               aria-label={`${user.name} 선택`}
                               className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
-                                isSelected ? 'border-[#075DF6]' : 'border-slate-300'
+                                isSelected ? 'border-brand' : 'border-slate-300'
                               }`.trim()}
                             >
                               <span
                                 className={`h-2.5 w-2.5 rounded-full transition ${
-                                  isSelected ? 'bg-[#075DF6]' : 'bg-transparent'
+                                  isSelected ? 'bg-brand' : 'bg-transparent'
                                 }`.trim()}
                               />
                             </button>
                           </td>
-                          <td className={monitoringTableCellClass(index, 'whitespace-nowrap px-3')}>
+                          <td className={tableCellClass(index, 'whitespace-nowrap px-3')}>
                             <span className="font-semibold text-slate-800">{user.ip}</span>
                           </td>
                           <td
-                            className={monitoringTableCellClass(
-                              index,
-                              'whitespace-nowrap px-3 text-center'
-                            )}
+                            className={tableCellClass(index, 'whitespace-nowrap px-3 text-center')}
                           >
                             {osIcon ? (
                               <div className="flex items-center justify-center">
-                                <div className="flex h-[var(--app-control-xs)] w-[var(--app-control-xs)] items-center justify-center rounded-[var(--app-radius-md)] border border-[#8BC6FF] bg-[#F7FBFF] shadow-[0_0.625rem_1.5rem_rgba(7, 93, 246,0.08)]">
+                                <div className="flex h-[var(--app-control-xs)] w-[var(--app-control-xs)] items-center justify-center rounded-[var(--app-radius-md)] border border-focus-border bg-palette-blue-05 shadow-detail-05">
                                   <img
                                     src={osIcon.src}
                                     alt={osIcon.label}
@@ -640,22 +625,25 @@ export default function UserPage() {
                               getFallbackValue(user.osType)
                             )}
                           </td>
-                          <td className={monitoringTableCellClass(index, 'whitespace-nowrap px-3')}>
+                          <td className={tableCellClass(index, 'whitespace-nowrap px-3')}>
                             {getFallbackValue(user.name)}
                           </td>
-                          <td className={monitoringTableCellClass(index, 'whitespace-nowrap px-3')}>
+                          <td className={tableCellClass(index, 'whitespace-nowrap px-3')}>
                             {getFallbackValue(user.department)}
                           </td>
-                          <td className={monitoringTableCellClass(index, 'whitespace-nowrap px-3')}>
+                          <td className={tableCellClass(index, 'whitespace-nowrap px-3')}>
                             <div className="truncate">{getFallbackValue(user.position)}</div>
                           </td>
-                          <td className={monitoringTableCellClass(index, 'whitespace-nowrap px-3')}>
+                          <td className={tableCellClass(index, 'whitespace-nowrap px-3')}>
                             {user.createdAt}
                           </td>
                         </tr>
                         {isSelected ? (
                           <tr>
-                            <td colSpan={7} className="border-t border-[#E5EBF5] bg-white p-0">
+                            <td
+                              colSpan={7}
+                              className="border-t border-palette-blue-28 bg-white p-0"
+                            >
                               {selectedUser ? (
                                 <UserDetailPanel
                                   key={selectedUser.id}
@@ -681,7 +669,7 @@ export default function UserPage() {
               </table>
             </div>
             {statusMessage ? (
-              <section className="border-t border-dashed border-[#DCEAF1] px-6 py-4 text-center text-sm text-[#94A3B8]">
+              <section className="border-t border-dashed border-palette-blue-34 px-6 py-4 text-center text-sm text-slate-400">
                 {statusMessage}
               </section>
             ) : null}

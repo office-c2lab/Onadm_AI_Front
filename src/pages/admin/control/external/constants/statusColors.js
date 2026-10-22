@@ -5,15 +5,15 @@ export const STATUS_LABELS = {
 };
 
 export const STATUS_COLORS = {
-  normal: '#075DF6',
-  masking: '#F59E0B',
-  block: '#FF4D4F',
+  normal: 'var(--color-brand)',
+  masking: 'var(--color-amber-500)',
+  block: 'var(--color-status-block)',
 };
 
 export const STATUS_TEXT_CLASS_NAMES = {
-  normal: 'text-[#075DF6]',
-  masking: 'text-[#F59E0B]',
-  block: 'text-[#FF4D4F]',
+  normal: 'text-brand',
+  masking: 'text-amber-500',
+  block: 'text-status-block',
 };
 
 export function getStatusKeyFromLabel(label) {
@@ -31,4 +31,3 @@ export function getStatusTextClassName(statusKeyOrLabel) {
 
   return STATUS_TEXT_CLASS_NAMES[statusKey] ?? STATUS_TEXT_CLASS_NAMES.normal;
 }
-

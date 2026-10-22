@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import StoreToolIcon from './StoreToolIcon.jsx';
+import StoreToolIcon from '../../../../components/tools/StoreToolIcon.jsx';
 
 function getPlacement(card, previewHeight) {
   const spaceBelow = window.innerHeight - card.getBoundingClientRect().bottom - 8;
@@ -66,7 +66,7 @@ export default function ToolHoverPreview({ tool, label, align = 'left' }) {
               <p className="mt-1 truncate text-xs text-slate-500">{category}</p>
             </div>
             {label && (
-              <span className="shrink-0 rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">
+              <span className="shrink-0 rounded-md bg-slate-100 px-2 py-1 text-micro font-medium text-slate-600">
                 {label}
               </span>
             )}

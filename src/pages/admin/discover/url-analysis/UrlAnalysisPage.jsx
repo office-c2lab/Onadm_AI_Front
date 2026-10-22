@@ -1,5 +1,5 @@
+import DialogLayer from '../../../../components/ui/DialogLayer.jsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import {
   AlertCircle,
   ArrowUpRight,
@@ -87,21 +87,6 @@ const sampleHistory = [
   },
 ];
 
-const aiFilterOptions = [
-  { value: 'all', label: 'AI 서비스 여부' },
-  { value: 'AI 서비스', label: 'AI 서비스' },
-  { value: '비AI 서비스', label: '비AI 서비스' },
-  { value: '판단 불가', label: '판단 불가' },
-];
-
-const dbFilterOptions = [
-  { value: 'all', label: '분석 상태' },
-  { value: '등록됨', label: '등록됨' },
-  { value: '신규 후보', label: '신규 후보' },
-  { value: '검토 필요', label: '검토 필요' },
-  { value: '—', label: '미등록' },
-];
-
 const analysisSteps = [
   {
     label: '웹사이트 정보 수집',
@@ -118,15 +103,15 @@ const analysisSteps = [
 ];
 
 function Badge({ value }) {
-  if (value === '—') return <span className="text-[#9aa7b8]">—</span>;
+  if (value === '—') return <span className="text-palette-blue-63">—</span>;
   const color =
     value === 'AI 서비스' || value.startsWith('높음')
-      ? 'bg-[#eaf1ff] text-[#3774ee]'
+      ? 'bg-palette-blue-18 text-palette-blue-76'
       : value === '등록됨'
-        ? 'bg-[#e4f7ee] text-[#18a66b]'
+        ? 'bg-palette-green-01 text-palette-green-04'
         : value === '신규 후보' || value === '검토 필요'
-          ? 'bg-[#fff2dc] text-[#c78819]'
-          : 'bg-[#eef2f6] text-[#6b7a90]';
+          ? 'bg-palette-orange-01 text-palette-orange-03'
+          : 'bg-palette-blue-21 text-palette-blue-82';
   return (
     <span className={`inline-flex rounded-md px-2 py-1 text-xs font-medium ${color}`}>{value}</span>
   );
@@ -148,7 +133,7 @@ function AnalysisDetails({ item, onShowResult }) {
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-slate-900">분석 진행 내역</h3>
             <span
-              className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${isRunning ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}
+              className={`rounded-full px-2.5 py-1 text-micro font-medium ${isRunning ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}
             >
               {isRunning ? '분석 중' : '모든 작업 완료'}
             </span>
@@ -223,27 +208,10 @@ function DetailModal({ item, onClose }) {
   const isAi = item.ai === 'AI 서비스';
   const status = item.db === '검토 필요' ? '검토 필요' : '분석 완료';
 
-  useEffect(() => {
-    const handleKeyDown = event => {
-      if (event.key === 'Escape') onClose();
-    };
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
-
-  return createPortal(
-    <div
+  return (
+    <DialogLayer
+      onClose={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]"
-      role="presentation"
-      onMouseDown={event => {
-        if (event.target === event.currentTarget) onClose();
-      }}
     >
       <section
         role="dialog"
@@ -261,7 +229,7 @@ function DetailModal({ item, onClose }) {
         </button>
 
         <div className="flex items-start gap-3 pr-9">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#eaf1ff] text-xl font-semibold text-[#3978f3]">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-palette-blue-18 text-xl font-semibold text-palette-blue-74">
             {item.domain[0].toUpperCase()}
           </span>
           <div className="min-w-0 flex-1">
@@ -274,7 +242,7 @@ function DetailModal({ item, onClose }) {
             <p className="mt-1 truncate text-xs text-slate-500">URL 검사 결과 · {item.time}</p>
           </div>
           <span
-            className={`shrink-0 rounded-md px-2 py-1 text-xs font-medium ${status === '분석 완료' ? 'bg-[#e4f7ee] text-[#18a66b]' : 'bg-[#fff2dc] text-[#c78819]'}`}
+            className={`shrink-0 rounded-md px-2 py-1 text-xs font-medium ${status === '분석 완료' ? 'bg-palette-green-01 text-palette-green-04' : 'bg-palette-orange-01 text-palette-orange-03'}`}
           >
             {status}
           </span>
@@ -309,7 +277,7 @@ function DetailModal({ item, onClose }) {
         {tab === 'result' && (
           <div className="pt-4">
             <h3
-              className={`flex items-center gap-2 text-sm font-semibold ${isAi ? 'text-[#10a779]' : 'text-[#d08d1d]'}`}
+              className={`flex items-center gap-2 text-sm font-semibold ${isAi ? 'text-palette-green-06' : 'text-palette-orange-02'}`}
             >
               {isAi ? <Check className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
               {isAi
@@ -357,7 +325,7 @@ function DetailModal({ item, onClose }) {
                   : ['사이트 기본 정보 확인', '서비스 기능 재검토 권장', '분류 데이터 확인 필요']
                 ).map(reason => (
                   <li key={reason} className="flex gap-2">
-                    <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-[#e4f7ee] text-[#15a572]">
+                    <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-palette-green-01 text-palette-green-05">
                       ✓
                     </span>
                     {reason}
@@ -373,17 +341,17 @@ function DetailModal({ item, onClose }) {
               현재는 예시 분석 데이터입니다. 실제 판정 근거는 분석 API 연결 후 표시됩니다.
             </p>
             <p className="flex items-center gap-2">
-              <FileSearch className="h-4 w-4 text-[#5a86df]" /> 서비스 설명 및 메타데이터
+              <FileSearch className="h-4 w-4 text-palette-blue-68" /> 서비스 설명 및 메타데이터
             </p>
             <p className="flex items-center gap-2">
-              <Globe2 className="h-4 w-4 text-[#5a86df]" /> 도메인 및 공개 페이지 정보
+              <Globe2 className="h-4 w-4 text-palette-blue-68" /> 도메인 및 공개 페이지 정보
             </p>
           </div>
         )}
         {tab === 'history' && (
           <div className="pt-5">
             <div className="flex gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
-              <Clock3 className="h-4 w-4 shrink-0 text-[#5a86df]" />
+              <Clock3 className="h-4 w-4 shrink-0 text-palette-blue-68" />
               <div>
                 <p className="font-medium text-slate-900">{status}</p>
                 <p className="mt-1">{item.time} · URL 분석 요청 기록</p>
@@ -392,25 +360,8 @@ function DetailModal({ item, onClose }) {
           </div>
         )}
       </section>
-    </div>,
-    document.body
+    </DialogLayer>
   );
-}
-
-function exportCsv(rows) {
-  const lines = [
-    ['URL / 도메인', 'AI 서비스 여부', '서비스 유형', 'DB 등록', '분석 일시'],
-    ...rows.map(row => [row.domain, row.ai, row.kind, row.db, row.time]),
-  ];
-  const csv = lines
-    .map(columns => columns.map(value => `"${String(value).replaceAll('"', '""')}"`).join(','))
-    .join('\n');
-  const href = URL.createObjectURL(new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' }));
-  const link = document.createElement('a');
-  link.href = href;
-  link.download = 'url-analysis-results.csv';
-  link.click();
-  URL.revokeObjectURL(href);
 }
 
 export default function UrlAnalysisPage() {
@@ -504,8 +455,8 @@ export default function UrlAnalysisPage() {
 
   return (
     <div className="w-full space-y-6 text-slate-900">
-      <div className="sticky top-0 z-30 -mx-5 -mt-[clamp(1.1rem,2vw,1.8rem)] bg-[#f9f9f9]/95 px-5 py-3 backdrop-blur md:-mx-8 md:px-8">
-        <label className="mx-auto flex h-11 w-full max-w-xl items-center gap-3 rounded-lg bg-[#edf2f7] px-4 text-slate-500 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20">
+      <div className="sticky top-0 z-30 -mx-5 -mt-[clamp(1.1rem,2vw,1.8rem)] bg-canvas/95 px-5 py-3 backdrop-blur md:-mx-8 md:px-8">
+        <label className="mx-auto flex h-11 w-full max-w-xl items-center gap-3 rounded-lg bg-search-surface px-4 text-slate-500 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20">
           <Search size={19} strokeWidth={2} aria-hidden="true" />
           <input
             type="search"

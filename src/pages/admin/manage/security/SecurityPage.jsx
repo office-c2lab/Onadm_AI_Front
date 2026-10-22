@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Check, ChevronRight, CircleAlert, Clock3 } from 'lucide-react';
-import { Drawer, EmptyState, SearchField, StatusBadge, ToolAvatar } from '../components.jsx';
+import Drawer from '../../../../components/ui/Drawer.jsx';
+import EmptyState from '../../../../components/ui/EmptyState.jsx';
+import SearchField from '../../../../components/ui/ValueSearchField.jsx';
+import StatusBadge from '../../../../components/ui/StatusBadge.jsx';
+import ToolAvatar from '../../../../components/ui/ToolAvatar.jsx';
 import { appRecords, reviewRequests } from '../data.js';
 import ReviewProgress from '../../../user/aistore/components/ReviewProgress.jsx';
 
@@ -71,7 +75,7 @@ export default function SecurityPage() {
           </button>
         </div>
       ) : null}
-      <div className="sticky top-0 z-20 -mx-4 bg-[#f9f9f9]/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
+      <div className="sticky top-0 z-20 -mx-4 bg-canvas/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
         <div className="mx-auto flex max-w-xl items-center">
           <SearchField value={query} onChange={setQuery} placeholder="앱, 요청 ID, 요청자 검색" />
         </div>
@@ -85,7 +89,7 @@ export default function SecurityPage() {
             <button
               key={item}
               onClick={() => setTab(item)}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${tab === item ? 'bg-[#ededed] font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+              className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${tab === item ? 'bg-tab-active font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
             >
               {item}
             </button>
@@ -95,7 +99,7 @@ export default function SecurityPage() {
 
       <section>
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="flex items-center gap-0.5 text-[17px] font-bold text-slate-900">
+          <h2 className="flex items-center gap-0.5 text-size-17px font-bold text-slate-900">
             {tab} <ChevronRight size={18} />
           </h2>
           <span className="text-xs text-slate-400">{rows.length}건</span>
@@ -180,7 +184,7 @@ export default function SecurityPage() {
               ['승인 상태', selected.approval],
             ].map(([label, value]) => (
               <div key={label} className="rounded-xl border border-slate-200 p-3">
-                <p className="text-[11px] text-slate-400">{label}</p>
+                <p className="text-micro text-slate-400">{label}</p>
                 <div className="mt-2">
                   <StatusBadge>{value}</StatusBadge>
                 </div>
@@ -214,7 +218,7 @@ export default function SecurityPage() {
               className="mt-3 min-h-24 w-full resize-none rounded-lg border border-slate-200 bg-white p-3 text-sm outline-none focus:border-blue-400"
               placeholder="승인, 보완 요청 또는 반려 사유를 입력하세요."
             />
-            <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-400">
+            <p className="mt-2 flex items-center gap-1 text-micro text-slate-400">
               <Clock3 size={12} /> 모든 결정과 의견은 감사 로그에 기록됩니다.
             </p>
           </div>

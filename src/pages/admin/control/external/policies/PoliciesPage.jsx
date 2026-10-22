@@ -1,22 +1,23 @@
+import Toggle from '../../../../../components/ui/Toggle.jsx';
 import { Fragment, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-import AppButton, { primaryButtonClassName } from '../components/AppButton.jsx';
-import FixedPaginationBar from '../components/FixedPaginationBar.jsx';
-import ServiceLogoBadge from '../components/ServiceLogoBadge.jsx';
-import SectionCard from '../components/SectionCard.jsx';
+import AppButton, { primaryButtonClassName } from '../../../../../components/ui/Button.jsx';
+import FixedPaginationBar from '../../../../../components/pagination/FixedPaginationBar.jsx';
+import ServiceLogoBadge from '../../../../../components/identity/ServiceLogoBadge.jsx';
+import SectionCard from '../../../../../components/ui/SectionCard.jsx';
 import {
-  monitoringTableCellClass,
-  monitoringTableClass,
-  monitoringTableHeadClass,
-  monitoringTableHeaderCellClass,
-  monitoringTableHeaderRowClass,
-  monitoringTableRowClass,
-  monitoringTableSurfaceClass,
-} from '../components/monitoring/monitoringTableStyles.js';
+  tableCellClass,
+  tableClass,
+  tableHeadClass,
+  tableHeaderCellClass,
+  tableHeaderRowClass,
+  tableRowClass,
+  tableSurfaceClass,
+} from '../../../../../styles/table.js';
 import useAdaptiveRowsPerPage from '../hooks/useAdaptiveRowsPerPage.js';
-import PageLayout from '../../components/PageLayout.jsx';
+import PageLayout from '../../../../../components/layout/PageLayout.jsx';
 import { usePatchPolicyEnabledMutation, usePoliciesQuery } from '../queries/policyQueries.js';
 import { FileUploadProtectionContent } from '../components/settings/SettingsContent.jsx';
 
@@ -208,7 +209,7 @@ function SupportedServiceList({ services }) {
 
   if (!normalizedServices.length) {
     return (
-      <div className="rounded-[8px] border border-dashed border-[#D8DEEA] bg-white px-5 py-6 text-sm font-semibold text-[#94A3B8]">
+      <div className="rounded-detail-03 border border-dashed border-palette-blue-42 bg-white px-5 py-6 text-sm font-semibold text-slate-400">
         적용중인 서비스가 없습니다.
       </div>
     );
@@ -219,14 +220,14 @@ function SupportedServiceList({ services }) {
       {normalizedServices.map(service => (
         <div
           key={service}
-          className="group flex min-h-[6.75rem] w-full max-w-[7.5rem] flex-col items-center justify-center gap-3 rounded-[8px] border border-[#D6E9FF] bg-white px-3 py-4 shadow-[0_8px_22px_rgba(15,23,42,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-[#8BC6FF] hover:shadow-[0_14px_30px_rgba(7, 93, 246,0.14)]"
+          className="group flex min-h-[6.75rem] w-full max-w-[7.5rem] flex-col items-center justify-center gap-3 rounded-detail-03 border border-track bg-white px-3 py-4 shadow-detail-25 transition duration-300 hover:-translate-y-0.5 hover:border-focus-border hover:shadow-detail-26"
         >
           <ServiceLogoBadge
             name={service}
-            className="h-12 w-12 rounded-[8px] !border-transparent !bg-transparent !shadow-none"
+            className="h-12 w-12 rounded-detail-03 !border-transparent !bg-transparent !shadow-none"
             iconStyle={{ height: '34px', width: '34px' }}
           />
-          <span className="max-w-full truncate text-center text-xs font-semibold text-[#57534E] transition group-hover:text-[#075DF6] sm:text-sm">
+          <span className="max-w-full truncate text-center text-xs font-semibold text-palette-neutral-21 transition group-hover:text-brand sm:text-sm">
             {service}
           </span>
         </div>
@@ -237,27 +238,13 @@ function SupportedServiceList({ services }) {
 
 function StatusToggleIndicator({ checked, ariaLabel, disabled = false, onToggle }) {
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={ariaLabel}
+    <Toggle
+      checked={checked}
+      ariaLabel={ariaLabel}
       disabled={disabled}
-      onClick={onToggle}
-      className={joinClasses(
-        'relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border transition duration-200 hover:brightness-[1.04] disabled:cursor-not-allowed disabled:opacity-60',
-        checked
-          ? 'border-[#075DF6] bg-[#075DF6] shadow-[0_8px_18px_rgba(7,93,246,0.28)]'
-          : 'border-[#C8E1FF] bg-[#B6D9FF]'
-      )}
-    >
-      <span
-        className={joinClasses(
-          'h-5 w-5 rounded-full bg-white shadow-[0_2px_8px_rgba(15,18,20,0.18)] transition duration-200',
-          checked ? 'translate-x-[1.35rem]' : 'translate-x-[0.15rem]'
-        )}
-      />
-    </button>
+      onChange={onToggle}
+      size="fixed"
+    />
   );
 }
 
@@ -270,9 +257,9 @@ function PolicyDetailPanel({ draftPolicy, onOpenPolicySettings }) {
 
   return (
     <div className="overflow-hidden bg-white">
-      <div className="flex flex-col gap-3 border-b border-slate-200 bg-[#FCFDFF] px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-        <p className="flex min-w-0 items-center gap-2.5 text-[0.92rem] font-semibold text-[#64708B]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#75BEFF]" aria-hidden="true" />
+      <div className="flex flex-col gap-3 border-b border-slate-200 bg-palette-blue-02 px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <p className="flex min-w-0 items-center gap-2.5 text-size-0-92rem font-semibold text-palette-blue-85">
+          <span className="h-1.5 w-1.5 rounded-full bg-palette-blue-55" aria-hidden="true" />
           {description}
         </p>
         {settingDefinition ? (
@@ -396,15 +383,15 @@ export default function PolicyPage() {
             </section>
 
             <SectionCard className="overflow-hidden">
-              <div ref={tableAreaRef} className={monitoringTableSurfaceClass}>
+              <div ref={tableAreaRef} className={tableSurfaceClass}>
                 <div className="overflow-x-auto">
-                  <table className={`min-w-[min(100%,47.5rem)] ${monitoringTableClass} text-left`}>
-                    <thead className={monitoringTableHeadClass}>
-                      <tr className={monitoringTableHeaderRowClass}>
-                        <th className={`${monitoringTableHeaderCellClass} w-12 px-5 sm:px-6`} />
-                        <th className={`${monitoringTableHeaderCellClass} w-[22%]`}>정책명</th>
-                        <th className={`${monitoringTableHeaderCellClass} w-[64%]`}>설명</th>
-                        <th className={`${monitoringTableHeaderCellClass} w-[14%] !text-center`}>
+                  <table className={`min-w-[min(100%,47.5rem)] ${tableClass} text-left`}>
+                    <thead className={tableHeadClass}>
+                      <tr className={tableHeaderRowClass}>
+                        <th className={`${tableHeaderCellClass} w-12 px-5 sm:px-6`} />
+                        <th className={`${tableHeaderCellClass} w-[22%]`}>정책명</th>
+                        <th className={`${tableHeaderCellClass} w-[64%]`}>설명</th>
+                        <th className={`${tableHeaderCellClass} w-[14%] !text-center`}>
                           사용 여부
                         </th>
                       </tr>
@@ -416,50 +403,45 @@ export default function PolicyPage() {
                         return (
                           <Fragment key={policy.id}>
                             <tr
-                              className={monitoringTableRowClass({
+                              className={tableRowClass({
                                 selected: isSelected,
                                 striped: index % 2 === 1,
                                 interactive: true,
                               })}
                               onClick={() => handleSelectPolicy(policy.id)}
                             >
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'px-5 align-middle sm:px-6'
-                                )}
-                              >
+                              <td className={tableCellClass(index, 'px-5 align-middle sm:px-6')}>
                                 <button
                                   type="button"
                                   aria-label={`${policy.name} 선택`}
                                   className={joinClasses(
                                     'flex h-5 w-5 items-center justify-center rounded-full border transition',
-                                    isSelected ? 'border-[#075DF6]' : 'border-slate-300'
+                                    isSelected ? 'border-brand' : 'border-slate-300'
                                   )}
                                 >
                                   <span
                                     className={joinClasses(
                                       'h-2.5 w-2.5 rounded-full transition',
-                                      isSelected ? 'bg-[#075DF6]' : 'bg-transparent'
+                                      isSelected ? 'bg-brand' : 'bg-transparent'
                                     )}
                                   />
                                 </button>
                               </td>
                               <td
-                                className={monitoringTableCellClass(
+                                className={tableCellClass(
                                   index,
                                   'whitespace-nowrap font-semibold text-slate-800'
                                 )}
                               >
                                 {policy.name}
                               </td>
-                              <td className={monitoringTableCellClass(index)}>
+                              <td className={tableCellClass(index)}>
                                 <div className="truncate text-slate-600" title={policy.description}>
                                   {policy.description || '-'}
                                 </div>
                               </td>
                               <td
-                                className={monitoringTableCellClass(
+                                className={tableCellClass(
                                   index,
                                   'whitespace-nowrap text-center font-semibold text-slate-600'
                                 )}
@@ -476,8 +458,11 @@ export default function PolicyPage() {
                               </td>
                             </tr>
                             {isSelected && selectedPolicy && draftPolicy ? (
-                              <tr className="bg-[#FFFFFF]">
-                                <td colSpan={4} className="border-t border-[#E6EAF4] px-0 py-0">
+                              <tr className="bg-white">
+                                <td
+                                  colSpan={4}
+                                  className="border-t border-palette-blue-27 px-0 py-0"
+                                >
                                   <PolicyDetailPanel
                                     draftPolicy={draftPolicy}
                                     onOpenPolicySettings={handleChangeView}

@@ -1,26 +1,26 @@
+import DialogLayer from '../../../../components/ui/DialogLayer.jsx';
 import { Fragment, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
-import '../../control/external/garim.css';
 import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
-import AppButton from '../../control/external/components/AppButton.jsx';
-import AppSearchField from '../../control/external/components/AppSearchField.jsx';
-import FixedPaginationBar from '../../control/external/components/FixedPaginationBar.jsx';
-import SectionCard from '../../control/external/components/SectionCard.jsx';
+import AppButton from '../../../../components/ui/Button.jsx';
+import AppSearchField from '../../../../components/ui/SearchField.jsx';
+import FixedPaginationBar from '../../../../components/pagination/FixedPaginationBar.jsx';
+import SectionCard from '../../../../components/ui/SectionCard.jsx';
 import {
   MonitoringIconButtonTooltip,
   MonitoringResetButton,
 } from '../../control/external/components/monitoring/MonitoringListComponents.jsx';
 import {
-  monitoringTableCellClass,
-  monitoringTableClass,
-  monitoringTableHeadClass,
-  monitoringTableHeaderCellClass,
-  monitoringTableHeaderRowClass,
-  monitoringTableRowClass,
-  monitoringTableSurfaceClass,
-} from '../../control/external/components/monitoring/monitoringTableStyles.js';
+  tableCellClass,
+  tableClass,
+  tableHeadClass,
+  tableHeaderCellClass,
+  tableHeaderRowClass,
+  tableRowClass,
+  tableSurfaceClass,
+} from '../../../../styles/table.js';
 import useAdaptiveRowsPerPage from '../../control/external/hooks/useAdaptiveRowsPerPage.js';
-import PageLayout from '../../control/components/PageLayout.jsx';
+import PageLayout from '../../../../components/layout/PageLayout.jsx';
 import { useDropdownSelectOptionsQuery } from '../../control/external/queries/dropdownSettingsQueries.js';
 import {
   useDeleteClientMutation,
@@ -101,10 +101,10 @@ function normalizeClient(client) {
 
 function UserStatusBadge({ status }) {
   const statusClassName = {
-    '승인 대기': 'bg-[#fff2dc] text-[#c78819]',
-    활성: 'bg-[#e4f7ee] text-[#18a66b]',
-    비활성: 'bg-[#eef2f6] text-[#6b7a90]',
-    거절됨: 'bg-[#fff0f1] text-[#d92d45]',
+    '승인 대기': 'bg-palette-orange-01 text-palette-orange-03',
+    활성: 'bg-palette-green-01 text-palette-green-04',
+    비활성: 'bg-palette-blue-21 text-palette-blue-82',
+    거절됨: 'bg-palette-red-02 text-palette-red-07',
   };
 
   return (
@@ -131,8 +131,8 @@ function createUserDraft(user) {
 
 function DetailField({ label, children }) {
   return (
-    <div className="grid grid-cols-[4.4rem_1fr] items-center gap-3 text-[13px]">
-      <span className="font-semibold text-[#5E6A84]">{label}</span>
+    <div className="grid grid-cols-[4.4rem_1fr] items-center gap-3 text-compact">
+      <span className="font-semibold text-palette-blue-89">{label}</span>
       {children}
     </div>
   );
@@ -144,15 +144,15 @@ function TextInput({ value, onChange, type = 'text' }) {
       type={type}
       value={value}
       onChange={event => onChange(event.target.value)}
-      className="h-10 w-full rounded-md border border-[#D7DDE8] bg-white px-3 text-[13px] font-medium text-[#344054] outline-none transition focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+      className="h-10 w-full rounded-md border border-palette-blue-44 bg-white px-3 text-compact font-medium text-text-secondary outline-none transition focus:border-focus-border focus:ring-4 focus:ring-focus-ring"
     />
   );
 }
 
 function DetailSection({ title, children, className = '' }) {
   return (
-    <section className={`border-[#E3E8F2] px-5 py-5 ${className}`.trim()}>
-      <h3 className="mb-4 text-[14px] font-bold text-[#23304A]">{title}</h3>
+    <section className={`border-divider px-5 py-5 ${className}`.trim()}>
+      <h3 className="mb-4 text-body-sm font-bold text-palette-blue-109">{title}</h3>
       <div className="space-y-3.5">{children}</div>
     </section>
   );
@@ -275,13 +275,13 @@ function UserDetailPanel({
               onChange={event => updateDraft({ statusChangeReason: event.target.value })}
               placeholder="계정 상태 변경 사유를 입력해 주세요"
               rows={4}
-              className="min-h-24 w-full resize-y rounded-md border border-[#D7DDE8] bg-white px-3 py-2.5 text-[13px] font-medium text-[#344054] outline-none transition placeholder:text-[#9AA5B5] focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+              className="min-h-24 w-full resize-y rounded-md border border-palette-blue-44 bg-white px-3 py-2.5 text-compact font-medium text-text-secondary outline-none transition placeholder:text-palette-blue-64 focus:border-focus-border focus:ring-4 focus:ring-focus-ring"
             />
           </DetailField>
         </DetailSection>
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-5 py-5 sm:px-6 xl:col-span-2">
-          <p role="alert" className="text-sm font-medium text-[#D92D45]">
+          <p role="alert" className="text-sm font-medium text-palette-red-07">
             {validationError}
           </p>
           <div className="flex gap-3">
@@ -312,7 +312,7 @@ function DeleteUserModal({ user, isDeleting = false, errorMessage = '', onClose,
   ];
 
   return (
-    <div className="app-modal-stage z-[90]">
+    <DialogLayer onClose={onClose} className="app-modal-stage z-[90]">
       <button
         type="button"
         aria-label="사용자 삭제 닫기"
@@ -325,43 +325,40 @@ function DeleteUserModal({ user, isDeleting = false, errorMessage = '', onClose,
         aria-labelledby="delete-user-modal-title"
         className="app-modal-panel"
       >
-        <div className="app-modal-header flex items-center justify-between gap-[var(--app-gap-md)] border-b border-[#E7EBF4]">
-          <h3
-            id="delete-user-modal-title"
-            className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-[#111827]"
-          >
+        <div className="app-modal-header flex items-center justify-between gap-[var(--app-gap-md)] border-b border-border-subtle">
+          <h3 id="delete-user-modal-title" className="text-modal-title font-bold text-text-primary">
             사용자 삭제
           </h3>
           <button
             type="button"
             aria-label="닫기"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#8A93A5] transition hover:bg-[#F4F6FA] hover:text-[#075DF6]"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-palette-blue-73 transition hover:bg-palette-blue-13 hover:text-brand"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="app-modal-body">
-          <div className="space-y-1.5 text-sm font-semibold leading-6 text-[#4B5563]">
+          <div className="space-y-1.5 text-sm font-semibold leading-6 text-gray-600">
             <p>선택한 사용자를 삭제하시겠습니까?</p>
             <p>삭제한 사용자 정보는 되돌릴 수 없습니다.</p>
           </div>
 
           <div className="mt-6">
             <div className="flex items-center gap-3">
-              <span className="shrink-0 text-sm font-bold text-[#111827]">삭제 대상</span>
-              <span className="h-px flex-1 bg-[#E7EBF4]" />
+              <span className="shrink-0 text-sm font-bold text-text-primary">삭제 대상</span>
+              <span className="h-px flex-1 bg-border-subtle" />
             </div>
 
-            <dl className="mt-3 rounded-lg border border-[#E1E6EF] px-5 py-4">
+            <dl className="mt-3 rounded-lg border border-palette-blue-33 px-5 py-4">
               {deleteRows.map(row => (
                 <div
                   key={row.label}
-                  className="grid min-h-7 grid-cols-[7.2rem_1fr] items-center gap-2 text-[13px]"
+                  className="grid min-h-7 grid-cols-[7.2rem_1fr] items-center gap-2 text-compact"
                 >
-                  <dt className="font-extrabold text-[#526078]">{row.label}</dt>
-                  <dd className="truncate font-semibold text-[#2D3748]" title={row.value}>
+                  <dt className="font-extrabold text-text-action">{row.label}</dt>
+                  <dd className="truncate font-semibold text-palette-blue-107" title={row.value}>
                     {row.value}
                   </dd>
                 </div>
@@ -370,13 +367,13 @@ function DeleteUserModal({ user, isDeleting = false, errorMessage = '', onClose,
           </div>
 
           {errorMessage ? (
-            <p className="mt-4 rounded-lg bg-[#FFF1F2] px-4 py-3 text-sm font-semibold text-[#E11D48]">
+            <p className="mt-4 rounded-lg bg-palette-red-01 px-4 py-3 text-sm font-semibold text-rose-600">
               {errorMessage}
             </p>
           ) : null}
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-[#E7EBF4] px-6 py-4">
+        <div className="flex justify-end gap-3 border-t border-border-subtle px-6 py-4">
           <AppButton
             variant="secondary"
             onClick={onClose}
@@ -395,7 +392,7 @@ function DeleteUserModal({ user, isDeleting = false, errorMessage = '', onClose,
           </AppButton>
         </div>
       </div>
-    </div>
+    </DialogLayer>
   );
 }
 
@@ -569,7 +566,7 @@ export default function UserPage() {
         : '';
 
   return (
-    <div className="garim-external-root flex h-dvh min-h-0 flex-col overflow-hidden text-[#111827]">
+    <div className="app-control-scope flex h-dvh min-h-0 flex-col overflow-hidden text-text-primary">
       <section className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <PageLayout bottomPaddingClassName="pb-0">
           <div className="flex min-h-0 flex-1 flex-col gap-5">
@@ -625,40 +622,30 @@ export default function UserPage() {
             <SectionCard className={selectedUser ? 'overflow-visible' : 'overflow-hidden'}>
               <div
                 ref={tableAreaRef}
-                className={`${monitoringTableSurfaceClass} ${selectedUser ? '!overflow-visible' : ''}`}
+                className={`${tableSurfaceClass} ${selectedUser ? '!overflow-visible' : ''}`}
               >
                 <div className={selectedUser ? 'overflow-visible' : 'overflow-hidden'}>
-                  <table className={`${monitoringTableClass} text-left`}>
-                    <thead className={monitoringTableHeadClass}>
-                      <tr className={monitoringTableHeaderRowClass}>
-                        <th
-                          className={`${monitoringTableHeaderCellClass} w-[12%] whitespace-nowrap px-4`}
-                        >
+                  <table className={`${tableClass} text-left`}>
+                    <thead className={tableHeadClass}>
+                      <tr className={tableHeaderRowClass}>
+                        <th className={`${tableHeaderCellClass} w-[12%] whitespace-nowrap px-4`}>
                           사용자명
                         </th>
-                        <th
-                          className={`${monitoringTableHeaderCellClass} w-[30%] whitespace-nowrap px-3`}
-                        >
+                        <th className={`${tableHeaderCellClass} w-[30%] whitespace-nowrap px-3`}>
                           이메일
                         </th>
                         <th
-                          className={`${monitoringTableHeaderCellClass} w-[15%] whitespace-nowrap px-3 !text-center`}
+                          className={`${tableHeaderCellClass} w-[15%] whitespace-nowrap px-3 !text-center`}
                         >
                           상태
                         </th>
-                        <th
-                          className={`${monitoringTableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}
-                        >
+                        <th className={`${tableHeaderCellClass} w-[16%] whitespace-nowrap px-3`}>
                           부서
                         </th>
-                        <th
-                          className={`${monitoringTableHeaderCellClass} w-[12%] whitespace-nowrap px-3`}
-                        >
+                        <th className={`${tableHeaderCellClass} w-[12%] whitespace-nowrap px-3`}>
                           직책
                         </th>
-                        <th
-                          className={`${monitoringTableHeaderCellClass} w-[15%] whitespace-nowrap px-3`}
-                        >
+                        <th className={`${tableHeaderCellClass} w-[15%] whitespace-nowrap px-3`}>
                           처리 시각
                         </th>
                       </tr>
@@ -673,62 +660,45 @@ export default function UserPage() {
                               onClick={() =>
                                 setSelectedId(current => (current === user.id ? null : user.id))
                               }
-                              className={monitoringTableRowClass({
+                              className={tableRowClass({
                                 selected: isSelected,
                                 striped: index % 2 === 1,
                                 interactive: true,
                               })}
                             >
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'whitespace-nowrap px-4'
-                                )}
-                              >
+                              <td className={tableCellClass(index, 'whitespace-nowrap px-4')}>
                                 {getFallbackValue(user.name)}
                               </td>
                               <td
-                                className={monitoringTableCellClass(index, 'min-w-0 px-3')}
+                                className={tableCellClass(index, 'min-w-0 px-3')}
                                 title={user.email}
                               >
                                 <span className="block truncate">{user.email}</span>
                               </td>
                               <td
-                                className={monitoringTableCellClass(
+                                className={tableCellClass(
                                   index,
                                   'whitespace-nowrap px-3 text-center'
                                 )}
                               >
                                 <UserStatusBadge status={user.status} />
                               </td>
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'whitespace-nowrap px-3'
-                                )}
-                              >
+                              <td className={tableCellClass(index, 'whitespace-nowrap px-3')}>
                                 {getFallbackValue(user.department)}
                               </td>
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'whitespace-nowrap px-3'
-                                )}
-                              >
+                              <td className={tableCellClass(index, 'whitespace-nowrap px-3')}>
                                 <div className="truncate">{getFallbackValue(user.position)}</div>
                               </td>
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'whitespace-nowrap px-3'
-                                )}
-                              >
+                              <td className={tableCellClass(index, 'whitespace-nowrap px-3')}>
                                 {user.createdAt}
                               </td>
                             </tr>
                             {isSelected ? (
                               <tr>
-                                <td colSpan={6} className="border-t border-[#E5EBF5] bg-white p-0">
+                                <td
+                                  colSpan={6}
+                                  className="border-t border-palette-blue-28 bg-white p-0"
+                                >
                                   {selectedUser ? (
                                     <UserDetailPanel
                                       key={selectedUser.id}
@@ -754,7 +724,7 @@ export default function UserPage() {
                   </table>
                 </div>
                 {statusMessage ? (
-                  <section className="border-t border-dashed border-[#DCEAF1] px-6 py-4 text-center text-sm text-[#94A3B8]">
+                  <section className="border-t border-dashed border-palette-blue-34 px-6 py-4 text-center text-sm text-slate-400">
                     {statusMessage}
                   </section>
                 ) : null}

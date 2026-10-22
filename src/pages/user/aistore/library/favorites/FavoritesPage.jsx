@@ -24,8 +24,6 @@ export default function FavoritesPage() {
   return (
     <>
       <section className="mt-7">
-        
-
         {savedTools.length > 0 ? (
           <div className="grid gap-2 md:grid-cols-2">
             {savedTools.map(tool => (

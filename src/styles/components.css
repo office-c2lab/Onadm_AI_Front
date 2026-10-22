@@ -1,0 +1,79 @@
+@layer components {
+  .ui-toggle {
+    --toggle-height: clamp(1.55rem, 1.95vw, 1.75rem);
+    --toggle-width: clamp(2.65rem, 3.35vw, 3rem);
+    --toggle-thumb-size: clamp(1.1rem, 1.4vw, 1.25rem);
+    --toggle-off: clamp(0.12rem, 0.18vw, 0.15rem);
+    --toggle-on: clamp(1.18rem, 1.48vw, 1.35rem);
+    height: var(--toggle-height);
+    width: var(--toggle-width);
+  }
+  .ui-toggle[data-size='fixed'] {
+    --toggle-height: 1.75rem;
+    --toggle-width: 3rem;
+    --toggle-thumb-size: 1.25rem;
+    --toggle-off: 0.15rem;
+    --toggle-on: 1.35rem;
+  }
+  .ui-toggle-thumb {
+    height: var(--toggle-thumb-size);
+    width: var(--toggle-thumb-size);
+    transform: translateX(var(--toggle-off));
+  }
+  .ui-toggle[aria-checked='true'] .ui-toggle-thumb {
+    transform: translateX(var(--toggle-on));
+  }
+
+  .ui-sidebar-frame {
+    height: 100dvh;
+    flex-shrink: 0;
+    overflow: hidden;
+    width: var(--layout-sidebar-rail-width);
+    transition: width var(--duration-normal) ease-out;
+  }
+  .ui-sidebar-frame[data-open='true'] {
+    width: var(--layout-sidebar-width);
+  }
+  .ui-sidebar-frame[data-open='true'][data-variant='chat'] {
+    width: var(--layout-chat-sidebar-width);
+  }
+  .ui-modal-stage {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--spacing) * 3);
+    background: color-mix(in srgb, var(--color-slate-950) 45%, transparent);
+    backdrop-filter: blur(2px);
+  }
+  .ui-modal-panel {
+    display: flex;
+    max-height: calc(100dvh - 1.5rem);
+    width: 100%;
+    max-width: var(--container-3xl);
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--color-slate-200);
+    border-radius: var(--radius-2xl);
+    background: var(--color-white);
+    box-shadow: var(--shadow-2xl);
+  }
+  @media (min-width: 40rem) {
+    .ui-modal-stage {
+      padding: calc(var(--spacing) * 6);
+    }
+    .ui-modal-panel {
+      max-height: calc(100dvh - 3rem);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-sidebar-frame,
+  .da-pagination *,
+  .app-solid-button {
+    transition: none;
+  }
+}

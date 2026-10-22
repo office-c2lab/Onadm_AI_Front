@@ -1,24 +1,6 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { buildPageRange, normalizePagination } from './pageRange.js';
+import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import './GlassPagination.css';
-
-const MAX_VISIBLE_PAGES = 5;
-
-function buildPageRange(currentPage, totalPages) {
-  if (totalPages <= MAX_VISIBLE_PAGES) {
-    return Array.from({ length: totalPages }, (_, index) => index + 1);
-  }
-
-  const halfWindow = Math.floor(MAX_VISIBLE_PAGES / 2);
-  let startPage = Math.max(1, currentPage - halfWindow);
-  let endPage = startPage + MAX_VISIBLE_PAGES - 1;
-
-  if (endPage > totalPages) {
-    endPage = totalPages;
-    startPage = endPage - MAX_VISIBLE_PAGES + 1;
-  }
-
-  return Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index);
-}
 
 function PaginationArrowIcon({ direction }) {
   return (
@@ -42,11 +24,11 @@ function PaginationArrowIcon({ direction }) {
   );
 }
 
-function GooFilter() {
+function GooFilter({ id }) {
   return (
     <svg className="da-pagination__defs" aria-hidden="true" focusable="false">
       <defs>
-        <filter id="pagination-goo" x="-50%" y="-50%" width="200%" height="200%">
+        <filter id={id} x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
           <feColorMatrix
             in="blur"
@@ -62,11 +44,13 @@ function GooFilter() {
 }
 
 export default function GlassPagination({
-  currentPage,
-  totalPages,
+  currentPage: requestedPage,
+  totalPages: requestedTotal,
   onPageChange,
   themeMode = 'light',
 }) {
+  const { currentPage, totalPages } = normalizePagination(requestedPage, requestedTotal);
+  const filterId = `pagination-goo-${useId().replaceAll(':', '')}`;
   const listRef = useRef(null);
   const pageRefs = useRef(new Map());
   const animationFrameRef = useRef(null);
@@ -149,7 +133,10 @@ export default function GlassPagination({
     <nav className={`da-pagination is-${themeMode}`} aria-label="페이지 이동">
       <ul ref={listRef} className="da-pagination__list">
         <li className="da-pagination__active-shell" aria-hidden="true">
-          <span className="da-pagination__active" style={indicatorStyle} />
+          <span
+            className="da-pagination__active"
+            style={{ ...indicatorStyle, filter: `url(#${filterId})` }}
+          />
         </li>
 
         <li className="da-pagination__item da-pagination__item--arrow">
@@ -202,7 +189,7 @@ export default function GlassPagination({
         </li>
       </ul>
 
-      <GooFilter />
+      <GooFilter id={filterId} />
     </nav>
   );
 }
