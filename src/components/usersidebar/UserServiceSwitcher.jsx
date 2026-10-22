@@ -4,16 +4,16 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 const services = [
   {
-    id: 'aistore',
-    label: 'AI APP STORE',
-    description: 'AI 도구를 탐색하고 관리하세요',
-    to: '/user/aistore/store',
-  },
-  {
     id: 'ondam',
     label: 'ONDAM AI',
     description: '대화로 업무를 시작하세요',
     to: '/user/ondam',
+  },
+  {
+    id: 'aistore',
+    label: 'AI APP STORE',
+    description: 'AI 도구를 탐색하고 관리하세요',
+    to: '/user/aistore/store',
   },
 ];
 
