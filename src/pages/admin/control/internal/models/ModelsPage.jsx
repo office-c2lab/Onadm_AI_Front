@@ -1,159 +1,28 @@
 import { useMemo, useState } from 'react';
 import { Eye, EyeOff, Plus, X } from 'lucide-react';
 
-import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
-import geminiIcon from '../../../../assets/icons/gemini-color.svg';
-import openaiIcon from '../../../../assets/icons/openai.svg';
-import AppButton from '../external/components/AppButton.jsx';
-import AppSearchField from '../external/components/AppSearchField.jsx';
+import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
+import geminiIcon from '../../../../../assets/icons/gemini-color.svg';
+import openaiIcon from '../../../../../assets/icons/openai.svg';
+import AppButton from '../../external/components/AppButton.jsx';
+import AppSearchField from '../../external/components/AppSearchField.jsx';
+import PageLayout from '../../components/PageLayout.jsx';
 import {
   monitoringTableCellClass,
   monitoringTableClass,
+  monitoringTableBodyClass,
   monitoringTableHeadClass,
   monitoringTableHeaderCellClass,
   monitoringTableHeaderRowClass,
   monitoringTableRowClass,
   monitoringTableSurfaceClass,
-} from '../external/components/monitoring/monitoringTableStyles.js';
-import '../external/garim.css';
+} from '../../external/components/monitoring/monitoringTableStyles.js';
+import '../../external/garim.css';
 
+import { providers, models, prompts } from '../data.js';
 const tabs = [
   { id: 'providers', label: '제공자 / API Key' },
   { id: 'models', label: '모델 · 단가' },
-];
-
-const providers = [
-  {
-    id: 'openai',
-    name: 'OpenAI',
-    code: 'OPENAI',
-    icon: openaiIcon,
-    endpoint: 'https://api.openai.com/v1',
-    key: 'sk-p...ZwMA',
-    status: '활성',
-    modifiedAt: '2026. 6. 4. 오후 8:23',
-  },
-  {
-    id: 'google',
-    name: 'Google Gemini',
-    code: 'GOOGLE',
-    icon: geminiIcon,
-    endpoint: 'https://generativelanguage.googleapis.com/v1beta/models',
-    key: 'AQ.A...d-Qw',
-    status: '활성',
-    modifiedAt: '2026. 6. 14. 오후 11:15',
-  },
-  {
-    id: 'deepseek',
-    name: 'DeepSeek',
-    code: 'DEEPSEEK',
-    icon: null,
-    endpoint: 'https://api.deepseek.com',
-    key: 'sk-7...c31c',
-    status: '활성',
-    modifiedAt: '2026. 6. 30. 오후 2:32',
-  },
-];
-
-const models = [
-  [
-    'gpt-5.5',
-    'OpenAI',
-    'openai',
-    '입력 5 · 출력 20',
-    '정상',
-    '사용 안 함',
-    '2026. 7. 5. 오후 6:25',
-  ],
-  ['gpt-5.4', 'OpenAI', 'openai', '입력 4 · 출력 21', '정상', '사용', '2026. 7. 5. 오후 6:23'],
-  [
-    'gemini-2.5-flash',
-    'Google Gemini',
-    'google',
-    '입력 1 · 출력 4',
-    '정상',
-    '사용',
-    '2026. 7. 5. 오후 6:23',
-  ],
-  [
-    'gemini-2.5-pro',
-    'Google Gemini',
-    'google',
-    '입력 2 · 출력 15',
-    '정상',
-    '사용',
-    '2026. 7. 5. 오후 6:23',
-  ],
-  [
-    'gemini-2.5-flash-lite',
-    'Google Gemini',
-    'google',
-    '입력 1 · 출력 1',
-    '정상',
-    '사용',
-    '2026. 7. 5. 오후 6:23',
-  ],
-  [
-    'gemini-3.1-flash-lite',
-    'Google Gemini',
-    'google',
-    '입력 1 · 출력 3',
-    '정상',
-    '사용',
-    '2026. 7. 5. 오후 6:23',
-  ],
-  [
-    'gemini-3.5-flash',
-    'Google Gemini',
-    'google',
-    '입력 3 · 출력 13',
-    '정상',
-    '사용',
-    '2026. 7. 5. 오후 6:23',
-  ],
-  [
-    'deepseek-v4-flash',
-    'DeepSeek',
-    'deepseek',
-    '입력 1 · 출력 1',
-    '정상',
-    '사용',
-    '2026. 7. 7. 오전 12:18',
-  ],
-  [
-    'deepseek-v4-pro',
-    'DeepSeek',
-    'deepseek',
-    '입력 1 · 출력 2',
-    '정상',
-    '사용',
-    '2026. 7. 5. 오후 6:23',
-  ],
-];
-
-const prompts = [
-  [
-    '기본 테스트 프롬프트',
-    '테스트 응답을 간결하고 정확하게 작성한다.',
-    '활성',
-    '2026. 6. 4. 오후 8:10',
-  ],
-  ['요약 테스트 프롬프트', '입력 내용을 핵심 bullet로 요약한다.', '활성', '2026. 6. 4. 오후 8:10'],
-  ['보고서 프롬프트', '회사 보고서 양식에 맞게 초안을 작성한다.', '활성', '2026. 7. 6. 오후 10:42'],
-  ['번역 프롬프트', 'AI 응답을 영어로 대답한다.', '비활성', '2026. 7. 6. 오후 10:42'],
-  ['업무 프롬프트', '하루 단위 해야할 업무를 리스트화 한다.', '활성', '2026. 7. 6. 오후 10:43'],
-  [
-    '주간 보고 프롬프트',
-    '진척률, 완료한 작업을 양식에 맞게 초안을 작성한다.',
-    '활성',
-    '2026. 7. 6. 오후 10:44',
-  ],
-  [
-    '인수인계 프롬프트',
-    '회사 문화에 맞는 인수 인계 목차 초안을 작성한다.',
-    '활성',
-    '2026. 7. 6. 오후 10:46',
-  ],
 ];
 
 const providerIcons = { openai: openaiIcon, google: geminiIcon, deepseek: null };
@@ -179,7 +48,7 @@ function ProviderIdentity({ icon, name, code }) {
       </span>
       <div className="min-w-0">
         <p className="truncate font-bold text-slate-900">{name}</p>
-        <span className="mt-1 inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+        <span className="mt-1 inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[0.72rem] font-bold text-slate-600">
           {code}
         </span>
       </div>
@@ -191,39 +60,24 @@ function ProviderIcon({ icon }) {
   return icon ? (
     <img src={icon} alt="" className="h-5 w-5" />
   ) : (
-    <span className="grid h-5 w-5 place-items-center rounded-md bg-[#596CFF] text-[10px] font-black text-white">
+    <span className="grid h-5 w-5 place-items-center rounded-md bg-[#596CFF] text-[0.72rem] font-black text-white">
       D
     </span>
   );
 }
 
-function ManageButton({ onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="rounded-lg bg-slate-50 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100"
-    >
-      관리
-    </button>
-  );
+function activateOnRowKeyDown(event, onActivate) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    onActivate();
+  }
 }
 
-function TableShell({ title, count, actionLabel, columns, widths, children, onRegister }) {
+function TableShell({ title, columns, widths, children }) {
   return (
-    <section className={`${monitoringTableSurfaceClass} min-h-[35rem]`}>
-      <header className="flex min-h-[4.25rem] items-center justify-between gap-4 border-b border-[#E7EBF4] px-5 py-3">
-        <div className="flex items-center gap-3">
-          <h2 className="text-sm font-bold text-slate-900">{title}</h2>
-          <Badge tone="gray">{count}</Badge>
-        </div>
-        <AppButton onClick={onRegister} className="h-9 px-4">
-          <Plus className="h-4 w-4 sm:hidden" />
-          <span>{actionLabel}</span>
-        </AppButton>
-      </header>
-      <div className="min-h-0 flex-1 overflow-auto">
-        <table className={`${monitoringTableClass} min-w-[62rem]`}>
+    <section className={monitoringTableSurfaceClass}>
+      <div className="overflow-x-auto">
+        <table aria-label={title} className={`${monitoringTableClass} min-w-[62rem]`}>
           <colgroup>
             {widths.map((width, index) => (
               <col key={index} style={{ width }} />
@@ -232,31 +86,35 @@ function TableShell({ title, count, actionLabel, columns, widths, children, onRe
           <thead className={monitoringTableHeadClass}>
             <tr className={monitoringTableHeaderRowClass}>
               {columns.map(column => (
-                <th key={column} className={monitoringTableHeaderCellClass}>
+                <th key={column} scope="col" className={monitoringTableHeaderCellClass}>
                   {column}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="text-[clamp(0.8rem,0.92vw,0.9rem)] text-slate-600">{children}</tbody>
+          <tbody className={monitoringTableBodyClass}>{children}</tbody>
         </table>
       </div>
     </section>
   );
 }
 
-function ProviderTable({ rows, onManage, onRegister }) {
+function ProviderTable({ rows, onManage }) {
   return (
     <TableShell
       title="제공자 목록"
-      count={providers.length}
-      actionLabel="제공자 등록"
-      columns={['제공자', 'ENDPOINT', 'API KEY', '상태', '수정일', '관리']}
-      widths={['22%', '37%', '15%', '8%', '13%', '7%']}
-      onRegister={onRegister}
+      columns={['제공자', 'ENDPOINT', 'API KEY', '상태', '수정일']}
+      widths={['24%', '38%', '16%', '9%', '13%']}
     >
       {rows.map((provider, rowIndex) => (
-        <tr key={provider.id} className={monitoringTableRowClass({ striped: rowIndex % 2 === 1 })}>
+        <tr
+          key={provider.id}
+          tabIndex={0}
+          aria-label={`${provider.name} 제공자 관리 열기`}
+          onClick={() => onManage(provider)}
+          onKeyDown={event => activateOnRowKeyDown(event, () => onManage(provider))}
+          className={monitoringTableRowClass({ striped: rowIndex % 2 === 1, interactive: true })}
+        >
           <td className={monitoringTableCellClass(rowIndex)}>
             <ProviderIdentity icon={provider.icon} name={provider.name} code={provider.code} />
           </td>
@@ -268,27 +126,28 @@ function ProviderTable({ rows, onManage, onRegister }) {
             <Badge>{provider.status}</Badge>
           </td>
           <td className={monitoringTableCellClass(rowIndex)}>{provider.modifiedAt}</td>
-          <td className={monitoringTableCellClass(rowIndex)}>
-            <ManageButton onClick={() => onManage(provider)} />
-          </td>
         </tr>
       ))}
     </TableShell>
   );
 }
 
-function ModelTable({ rows, onManage, onRegister }) {
+function ModelTable({ rows, onManage }) {
   return (
     <TableShell
       title="모델 목록"
-      count={19}
-      actionLabel="모델 등록"
-      columns={['모델', '단가 (1K)', '점검 결과', '사용 설정', '수정일', '관리']}
-      widths={['23%', '28%', '16%', '10%', '16%', '7%']}
-      onRegister={onRegister}
+      columns={['모델', '단가 (1K)', '점검 결과', '사용 설정', '수정일']}
+      widths={['27%', '30%', '17%', '11%', '15%']}
     >
       {rows.map((model, rowIndex) => (
-        <tr key={model[0]} className={monitoringTableRowClass({ striped: rowIndex % 2 === 1 })}>
+        <tr
+          key={model[0]}
+          tabIndex={0}
+          aria-label={`${model[0]} 모델 관리 열기`}
+          onClick={() => onManage(model)}
+          onKeyDown={event => activateOnRowKeyDown(event, () => onManage(model))}
+          className={monitoringTableRowClass({ striped: rowIndex % 2 === 1, interactive: true })}
+        >
           <td className={monitoringTableCellClass(rowIndex)}>
             <div className="flex items-center gap-3">
               <span className="grid h-9 w-9 place-items-center rounded-lg bg-slate-50">
@@ -308,27 +167,28 @@ function ModelTable({ rows, onManage, onRegister }) {
             <Badge tone={model[5] === '사용' ? 'green' : 'gray'}>{model[5]}</Badge>
           </td>
           <td className={monitoringTableCellClass(rowIndex)}>{model[6]}</td>
-          <td className={monitoringTableCellClass(rowIndex)}>
-            <ManageButton onClick={() => onManage(model)} />
-          </td>
         </tr>
       ))}
     </TableShell>
   );
 }
 
-function PromptTable({ rows, onManage, onRegister }) {
+function PromptTable({ rows, onManage }) {
   return (
     <TableShell
       title="프롬프트 목록"
-      count={prompts.length}
-      actionLabel="프롬프트 등록"
-      columns={['이름', '본문 미리보기', '상태', '수정일', '관리']}
-      widths={['22%', '46%', '9%', '16%', '7%']}
-      onRegister={onRegister}
+      columns={['이름', '본문 미리보기', '상태', '수정일']}
+      widths={['25%', '50%', '10%', '15%']}
     >
       {rows.map((prompt, rowIndex) => (
-        <tr key={prompt[0]} className={monitoringTableRowClass({ striped: rowIndex % 2 === 1 })}>
+        <tr
+          key={prompt[0]}
+          tabIndex={0}
+          aria-label={`${prompt[0]} 프롬프트 관리 열기`}
+          onClick={() => onManage(prompt)}
+          onKeyDown={event => activateOnRowKeyDown(event, () => onManage(prompt))}
+          className={monitoringTableRowClass({ striped: rowIndex % 2 === 1, interactive: true })}
+        >
           <td className={monitoringTableCellClass(rowIndex, 'font-bold text-slate-900')}>
             {prompt[0]}
           </td>
@@ -337,9 +197,6 @@ function PromptTable({ rows, onManage, onRegister }) {
             <Badge tone={prompt[2] === '활성' ? 'green' : 'gray'}>{prompt[2]}</Badge>
           </td>
           <td className={monitoringTableCellClass(rowIndex)}>{prompt[3]}</td>
-          <td className={monitoringTableCellClass(rowIndex)}>
-            <ManageButton onClick={() => onManage(prompt)} />
-          </td>
         </tr>
       ))}
     </TableShell>
@@ -362,7 +219,7 @@ function TextField({ value, onChange, placeholder, type = 'text' }) {
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+      className="h-[var(--app-control-lg)] w-full rounded-[var(--app-radius-lg)] border border-slate-200 bg-white px-[var(--app-pad-md)] text-[clamp(0.82rem,0.95vw,0.9rem)] text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8BC6FF] focus:ring-[clamp(0.2rem,0.32vw,0.25rem)] focus:ring-[#DEEEFF]"
     />
   );
 }
@@ -488,13 +345,9 @@ function ManagementModal({ tab, item, mode, onClose }) {
           ) : null}
         </div>
         <footer className="app-modal-footer flex justify-end gap-2 border-t border-slate-200">
-          <button
-            type="button"
-            onClick={onClose}
-            className="h-10 rounded-xl border border-slate-200 px-5 text-sm font-bold text-slate-500"
-          >
+          <AppButton type="button" variant="secondary" onClick={onClose} className="h-10 px-5">
             취소
-          </button>
+          </AppButton>
           <AppButton onClick={onClose} className="h-10 px-5">
             저장
           </AppButton>
@@ -560,7 +413,7 @@ export default function ModelsPage({ initialTab = 'providers' }) {
       <div className="bg-[#f9f9f9]/95">
         {!isPromptPage ? (
           <nav
-            className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-1 overflow-x-auto px-[var(--app-page-x)] py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-4 overflow-x-auto border-b border-[#E2E8F0] px-[var(--app-page-x)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             aria-label="모델 설정 유형"
           >
             {tabs.map(tab => (
@@ -568,10 +421,10 @@ export default function ModelsPage({ initialTab = 'providers' }) {
                 key={tab.id}
                 type="button"
                 onClick={() => changeTab(tab.id)}
-                className={`shrink-0 rounded-full px-4 py-1 text-sm transition-colors ${
+                className={`relative flex h-12 shrink-0 items-center justify-center border-b-2 px-3 text-sm font-black transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-[#ededed] font-medium text-[#333]'
-                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+                    ? 'border-[#075DF6] text-[#075DF6]'
+                    : 'border-transparent text-slate-600 hover:text-[#075DF6]'
                 }`}
               >
                 {tab.label}
@@ -580,9 +433,9 @@ export default function ModelsPage({ initialTab = 'providers' }) {
           </nav>
         ) : null}
       </div>
-      <div className="mx-auto flex min-h-full w-full max-w-[88rem] flex-col px-[var(--app-page-x)] pb-8 pt-[var(--app-page-top)]">
+      <PageLayout gapClassName="gap-[var(--app-gap-md)]">
         <section
-          className={`mb-5 grid items-end gap-2.5 md:grid-cols-2 ${activeTab === 'models' ? 'xl:grid-cols-[9rem_11rem_minmax(0,1fr)_5.25rem]' : 'xl:grid-cols-[9rem_minmax(0,1fr)_5.25rem]'}`}
+          className={`grid items-end gap-[var(--app-gap-sm)] md:grid-cols-2 ${activeTab === 'models' ? 'xl:grid-cols-[9rem_11rem_minmax(0,1fr)_5.25rem_9rem]' : 'xl:grid-cols-[9rem_minmax(0,1fr)_5.25rem_9rem]'}`}
         >
           <label>
             <span className="mb-1.5 block text-xs font-bold text-slate-700">
@@ -638,17 +491,25 @@ export default function ModelsPage({ initialTab = 'providers' }) {
           >
             조회
           </AppButton>
+          <AppButton onClick={openCreate} className="h-[var(--app-control-lg)] px-3">
+            <Plus className="h-4 w-4" />
+            <span>
+              {activeTab === 'providers'
+                ? '제공자 등록'
+                : activeTab === 'models'
+                  ? '모델 등록'
+                  : '프롬프트 등록'}
+            </span>
+          </AppButton>
         </section>
         {activeTab === 'providers' ? (
-          <ProviderTable rows={filteredProviders} onManage={openManage} onRegister={openCreate} />
+          <ProviderTable rows={filteredProviders} onManage={openManage} />
         ) : null}
-        {activeTab === 'models' ? (
-          <ModelTable rows={filteredModels} onManage={openManage} onRegister={openCreate} />
-        ) : null}
+        {activeTab === 'models' ? <ModelTable rows={filteredModels} onManage={openManage} /> : null}
         {activeTab === 'prompts' ? (
-          <PromptTable rows={filteredPrompts} onManage={openManage} onRegister={openCreate} />
+          <PromptTable rows={filteredPrompts} onManage={openManage} />
         ) : null}
-      </div>
+      </PageLayout>
       {modal ? (
         <ManagementModal
           tab={activeTab}

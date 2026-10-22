@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import AppButton, { primaryButtonClassName } from '../components/AppButton.jsx';
 import SectionCard from '../components/SectionCard.jsx';
-import PageLayout from '../layout/PageLayout.jsx';
+import PageLayout from '../../components/PageLayout.jsx';
 import {
   useDownloadSettingsQuery,
   usePatchDownloadSettingsMutation,
@@ -149,10 +149,7 @@ function TemplateEditModal({ template, onClose, onSave, isSaving }) {
         onClick={onClose}
       />
 
-      <form
-        onSubmit={handleSubmit}
-        className="app-modal-panel app-modal-panel--lg"
-      >
+      <form onSubmit={handleSubmit} className="app-modal-panel app-modal-panel--lg">
         <div className="app-modal-header flex items-start justify-between border-b border-[#EEF2F7]">
           <div>
             <h2 className="text-lg font-bold text-[#111827]">템플릿 정보 수정</h2>
@@ -313,10 +310,7 @@ function DownloadUrlModal({ currentPath, onClose, onApply, isSaving }) {
         onClick={onClose}
       />
 
-      <form
-        onSubmit={handleSubmit}
-        className="app-modal-panel app-modal-panel--lg"
-      >
+      <form onSubmit={handleSubmit} className="app-modal-panel app-modal-panel--lg">
         <div className="app-modal-header flex items-start justify-between pb-0">
           <div>
             <h2 className="text-lg font-bold leading-tight text-[#111827]">다운로드 URL 변경</h2>
@@ -612,4 +606,3 @@ export default function SupportPage() {
     </PageLayout>
   );
 }
-

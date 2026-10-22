@@ -2,7 +2,7 @@ import {
   APP_PAGE_HORIZONTAL_PADDING_CLASS,
   APP_PAGE_INNER_WIDTH_CLASS,
   APP_PAGE_OUTER_WIDTH_CLASS,
-} from '../constants/contentLayout.js';
+} from '../external/constants/contentLayout.js';
 
 export default function PageLayout({
   children,
@@ -22,4 +22,3 @@ export default function PageLayout({
     </div>
   );
 }
-

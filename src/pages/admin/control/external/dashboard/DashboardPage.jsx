@@ -17,7 +17,7 @@ import { DateRangePicker } from '../components/monitoring/MonitoringListComponen
 import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
 import ServiceLogoBadge from '../components/ServiceLogoBadge.jsx';
 import { STATUS_COLORS } from '../constants/statusColors.js';
-import PageLayout from '../layout/PageLayout.jsx';
+import PageLayout from '../../components/PageLayout.jsx';
 
 const dashboardTabs = [
   { key: 'all', label: '전체', description: '각 항목 탐지 현황을 한눈에 확인합니다.' },
@@ -55,11 +55,11 @@ const POLICY_CHART_COLORS = {
 };
 
 const ORGANIZATION_CHART_COLORS = {
-first:  '#075DF6',
-second: '#168BFF',
-third:  '#75BEFF',
-fourth: '#6FB0FF',
-fifth:  '#A9D6FF',
+  first: '#075DF6',
+  second: '#168BFF',
+  third: '#75BEFF',
+  fourth: '#6FB0FF',
+  fifth: '#A9D6FF',
 };
 
 const SERVICE_CHART_COLORS = {
@@ -1383,4 +1383,3 @@ export default function DashboardPage() {
     </PageLayout>
   );
 }
-

@@ -19,7 +19,7 @@ import {
   monitoringTableSurfaceClass,
 } from '../components/monitoring/monitoringTableStyles.js';
 import useAdaptiveRowsPerPage from '../hooks/useAdaptiveRowsPerPage.js';
-import PageLayout from '../layout/PageLayout.jsx';
+import PageLayout from '../../components/PageLayout.jsx';
 import { useDropdownSelectOptionsQuery } from '../queries/dropdownSettingsQueries.js';
 import {
   useDeleteClientMutation,

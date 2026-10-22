@@ -1,89 +1,34 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, Check, Plus, Save, X } from 'lucide-react';
-import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
+import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
+import AppButton from '../../external/components/AppButton.jsx';
+import AppSearchField from '../../external/components/AppSearchField.jsx';
+import FixedPaginationBar from '../../external/components/FixedPaginationBar.jsx';
+import PageLayout from '../../components/PageLayout.jsx';
+import {
+  monitoringTableCellClass,
+  monitoringTableClass,
+  monitoringTableHeadClass,
+  monitoringTableHeaderCellClass,
+  monitoringTableHeaderRowClass,
+  monitoringTableRowClass,
+  monitoringTableSurfaceClass,
+} from '../../external/components/monitoring/monitoringTableStyles.js';
 
-const initialPolicies = {
-  exchangeRate: '1,332',
-  creditPrice: '10',
-  minimumCharge: '1,000',
-  totalLimit: '100,000,000',
-};
-
-const initialTiers = [
-  { id: 1, name: '테스트직책', credits: '1,000,000', updatedAt: '2026. 6. 12. 오후 12:59' },
-  { id: 2, name: '교수', credits: '100,000', updatedAt: '2026. 7. 6. 오후 10:56' },
-  { id: 3, name: '직원', credits: '100,000,000', updatedAt: '2026. 6. 12. 오후 1:02' },
-  { id: 4, name: '학생', credits: '10,000', updatedAt: '2026. 6. 4. 오후 8:10' },
-  { id: 5, name: '세종시', credits: '456', updatedAt: '2026. 6. 4. 오후 9:46' },
-  { id: 6, name: '관리자', credits: '499', updatedAt: '2026. 6. 8. 오후 5:34' },
-];
-
-const initialTransactions = [
-  {
-    id: 3084,
-    user: 'tester2@school.edu',
-    role: '#2',
-    type: '지급',
-    delta: '+100',
-    balance: '994,000 → 994,100',
-    requestId: '-',
-    actor: 'ADMIN #2',
-  },
-  {
-    id: 3083,
-    user: 'tester2@school.edu',
-    role: '#2',
-    type: '차감',
-    delta: '-1,000',
-    balance: '995,000 → 994,000',
-    requestId: '3276',
-    actor: 'LLM_REQUEST #3276',
-  },
-  {
-    id: 3082,
-    user: 'tester2@school.edu',
-    role: '#2',
-    type: '차감',
-    delta: '-1,000',
-    balance: '996,000 → 995,000',
-    requestId: '3275',
-    actor: 'LLM_REQUEST #3275',
-  },
-  {
-    id: 3081,
-    user: 'tester2@school.edu',
-    role: '#2',
-    type: '차감',
-    delta: '-1,000',
-    balance: '997,000 → 996,000',
-    requestId: '3274',
-    actor: 'LLM_REQUEST #3274',
-  },
-  {
-    id: 3080,
-    user: 'tester2@school.edu',
-    role: '#2',
-    type: '차감',
-    delta: '-1,000',
-    balance: '998,000 → 997,000',
-    requestId: '3273',
-    actor: 'LLM_REQUEST #3273',
-  },
-];
-
-const users = ['테스트사용자 #1 (tester1@school.edu)', 'tester2@school.edu', 'bjh@aictl.kr'];
-
+import { initialPolicies, initialTiers, initialTransactions, users } from '../data.js';
 const inputClass =
-  'h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100';
-const fieldLabelClass = 'mb-1.5 block text-xs font-semibold text-slate-600';
+  'h-[var(--app-control-lg)] w-full rounded-[var(--app-radius-lg)] border border-slate-200 bg-white px-[var(--app-pad-md)] text-[clamp(0.82rem,0.95vw,0.9rem)] text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8BC6FF] focus:ring-[clamp(0.2rem,0.32vw,0.25rem)] focus:ring-[#DEEEFF]';
+const fieldLabelClass = 'mb-1.5 block text-[0.8rem] font-semibold text-[#5C6784]';
 const panelClass =
-  'overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.025]';
+  'overflow-hidden rounded-[22px] border border-[#E2E8F4] bg-white shadow-[0_12px_34px_rgba(15,23,42,0.06)]';
 
 function PanelHeading({ title, action }) {
   return (
-    <header className="flex min-h-10 items-center justify-between gap-3 border-b border-slate-100 px-4 py-2.5">
-      <h2 className="text-sm font-bold text-slate-900">{title}</h2>
+    <header className="flex min-h-14 items-center justify-between gap-3 border-b border-[#E7EBF4] px-5 py-3">
+      <h2 className="text-[1.12rem] font-bold tracking-[-0.03em] text-[#11182E] xl:text-[1.18rem]">
+        {title}
+      </h2>
       {action}
     </header>
   );
@@ -115,7 +60,9 @@ function StatusPill({ children, tone = 'green' }) {
     gray: 'bg-slate-100 text-slate-500',
   };
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${tones[tone]}`}>
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 text-[0.78rem] font-bold ${tones[tone]}`}
+    >
       {children}
     </span>
   );
@@ -126,15 +73,13 @@ function TierModal({ tier, onClose, onSave }) {
   const [credits, setCredits] = useState(tier?.credits ?? '');
 
   return (
-    <div className="fixed inset-0 z-[100] grid place-items-center bg-slate-950/40 p-4 backdrop-blur-sm">
-      <button type="button" className="absolute inset-0" onClick={onClose} aria-label="닫기" />
-      <section
-        role="dialog"
-        aria-modal="true"
-        className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
-      >
-        <header className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <h2 className="font-bold text-slate-900">{tier ? '지급 기준 관리' : '지급 기준 등록'}</h2>
+    <div className="app-modal-stage z-[100]">
+      <button type="button" className="app-modal-backdrop" onClick={onClose} aria-label="닫기" />
+      <section role="dialog" aria-modal="true" className="app-modal-panel app-modal-panel--sm">
+        <header className="app-modal-header flex items-center justify-between border-b border-slate-200">
+          <h2 className="text-[1.12rem] font-bold tracking-[-0.02em] text-[#11182E]">
+            {tier ? '지급 기준 관리' : '지급 기준 등록'}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -149,57 +94,45 @@ function TierModal({ tier, onClose, onSave }) {
             event.preventDefault();
             onSave({ name, credits });
           }}
-          className="space-y-4 p-5"
+          className="flex min-h-0 flex-1 flex-col"
         >
-          <label className="block">
-            <span className={fieldLabelClass}>직급 / 그룹</span>
-            <input
-              required
-              value={name}
-              onChange={event => setName(event.target.value)}
-              placeholder="예: 교직원"
-              className={inputClass}
-            />
-          </label>
-          <label className="block">
-            <span className={fieldLabelClass}>월 지급 크레딧</span>
-            <input
-              required
-              value={credits}
-              onChange={event => setCredits(event.target.value)}
-              placeholder="크레딧 입력"
-              className={inputClass}
-            />
-          </label>
-          <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-10 rounded-lg border border-slate-200 px-4 text-sm font-semibold text-slate-600"
-            >
-              취소
-            </button>
-            <button className="h-10 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700">
-              저장
-            </button>
+          <div className="app-modal-body space-y-4">
+            <label className="block">
+              <span className={fieldLabelClass}>직급 / 그룹</span>
+              <input
+                required
+                value={name}
+                onChange={event => setName(event.target.value)}
+                placeholder="예: 교직원"
+                className={inputClass}
+              />
+            </label>
+            <label className="block">
+              <span className={fieldLabelClass}>월 지급 크레딧</span>
+              <input
+                required
+                value={credits}
+                onChange={event => setCredits(event.target.value)}
+                placeholder="크레딧 입력"
+                className={inputClass}
+              />
+            </label>
           </div>
+          <footer className="app-modal-footer flex justify-end gap-2 border-t border-slate-200">
+            <AppButton type="button" variant="secondary" onClick={onClose} className="h-10 px-5">
+              취소
+            </AppButton>
+            <AppButton type="submit" className="h-10 px-5">
+              저장
+            </AppButton>
+          </footer>
         </form>
       </section>
     </div>
   );
 }
 
-function TransactionTable({
-  rows,
-  typeFilter,
-  setTypeFilter,
-  userQuery,
-  setUserQuery,
-  requestQuery,
-  setRequestQuery,
-  page,
-  setPage,
-}) {
+function TransactionTable({ rows, typeFilter, userQuery, requestQuery }) {
   const filteredRows = useMemo(
     () =>
       rows.filter(
@@ -212,99 +145,61 @@ function TransactionTable({
   );
 
   return (
-    <section className={panelClass}>
-      <PanelHeading
-        title="변동 내역"
-        action={
-          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
-            3,073
-          </span>
-        }
-      />
-      <div className="flex flex-wrap items-end gap-2 border-b border-slate-100 px-4 py-3">
-        <label className="w-28">
-          <span className={fieldLabelClass}>유형</span>
-          <CustomDropdown
-            value={typeFilter}
-            onChange={setTypeFilter}
-            options={['전체', '지급', '차감']}
-            ariaLabel="변동 유형"
-            className="[&>button]:h-9 [&>button]:min-h-0 [&>button]:rounded-lg [&>button]:text-xs"
-          />
-        </label>
-        <label className="w-40">
-          <span className={fieldLabelClass}>사용자 ID</span>
-          <input
-            value={userQuery}
-            onChange={event => setUserQuery(event.target.value)}
-            placeholder="사용자 ID 입력..."
-            className={`${inputClass} h-9 text-xs`}
-          />
-        </label>
-        <label className="w-36">
-          <span className={fieldLabelClass}>요청 ID</span>
-          <input
-            value={requestQuery}
-            onChange={event => setRequestQuery(event.target.value)}
-            placeholder="요청 ID 입력..."
-            className={`${inputClass} h-9 text-xs`}
-          />
-        </label>
-      </div>
+    <section className={monitoringTableSurfaceClass}>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[850px] table-fixed text-left text-xs">
-          <thead className="bg-slate-50 text-slate-500">
-            <tr>
+        <table aria-label="크레딧 변동 내역" className={`${monitoringTableClass} min-w-[68rem]`}>
+          <colgroup>
+            {['8%', '18%', '8%', '10%', '10%', '17%', '11%', '18%'].map((width, index) => (
+              <col key={index} style={{ width }} />
+            ))}
+          </colgroup>
+          <thead className={monitoringTableHeadClass}>
+            <tr className={monitoringTableHeaderRowClass}>
               {[
-                ['로그 ID', '8%'],
-                ['사용자', '18%'],
-                ['직급', '8%'],
-                ['유형', '10%'],
-                ['변동', '10%'],
-                ['잔액 변화', '17%'],
-                ['요청 ID', '11%'],
-                ['처리 주체', '18%'],
-              ].map(([title, width]) => (
-                <th
-                  key={title}
-                  style={{ width }}
-                  className="border-b border-slate-100 px-3 py-2.5 font-semibold"
-                >
-                  {title}
+                '로그 ID',
+                '사용자',
+                '직급',
+                '유형',
+                '변동',
+                '잔액 변화',
+                '요청 ID',
+                '처리 주체',
+              ].map(column => (
+                <th key={column} scope="col" className={monitoringTableHeaderCellClass}>
+                  {column}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-[clamp(0.82rem,0.95vw,0.94rem)] leading-[1.45] text-[#344054]">
             {filteredRows.map((row, index) => (
-              <tr key={row.id} className="hover:bg-slate-50/70">
-                <td className="border-b border-slate-100 px-3 py-2.5 text-slate-500">{row.id}</td>
-                <td className="border-b border-slate-100 px-3 py-2.5 font-medium text-slate-700">
+              <tr key={row.id} className={monitoringTableRowClass({ striped: index % 2 === 1 })}>
+                <td className={monitoringTableCellClass(index, 'text-slate-500')}>{row.id}</td>
+                <td className={monitoringTableCellClass(index, 'font-medium text-slate-700')}>
                   {row.user}
                 </td>
-                <td className="border-b border-slate-100 px-3 py-2.5 text-slate-500">{row.role}</td>
-                <td className="border-b border-slate-100 px-3 py-2.5">
+                <td className={monitoringTableCellClass(index, 'text-slate-500')}>{row.role}</td>
+                <td className={monitoringTableCellClass(index)}>
                   <StatusPill tone={row.type === '지급' ? 'green' : 'red'}>{row.type}</StatusPill>
                 </td>
                 <td
-                  className={`border-b border-slate-100 px-3 py-2.5 font-bold ${row.type === '지급' ? 'text-emerald-600' : 'text-rose-500'}`}
+                  className={monitoringTableCellClass(
+                    index,
+                    `font-bold ${row.type === '지급' ? 'text-emerald-600' : 'text-rose-500'}`
+                  )}
                 >
                   {row.delta}
                 </td>
-                <td className="border-b border-slate-100 px-3 py-2.5 text-slate-500">
-                  {row.balance}
-                </td>
-                <td className="border-b border-slate-100 px-3 py-2.5 text-slate-500">
+                <td className={monitoringTableCellClass(index, 'text-slate-500')}>{row.balance}</td>
+                <td className={monitoringTableCellClass(index, 'text-slate-500')}>
                   {row.requestId}
                 </td>
-                <td className="border-b border-slate-100 px-3 py-2.5 text-slate-400">
-                  {row.actor}
-                </td>
+                <td className={monitoringTableCellClass(index, 'text-slate-400')}>{row.actor}</td>
               </tr>
             ))}
             {filteredRows.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-10 text-center text-slate-400">
+                <td colSpan={8} className="h-56 text-center text-slate-400">
                   조건에 맞는 변동 내역이 없습니다.
                 </td>
               </tr>
@@ -312,40 +207,6 @@ function TransactionTable({
           </tbody>
         </table>
       </div>
-      <footer className="flex items-center justify-between gap-3 px-4 py-3 text-xs text-slate-500">
-        <span>3,073건</span>
-        <nav className="flex items-center gap-1" aria-label="변동 내역 페이지">
-          <button
-            type="button"
-            disabled={page <= 1}
-            onClick={() => setPage(page - 1)}
-            className="rounded px-2 py-1 disabled:text-slate-300"
-          >
-            ‹ 이전
-          </button>
-          {[1, 2, 3, 4, 5].map(number => (
-            <button
-              key={number}
-              type="button"
-              onClick={() => setPage(number)}
-              className={`h-8 min-w-8 rounded-lg px-2 ${page === number ? 'bg-blue-600 font-bold text-white' : 'hover:bg-slate-100'}`}
-            >
-              {number}
-            </button>
-          ))}
-          <span className="px-1">…</span>
-          <button
-            type="button"
-            onClick={() => setPage(154)}
-            className={`h-8 rounded-lg px-2 ${page === 154 ? 'bg-blue-600 text-white' : ''}`}
-          >
-            154
-          </button>
-          <button type="button" onClick={() => setPage(page + 1)} className="rounded px-2 py-1">
-            다음 ›
-          </button>
-        </nav>
-      </footer>
     </section>
   );
 }
@@ -429,7 +290,7 @@ export default function LimitsPage() {
   ];
 
   return (
-    <main className="mx-auto w-full max-w-[88rem] space-y-3 px-[clamp(0.875rem,2vw,1.5rem)] pb-8 pt-4 text-slate-900">
+    <PageLayout gapClassName="gap-4">
       {notice ? (
         <div
           role="status"
@@ -442,7 +303,7 @@ export default function LimitsPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-3 xl:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2">
         <section className={panelClass}>
           <PanelHeading
             title="크레딧 현황"
@@ -495,12 +356,12 @@ export default function LimitsPage() {
                 type="month"
                 value={targetMonth}
                 onChange={event => setTargetMonth(event.target.value)}
-                className={`${inputClass} h-9`}
+                className={inputClass}
               />
             </label>
-            <button className="h-9 rounded-lg bg-blue-600 px-4 text-xs font-semibold text-white hover:bg-blue-700">
+            <AppButton type="submit" className="h-[var(--app-control-lg)] px-4">
               월별 지급 실행
-            </button>
+            </AppButton>
           </form>
         </section>
       </div>
@@ -518,90 +379,88 @@ export default function LimitsPage() {
             />
           ))}
           <div className="flex justify-end sm:col-span-4">
-            <button
+            <AppButton
               type="button"
+              variant="secondary"
               onClick={() => {
                 setPolicySaved(true);
                 setNotice('운영 정책을 저장했습니다.');
               }}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-slate-100 px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
+              className="h-[var(--app-control-lg)] gap-2 px-4"
             >
               {policySaved ? <Check size={14} /> : <Save size={14} />}
               {policySaved ? '저장됨' : '변경 저장'}
-            </button>
+            </AppButton>
           </div>
         </div>
       </section>
 
       <section className={panelClass}>
-        <PanelHeading
-          title="직급별 지급 기준"
-          action={
-            <button
-              type="button"
-              onClick={() => setTierModal({ tier: null })}
-              className="inline-flex h-8 items-center gap-1 rounded-lg bg-blue-50 px-3 text-xs font-semibold text-blue-600 hover:bg-blue-100"
-            >
-              <Plus size={14} />
-              지급 기준 등록
-            </button>
-          }
-        />
-        <div className="flex items-center gap-2 px-4 py-2">
-          <span className="text-xs text-slate-500">직급</span>
-          <CustomDropdown
-            value={tierFilter}
-            onChange={setTierFilter}
-            options={['전체 직급', ...tiers.map(tier => tier.name)]}
-            ariaLabel="직급 필터"
-            className="w-32 [&>button]:h-8 [&>button]:min-h-0 [&>button]:rounded-lg [&>button]:text-xs"
-          />
+        <PanelHeading title="직급별 지급 기준" />
+        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#E7EBF4] px-4 py-3">
+          <label className="w-40">
+            <span className={fieldLabelClass}>직급</span>
+            <CustomDropdown
+              value={tierFilter}
+              onChange={setTierFilter}
+              options={['전체 직급', ...tiers.map(tier => tier.name)]}
+              ariaLabel="직급 필터"
+              className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)]"
+            />
+          </label>
+          <AppButton
+            onClick={() => setTierModal({ tier: null })}
+            className="h-[var(--app-control-lg)]"
+          >
+            <Plus className="h-4 w-4" /> 지급 기준 등록
+          </AppButton>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[620px] table-fixed text-left text-xs">
-            <thead className="bg-slate-50 text-slate-500">
-              <tr>
+          <table className={`${monitoringTableClass} min-w-[58rem]`}>
+            <thead className={monitoringTableHeadClass}>
+              <tr className={monitoringTableHeaderRowClass}>
                 {[
-                  ['직급', '35%'],
-                  ['월 지급 크레딧', '25%'],
-                  ['지급 상태', '15%'],
-                  ['최근 변경', '17%'],
-                  ['관리', '8%'],
+                  ['직급', '38%'],
+                  ['월 지급 크레딧', '27%'],
+                  ['지급 상태', '16%'],
+                  ['최근 변경', '19%'],
                 ].map(([title, width]) => (
-                  <th
-                    key={title}
-                    style={{ width }}
-                    className="border-y border-slate-100 px-4 py-2 font-semibold"
-                  >
+                  <th key={title} style={{ width }} className={monitoringTableHeaderCellClass}>
                     {title}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody>
-              {visibleTiers.map(tier => (
-                <tr key={tier.id} className="hover:bg-slate-50/60">
-                  <td className="border-b border-slate-100 px-4 py-2">
+            <tbody className="text-[clamp(0.82rem,0.95vw,0.94rem)] leading-[1.45] text-[#344054]">
+              {visibleTiers.map((tier, index) => (
+                <tr
+                  key={tier.id}
+                  tabIndex={0}
+                  aria-label={`${tier.name} 지급 기준 관리 열기`}
+                  onClick={() => setTierModal({ tier })}
+                  onKeyDown={event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setTierModal({ tier });
+                    }
+                  }}
+                  className={monitoringTableRowClass({
+                    striped: index % 2 === 1,
+                    interactive: true,
+                  })}
+                >
+                  <td className={monitoringTableCellClass(index)}>
                     <span className="block font-semibold text-slate-800">{tier.name}</span>
-                    <span className="mt-0.5 block text-[10px] text-slate-400">#{tier.id}</span>
+                    <span className="mt-0.5 block text-[0.76rem] text-slate-400">#{tier.id}</span>
                   </td>
-                  <td className="border-b border-slate-100 px-4 py-2 font-semibold text-slate-700">
+                  <td className={monitoringTableCellClass(index, 'font-semibold text-slate-700')}>
                     {tier.credits}
                   </td>
-                  <td className="border-b border-slate-100 px-4 py-2">
+                  <td className={monitoringTableCellClass(index)}>
                     <StatusPill>활성</StatusPill>
                   </td>
-                  <td className="border-b border-slate-100 px-4 py-2 text-slate-400">
+                  <td className={monitoringTableCellClass(index, 'text-slate-400')}>
                     {tier.updatedAt}
-                  </td>
-                  <td className="border-b border-slate-100 px-4 py-2">
-                    <button
-                      type="button"
-                      onClick={() => setTierModal({ tier })}
-                      className="rounded-md bg-slate-100 px-3 py-1.5 font-semibold text-slate-600 hover:bg-slate-200"
-                    >
-                      관리
-                    </button>
                   </td>
                 </tr>
               ))}
@@ -648,7 +507,7 @@ export default function LimitsPage() {
                     onChange={setSelectedUser}
                     options={users}
                     ariaLabel="대상 사용자"
-                    className="[&>button]:h-9 [&>button]:min-h-0 [&>button]:rounded-lg [&>button]:text-xs"
+                    className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)]"
                   />
                 </label>
                 <label>
@@ -659,7 +518,7 @@ export default function LimitsPage() {
                       onChange={event => setAmount(event.target.value)}
                       inputMode="numeric"
                       placeholder="수량 입력"
-                      className={`${inputClass} h-9 pr-14 text-xs`}
+                      className={`${inputClass} pr-14`}
                     />
                     <span className="absolute inset-y-0 right-3 flex items-center text-[11px] text-slate-400">
                       크레딧
@@ -676,9 +535,9 @@ export default function LimitsPage() {
                     placeholder="처리 사유 입력..."
                     className="min-h-12 flex-1 resize-y rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   />
-                  <button className="h-9 shrink-0 rounded-lg bg-blue-600 px-4 text-xs font-semibold text-white hover:bg-blue-700">
+                  <AppButton type="submit" className="h-[var(--app-control-lg)] shrink-0 px-4">
                     지급 실행
-                  </button>
+                  </AppButton>
                 </div>
               </label>
             </div>
@@ -689,7 +548,7 @@ export default function LimitsPage() {
       {tierModal ? (
         <TierModal tier={tierModal.tier} onClose={() => setTierModal(null)} onSave={saveTier} />
       ) : null}
-    </main>
+    </PageLayout>
   );
 }
 
@@ -697,21 +556,52 @@ export function CreditHistoryPage() {
   const [typeFilter, setTypeFilter] = useState('전체');
   const [userQuery, setUserQuery] = useState('');
   const [requestQuery, setRequestQuery] = useState('');
+  const [submittedFilters, setSubmittedFilters] = useState({
+    typeFilter: '전체',
+    userQuery: '',
+    requestQuery: '',
+  });
   const [page, setPage] = useState(1);
+  const handleSearch = () => {
+    setSubmittedFilters({ typeFilter, userQuery, requestQuery });
+    setPage(1);
+  };
 
   return (
-    <main className="mx-auto w-full max-w-[88rem] space-y-3 px-[clamp(0.875rem,2vw,1.5rem)] pb-8 pt-4 text-slate-900">
-      <TransactionTable
-        rows={initialTransactions}
-        typeFilter={typeFilter}
-        setTypeFilter={setTypeFilter}
-        userQuery={userQuery}
-        setUserQuery={setUserQuery}
-        requestQuery={requestQuery}
-        setRequestQuery={setRequestQuery}
-        page={page}
-        setPage={setPage}
-      />
-    </main>
+    <PageLayout gapClassName="gap-4" bottomPaddingClassName="pb-0">
+      <section className="grid items-end gap-[var(--app-gap-sm)] md:grid-cols-2 xl:grid-cols-[9rem_minmax(0,1fr)_minmax(0,1fr)_5.25rem]">
+        <label className="min-w-0">
+          <span className="mb-1.5 block text-xs font-bold text-slate-700">유형</span>
+          <CustomDropdown
+            value={typeFilter}
+            onChange={setTypeFilter}
+            options={['전체', '지급', '차감']}
+            ariaLabel="변동 유형"
+            className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)] [&>button]:font-semibold"
+          />
+        </label>
+        <label className="min-w-0">
+          <span className="mb-1.5 block text-xs font-bold text-slate-700">사용자 ID</span>
+          <AppSearchField
+            value={userQuery}
+            onChange={event => setUserQuery(event.target.value)}
+            placeholder="사용자 ID 입력..."
+          />
+        </label>
+        <label className="min-w-0">
+          <span className="mb-1.5 block text-xs font-bold text-slate-700">요청 ID</span>
+          <AppSearchField
+            value={requestQuery}
+            onChange={event => setRequestQuery(event.target.value)}
+            placeholder="요청 ID 입력..."
+          />
+        </label>
+        <AppButton onClick={handleSearch} className="h-[var(--app-control-lg)] w-full">
+          조회
+        </AppButton>
+      </section>
+      <TransactionTable rows={initialTransactions} {...submittedFilters} />
+      <FixedPaginationBar currentPage={page} totalPages={154} onPageChange={setPage} />
+    </PageLayout>
   );
 }

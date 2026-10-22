@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 
-import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
-import AppButton from '../external/components/AppButton.jsx';
-import AppSearchField from '../external/components/AppSearchField.jsx';
-import GlassPagination from '../external/components/GlassPagination.jsx';
+import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
+import AppButton from '../../external/components/AppButton.jsx';
+import AppSearchField from '../../external/components/AppSearchField.jsx';
+import FixedPaginationBar from '../../external/components/FixedPaginationBar.jsx';
+import PageLayout from '../../components/PageLayout.jsx';
 import {
   monitoringTableCellClass,
   monitoringTableClass,
@@ -13,357 +14,16 @@ import {
   monitoringTableHeaderRowClass,
   monitoringTableRowClass,
   monitoringTableSurfaceClass,
-} from '../external/components/monitoring/monitoringTableStyles.js';
-import '../external/garim.css';
+} from '../../external/components/monitoring/monitoringTableStyles.js';
+import '../../external/garim.css';
 
+import { agentRows, historyTabCounts, llmRows, toolRows } from '../data.js';
 const PAGE_SIZE = 9;
 
 const tabs = [
-  { id: 'llm', label: 'LLM 요청 로그', count: 3273 },
-  { id: 'agent', label: 'Agent 실행 로그', count: 1691 },
-  { id: 'tool', label: '도구 사용 로그', count: 2049 },
-];
-
-const llmRows = [
-  [
-    '3276',
-    'tester2@school.edu',
-    '#2',
-    'gpt-5',
-    'OPENAI',
-    '성공',
-    '353 / 148',
-    '2.2초',
-    '2026. 10. 19. 오후 1:15',
-    '-',
-  ],
-  [
-    '3275',
-    'tester2@school.edu',
-    '#2',
-    'gpt-4.1',
-    'OPENAI',
-    '성공',
-    '728 / 13',
-    '1.3초',
-    '2026. 10. 19. 오후 1:15',
-    '-',
-  ],
-  [
-    '3274',
-    'tester2@school.edu',
-    '#2',
-    'deepseek-v4-flash',
-    'DEEPSEEK',
-    '성공',
-    '431 / 47',
-    '1초',
-    '2026. 10. 19. 오후 1:15',
-    '-',
-  ],
-  [
-    '3273',
-    'tester2@school.edu',
-    '#2',
-    'gpt-4.1',
-    'OPENAI',
-    '성공',
-    '730 / 15',
-    '922ms',
-    '2026. 10. 19. 오후 1:15',
-    '-',
-  ],
-  [
-    '3272',
-    'tester2@school.edu',
-    '#2',
-    'gemini-2.5-flash',
-    'GOOGLE',
-    '성공',
-    '338 / 8',
-    '1.5초',
-    '2026. 10. 19. 오후 1:14',
-    '-',
-  ],
-  [
-    '3271',
-    'tester2@school.edu',
-    '#2',
-    'gpt-4.1',
-    'OPENAI',
-    '성공',
-    '728 / 15',
-    '1.6초',
-    '2026. 10. 19. 오후 1:14',
-    '-',
-  ],
-  [
-    '3270',
-    'tester2@school.edu',
-    '#2',
-    'gpt-4.1',
-    'OPENAI',
-    '실패',
-    '0 / 0',
-    '0ms',
-    '2026. 10. 19. 오후 1:10',
-    '요청 처리 중 연결이 종료되었습니다.',
-  ],
-  [
-    '3269',
-    'tester2@school.edu',
-    '#2',
-    'gpt-4.1',
-    'OPENAI',
-    '실패',
-    '0 / 0',
-    '0ms',
-    '2026. 10. 19. 오후 1:10',
-    'provider_timeout',
-  ],
-  [
-    '3268',
-    'tester2@school.edu',
-    '#2',
-    'gpt-5.5',
-    'OPENAI',
-    '실패',
-    '0 / 0',
-    '0ms',
-    '2026. 10. 19. 오후 1:09',
-    'model_not_available',
-  ],
-];
-
-const agentRows = [
-  [
-    '#1691',
-    'tester2@school.edu',
-    '-',
-    'C#479 / T#1833 / LLM#3276',
-    '성공',
-    '-',
-    '3.7s',
-    '2026. 10. 19. 오후 1:15',
-  ],
-  [
-    '#1690',
-    'tester2@school.edu',
-    '-',
-    'C#478 / T#1832 / LLM#3274',
-    '성공',
-    '-',
-    '2.1s',
-    '2026. 10. 19. 오후 1:15',
-  ],
-  [
-    '#1689',
-    'tester2@school.edu',
-    '-',
-    'C#477 / T#1831 / LLM#3272',
-    '성공',
-    '-',
-    '3.4s',
-    '2026. 10. 19. 오후 1:14',
-  ],
-  [
-    '#1688',
-    'tester2@school.edu',
-    '-',
-    'C#476 / T#1830 / LLM#3270',
-    '실패',
-    'agent_runtime_failed',
-    '57ms',
-    '2026. 10. 19. 오후 1:10',
-  ],
-  [
-    '#1687',
-    'tester2@school.edu',
-    '-',
-    'C#475 / T#1829 / LLM#3269',
-    '실패',
-    'agent_runtime_failed',
-    '221ms',
-    '2026. 10. 19. 오후 1:10',
-  ],
-  [
-    '#1686',
-    'tester2@school.edu',
-    '-',
-    'C#474 / T#1828 / LLM#3268',
-    '실패',
-    'agent_runtime_failed',
-    '2.6s',
-    '2026. 10. 19. 오후 1:09',
-  ],
-  [
-    '#1685',
-    'tester2@school.edu',
-    '-',
-    'C#474 / T#1827 / LLM#3266',
-    '실패',
-    'agent_runtime_failed',
-    '105ms',
-    '2026. 10. 19. 오후 12:06',
-  ],
-  [
-    '#1684',
-    'tester2@school.edu',
-    '-',
-    'C#474 / T#1826 / LLM#3265',
-    '실패',
-    'agent_runtime_failed',
-    '110ms',
-    '2026. 10. 19. 오후 12:05',
-  ],
-  [
-    '#1683',
-    'bjh@aictl.kr',
-    '-',
-    'C#473 / T#1825 / LLM#3264',
-    '실패',
-    'agent_tool_approval_required',
-    '1.6s',
-    '2026. 8. 5. 오후 2:40',
-  ],
-];
-
-const toolRows = [
-  [
-    '2049',
-    'web_search',
-    'LOCAL / DEEPSEEK',
-    'bjh@aictl.kr',
-    '#10',
-    'C#473 / T#1825',
-    'APPROVAL_DECIDED',
-    '거절',
-    '0',
-    'user_daily_tool - / -',
-    '거절',
-    '-',
-    '2026. 8. 5. 오후 2:43',
-  ],
-  [
-    '2048',
-    'web_search',
-    'LOCAL / DEEPSEEK',
-    'bjh@aictl.kr',
-    '#10',
-    'C#473 / T#1825',
-    'INVOCATION_SKIPPED',
-    '건너뜀',
-    '0',
-    'user_daily_tool - / -',
-    '-',
-    'agent_tool_approval_required',
-    '2026. 8. 5. 오후 2:40',
-  ],
-  [
-    '2047',
-    'web_search',
-    'LOCAL / DEEPSEEK',
-    'bjh@aictl.kr',
-    '#10',
-    'C#473 / T#1825',
-    'APPROVAL_REQUESTED',
-    'ALLOWED',
-    '0',
-    'user_daily_tool - / -',
-    '대기',
-    '-',
-    '2026. 8. 5. 오후 2:40',
-  ],
-  [
-    '2046',
-    'web_search',
-    'LOCAL / DEEPSEEK',
-    'bjh@aictl.kr',
-    '#10',
-    'C#469 / T#1821',
-    'INVOCATION_SUCCEEDED',
-    '성공',
-    '13',
-    'user_daily_tool 1 / 100',
-    '-',
-    '-',
-    '2026. 7. 30. 오후 4:39',
-  ],
-  [
-    '2045',
-    'web_search',
-    'LOCAL / DEEPSEEK',
-    'bjh@aictl.kr',
-    '#10',
-    'C#469 / T#1821',
-    'APPROVAL_DECIDED',
-    '승인',
-    '0',
-    'user_daily_tool - / -',
-    '승인',
-    '-',
-    '2026. 7. 30. 오후 4:39',
-  ],
-  [
-    '2044',
-    'web_search',
-    'LOCAL / DEEPSEEK',
-    'bjh@aictl.kr',
-    '#10',
-    'C#469 / T#1820',
-    'INVOCATION_SKIPPED',
-    '건너뜀',
-    '0',
-    'user_daily_tool - / -',
-    '-',
-    'agent_tool_approval_required',
-    '2026. 7. 30. 오후 4:39',
-  ],
-  [
-    '2043',
-    'web_search',
-    'LOCAL / DEEPSEEK',
-    'bjh@aictl.kr',
-    '#10',
-    'C#469 / T#1820',
-    'APPROVAL_REQUESTED',
-    'ALLOWED',
-    '0',
-    'user_daily_tool - / -',
-    '대기',
-    '-',
-    '2026. 7. 30. 오후 4:39',
-  ],
-  [
-    '2042',
-    'web_search',
-    'LOCAL / DEEPSEEK',
-    'bjh@aictl.kr',
-    '#10',
-    'C#468 / T#1814',
-    'INVOCATION_SUCCEEDED',
-    '성공',
-    '8',
-    'user_daily_tool 0 / 100',
-    '-',
-    '-',
-    '2026. 7. 30. 오후 4:11',
-  ],
-  [
-    '2041',
-    'web_search',
-    'LOCAL / DEEPSEEK',
-    'bjh@aictl.kr',
-    '#10',
-    'C#468 / T#1813',
-    'APPROVAL_DECIDED',
-    '승인',
-    '0',
-    'user_daily_tool - / -',
-    '승인',
-    '-',
-    '2026. 7. 30. 오후 4:11',
-  ],
+  { id: 'llm', label: 'LLM 요청 로그', count: historyTabCounts.llm },
+  { id: 'agent', label: 'Agent 실행 로그', count: historyTabCounts.agent },
+  { id: 'tool', label: '도구 사용 로그', count: historyTabCounts.tool },
 ];
 
 const tableConfig = {
@@ -544,7 +204,7 @@ function renderCells(tab, row, onDetail) {
   ];
 }
 
-function LogTable({ tab, query, status, currentPage, onPageChange, onDetail }) {
+function LogTable({ tab, query, status, onDetail }) {
   const config = tableConfig[tab];
   const tabInfo = tabs.find(item => item.id === tab);
   const filteredRows = useMemo(() => {
@@ -556,17 +216,15 @@ function LogTable({ tab, query, status, currentPage, onPageChange, onDetail }) {
       return matchesQuery && matchesStatus;
     });
   }, [config.rows, query, status]);
-  const totalPages = Math.max(1, Math.ceil(tabInfo.count / PAGE_SIZE));
-
   return (
-    <section className={`${monitoringTableSurfaceClass} min-h-[33rem]`}>
+    <section className={monitoringTableSurfaceClass}>
       <div className="flex items-center gap-3 border-b border-[#E7EBF4] px-5 py-4">
         <h2 className="text-sm font-bold text-slate-900">{config.title}</h2>
         <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
           {tabInfo.count.toLocaleString()}건
         </span>
       </div>
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div className="overflow-x-auto">
         <table className={`${monitoringTableClass} min-w-[68rem]`}>
           <colgroup>
             {config.widths.map((width, index) => (
@@ -574,7 +232,9 @@ function LogTable({ tab, query, status, currentPage, onPageChange, onDetail }) {
             ))}
           </colgroup>
           <thead className={monitoringTableHeadClass}>
-            <tr className={monitoringTableHeaderRowClass}>
+            <tr
+              className={`${monitoringTableHeaderRowClass} !text-[clamp(0.74rem,0.84vw,0.84rem)]`}
+            >
               {config.columns.map(column => (
                 <th key={column} className={monitoringTableHeaderCellClass}>
                   {column}
@@ -582,7 +242,7 @@ function LogTable({ tab, query, status, currentPage, onPageChange, onDetail }) {
               ))}
             </tr>
           </thead>
-          <tbody className="text-[clamp(0.78rem,0.9vw,0.88rem)] leading-[1.45] text-slate-600">
+          <tbody className="text-[clamp(0.74rem,0.84vw,0.84rem)] leading-[1.4] text-[#344054]">
             {filteredRows.length ? (
               filteredRows.map((row, rowIndex) => (
                 <tr
@@ -612,14 +272,6 @@ function LogTable({ tab, query, status, currentPage, onPageChange, onDetail }) {
           </tbody>
         </table>
       </div>
-      <footer className="flex min-h-16 flex-col items-center justify-between gap-3 border-t border-[#E7EBF4] px-5 py-3 sm:flex-row">
-        <p className="text-sm font-medium text-slate-500">총 {tabInfo.count.toLocaleString()}건</p>
-        <GlassPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-        />
-      </footer>
     </section>
   );
 }
@@ -696,7 +348,7 @@ export default function HistoryPage() {
     <div className="garim-external-root min-h-full bg-[#f9f9f9] text-[#111827]">
       <div className="bg-[#f9f9f9]/95">
         <nav
-          className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-1 overflow-x-auto px-[var(--app-page-x)] py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-4 overflow-x-auto border-b border-[#E2E8F0] px-[var(--app-page-x)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           aria-label="AI 요청 이력 유형"
         >
           {tabs.map(tab => (
@@ -704,10 +356,10 @@ export default function HistoryPage() {
               key={tab.id}
               type="button"
               onClick={() => changeTab(tab.id)}
-              className={`shrink-0 rounded-full px-4 py-1 text-sm transition-colors ${
+              className={`relative flex h-12 shrink-0 items-center justify-center border-b-2 px-3 text-sm font-black transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-[#ededed] font-medium text-[#333]'
-                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+                  ? 'border-[#075DF6] text-[#075DF6]'
+                  : 'border-transparent text-slate-600 hover:text-[#075DF6]'
               }`}
             >
               {tab.label}
@@ -715,8 +367,10 @@ export default function HistoryPage() {
           ))}
         </nav>
       </div>
-      <div className="mx-auto flex min-h-full w-full max-w-[88rem] flex-col px-[var(--app-page-x)] pb-8 pt-[var(--app-page-top)]">
-        <section className={`mb-5 grid items-end gap-2.5 md:grid-cols-2 ${filterGridClass}`}>
+      <PageLayout gapClassName="gap-[var(--app-gap-md)]" bottomPaddingClassName="pb-0">
+        <section
+          className={`grid items-end gap-[var(--app-gap-sm)] md:grid-cols-2 ${filterGridClass}`}
+        >
           <label className="min-w-0">
             <span className="mb-1.5 block text-xs font-bold text-slate-700">상태</span>
             <CustomDropdown
@@ -751,15 +405,16 @@ export default function HistoryPage() {
             조회
           </AppButton>
         </section>
-        <LogTable
-          tab={activeTab}
-          query={submittedQuery}
-          status={status}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-          onDetail={setDetailRow}
-        />
-      </div>
+        <LogTable tab={activeTab} query={submittedQuery} status={status} onDetail={setDetailRow} />
+      </PageLayout>
+      <FixedPaginationBar
+        currentPage={currentPage}
+        totalPages={Math.max(
+          1,
+          Math.ceil(tabs.find(tab => tab.id === activeTab).count / PAGE_SIZE)
+        )}
+        onPageChange={setCurrentPage}
+      />
       <DetailModal tab={activeTab} row={detailRow} onClose={() => setDetailRow(null)} />
     </div>
   );

@@ -34,12 +34,14 @@ import IntelligencePage from '../pages/admin/discover/intelligence/IntelligenceP
 // ================================
 // 관리자 - Control
 // ================================
-import UsagePage from '../pages/admin/control/usage/UsagePage.jsx';
-import ModelsPage from '../pages/admin/control/models/ModelsPage.jsx';
-import ClassificationPage from '../pages/admin/control/classification/ClassificationPage.jsx';
-import ControlPoliciesPage from '../pages/admin/control/policies/PoliciesPage.jsx';
-import LimitsPage, { CreditHistoryPage } from '../pages/admin/control/limits/LimitsPage.jsx';
-import HistoryPage from '../pages/admin/control/history/HistoryPage.jsx';
+import UsagePage from '../pages/admin/control/internal/usage/UsagePage.jsx';
+import ModelsPage from '../pages/admin/control/internal/models/ModelsPage.jsx';
+import ClassificationPage from '../pages/admin/control/internal/classification/ClassificationPage.jsx';
+import ControlPoliciesPage from '../pages/admin/control/internal/policies/PoliciesPage.jsx';
+import LimitsPage, {
+  CreditHistoryPage,
+} from '../pages/admin/control/internal/limits/LimitsPage.jsx';
+import HistoryPage from '../pages/admin/control/internal/history/HistoryPage.jsx';
 import InternalControlLayout from '../pages/admin/control/layout/InternalControlLayout.jsx';
 import ExternalControlLayout from '../pages/admin/control/external/layout/ExternalControlLayout.jsx';
 import DownloadRoute from '../pages/admin/control/external/download/DownloadRoute.jsx';
@@ -144,8 +146,11 @@ export default function AppRouter() {
             <Route path="internal" element={<InternalControlLayout />}>
               <Route index element={<Navigate to="usage" replace />} />
               <Route path="usage" element={<UsagePage />} />
-              <Route path="models" element={<ModelsPage />} />
-              <Route path="prompts" element={<ModelsPage initialTab="prompts" />} />
+              <Route path="models" element={<ModelsPage key="internal-models" />} />
+              <Route
+                path="prompts"
+                element={<ModelsPage key="internal-prompts" initialTab="prompts" />}
+              />
               <Route path="classification" element={<ClassificationPage />} />
               <Route path="policies" element={<ControlPoliciesPage />} />
               <Route path="limits" element={<LimitsPage />} />

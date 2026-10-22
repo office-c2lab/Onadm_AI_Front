@@ -16,7 +16,7 @@ import {
   monitoringTableSurfaceClass,
 } from '../components/monitoring/monitoringTableStyles.js';
 import useAdaptiveRowsPerPage from '../hooks/useAdaptiveRowsPerPage.js';
-import PageLayout from '../layout/PageLayout.jsx';
+import PageLayout from '../../components/PageLayout.jsx';
 import { usePatchPolicyEnabledMutation, usePoliciesQuery } from '../queries/policyQueries.js';
 import { FileUploadProtectionContent } from '../components/settings/SettingsContent.jsx';
 
@@ -537,4 +537,3 @@ export default function PolicyPage() {
     </PageLayout>
   );
 }
-
