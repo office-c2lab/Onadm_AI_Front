@@ -1,45 +1,49 @@
 import { useMemo, useState } from 'react';
-import {
-  Check,
-  ChevronRight,
-  CircleAlert,
-  Clock3,
-  FileWarning,
-  RotateCcw,
-  ShieldCheck,
-} from 'lucide-react';
+import { Check, ChevronRight, CircleAlert, Clock3 } from 'lucide-react';
 import { Drawer, EmptyState, SearchField, StatusBadge, ToolAvatar } from '../components.jsx';
-import { reviewRequests } from '../data.js';
+import { appRecords, reviewRequests } from '../data.js';
+import ReviewProgress from '../../../user/aistore/components/ReviewProgress.jsx';
 
-const tabs = ['심사 대기', '자동검사 결과', '관리자 승인', '심사 이력'];
-const checks = [
-  ['악성 파일 및 압축 구조', '통과', '위험한 실행 파일이 발견되지 않았습니다.'],
-  ['비밀키·개인정보 탐지', '통과', '노출된 인증정보가 없습니다.'],
-  ['외부 네트워크 연결', '경고', 'api.example.com으로의 외부 연결 1건을 확인해 주세요.'],
-  ['요청 권한 범위', '경고', '조직 디렉터리 읽기 권한의 필요성을 검토해 주세요.'],
-  ['오픈소스 라이선스', '통과', '차단된 라이선스가 없습니다.'],
-];
+const tabs = ['전체', '자동검사 중', '관리자 검토 필요', '심사 완료'];
+const appCategoryById = new Map(appRecords.map(app => [app.id, app.category]));
+
+function getCurrentReviewStage(item) {
+  if (item.approval === '승인') return { name: '승인 및 게시', state: '완료' };
+  if (item.approval === '반려') return { name: '심사 완료', state: '반려' };
+  if (item.scan === '검사 중') return { name: '파일 제출·보안 검사', state: '진행 중' };
+  if (item.scan === '실패') return { name: '파일 제출·보안 검사', state: '확인 필요' };
+  if (item.approval === '보완 필요') return { name: '관리자 검토', state: '보완 필요' };
+  return { name: '관리자 검토', state: '대기 중' };
+}
+
+function getReviewStageStates(item) {
+  const approved = item.approval === '승인';
+  const needsAttention = ['보완 필요', '반려'].includes(item.approval);
+  const scanState =
+    item.scan === '검사 중' ? 'running' : item.scan === '실패' ? 'failed' : 'complete';
+  const adminState = approved ? 'complete' : needsAttention ? 'failed' : 'queued';
+  return ['complete', scanState, adminState, approved ? 'complete' : 'pending'];
+}
 
 export default function SecurityPage() {
-  const [tab, setTab] = useState('심사 대기');
+  const [tab, setTab] = useState('관리자 검토 필요');
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(null);
   const [requests, setRequests] = useState(reviewRequests);
   const [notice, setNotice] = useState('');
-
   const rows = useMemo(
     () =>
       requests.filter(item => {
         const matches = `${item.name} ${item.id} ${item.requester}`
           .toLowerCase()
           .includes(query.toLowerCase());
-        if (tab === '심사 대기') return matches && item.approval === '대기';
-        if (tab === '자동검사 결과') return matches;
-        if (tab === '관리자 승인')
+        if (tab === '전체') return matches;
+        if (tab === '자동검사 중') return matches && item.scan === '검사 중';
+        if (tab === '관리자 검토 필요')
           return (
             matches && ['대기', '보완 필요'].includes(item.approval) && item.scan !== '검사 중'
           );
-        return matches && ['승인', '반려', '보완 필요'].includes(item.approval);
+        return matches && ['승인', '반려'].includes(item.approval);
       }),
     [query, requests, tab]
   );
@@ -72,8 +76,11 @@ export default function SecurityPage() {
           <SearchField value={query} onChange={setQuery} placeholder="앱, 요청 ID, 요청자 검색" />
         </div>
       </div>
-      <nav className="overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div className="flex w-max min-w-full justify-center gap-1">
+      <nav
+        aria-label="심사 관리 항목"
+        className="overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        <div className="flex w-max min-w-full justify-start gap-1">
           {tabs.map(item => (
             <button
               key={item}
@@ -81,11 +88,6 @@ export default function SecurityPage() {
               className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${tab === item ? 'bg-[#ededed] font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
             >
               {item}
-              {item === '심사 대기' ? (
-                <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] text-amber-700">
-                  2
-                </span>
-              ) : null}
             </button>
           ))}
         </div>
@@ -120,31 +122,19 @@ export default function SecurityPage() {
                     }
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <strong className="truncate text-base font-semibold text-slate-900">
-                        {item.name}
-                      </strong>
-                      <span className="rounded-md bg-slate-100 px-2 py-1 text-[11px] text-slate-600">
-                        {item.requestType}
-                      </span>
-                    </div>
-                    <p className="mt-1 truncate text-xs text-slate-500">
-                      {item.requester} · {item.id}
-                    </p>
+                    <strong className="block truncate text-left text-base font-semibold text-slate-900">
+                      {item.name}
+                    </strong>
+                    <span className="mt-1 block truncate text-sm text-slate-500">
+                      {appCategoryById.get(item.appId) ?? '미분류'}
+                    </span>
                   </div>
                 </div>
-                <div className="relative z-10 flex flex-wrap items-center gap-2 sm:justify-end">
-                  <StatusBadge>{item.risk}</StatusBadge>
-                  <StatusBadge>{item.scan}</StatusBadge>
-                  <StatusBadge>{item.approval}</StatusBadge>
-                  {item.findings ? (
-                    <span className="text-xs font-medium text-red-500">발견 {item.findings}건</span>
-                  ) : null}
-                </div>
-                <div className="relative z-10 flex min-w-24 items-center justify-end gap-2 text-xs text-slate-400">
-                  <span>{item.assignee}</span>
-                  <span>·</span>
-                  <span>{item.elapsed}</span>
+                <div className="relative z-10 flex min-w-0 flex-wrap items-center gap-2 text-xs sm:min-w-48 sm:justify-end">
+                  <span className="text-slate-500">{getCurrentReviewStage(item).name}</span>
+                  <StatusBadge>{getCurrentReviewStage(item).state}</StatusBadge>
+                  <span className="text-slate-400">{item.requester}</span>
+                  <span className="text-slate-400">· {item.submittedAt}</span>
                 </div>
               </article>
             ))}
@@ -197,29 +187,24 @@ export default function SecurityPage() {
               </div>
             ))}
           </div>
-          <div className="mt-5 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-900">자동검사 결과</h3>
-            <button className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600">
-              <RotateCcw size={13} /> 재검사
-            </button>
-          </div>
-          <div className="mt-3 divide-y divide-slate-100 rounded-xl border border-slate-200">
-            {checks.map(([name, status, description]) => (
-              <div key={name} className="flex gap-3 p-4">
-                {status === '통과' ? (
-                  <ShieldCheck className="mt-0.5 shrink-0 text-emerald-500" size={18} />
-                ) : (
-                  <FileWarning className="mt-0.5 shrink-0 text-amber-500" size={18} />
-                )}
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-slate-800">{name}</p>
-                    <StatusBadge>{status}</StatusBadge>
-                  </div>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
-                </div>
-              </div>
-            ))}
+          <div className="mt-5 rounded-xl border border-slate-200">
+            <ReviewProgress
+              upload={{
+                id: selected.id,
+                name: selected.name,
+                status:
+                  selected.approval === '승인'
+                    ? '승인 완료'
+                    : ['보완 필요', '반려'].includes(selected.approval)
+                      ? selected.approval
+                      : selected.scan === '검사 중'
+                        ? '검토 중'
+                        : '심사 대기',
+                displayLabel: `${selected.requestType} · ${selected.requester}`,
+                createdAt: selected.submittedAt,
+              }}
+              stageStates={getReviewStageStates(selected)}
+            />
           </div>
           <div className="mt-5 rounded-xl bg-slate-50 p-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">

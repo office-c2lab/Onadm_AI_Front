@@ -1,4 +1,6 @@
-export const appRecords = [
+import { publishedTools } from '../../user/aistore/data/manageStore.js';
+
+const managedAppRecords = [
   {
     id: 'APP-0241',
     name: '계약서 검토 도우미',
@@ -107,6 +109,77 @@ export const appRecords = [
     updatedAt: '2026.10.15',
     risk: '검사 중',
   },
+  {
+    id: 'APP-0301',
+    name: '회의 일정 자동 조율',
+    summary: '참석자 일정과 회의 조건을 바탕으로 가능한 시간을 정리합니다.',
+    type: 'AI Agent',
+    category: '업무 자동화',
+    owner: '운영혁신팀',
+    department: '운영혁신팀',
+    version: '1.0.0',
+    operation: '정상',
+    scan: '통과',
+    approval: '승인',
+    publication: '숨김',
+    visibility: '전사',
+    users: 0,
+    updatedAt: '2026.10.21',
+    risk: '낮음',
+  },
+  {
+    id: 'APP-0302',
+    name: '메일 개인정보 보호 도우미',
+    summary: '메일 본문의 개인정보 노출 여부를 확인하고 안전한 표현을 제안합니다.',
+    type: 'AI App',
+    category: '보안·개인정보',
+    owner: '정보보호팀',
+    department: '정보보호팀',
+    version: '1.1.0',
+    operation: '중지',
+    scan: '통과',
+    approval: '승인',
+    publication: '게시 중',
+    visibility: '전사',
+    users: 0,
+    updatedAt: '2026.10.21',
+    risk: '낮음',
+  },
+];
+
+const publishedAppRecords = publishedTools.map((tool, index) => {
+  const existing = managedAppRecords.find(item => item.name === tool.name);
+
+  return {
+    ...existing,
+    id: existing?.id ?? `APP-${String(242 + index).padStart(4, '0')}`,
+    storeId: tool.id,
+    name: tool.name,
+    summary: tool.summary,
+    type: tool.type,
+    category: tool.category,
+    storeCategory: tool.storeCategory,
+    storeTags: tool.storeTags,
+    description: tool.description,
+    maker: tool.maker,
+    owner: existing?.owner ?? tool.maker,
+    department: existing?.department ?? tool.maker,
+    version: tool.version,
+    operation: '정상',
+    scan: '통과',
+    approval: '승인',
+    publication: '게시 중',
+    visibility: existing?.visibility ?? '전사',
+    users: existing?.users ?? 0,
+    updatedAt: existing?.updatedAt ?? '2026.10.20',
+    risk: existing?.risk ?? '낮음',
+  };
+});
+
+const publishedAppNames = new Set(publishedTools.map(tool => tool.name));
+export const appRecords = [
+  ...publishedAppRecords,
+  ...managedAppRecords.filter(item => !publishedAppNames.has(item.name)),
 ];
 
 export const reviewRequests = [

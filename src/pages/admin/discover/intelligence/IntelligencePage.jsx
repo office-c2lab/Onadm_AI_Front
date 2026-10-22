@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import {
   CheckCircle2,
   Database,
-  ExternalLink,
   FileSearch,
   FileText,
   Globe2,
@@ -115,14 +114,18 @@ function IntelligenceRow({ item, blocked, onToggleBlocked, onOpen }) {
       </button>
 
       <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
-        <button
-          type="button"
-          onClick={() => onOpen(item)}
-          className="inline-flex h-8 items-center gap-1 rounded-lg bg-blue-50 px-2.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-100"
+        <span
+          className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-semibold ${
+            blocked ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
+          }`}
         >
-          열기
-          <ExternalLink size={13} aria-hidden="true" />
-        </button>
+          {blocked ? (
+            <Ban size={14} aria-hidden="true" />
+          ) : (
+            <CheckCircle2 size={14} aria-hidden="true" />
+          )}
+          {blocked ? '차단됨' : '허용됨'}
+        </span>
         <div
           className="relative"
           onBlur={event => {
