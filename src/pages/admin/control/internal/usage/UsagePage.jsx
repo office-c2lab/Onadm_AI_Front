@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Activity, Database, FileText, UserRound } from 'lucide-react';
+import { Activity } from 'lucide-react';
 import {
   CartesianGrid,
   Cell,
@@ -29,7 +29,6 @@ import {
 } from '../data.js';
 const panelClass =
   'min-w-0 rounded-[22px] border border-[#E2E8F4] bg-white px-5 py-5 shadow-[0_12px_34px_rgba(15,23,42,0.06)] xl:px-6';
-const tabs = ['크레딧', '토큰', '요청 수', '사용자 수'];
 
 function Panel({ title, children, action, className = '' }) {
   return (
@@ -45,48 +44,19 @@ function Panel({ title, children, action, className = '' }) {
   );
 }
 
-function MiniTabs({ value, onChange, items = tabs }) {
+function MetricCard({ title, value, delta, trend = 'up' }) {
+  const isPositive = trend === 'up';
   return (
-    <div className="inline-flex rounded-lg bg-[#F4F7FC] p-1">
-      {items.map(item => (
-        <button
-          key={item}
-          type="button"
-          onClick={() => onChange(item)}
-          className={`rounded-md px-3 py-1.5 text-[0.78rem] font-semibold transition ${value === item ? 'bg-[#075DF6] text-white shadow-sm' : 'text-[#647089] hover:text-[#075DF6]'}`}
-        >
-          {item}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function MetricCard({ icon: Icon, title, value, delta, color, bars }) {
-  return (
-    <section className={`${panelClass} flex min-h-[112px] items-center gap-4`}>
-      <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#EFF6FF] text-[#075DF6]">
-        <Icon size={21} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[0.96rem] font-semibold text-[#20273D]">{title}</p>
-        <p className="mt-3 text-[2rem] leading-none font-black tracking-[-0.05em] text-[#0E1731]">
-          {value}
-        </p>
-        <p className="mt-2 text-[0.86rem] font-bold text-[#2BB658]">
-          ↓ {delta} <span className="ml-2 font-medium text-[#71809D]">지난 30일 대비</span>
-        </p>
-      </div>
-      <div className="hidden h-9 items-end gap-0.5 sm:flex" aria-hidden="true">
-        {bars.map((height, index) => (
-          <span
-            key={index}
-            className="w-1 rounded-t-sm opacity-80"
-            style={{ height: `${height}px`, backgroundColor: color }}
-          />
-        ))}
-      </div>
-    </section>
+    <article className="min-w-0 rounded-[18px] border border-[#E2E8F4] bg-white px-5 py-5 shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
+      <p className="truncate text-[0.96rem] font-semibold text-[#20273D]">{title}</p>
+      <strong className="mt-5 block text-[clamp(1.75rem,2.2vw,2.25rem)] leading-none font-black tracking-[-0.05em] text-[#0E1731]">
+        {value}
+      </strong>
+      <p className={`mt-2 text-sm font-bold ${isPositive ? 'text-[#2BB658]' : 'text-[#FF4B57]'}`}>
+        {isPositive ? '↑' : '↓'} {delta}
+      </p>
+      <p className="mt-2 text-xs font-medium text-[#71809D]">지난 30일 대비</p>
+    </article>
   );
 }
 
@@ -112,54 +82,86 @@ function Donut({ data, centerTop, centerValue }) {
   const selectedSegment = data.find(segment => segment.name === selected);
 
   return (
-    <div className="relative h-[clamp(15rem,18vw,18rem)] w-[clamp(15rem,18vw,18rem)] shrink-0">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Tooltip content={<DonutTooltip />} wrapperStyle={{ zIndex: 20 }} />
-          <Pie
-            data={data}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            innerRadius="57%"
-            outerRadius="88%"
-            paddingAngle={2}
-            cornerRadius={8}
-            stroke="none"
-            onClick={segment =>
-              setSelected(current => (current === segment.name ? null : segment.name))
-            }
-            isAnimationActive
-            animationBegin={80}
-            animationDuration={520}
-            animationEasing="ease-out"
-          >
-            {data.map((segment, index) => (
-              <Cell
-                key={segment.name}
-                fill={
-                  segment.color ??
-                  ['#2678f5', '#27bfd0', '#8b72f8', '#ffa940', '#5b9cff', '#aebbd0'][index % 6]
-                }
-                opacity={selectedSegment && selectedSegment.name !== segment.name ? 0.42 : 1}
-                style={{ cursor: 'pointer' }}
-              />
-            ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className="text-[0.82rem] font-semibold text-[#55627E]">
-          {selectedSegment?.name ?? centerTop}
-        </span>
-        <strong className="mt-1 text-[1.3rem] font-black tracking-[-0.05em] text-[#10182E]">
-          {selectedSegment?.count ?? centerValue}
-        </strong>
-        {selectedSegment ? (
-          <span className="mt-1 text-xs font-bold text-[#647089]">{selectedSegment.value}%</span>
-        ) : null}
+    <div className="flex h-[clamp(14.5rem,18.75vw,16.875rem)] w-full items-center justify-center">
+      <div className="relative h-full w-full max-w-[16.875rem]">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Tooltip content={<DonutTooltip />} wrapperStyle={{ zIndex: 20 }} />
+            <Pie
+              data={data}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              innerRadius="57%"
+              outerRadius="88%"
+              paddingAngle={2}
+              cornerRadius={8}
+              stroke="none"
+              onClick={segment =>
+                setSelected(current => (current === segment.name ? null : segment.name))
+              }
+              isAnimationActive
+              animationBegin={80}
+              animationDuration={520}
+              animationEasing="ease-out"
+            >
+              {data.map((segment, index) => (
+                <Cell
+                  key={segment.name}
+                  fill={
+                    segment.color ??
+                    ['#2678f5', '#27bfd0', '#8b72f8', '#ffa940', '#5b9cff', '#aebbd0'][index % 6]
+                  }
+                  opacity={selectedSegment && selectedSegment.name !== segment.name ? 0.42 : 1}
+                  style={{ cursor: 'pointer' }}
+                />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+          <span className="max-w-[76%] truncate text-[0.82rem] font-semibold text-[#55627E]">
+            {selectedSegment?.name ?? centerTop}
+          </span>
+          <strong className="mt-1 max-w-[82%] truncate text-[1.45rem] font-black tracking-[-0.05em] text-[#10182E]">
+            {selectedSegment?.count ?? centerValue}
+          </strong>
+          {selectedSegment ? (
+            <span className="mt-1 text-xs font-bold text-[#647089]">{selectedSegment.value}%</span>
+          ) : null}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function ChartLegend({ items, hiddenLabels = [], onToggle }) {
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-2">
+      {items.map(item =>
+        onToggle ? (
+          <button
+            key={item.label}
+            type="button"
+            aria-pressed={!hiddenLabels.includes(item.label)}
+            onClick={() => onToggle(item.label)}
+            className={`inline-flex h-8 items-center gap-2 rounded-full border px-3 text-[0.78rem] font-bold transition ${hiddenLabels.includes(item.label) ? 'border-[#E7ECF5] bg-[#F8FAFD] text-[#A5AEC0]' : 'border-[#D9E0F1] bg-white text-[#33415B] hover:border-[#C9D3E8]'}`}
+          >
+            <i className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+            <span className="min-w-0 truncate">{item.label}</span>
+          </button>
+        ) : (
+          <span
+            key={item.label}
+            className="inline-flex h-8 items-center gap-2 rounded-full bg-white px-3 text-[0.78rem] font-bold text-[#33415B]"
+          >
+            <i className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+            <span className="min-w-0 truncate">{item.label}</span>
+            {item.value ? <span className="text-[#71809D]">{item.value}</span> : null}
+          </span>
+        )
+      )}
     </div>
   );
 }
@@ -189,19 +191,20 @@ function TrendTooltip({ active, label, payload }) {
 }
 
 export default function UsagePage() {
-  const [trendTab, setTrendTab] = useState('크레딧');
   const [hiddenTrendSeries, setHiddenTrendSeries] = useState([]);
-  const [modelTab, setModelTab] = useState('크레딧');
-  const [requestTab, setRequestTab] = useState('크레딧');
   const [dateRange, setDateRange] = useState(usageDefaultDateRange);
+  const toggleSeries = label =>
+    setHiddenTrendSeries(current =>
+      current.includes(label) ? current.filter(item => item !== label) : [...current, label]
+    );
 
   return (
     <PageLayout>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[Database, FileText, Activity, UserRound].map((icon, index) => (
-          <MetricCard key={usageMetrics[index].title} icon={icon} {...usageMetrics[index]} />
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {usageMetrics.map(metric => (
+          <MetricCard key={metric.title} {...metric} />
         ))}
-      </div>
+      </section>
 
       <section className="relative z-20 flex max-w-full flex-wrap items-end gap-[var(--app-gap-sm)]">
         <DateRangePicker
@@ -214,84 +217,49 @@ export default function UsagePage() {
         />
       </section>
 
-      <Panel
-        title="사용량 추이"
-        action={
-          <div className="flex flex-wrap items-center gap-2">
-            <MiniTabs value={trendTab} onChange={setTrendTab} />
-            <select className="h-9 rounded-lg border border-[#D9E0F1] bg-white px-3 text-[0.82rem] font-bold text-[#647089]">
-              <option>일별</option>
-              <option>주별</option>
-              <option>월별</option>
-            </select>
-            <select className="h-9 rounded-lg border border-[#D9E0F1] bg-white px-3 text-[0.82rem] font-bold text-[#647089]">
-              <option>모델별 (누적)</option>
-              <option>모델별</option>
-            </select>
-          </div>
-        }
-      >
-        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.8rem] font-semibold text-[#5C6784]">
-          {trendSeries.map(([key, label, color]) => {
-            const isVisible = !hiddenTrendSeries.includes(label);
-
-            return (
-              <button
-                key={key}
-                type="button"
-                aria-pressed={isVisible}
-                onClick={() =>
-                  setHiddenTrendSeries(current =>
-                    isVisible ? [...current, label] : current.filter(item => item !== label)
-                  )
-                }
-                className={`inline-flex items-center gap-1.5 transition ${isVisible ? 'text-[#5C6784]' : 'text-slate-300'}`}
-              >
-                <i
-                  className="size-2.5 rounded-full"
-                  style={{ backgroundColor: isVisible ? color : '#AEB8CA' }}
-                />
-                {label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="h-[clamp(15rem,18vw,18rem)] px-2 pb-1 pt-1">
+      <Panel title="사용량 추이">
+        <ChartLegend
+          items={trendSeries.map(([key, label, color]) => ({ key, label, color }))}
+          hiddenLabels={hiddenTrendSeries}
+          onToggle={toggleSeries}
+        />
+        <div className="relative h-[clamp(15.5rem,19.9vw,17.875rem)] min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <RechartsLineChart
               data={trendData}
-              margin={{ top: 12, right: 18, left: -8, bottom: 2 }}
+              margin={{ top: 22, right: 18, bottom: 4, left: -8 }}
             >
               <CartesianGrid stroke="#E8EDF7" vertical={false} />
               <XAxis
                 dataKey="day"
-                interval={1}
-                tick={{ fontSize: 10, fill: '#71809D', fontWeight: 600 }}
+                interval="preserveStartEnd"
+                minTickGap={20}
+                tick={{ fill: '#71809D', fontSize: 12, fontWeight: 700 }}
                 axisLine={false}
                 tickLine={false}
-                dy={8}
+                dy={10}
               />
               <YAxis
                 domain={[0, 3]}
                 ticks={[0, 1, 2, 3]}
                 tickFormatter={value => (value === 0 ? '0' : `${value}M`)}
-                tick={{ fontSize: 10, fill: '#71809D', fontWeight: 600 }}
+                tick={{ fill: '#71809D', fontSize: 12, fontWeight: 700 }}
                 axisLine={false}
                 tickLine={false}
                 width={42}
               />
               <Tooltip cursor={{ stroke: '#D6E9FF', strokeWidth: 1 }} content={<TrendTooltip />} />
               {trendSeries
-                .filter(([, name]) => !hiddenTrendSeries.includes(name))
-                .map(([key, name, color]) => (
+                .filter(([, label]) => !hiddenTrendSeries.includes(label))
+                .map(([key, label, color]) => (
                   <Line
                     key={key}
                     type="monotone"
                     dataKey={key}
-                    name={name}
+                    name={label}
                     stroke={color}
                     strokeWidth={2.8}
-                    dot={{ r: 3.5, strokeWidth: 2, fill: '#FFFFFF', stroke: color }}
+                    dot={{ r: 4, strokeWidth: 2, fill: '#FFFFFF', stroke: color }}
                     activeDot={{ r: 5, strokeWidth: 2, fill: '#FFFFFF', stroke: color }}
                     isAnimationActive
                     animationDuration={520}
@@ -300,123 +268,91 @@ export default function UsagePage() {
                 ))}
             </RechartsLineChart>
           </ResponsiveContainer>
+          {hiddenTrendSeries.length === trendSeries.length ? (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm font-bold text-[#9AA6BD]">
+              표시할 범례를 선택하세요
+            </div>
+          ) : null}
         </div>
       </Panel>
 
-      <div className="grid gap-5 xl:grid-cols-2">
-        <Panel
-          title="모델별 사용량"
-          action={
-            <MiniTabs
-              value={modelTab}
-              onChange={setModelTab}
-              items={['크레딧', '토큰', '요청 수']}
-            />
-          }
-        >
-          <div className="flex items-center gap-2 p-3">
-            <Donut
-              data={modelUsage.map(([name, count, percent, color]) => ({
-                name,
-                value: Number.parseFloat(percent),
-                count,
-                color,
-              }))}
-              centerTop="총 크레딧"
-              centerValue={usageMetrics[0].value}
-            />
-            <div className="min-w-0 flex-1 space-y-2">
-              {modelUsage.map(([name, value, percent, color]) => (
-                <div
-                  key={name}
-                  className="grid grid-cols-[1fr_auto_auto] items-center gap-2 text-[0.78rem]"
-                >
-                  <span className="flex items-center gap-1.5 truncate text-slate-600">
-                    <i className="size-2 rounded-full" style={{ backgroundColor: color }} />
-                    {name}
-                  </span>
-                  <span className="text-slate-600">{value}</span>
-                  <span className="w-10 text-right text-slate-400">{percent}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+      <section className="grid gap-5 xl:grid-cols-2">
+        <Panel title="모델별 사용량">
+          <ChartLegend
+            items={modelUsage.map(([label, , value, color]) => ({ label, value, color }))}
+          />
+          <Donut
+            data={modelUsage.map(([name, count, percent, color]) => ({
+              name,
+              value: Number.parseFloat(percent),
+              count,
+              color,
+            }))}
+            centerTop="총 크레딧"
+            centerValue={usageMetrics[0].value}
+          />
         </Panel>
-        <Panel
-          title="요청 유형"
-          action={
-            <MiniTabs value={requestTab} onChange={setRequestTab} items={['크레딧', '요청 수']} />
-          }
-        >
-          <div className="flex items-center gap-1 p-3">
-            <Donut
-              data={usageRequestTypes}
-              centerTop="총 요청 수"
-              centerValue={usageMetrics[1].value}
-            />
-            <div className="space-y-2.5 text-[0.78rem] text-slate-500">
-              {usageRequestTypes
-                .filter(({ name }) => name !== '이미지 생성')
-                .map(({ name, value, color }) => (
-                  <div key={name} className="flex w-24 items-center justify-between gap-2">
-                    <span className="flex items-center gap-1">
-                      <i className="size-2 rounded-full" style={{ backgroundColor: color }} />
-                      {name}
-                    </span>
-                    <span>{value}</span>
-                  </div>
-                ))}
-            </div>
-          </div>
+        <Panel title="요청 유형">
+          <ChartLegend
+            items={usageRequestTypes.map(({ name, value, color }) => ({
+              label: name,
+              value: `${value}%`,
+              color,
+            }))}
+          />
+          <Donut
+            data={usageRequestTypes}
+            centerTop="총 요청 수"
+            centerValue={usageMetrics[1].value}
+          />
         </Panel>
-      </div>
+      </section>
 
-      <div className="grid gap-4 xl:grid-cols-3">
+      <section className="grid gap-5 xl:grid-cols-3">
         <Panel title="토큰 사용 현황">
-          <div className="p-4">
-            <div className="flex h-2 overflow-hidden rounded-full bg-slate-100">
-              <i className="w-[70%] bg-blue-500" />
-              <i className="w-[26%] bg-blue-300" />
-              <i className="w-[4%] bg-blue-100" />
-            </div>
-            <div className="mt-3 flex justify-between gap-3 text-[0.8rem] text-slate-500">
-              <span>
-                입력 토큰 {usageTokenSummary.input} ({usageTokenSummary.inputPercent}%)
-              </span>
-              <span>
-                출력 토큰 {usageTokenSummary.output} ({usageTokenSummary.outputPercent}%)
-              </span>
-            </div>
+          <div className="flex h-2 overflow-hidden rounded-full bg-slate-100">
+            <i className="w-[70%] bg-[#075DF6]" />
+            <i className="w-[26%] bg-[#75BEFF]" />
+            <i className="w-[4%] bg-[#D6E9FF]" />
+          </div>
+          <div className="mt-4 grid gap-2 text-[0.82rem] leading-relaxed text-[#647089] sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+            <span>
+              입력 토큰 {usageTokenSummary.input} ({usageTokenSummary.inputPercent}%)
+            </span>
+            <span>
+              출력 토큰 {usageTokenSummary.output} ({usageTokenSummary.outputPercent}%)
+            </span>
           </div>
         </Panel>
         <Panel title="요청 처리 현황">
-          <div className="p-4">
-            <div className="flex h-2 overflow-hidden rounded-full bg-slate-100">
-              <i className="w-[97%] bg-emerald-500" />
-              <i className="w-[2%] bg-rose-400" />
-              <i className="w-[1%] bg-slate-300" />
-            </div>
-            <div className="mt-3 flex justify-between gap-3 text-[0.8rem] text-slate-500">
-              <span>
-                성공 {usageRequestSummary.success} ({usageRequestSummary.successPercent}%)
-              </span>
-              <span>실패 {usageRequestSummary.failure}</span>
-              <span>타임아웃 {usageRequestSummary.timeout}</span>
-            </div>
+          <div className="flex h-2 overflow-hidden rounded-full bg-slate-100">
+            <i className="w-[97%] bg-emerald-500" />
+            <i className="w-[2%] bg-rose-400" />
+            <i className="w-[1%] bg-slate-300" />
+          </div>
+          <div className="mt-4 grid gap-2 text-[0.82rem] leading-relaxed text-[#647089] sm:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
+            <span>
+              성공 {usageRequestSummary.success} ({usageRequestSummary.successPercent}%)
+            </span>
+            <span>실패 {usageRequestSummary.failure}</span>
+            <span>타임아웃 {usageRequestSummary.timeout}</span>
           </div>
         </Panel>
         <Panel title="평균 응답 시간">
-          <div className="flex items-center justify-between px-4 py-2">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <strong className="text-2xl">{usageResponseTime.value}</strong>
-              <p className="text-[0.8rem] text-emerald-600">
-                ↓ {usageResponseTime.delta}% <span className="text-slate-400">지난 30일 대비</span>
+              <strong className="text-[2rem] leading-none font-black tracking-[-0.05em] text-[#0E1731]">
+                {usageResponseTime.value}
+              </strong>
+              <p className="mt-2 text-sm font-bold text-[#2BB658]">
+                ↓ {usageResponseTime.delta}
+                <span className="ml-2 text-xs font-medium text-[#71809D]">지난 30일 대비</span>
               </p>
             </div>
-            <Activity className="text-blue-500" size={48} strokeWidth={1.4} />
+            <Activity className="shrink-0 text-[#075DF6]" size={40} strokeWidth={1.6} />
           </div>
         </Panel>
-      </div>
+      </section>
     </PageLayout>
   );
 }
