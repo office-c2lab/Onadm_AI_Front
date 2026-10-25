@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, ClipboardList, Plus, RefreshCw } from 'lucide-react';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import zipFileImage from '../../../../assets/images/zipfile.png';
 import {
+  cancelReviewRequest,
   MOCK_TOOL_UPDATE_REVIEW,
   normalizeReviewStatus,
   REVIEW_REQUESTS_KEY,
@@ -72,13 +74,14 @@ function readUploads() {
   try {
     const saved = window.localStorage.getItem(REVIEW_REQUESTS_KEY);
     const rows = saved ? JSON.parse(saved) : [];
-    const uploads = Array.isArray(rows)
+    const normalizedRows = Array.isArray(rows)
       ? rows.map(row => ({
           ...row,
           status: normalizeReviewStatus(row.status),
         }))
       : [];
-    const savedIds = new Set(uploads.map(row => row.id));
+    const savedIds = new Set(normalizedRows.map(row => row.id));
+    const uploads = normalizedRows.filter(row => !row.cancelled);
     return [...uploads, ...MOCK_UPLOADS.filter(row => !savedIds.has(row.id))];
   } catch {
     return MOCK_UPLOADS;
@@ -107,14 +110,16 @@ const updateReviewSteps = [
   },
 ];
 
-function ReviewDetails({ upload }) {
+function ReviewDetails({ upload, onCancel, onRetry }) {
   const steps = upload.requestType === '업데이트' ? updateReviewSteps : reviewSteps;
   const progressUpload = {
     ...upload,
     displayLabel:
       upload.requestType === '업데이트' ? `업데이트 요청 · v${upload.version}` : upload.fileName,
   };
-  return <ReviewProgress upload={progressUpload} steps={steps} />;
+  return (
+    <ReviewProgress upload={progressUpload} steps={steps} onCancel={onCancel} onRetry={onRetry} />
+  );
 }
 
 function ReviewStatus({ status }) {
@@ -141,10 +146,86 @@ function reviewStatusTab(status) {
   return status;
 }
 
+function ReviewActionModal({ action, upload, error, onClose, onConfirm }) {
+  useEffect(() => {
+    const closeOnEscape = event => {
+      if (event.key === 'Escape') onClose();
+    };
+
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [onClose]);
+
+  if (typeof document === 'undefined') return null;
+
+  const isCancel = action === 'cancel';
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/40 p-4"
+      role="presentation"
+      onMouseDown={event => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="review-action-title"
+        className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl"
+      >
+        <div className="px-6 py-6 sm:px-7">
+          <h2 id="review-action-title" className="text-lg font-bold text-slate-900">
+            {isCancel ? '검사를 취소하시겠습니까?' : '수정 후 다시 요청하시겠습니까?'}
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            {isCancel ? (
+              <>
+                <strong className="font-semibold text-slate-900">{upload.name}</strong>의 심사가
+                중단되며, 현재까지의 검사 결과는 저장되지 않습니다.
+              </>
+            ) : (
+              <>
+                <strong className="font-semibold text-slate-900">{upload.name}</strong>의 기존
+                정보를 불러옵니다. 반려 사유를 보완하고 ZIP 파일을 다시 첨부해 주세요.
+              </>
+            )}
+          </p>
+          {error && (
+            <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              {error}
+            </p>
+          )}
+        </div>
+        <div className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:px-7">
+          <button
+            type="button"
+            onClick={onClose}
+            autoFocus
+            className="inline-flex h-10 items-center rounded-lg border border-slate-200 bg-white px-4 text-slate-700 hover:bg-slate-50"
+          >
+            <span className="text-sm font-semibold">돌아가기</span>
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="inline-flex h-10 items-center rounded-lg bg-red-600 px-4 text-white shadow-sm transition-colors hover:bg-red-700"
+          >
+            <span className="text-sm font-semibold">
+              {isCancel ? '검사 취소' : '수정 후 다시 요청'}
+            </span>
+          </button>
+        </div>
+      </section>
+    </div>,
+    document.body
+  );
+}
+
 export default function RegisterPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [uploads] = useState(() => {
+  const [uploads, setUploads] = useState(() => {
     const savedUploads = readUploads();
     const submittedReview = location.state?.submittedReview;
     if (!submittedReview) return savedUploads;
@@ -153,6 +234,20 @@ export default function RegisterPage() {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState(location.state?.activeTab ?? '전체');
   const [openUploadId, setOpenUploadId] = useState(location.state?.openReviewId ?? null);
+  const [reviewAction, setReviewAction] = useState(null);
+  const [cancelError, setCancelError] = useState('');
+  const cancelUpload = () => {
+    if (!reviewAction?.upload) return;
+    try {
+      cancelReviewRequest(reviewAction.upload);
+      setUploads(current => current.filter(item => item.id !== reviewAction.upload.id));
+      setOpenUploadId(null);
+      setReviewAction(null);
+      setCancelError('');
+    } catch {
+      setCancelError('검사 요청을 취소하지 못했습니다. 다시 시도해 주세요.');
+    }
+  };
   const keyword = search.trim().toLowerCase();
   const tabCounts = Object.fromEntries(
     reviewTabs.map(tab => [
@@ -201,9 +296,10 @@ export default function RegisterPage() {
         <button
           type="button"
           onClick={() => navigate('/user/aistore/register/new')}
-          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 sm:self-auto"
+          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-lg bg-blue-600 px-4 text-white shadow-sm transition-colors hover:bg-blue-700 sm:self-auto"
         >
-          <Plus size={17} aria-hidden="true" />새 도구 등록
+          <Plus size={17} aria-hidden="true" />
+          <span className="text-sm font-semibold">새 도구 등록</span>
         </button>
       </div>
 
@@ -294,7 +390,19 @@ export default function RegisterPage() {
                     />
                   </span>
                 </button>
-                {openUploadId === upload.id && <ReviewDetails upload={upload} />}
+                {openUploadId === upload.id && (
+                  <ReviewDetails
+                    upload={upload}
+                    onCancel={() => {
+                      setCancelError('');
+                      setReviewAction({ action: 'cancel', upload });
+                    }}
+                    onRetry={() => {
+                      setCancelError('');
+                      setReviewAction({ action: 'retry', upload });
+                    }}
+                  />
+                )}
               </article>
             ))}
           </div>
@@ -316,6 +424,26 @@ export default function RegisterPage() {
           </div>
         )}
       </section>
+      {reviewAction && (
+        <ReviewActionModal
+          action={reviewAction.action}
+          upload={reviewAction.upload}
+          error={cancelError}
+          onClose={() => {
+            setReviewAction(null);
+            setCancelError('');
+          }}
+          onConfirm={() => {
+            if (reviewAction.action === 'cancel') {
+              cancelUpload();
+              return;
+            }
+            navigate('/user/aistore/register/new', {
+              state: { draft: reviewAction.upload },
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

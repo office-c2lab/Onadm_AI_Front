@@ -50,10 +50,13 @@ export function readSavedReviewRequests() {
 }
 
 export function getToolUpdateReviews() {
-  const savedRequests = readSavedReviewRequests().filter(
-    request => request.requestType === '업데이트'
+  const allSavedRequests = readSavedReviewRequests();
+  const savedRequests = allSavedRequests.filter(
+    request => request.requestType === '업데이트' && !request.cancelled
   );
-  const hasMockRequest = savedRequests.some(request => request.id === MOCK_TOOL_UPDATE_REVIEW.id);
+  const hasMockRequest = allSavedRequests.some(
+    request => request.id === MOCK_TOOL_UPDATE_REVIEW.id
+  );
   return hasMockRequest ? savedRequests : [...savedRequests, MOCK_TOOL_UPDATE_REVIEW];
 }
 
@@ -96,6 +99,24 @@ export function addReviewRequest(request) {
   const parsed = stored ? JSON.parse(stored) : [];
   if (!Array.isArray(parsed)) throw new Error('Invalid review requests');
   saveReviewRequests([request, ...parsed]);
+}
+
+export function cancelReviewRequest(request) {
+  const stored = window.localStorage.getItem(REVIEW_REQUESTS_KEY);
+  const parsed = stored ? JSON.parse(stored) : [];
+  if (!Array.isArray(parsed)) throw new Error('Invalid review requests');
+
+  const cancelledRequest = {
+    ...request,
+    cancelled: true,
+    cancelledAt: formatReviewDate(new Date()),
+  };
+  const exists = parsed.some(item => item.id === request.id);
+  const next = exists
+    ? parsed.map(item => (item.id === request.id ? cancelledRequest : item))
+    : [cancelledRequest, ...parsed];
+
+  saveReviewRequests(next);
 }
 
 export function formatReviewDate(date) {

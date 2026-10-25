@@ -122,10 +122,10 @@ export default function StoreDetailPage() {
               onClick={() => addDownload(tool.id)}
               disabled={isAdded}
               aria-label={`${tool.name} ${isAdded ? '다운로드 됨' : '다운로드'}`}
-              className="inline-flex h-11 items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-default disabled:border-transparent disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none"
+              className="inline-flex h-11 items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-5 text-white shadow-sm transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-default disabled:border-transparent disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none"
             >
               {isAdded ? <Check size={17} /> : <Download size={17} />}
-              {isAdded ? '다운로드 됨' : '다운로드'}
+              <span className="text-sm font-semibold">{isAdded ? '다운로드 됨' : '다운로드'}</span>
             </button>
           </div>
         </header>

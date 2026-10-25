@@ -1,5 +1,12 @@
 @import 'tailwindcss';
 
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 button:not(:disabled),
 a[href],
 select:not(:disabled),

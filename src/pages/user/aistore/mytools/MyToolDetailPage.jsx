@@ -119,9 +119,7 @@ export default function MyToolDetailPage() {
                   {tool.name}
                 </h1>
                 {activeUpdate && (
-                  <span
-                    className={`rounded-md px-2.5 py-1 text-xs font-medium ${activeUpdate.status === '심사 진행중' ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600'}`}
-                  >
+                  <span className="rounded-md border border-blue-600 bg-blue-600 px-2.5 py-1 text-xs font-medium text-white">
                     업데이트 {activeUpdate.status}
                   </span>
                 )}

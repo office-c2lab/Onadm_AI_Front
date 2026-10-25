@@ -60,7 +60,14 @@ function getAutomatedReviewStates(elapsed, stepCount) {
   return states;
 }
 
-export default function ReviewProgress({ upload, stageStates, steps = reviewSteps, duration }) {
+export default function ReviewProgress({
+  upload,
+  stageStates,
+  steps = reviewSteps,
+  duration,
+  onCancel,
+  onRetry,
+}) {
   const reviewStartedAt = Date.parse(upload.reviewStartedAt ?? '');
   const isAutomatedReviewRunning =
     upload.status === '심사 진행중' && Number.isFinite(reviewStartedAt);
@@ -214,18 +221,29 @@ export default function ReviewProgress({ upload, stageStates, steps = reviewStep
         {isRejected ? (
           <Link
             to="/user/aistore/register/new"
-            state={{ draft: upload }}
-            className="inline-flex h-9 shrink-0 items-center rounded-lg border border-red-200 bg-white px-3.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100"
+            onClick={event => {
+              event.preventDefault();
+              onRetry();
+            }}
+            className="inline-flex h-9 shrink-0 items-center rounded-lg bg-red-600 px-3.5 text-white transition-colors hover:bg-red-700"
           >
-            수정 후 다시 요청
+            <span className="text-sm font-semibold">수정 후 다시 요청</span>
           </Link>
         ) : isComplete ? (
           <Link
             to="/user/aistore/mytools"
-            className="inline-flex h-9 shrink-0 items-center rounded-lg bg-emerald-600 px-3.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
+            className="inline-flex h-9 shrink-0 items-center rounded-lg bg-emerald-600 px-3.5 text-white transition-colors hover:bg-emerald-700"
           >
-            내 도구 보기
+            <span className="text-sm font-semibold">내 도구 보기</span>
           </Link>
+        ) : onCancel ? (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="inline-flex h-9 shrink-0 appearance-none items-center rounded-lg bg-red-600 px-3.5 text-white transition-colors hover:bg-red-700"
+          >
+            <span className="text-sm font-semibold">검사 취소</span>
+          </button>
         ) : null}
       </div>
     </div>

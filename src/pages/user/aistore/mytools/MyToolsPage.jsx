@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, RefreshCw } from 'lucide-react';
+import { Download } from 'lucide-react';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import { useMyTools } from '../data/manageStore.js';
@@ -60,11 +60,8 @@ export default function MyToolsPage() {
                           {tool.name}
                         </strong>
                         {activeUpdate && (
-                          <span
-                            className={`inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium ${activeUpdate.status === '심사 진행중' ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600'}`}
-                          >
-                            <RefreshCw size={11} aria-hidden="true" /> 업데이트{' '}
-                            {activeUpdate.status}
+                          <span className="inline-flex shrink-0 items-center rounded-md border border-blue-600 bg-blue-600 px-2 py-0.5 text-[11px] font-medium text-white">
+                            업데이트 {activeUpdate.status}
                           </span>
                         )}
                       </span>

@@ -61,9 +61,9 @@ function VersionNotesModal({ tool, onClose }) {
             type="button"
             onClick={onClose}
             autoFocus
-            className="inline-flex h-10 items-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            className="inline-flex h-10 items-center rounded-lg border border-slate-200 bg-white px-4 text-slate-700 transition-colors hover:bg-slate-50"
           >
-            닫기
+            <span className="text-sm font-semibold">닫기</span>
           </button>
         </div>
       </section>
