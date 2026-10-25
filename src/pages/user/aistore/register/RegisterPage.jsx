@@ -1,9 +1,8 @@
 import { useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   CheckCircle2,
   ChevronDown,
-  ChevronRight,
   ClipboardList,
   Clock3,
   CloudUpload,
@@ -15,7 +14,6 @@ import {
 } from 'lucide-react';
 import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
-import projectImage from '../../../../assets/images/project.png';
 import ToolInfoModalShell from '../components/ToolInfoModalShell.jsx';
 import {
   CATEGORY_OPTIONS,
@@ -28,9 +26,7 @@ import { formatReviewDate, REVIEW_REQUESTS_KEY } from '../data/reviewRequests.js
 import { reviewSteps } from '../data/reviewSteps.js';
 import ReviewProgress from '../components/ReviewProgress.jsx';
 
-const MAX_ZIP_BYTES = 500 * 1024 * 1024;
-const MAX_ICON_BYTES = 2 * 1024 * 1024;
-const MAX_SCREENSHOT_BYTES = 500 * 1024;
+const reviewTabs = ['전체', '심사 중', '보완 필요', '승인 완료', '반려'];
 const MOCK_UPLOADS = [
   {
     id: 'mock-contract-review',
@@ -160,13 +156,22 @@ function ReviewStatus({ status }) {
   );
 }
 
+function reviewStatusTab(status) {
+  if (status === '승인 완료') return '승인 완료';
+  if (status === '보완 필요') return '보완 필요';
+  if (status === '반려') return '반려';
+  return '심사 중';
+}
+
 export default function RegisterPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const inputRef = useRef(null);
   const iconInputRef = useRef(null);
   const screenshotInputRef = useRef(null);
   const [uploads, setUploads] = useState(readUploads);
   const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab ?? '전체');
   const [openUploadId, setOpenUploadId] = useState(location.state?.openReviewId ?? null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -175,11 +180,22 @@ export default function RegisterPage() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const keyword = search.trim().toLowerCase();
-  const filteredUploads = uploads.filter(upload =>
-    `${upload.fileName} ${upload.name} ${upload.status} ${upload.requestType || ''}`
-      .toLowerCase()
-      .includes(keyword)
+  const tabCounts = Object.fromEntries(
+    reviewTabs.map(tab => [
+      tab,
+      tab === '전체'
+        ? uploads.length
+        : uploads.filter(upload => reviewStatusTab(upload.status) === tab).length,
+    ])
   );
+  const filteredUploads = uploads.filter(upload => {
+    const matchesTab = activeTab === '전체' || reviewStatusTab(upload.status) === activeTab;
+    const matchesKeyword =
+      `${upload.fileName} ${upload.name} ${upload.status} ${upload.requestType || ''}`
+        .toLowerCase()
+        .includes(keyword);
+    return matchesTab && matchesKeyword;
+  });
 
   const saveUploads = next => {
     try {
@@ -201,11 +217,6 @@ export default function RegisterPage() {
       setError('ZIP 형식의 파일만 선택할 수 있습니다.');
       return;
     }
-    if (file.size > MAX_ZIP_BYTES) {
-      setError('파일당 최대 크기는 500MB입니다.');
-      return;
-    }
-
     setSelectedFile(file);
     setError('');
     setForm(current => ({
@@ -232,11 +243,6 @@ export default function RegisterPage() {
       setError('도구 아이콘은 PNG, JPG 또는 WEBP 이미지만 사용할 수 있습니다.');
       return;
     }
-    if (file.size > MAX_ICON_BYTES) {
-      setError('도구 아이콘은 2MB 이하의 이미지를 선택해 주세요.');
-      return;
-    }
-
     const reader = new FileReader();
     reader.onload = () => {
       setForm(current => ({
@@ -261,11 +267,6 @@ export default function RegisterPage() {
       setError('화면 이미지는 PNG, JPG 또는 WEBP 형식만 사용할 수 있습니다.');
       return;
     }
-    if (files.some(file => file.size > MAX_SCREENSHOT_BYTES)) {
-      setError('화면 이미지는 장당 500KB 이하로 선택해 주세요.');
-      return;
-    }
-
     try {
       const screenshots = await Promise.all(
         files.map(
@@ -346,6 +347,7 @@ export default function RegisterPage() {
 
     if (!saveUploads([nextRow, ...uploads])) return;
     setSearch('');
+    setActiveTab('심사 중');
     setMessage('승인 요청을 접수했습니다. 심사 진행 내역에서 상태를 확인해 주세요.');
     closeRegistration();
   };
@@ -393,27 +395,32 @@ export default function RegisterPage() {
         }}
       />
 
-      <section className="flex min-h-[330px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-10 text-center">
-        <img src={projectImage} alt="" className="h-32 w-40 object-contain" aria-hidden="true" />
-        <h2 className="mt-6 text-lg font-semibold text-slate-900">
-          {uploads.length ? '새로운 도구를 등록해 보세요.' : '아직 등록된 도구가 없습니다.'}
-        </h2>
-        <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-          ZIP 파일을 업로드하고 도구 정보를 입력한 후<br className="hidden sm:block" /> 승인 요청을
-          진행할 수 있습니다.
-        </p>
+      <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <nav className="flex flex-wrap items-center gap-1" aria-label="등록 및 심사 상태">
+          {reviewTabs.map(tab => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => {
+                setActiveTab(tab);
+                setOpenUploadId(null);
+              }}
+              aria-pressed={activeTab === tab}
+              className={`inline-flex h-8 items-center rounded-full px-4 text-sm transition-colors ${activeTab === tab ? 'bg-[#ededed] font-medium text-[#333]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+            >
+              {tab}
+              <span className="ml-1.5 text-xs tabular-nums text-slate-400">{tabCounts[tab]}</span>
+            </button>
+          ))}
+        </nav>
         <button
           type="button"
-          onClick={() => {
-            setIsRegistering(true);
-            setMessage('');
-            setError('');
-          }}
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700"
+          onClick={() => navigate('/user/aistore/register/new')}
+          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 sm:self-auto"
         >
           <Plus size={17} aria-hidden="true" />새 도구 등록
         </button>
-      </section>
+      </div>
 
       {isRegistering && (
         <ToolInfoModalShell
@@ -487,7 +494,7 @@ export default function RegisterPage() {
               <span className="mt-1 text-xs text-slate-500">
                 {selectedFile
                   ? `${formatSize(selectedFile.size)} · 클릭하여 파일 변경`
-                  : '파일을 드래그하거나 클릭하여 선택할 수 있습니다. (최대 500MB)'}
+                  : '파일을 드래그하거나 클릭하여 선택할 수 있습니다.'}
               </span>
               {!selectedFile && (
                 <span className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white">
@@ -607,15 +614,13 @@ export default function RegisterPage() {
                       </span>
                     )}
                     <span className="min-w-0 truncate">
-                      {form.iconName || 'PNG, JPG 또는 WEBP 이미지 (최대 2MB)'}
+                      {form.iconName || 'PNG, JPG 또는 WEBP 이미지'}
                     </span>
                   </button>
                 </div>
                 <div className="text-sm font-medium text-slate-700 sm:col-span-2">
                   화면 이미지{' '}
-                  <span className="text-xs font-normal text-slate-400">
-                    (선택 · 최대 3장, 장당 500KB)
-                  </span>
+                  <span className="text-xs font-normal text-slate-400">(선택 · 최대 3장)</span>
                   <button
                     type="button"
                     onClick={() => screenshotInputRef.current?.click()}
@@ -705,7 +710,7 @@ export default function RegisterPage() {
         </p>
       )}
 
-      <section className="mt-7">
+      <section className="mt-5">
         {filteredUploads.length ? (
           <div className="grid gap-2">
             {filteredUploads.map(upload => (
@@ -782,6 +787,10 @@ export default function RegisterPage() {
         ) : keyword ? (
           <p className="py-12 text-center text-sm text-slate-500">
             검색 조건에 맞는 ZIP 파일이 없습니다.
+          </p>
+        ) : activeTab !== '전체' ? (
+          <p className="py-12 text-center text-sm text-slate-500">
+            {activeTab} 상태의 심사 요청이 없습니다.
           </p>
         ) : (
           <div className="flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-10 text-center">

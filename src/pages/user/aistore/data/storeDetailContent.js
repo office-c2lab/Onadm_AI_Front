@@ -8,6 +8,37 @@ export const supportedEnvironment = [
   { label: '기타', value: '별도 설치 없이 바로 사용 가능', icon: MoreHorizontal },
 ];
 
+const sampleDownloadSizes = {
+  report: '12.4 MB',
+  meeting: '18.7 MB',
+  workflow: '8.6 MB',
+  analysis: '24.3 MB',
+  review: '15.8 MB',
+  expense: '6.2 MB',
+  translate: '20.1 MB',
+  support: '11.6 MB',
+  contract: '17.9 MB',
+  email: '9.8 MB',
+  inquiry: '13.2 MB',
+  schedule: '10.5 MB',
+  'mine-1': '12.4 MB',
+  'mine-2': '7.8 MB',
+  'mine-3': '8.2 MB',
+  'mine-4': '14.1 MB',
+  'mine-5': '18.7 MB',
+  'mine-6': '8.6 MB',
+  'mine-7': '24.3 MB',
+  'mine-8': '15.8 MB',
+  'mine-9': '21.6 MB',
+  'mine-10': '13.2 MB',
+  'mine-11': '20.1 MB',
+  'mine-12': '10.5 MB',
+};
+
+export function getToolDownloadSize(tool) {
+  return tool.downloadSize || tool.size || sampleDownloadSizes[tool.id] || '용량 정보 없음';
+}
+
 export const detailContent = {
   report: {
     description: [

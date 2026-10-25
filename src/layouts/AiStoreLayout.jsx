@@ -31,7 +31,7 @@ export default function AiStoreLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f9f9f9] text-[#0d0d0d]">
+    <div className="flex min-h-screen bg-white text-[#0d0d0d]">
       <div
         className={`sticky top-0 h-screen shrink-0 overflow-hidden transition-[width] duration-200 ease-out ${
           isSidebarOpen ? 'w-[260px]' : 'w-12'
@@ -44,7 +44,7 @@ export default function AiStoreLayout() {
         )}
       </div>
 
-      <main className="relative min-h-screen min-w-0 flex-1 bg-[#f9f9f9]">
+      <main className="relative min-h-screen min-w-0 flex-1 bg-white">
         <div className="mx-auto flex min-h-full w-full max-w-[88rem] px-[clamp(0.875rem,2vw,1.5rem)] pb-[clamp(2rem,4vw,3rem)]">
           <div className="mx-auto w-full max-w-[74rem]">
             {isLibraryPage ? (

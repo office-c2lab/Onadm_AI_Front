@@ -14,7 +14,11 @@ import {
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import { StoreToolPreviewScreen, storePreviewTabs } from '../components/StoreToolPreviewScreen.jsx';
 import { publishedTools, useDownloads, useFavorites } from '../data/manageStore.js';
-import { detailContent, supportedEnvironment } from '../data/storeDetailContent.js';
+import {
+  detailContent,
+  getToolDownloadSize,
+  supportedEnvironment,
+} from '../data/storeDetailContent.js';
 
 function DetailSection({ title, children }) {
   return (
@@ -58,6 +62,7 @@ export default function StoreDetailPage() {
   const specifications = [
     ['도구 유형', tool.type],
     ['카테고리', tool.category],
+    ['다운로드 용량', getToolDownloadSize(tool)],
     ['제작자', makerLabel],
     ['제공 위치', 'ONDAM AI App Store'],
   ];
@@ -86,6 +91,9 @@ export default function StoreDetailPage() {
               <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] text-slate-500">
                 <span className="inline-flex items-center gap-1.5">
                   <FileText size={14} /> v{tool.version}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Download size={14} /> {getToolDownloadSize(tool)}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <ShieldCheck size={14} /> 사내 등록 도구

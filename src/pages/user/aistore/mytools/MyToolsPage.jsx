@@ -51,11 +51,6 @@ function EditToolModal({ tool, onClose, onSave }) {
       setError('도구 아이콘은 PNG, JPG 또는 WEBP 이미지만 사용할 수 있습니다.');
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      setError('도구 아이콘은 2MB 이하의 이미지를 선택해 주세요.');
-      return;
-    }
-
     const reader = new FileReader();
     reader.onload = () => {
       setForm(current => ({
@@ -80,11 +75,6 @@ function EditToolModal({ tool, onClose, onSave }) {
       setError('화면 이미지는 PNG, JPG 또는 WEBP 형식만 사용할 수 있습니다.');
       return;
     }
-    if (files.some(file => file.size > 500 * 1024)) {
-      setError('화면 이미지는 장당 500KB 이하로 선택해 주세요.');
-      return;
-    }
-
     try {
       const screenshots = await Promise.all(
         files.map(

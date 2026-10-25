@@ -2,7 +2,7 @@ export const reviewSteps = [
   {
     label: 'ZIP 정보 준비',
     description: '등록에 필요한 기본 파일 정보를 확인합니다.',
-    checks: ['ZIP 형식 확인', '파일 크기 500MB 이하 확인', '파일명·크기 기록'],
+    checks: ['ZIP 형식 확인', '파일 열기 확인', '파일명·크기 기록'],
     duration: '2s',
   },
   {
