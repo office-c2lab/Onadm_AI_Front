@@ -5,11 +5,14 @@ import AiStoreSidebar, {
 } from '../components/usersidebar/aistoresidebar/AiStoreSidebar.jsx';
 import SearchHeader from '../components/search/SearchHeader.jsx';
 import { useDownloads, useFavorites } from '../pages/user/aistore/data/manageStore.js';
+import { ensureAiStoreStorageVersion } from '../pages/user/aistore/data/storageMigration.js';
 
 const libraryTabs = [
   { id: 'downloads', label: '다운로드한 도구', to: '/user/aistore/library/downloads' },
   { id: 'favorites', label: '즐겨찾기', to: '/user/aistore/library/favorites' },
 ];
+
+ensureAiStoreStorageVersion();
 
 export default function AiStoreLayout() {
   const { pathname } = useLocation();
