@@ -1,3 +1,6 @@
+export const ZIP_PREPARATION_DURATION_MS = 2_000;
+export const AUTOMATED_REVIEW_DURATION_MS = 20_000;
+
 export const reviewSteps = [
   {
     label: 'ZIP 정보 준비',

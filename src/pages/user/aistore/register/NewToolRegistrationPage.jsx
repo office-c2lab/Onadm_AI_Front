@@ -7,7 +7,7 @@ import {
   EMPTY_SUPPORT_ENVIRONMENT,
   MAX_SCREENSHOTS,
 } from '../components/toolRegistrationConfig.js';
-import { addReviewRequest, formatReviewDate } from '../data/reviewRequests.js';
+import { addReviewRequest, CURRENT_TOOL_MAKER, formatReviewDate } from '../data/reviewRequests.js';
 
 const initialForm = {
   name: '',
@@ -122,10 +122,6 @@ export default function NewToolRegistrationPage() {
 
   const submit = event => {
     event.preventDefault();
-    if (!selectedFile) {
-      setError('등록할 ZIP 파일을 먼저 선택해 주세요.');
-      return;
-    }
     if (
       !form.name.trim() ||
       !form.summary.trim() ||
@@ -147,11 +143,13 @@ export default function NewToolRegistrationPage() {
     }
 
     const now = new Date();
+    const submittedAt = formatReviewDate(now);
     const request = {
       ...form,
+      ...CURRENT_TOOL_MAKER,
       id: `upload-${now.getTime()}-${Math.random().toString(36).slice(2)}`,
       requestType: '신규 등록',
-      fileName: selectedFile.name,
+      fileName: selectedFile?.name || 'ZIP 파일 미첨부',
       name: form.name.trim(),
       summary: form.summary.trim(),
       description: form.description.trim(),
@@ -161,15 +159,18 @@ export default function NewToolRegistrationPage() {
       supportEnvironment: Object.fromEntries(
         Object.entries(form.supportEnvironment).map(([key, value]) => [key, value.trim()])
       ),
-      size: formatSize(selectedFile.size),
-      createdAt: formatReviewDate(now),
-      status: '승인 대기',
+      size: selectedFile ? formatSize(selectedFile.size) : '미첨부',
+      createdAt: submittedAt,
+      updatedAt: submittedAt,
+      versionHistory: [{ version: form.version.trim(), updatedAt: submittedAt }],
+      status: '심사 진행중',
+      reviewStartedAt: now.toISOString(),
     };
 
     try {
       addReviewRequest(request);
       navigate('/user/aistore/register', {
-        state: { openReviewId: request.id, activeTab: '심사 중' },
+        state: { openReviewId: request.id, activeTab: '심사 진행중', submittedReview: request },
       });
     } catch {
       setError('승인 요청을 저장하지 못했습니다. 브라우저 저장 공간을 확인해 주세요.');
@@ -177,7 +178,7 @@ export default function NewToolRegistrationPage() {
   };
 
   return (
-    <div className="pb-14 pt-6 text-slate-900">
+    <div className="mx-auto w-full max-w-4xl pb-14 pt-6 text-slate-900">
       <Link
         to="/user/aistore/register"
         className="inline-flex h-9 items-center gap-2 rounded-lg pr-3 text-sm font-medium text-slate-500 transition-colors hover:text-blue-600"
@@ -185,7 +186,7 @@ export default function NewToolRegistrationPage() {
         <ArrowLeft size={16} /> 등록 및 심사로 돌아가기
       </Link>
 
-      <form onSubmit={submit} className="mt-2">
+      <form onSubmit={submit} noValidate className="mt-2">
         <header className="py-8 sm:py-10">
           <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
             새 도구 등록
@@ -234,7 +235,9 @@ export default function NewToolRegistrationPage() {
         )}
 
         <section className="border-t border-slate-200 py-9 sm:py-10">
-          <h2 className="text-lg font-bold tracking-tight text-slate-900">도구 파일</h2>
+          <h2 className="text-lg font-bold tracking-tight text-slate-900">
+            도구 파일 <span className="text-sm font-normal text-slate-400">(선택)</span>
+          </h2>
           <button
             type="button"
             onClick={() => zipInputRef.current?.click()}
@@ -251,7 +254,7 @@ export default function NewToolRegistrationPage() {
               setIsDragging(false);
               selectZipFile(event.dataTransfer.files?.[0]);
             }}
-            className={`mt-5 flex min-h-[250px] w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-8 text-center transition-colors sm:min-h-[330px] ${isDragging ? 'border-blue-500' : selectedFile ? 'border-blue-300' : 'border-slate-200 hover:border-blue-300'}`}
+            className={`mt-5 flex min-h-[250px] w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-8 text-center transition-colors sm:min-h-[330px] ${isDragging ? 'border-blue-500 bg-blue-50/70' : selectedFile ? 'border-blue-300 bg-blue-50/40' : 'border-slate-200 hover:border-blue-300 hover:bg-blue-50/30'}`}
           >
             <img
               src={projectImage}
@@ -265,7 +268,7 @@ export default function NewToolRegistrationPage() {
             <span className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
               {selectedFile
                 ? `${formatSize(selectedFile.size)} · 클릭하여 파일 변경`
-                : '파일을 드래그하거나 클릭하여 선택할 수 있습니다.'}
+                : '목업에서는 파일 없이 승인 요청할 수 있습니다.'}
             </span>
             {!selectedFile && (
               <span className="mt-5 inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm">
@@ -285,6 +288,11 @@ export default function NewToolRegistrationPage() {
         />
 
         <div className="flex justify-end gap-2 border-t border-slate-200 py-7">
+          {error && (
+            <p role="alert" className="mr-auto self-center text-sm font-medium text-red-600">
+              {error}
+            </p>
+          )}
           <Link
             to="/user/aistore/register"
             className="inline-flex h-10 items-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"

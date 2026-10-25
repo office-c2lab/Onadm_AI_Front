@@ -261,7 +261,7 @@ export default function MyToolsPage() {
             {filteredTools.map(tool => (
               <article
                 key={tool.id}
-                className="group relative flex min-h-[82px] min-w-0 items-center gap-4 rounded-xl border border-transparent px-3 py-3 transition hover:z-20 hover:border-slate-100 hover:bg-white hover:shadow-sm focus-within:z-20 focus-within:border-slate-100 focus-within:bg-white"
+                className="group relative flex min-h-[82px] min-w-0 items-center gap-4 rounded-xl border border-transparent px-3 py-3 transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20 focus-within:border-slate-100"
               >
                 <button
                   type="button"
@@ -318,7 +318,7 @@ export default function MyToolsPage() {
               fileName: editingTool.fileName || '',
               size: editingTool.size || '—',
               createdAt: formatReviewDate(now),
-              status: '승인 대기',
+              status: '심사 진행중',
             };
             addReviewRequest(request);
             setEditingTool(null);

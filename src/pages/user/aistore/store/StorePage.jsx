@@ -64,7 +64,7 @@ function FeaturedCard({ tool, favorite, onFavorite, onDetail, previewAlign }) {
         <button
           type="button"
           onClick={() => onFavorite(tool.id)}
-          className={`absolute right-2 top-2 rounded-lg bg-white p-1.5 shadow-sm transition hover:bg-slate-50 focus:opacity-100 group-hover:opacity-100 ${favorite ? 'text-blue-600 opacity-100' : 'text-slate-500 opacity-0'}`}
+          className={`absolute right-2 top-2 rounded-lg p-1.5 transition focus:opacity-100 group-hover:opacity-100 ${favorite ? 'bg-blue-600 text-white opacity-100 shadow-sm hover:bg-blue-700' : 'bg-transparent text-blue-600 opacity-0 hover:bg-blue-50'}`}
           aria-label={`${tool.name} 즐겨찾기 ${favorite ? '해제' : '추가'}`}
           aria-pressed={favorite}
         >
@@ -88,7 +88,7 @@ function FeaturedCard({ tool, favorite, onFavorite, onDetail, previewAlign }) {
 
 function CompactTool({ tool, favorite, onFavorite, onDetail, previewAlign }) {
   return (
-    <article className="group relative flex min-h-[82px] min-w-0 items-center rounded-xl border border-transparent transition hover:z-20 hover:border-slate-100 hover:bg-white hover:shadow-sm focus-within:z-20">
+    <article className="group relative flex min-h-[82px] min-w-0 items-center rounded-xl border border-transparent transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20">
       <button
         type="button"
         onClick={() => onDetail(tool)}
@@ -105,7 +105,7 @@ function CompactTool({ tool, favorite, onFavorite, onDetail, previewAlign }) {
       <button
         type="button"
         onClick={() => onFavorite(tool.id)}
-        className={`mr-3 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white shadow-sm transition hover:bg-slate-50 focus:opacity-100 group-hover:opacity-100 ${favorite ? 'text-blue-600 opacity-100' : 'text-slate-500 opacity-0'}`}
+        className={`mr-3 grid h-8 w-8 shrink-0 place-items-center rounded-lg transition focus:opacity-100 group-hover:opacity-100 ${favorite ? 'bg-blue-600 text-white opacity-100 shadow-sm hover:bg-blue-700' : 'bg-transparent text-blue-600 opacity-0 hover:bg-blue-50'}`}
         aria-label={`${tool.name} 즐겨찾기 ${favorite ? '해제' : '추가'}`}
         aria-pressed={favorite}
       >

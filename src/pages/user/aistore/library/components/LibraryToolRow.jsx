@@ -89,7 +89,7 @@ export default function LibraryToolRow({
   return (
     <>
       <article
-        className={`group relative flex min-h-[82px] min-w-0 flex-wrap items-center gap-4 rounded-xl border border-transparent px-3 py-3 transition hover:border-slate-100 hover:bg-white hover:shadow-sm ${menuOpen ? 'z-[100] border-slate-100 bg-white shadow-sm' : 'hover:z-20 focus-within:z-20'}`}
+        className={`group relative flex min-h-[82px] min-w-0 flex-wrap items-center gap-4 rounded-xl border border-transparent px-3 py-3 transition hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm ${menuOpen ? 'z-[100] border-slate-100 bg-white shadow-sm' : 'hover:z-20 focus-within:z-20'}`}
       >
         <button
           type="button"

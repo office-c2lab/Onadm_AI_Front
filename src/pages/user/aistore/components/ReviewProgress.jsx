@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   CheckCircle2,
   ChevronDown,
@@ -8,23 +8,26 @@ import {
   LoaderCircle,
   XCircle,
 } from 'lucide-react';
-import { reviewSteps } from '../data/reviewSteps.js';
+import {
+  AUTOMATED_REVIEW_DURATION_MS,
+  reviewSteps,
+  ZIP_PREPARATION_DURATION_MS,
+} from '../data/reviewSteps.js';
 
 function getStepState(status, index) {
   if (status === '승인 완료') return 'complete';
-  if (index === 0) return 'complete';
-  if (status === '제출 준비') return 'pending';
-  if (index === 1) return 'complete';
+  if (status === '검사 대기') return 'pending';
+  if (index < 2) return 'complete';
   if (index !== 2) return 'pending';
-  if (status === '검토 중') return 'running';
-  if (status === '보완 필요' || status === '반려') return 'failed';
-  return 'queued';
+  if (status === '심사 진행중') return 'running';
+  if (status === '반려') return 'failed';
+  return 'pending';
 }
 
 const stepVisuals = {
   complete: { Icon: CheckCircle2, color: 'text-emerald-600', label: '완료' },
   running: { Icon: LoaderCircle, color: 'text-blue-600', label: '진행 중' },
-  queued: { Icon: Clock3, color: 'text-amber-600', label: '대기 중' },
+  queued: { Icon: Clock3, color: 'text-slate-500', label: '대기 중' },
   failed: { Icon: XCircle, color: 'text-red-600', label: '확인 필요' },
   pending: { Icon: Circle, color: 'text-slate-300', label: '대기' },
 };
@@ -38,35 +41,61 @@ function getCheckState(stepState, checkIndex) {
 
 const checkLabels = { complete: '확인 완료', running: '확인 중', pending: '대기' };
 
+function getAutomatedReviewStates(elapsed, stepCount) {
+  const states = Array.from({ length: stepCount }, () => 'pending');
+  if (elapsed < ZIP_PREPARATION_DURATION_MS) {
+    states[0] = 'running';
+    return states;
+  }
+
+  states[0] = 'complete';
+  if (elapsed < AUTOMATED_REVIEW_DURATION_MS) {
+    states[1] = 'running';
+    return states;
+  }
+
+  states[1] = 'complete';
+  if (states.length > 2) states[2] = 'running';
+  return states;
+}
+
 export default function ReviewProgress({ upload, stageStates, steps = reviewSteps, duration }) {
-  const states = stageStates ?? steps.map((_, index) => getStepState(upload.status, index));
+  const reviewStartedAt = Date.parse(upload.reviewStartedAt ?? '');
+  const isAutomatedReviewRunning =
+    upload.status === '심사 진행중' && Number.isFinite(reviewStartedAt);
+  const [clock, setClock] = useState(() => Date.now());
+  const elapsed = isAutomatedReviewRunning ? Math.max(0, clock - reviewStartedAt) : 0;
+  const states =
+    stageStates ??
+    (isAutomatedReviewRunning
+      ? getAutomatedReviewStates(elapsed, steps.length)
+      : steps.map((_, index) => getStepState(upload.status, index)));
   const completedCount = states.filter(state => state === 'complete').length;
-  const initialOpenStep = states.findIndex(state => state === 'running');
-  const [openStep, setOpenStep] = useState(initialOpenStep >= 0 ? initialOpenStep : null);
+  const runningStep = states.findIndex(state => state === 'running');
+  const [selectedOpenStep, setSelectedOpenStep] = useState(null);
+  const [hasSelectedStep, setHasSelectedStep] = useState(false);
+  const openStep = hasSelectedStep ? selectedOpenStep : runningStep >= 0 ? runningStep : null;
   const hasFailed = states.includes('failed');
   const isComplete = states.every(state => state === 'complete');
-  const isLocalDraft = upload.status === '제출 준비';
-  const runStatus = hasFailed ? '일부 검사 실패' : isComplete ? '모든 작업 완료' : '진행 중';
-  const runStatusStyle = hasFailed
-    ? 'bg-red-50 text-red-700'
-    : isComplete
-      ? 'bg-emerald-50 text-emerald-700'
-      : 'bg-blue-50 text-blue-700';
+  const isWaiting = upload.status === '검사 대기';
+
+  useEffect(() => {
+    if (!isAutomatedReviewRunning || elapsed >= AUTOMATED_REVIEW_DURATION_MS) return undefined;
+    const timer = window.setInterval(() => setClock(Date.now()), 250);
+    return () => window.clearInterval(timer);
+  }, [elapsed, isAutomatedReviewRunning]);
 
   return (
     <div
       id={`review-detail-${upload.id}`}
       role="region"
       aria-label={`${upload.name} 심사 진행 내역`}
-      className="border-t border-slate-100 bg-white"
+      className="border-t border-slate-200 bg-transparent"
     >
       <div className="flex flex-wrap items-end justify-between gap-2 px-4 py-4 sm:px-6">
         <div>
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-semibold text-slate-900">심사 진행 내역</h4>
-            <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${runStatusStyle}`}>
-              {runStatus}
-            </span>
           </div>
           <p className="mt-1 text-xs text-slate-500">
             {upload.displayLabel ?? upload.fileName} · {upload.createdAt}
@@ -105,7 +134,10 @@ export default function ReviewProgress({ upload, stageStates, steps = reviewStep
             <li key={step.label}>
               <button
                 type="button"
-                onClick={() => setOpenStep(current => (current === index ? null : index))}
+                onClick={() => {
+                  setHasSelectedStep(true);
+                  setSelectedOpenStep(current => (current === index ? null : index));
+                }}
                 aria-expanded={isOpen}
                 className="flex min-h-14 w-full items-center gap-2.5 px-4 text-left transition-colors hover:bg-blue-50/40 sm:px-6"
               >
@@ -159,8 +191,8 @@ export default function ReviewProgress({ upload, stageStates, steps = reviewStep
         })}
       </ol>
       <div className="border-t border-slate-100 bg-slate-50/40 px-4 py-3 text-xs leading-5 text-slate-500 sm:px-6">
-        {isLocalDraft
-          ? '파일 정보만 브라우저에 저장되었습니다. 실제 제출과 심사는 아직 시작되지 않았습니다.'
+        {isWaiting
+          ? '요청이 접수되었습니다. 자동 검사가 시작되면 심사 진행중으로 변경됩니다.'
           : '현재 표시된 로그는 화면 예시입니다. 실제 검사 로그와 보완 사유는 서버 연동 후 제공됩니다.'}
       </div>
     </div>

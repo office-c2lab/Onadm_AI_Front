@@ -82,6 +82,7 @@ export default function ToolRegistrationFields({
 
       <FormSection title="스크린샷">
         <div className="max-w-4xl text-sm font-medium text-slate-700">
+          <p className="mb-2 text-xs font-normal text-slate-400">선택 사항</p>
           <button
             type="button"
             onClick={() => screenshotInputRef.current?.click()}

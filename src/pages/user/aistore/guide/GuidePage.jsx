@@ -136,19 +136,9 @@ const STATUSES = [
     className: 'bg-slate-100 text-slate-600',
   },
   {
-    name: '검사 중',
-    description: '자동 보안검사가 진행되고 있는 상태',
+    name: '심사 진행중',
+    description: '자동 보안검사 또는 관리자 검토가 진행 중인 상태',
     className: 'bg-blue-50 text-blue-700',
-  },
-  {
-    name: '검토 대기',
-    description: '보안검사를 마치고 관리자 검토를 기다리는 상태',
-    className: 'bg-amber-50 text-amber-700',
-  },
-  {
-    name: '보완 필요',
-    description: '추가 수정이나 보안 개선이 필요한 상태',
-    className: 'bg-orange-50 text-orange-700',
   },
   {
     name: '승인 완료',

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
+import zipFileImage from '../../../../assets/images/zipfile.png';
 import ToolInfoModalShell from '../components/ToolInfoModalShell.jsx';
 import {
   CATEGORY_OPTIONS,
@@ -22,11 +23,15 @@ import {
   SUPPORT_ENVIRONMENT_FIELDS,
   TOOL_TYPE_OPTIONS,
 } from '../components/toolRegistrationConfig.js';
-import { formatReviewDate, REVIEW_REQUESTS_KEY } from '../data/reviewRequests.js';
+import {
+  formatReviewDate,
+  REVIEW_REQUESTS_KEY,
+  saveReviewRequests,
+} from '../data/reviewRequests.js';
 import { reviewSteps } from '../data/reviewSteps.js';
 import ReviewProgress from '../components/ReviewProgress.jsx';
 
-const reviewTabs = ['전체', '심사 중', '보완 필요', '승인 완료', '반려'];
+const reviewTabs = ['전체', '검사 대기', '심사 진행중', '승인 완료', '반려'];
 const MOCK_UPLOADS = [
   {
     id: 'mock-contract-review',
@@ -34,7 +39,7 @@ const MOCK_UPLOADS = [
     fileName: 'contract_review_assistant.zip',
     size: '2.4 MB',
     createdAt: '2026. 10. 20. 09:42',
-    status: '검토 중',
+    status: '심사 진행중',
   },
   {
     id: 'mock-inquiry-sorter',
@@ -42,7 +47,23 @@ const MOCK_UPLOADS = [
     fileName: 'inquiry_sorter_agent.zip',
     size: '1.8 MB',
     createdAt: '2026. 10. 19. 16:18',
-    status: '승인 대기',
+    status: '검사 대기',
+  },
+  {
+    id: 'mock-meeting-summary',
+    name: '회의록 요약 도우미',
+    fileName: 'meeting_summary_assistant.zip',
+    size: '3.1 MB',
+    createdAt: '2026. 10. 18. 14:05',
+    status: '승인 완료',
+  },
+  {
+    id: 'mock-data-export',
+    name: '고객 데이터 내보내기',
+    fileName: 'customer_data_export.zip',
+    size: '1.2 MB',
+    createdAt: '2026. 10. 17. 11:26',
+    status: '반려',
   },
 ];
 
@@ -56,11 +77,15 @@ function readUploads() {
       ? rows.map(row => ({
           ...row,
           status:
-            row.status === '등록 대기'
-              ? '제출 준비'
-              : row.status === '등록 완료'
-                ? '승인 완료'
-                : row.status,
+            {
+              '등록 대기': '검사 대기',
+              '제출 준비': '검사 대기',
+              '승인 대기': '검사 대기',
+              '검사 중': '심사 진행중',
+              '검토 중': '심사 진행중',
+              '보완 필요': '반려',
+              '등록 완료': '승인 완료',
+            }[row.status] ?? row.status,
         }))
       : [];
     const savedIds = new Set(uploads.map(row => row.id));
@@ -136,14 +161,14 @@ function ReviewDetails({ upload }) {
 
 function ReviewStatus({ status }) {
   const isApproved = status === '승인 완료';
-  const isRejected = status === '반려' || status === '보완 필요';
+  const isRejected = status === '반려';
   const Icon = isApproved ? CheckCircle2 : isRejected ? XCircle : Clock3;
   const color = isApproved
     ? 'bg-emerald-50 text-emerald-700'
     : isRejected
       ? 'bg-red-50 text-red-700'
-      : status === '검토 중'
-        ? 'bg-amber-50 text-amber-700'
+      : status === '심사 진행중'
+        ? 'bg-blue-50 text-blue-700'
         : 'bg-slate-100 text-slate-700';
 
   return (
@@ -157,10 +182,7 @@ function ReviewStatus({ status }) {
 }
 
 function reviewStatusTab(status) {
-  if (status === '승인 완료') return '승인 완료';
-  if (status === '보완 필요') return '보완 필요';
-  if (status === '반려') return '반려';
-  return '심사 중';
+  return status;
 }
 
 export default function RegisterPage() {
@@ -169,7 +191,12 @@ export default function RegisterPage() {
   const inputRef = useRef(null);
   const iconInputRef = useRef(null);
   const screenshotInputRef = useRef(null);
-  const [uploads, setUploads] = useState(readUploads);
+  const [uploads, setUploads] = useState(() => {
+    const savedUploads = readUploads();
+    const submittedReview = location.state?.submittedReview;
+    if (!submittedReview) return savedUploads;
+    return [submittedReview, ...savedUploads.filter(upload => upload.id !== submittedReview.id)];
+  });
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState(location.state?.activeTab ?? '전체');
   const [openUploadId, setOpenUploadId] = useState(location.state?.openReviewId ?? null);
@@ -199,7 +226,7 @@ export default function RegisterPage() {
 
   const saveUploads = next => {
     try {
-      window.localStorage.setItem(REVIEW_REQUESTS_KEY, JSON.stringify(next));
+      saveReviewRequests(next);
       setUploads(next);
       return true;
     } catch {
@@ -342,12 +369,12 @@ export default function RegisterPage() {
       ),
       size: formatSize(selectedFile.size),
       createdAt: formatReviewDate(now),
-      status: '승인 대기',
+      status: '심사 진행중',
     };
 
     if (!saveUploads([nextRow, ...uploads])) return;
     setSearch('');
-    setActiveTab('심사 중');
+    setActiveTab('심사 진행중');
     setMessage('승인 요청을 접수했습니다. 심사 진행 내역에서 상태를 확인해 주세요.');
     closeRegistration();
   };
@@ -716,7 +743,7 @@ export default function RegisterPage() {
             {filteredUploads.map(upload => (
               <article
                 key={upload.id}
-                className={`group relative min-w-0 rounded-xl border transition hover:z-20 hover:border-slate-100 hover:bg-white hover:shadow-sm focus-within:z-20 ${openUploadId === upload.id ? 'border-slate-100 bg-white shadow-sm' : 'border-transparent'}`}
+                className={`group relative min-w-0 rounded-xl border transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20 ${openUploadId === upload.id ? 'border-slate-200 bg-[#f5f5f5] shadow-sm' : 'border-transparent'}`}
               >
                 <button
                   type="button"
@@ -740,7 +767,12 @@ export default function RegisterPage() {
                         <RefreshCw size={24} strokeWidth={1.8} aria-hidden="true" />
                       </span>
                     ) : (
-                      <ZipIcon />
+                      <img
+                        src={zipFileImage}
+                        alt=""
+                        className="h-12 w-12 shrink-0 object-contain"
+                        aria-hidden="true"
+                      />
                     )}
                     <span className="flex min-w-0 flex-1 items-center gap-2">
                       <span

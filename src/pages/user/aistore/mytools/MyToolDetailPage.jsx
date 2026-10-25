@@ -13,6 +13,7 @@ import { Link, useParams } from 'react-router-dom';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import { StoreToolPreviewScreen, storePreviewTabs } from '../components/StoreToolPreviewScreen.jsx';
 import { useMyTools } from '../data/manageStore.js';
+import { CURRENT_TOOL_MAKER } from '../data/reviewRequests.js';
 import {
   detailContent,
   getToolDownloadSize,
@@ -26,6 +27,8 @@ const sampleDetailKeys = {
   'mine-7': 'analysis',
   'mine-11': 'translate',
 };
+
+const supportEnvironmentKeys = ['audience', 'operatingSystem', 'browser', 'memory', 'other'];
 
 function DetailSection({ title, children }) {
   return (
@@ -65,14 +68,27 @@ export default function MyToolDetailPage() {
       presetContent?.usage ||
       '도구를 실행한 뒤 처리할 내용을 입력해 주세요. 결과를 확인하고 필요한 부분을 수정해 업무에 활용할 수 있습니다.',
   };
-  const makerLabel = [tool.maker, tool.makerPosition, tool.makerName].filter(Boolean).join(' · ');
+  const makerLabel = [
+    tool.maker || CURRENT_TOOL_MAKER.maker,
+    tool.makerPosition || CURRENT_TOOL_MAKER.makerPosition,
+    tool.makerName || CURRENT_TOOL_MAKER.makerName,
+  ].join(' · ');
   const specifications = [
     ['도구 유형', tool.type],
     ['카테고리', tool.category],
     ['다운로드 용량', getToolDownloadSize(tool)],
-    ['제작자', makerLabel || '나'],
+    ['제작자', makerLabel],
     ['제공 위치', 'ONDAM AI App Store'],
   ];
+  const hasScreenshots = tool.screenshots?.length > 0;
+  const previewCount = hasScreenshots ? tool.screenshots.length : storePreviewTabs.length;
+  const previewLabel = hasScreenshots
+    ? `등록 화면 ${activePreview + 1}`
+    : storePreviewTabs[activePreview];
+  const environmentRows = supportedEnvironment.map((item, index) => ({
+    ...item,
+    value: tool.supportEnvironment?.[supportEnvironmentKeys[index]] || item.value,
+  }));
 
   return (
     <div className="pb-14 pt-6 text-slate-900">
@@ -105,7 +121,7 @@ export default function MyToolDetailPage() {
                 <span className="inline-flex items-center gap-1.5">
                   <ShieldCheck size={14} /> 사내 등록 도구
                 </span>
-                <span>{makerLabel || '나'}</span>
+                <span>{makerLabel}</span>
               </div>
             </div>
           </div>
@@ -123,13 +139,21 @@ export default function MyToolDetailPage() {
 
         <DetailSection title="스크린샷">
           <div className="relative rounded-2xl border border-blue-100/80 bg-gradient-to-br from-sky-50 via-white to-indigo-100 px-5 py-7 sm:px-12 sm:py-10">
-            <StoreToolPreviewScreen tool={tool} activeIndex={activePreview} />
+            {hasScreenshots ? (
+              <div className="flex min-h-[250px] items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 sm:min-h-[330px]">
+                <img
+                  src={tool.screenshots[activePreview].data}
+                  alt={`${tool.name} 화면 이미지 ${activePreview + 1}`}
+                  className="max-h-[420px] w-full object-contain"
+                />
+              </div>
+            ) : (
+              <StoreToolPreviewScreen tool={tool} activeIndex={activePreview} />
+            )}
             <button
               type="button"
               onClick={() =>
-                setActivePreview(
-                  current => (current + storePreviewTabs.length - 1) % storePreviewTabs.length
-                )
+                setActivePreview(current => (current + previewCount - 1) % previewCount)
               }
               aria-label="이전 미리보기"
               className="absolute left-1 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-white text-blue-600 shadow-md transition-colors hover:bg-blue-50 sm:left-5"
@@ -138,7 +162,7 @@ export default function MyToolDetailPage() {
             </button>
             <button
               type="button"
-              onClick={() => setActivePreview(current => (current + 1) % storePreviewTabs.length)}
+              onClick={() => setActivePreview(current => (current + 1) % previewCount)}
               aria-label="다음 미리보기"
               className="absolute right-1 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-white text-blue-600 shadow-md transition-colors hover:bg-blue-50 sm:right-5"
             >
@@ -146,20 +170,18 @@ export default function MyToolDetailPage() {
             </button>
           </div>
           <div className="mt-3 flex items-center justify-center gap-2" aria-label="미리보기 페이지">
-            {storePreviewTabs.map((tab, index) => (
+            {Array.from({ length: previewCount }, (_, index) => (
               <button
-                key={tab}
+                key={index}
                 type="button"
                 onClick={() => setActivePreview(index)}
-                aria-label={`${tab} 미리보기`}
+                aria-label={`${index + 1}번 미리보기`}
                 aria-current={activePreview === index ? 'true' : undefined}
                 className={`h-2 rounded-full transition-all ${activePreview === index ? 'w-5 bg-blue-600' : 'w-2 bg-slate-300 hover:bg-slate-400'}`}
               />
             ))}
           </div>
-          <p className="mt-2 text-center text-xs text-slate-500">
-            화면 구성 예시 · {storePreviewTabs[activePreview]}
-          </p>
+          <p className="mt-2 text-center text-xs text-slate-500">화면 구성 예시 · {previewLabel}</p>
         </DetailSection>
 
         <DetailSection title="설명">
@@ -180,7 +202,7 @@ export default function MyToolDetailPage() {
 
         <DetailSection title="지원 환경">
           <dl className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
-            {supportedEnvironment.map(({ label, value, icon: Icon }) => (
+            {environmentRows.map(({ label, value, icon: Icon }) => (
               <div
                 key={label}
                 className="grid gap-1 py-4 sm:grid-cols-[14rem_1fr] sm:items-center sm:gap-4"
@@ -215,7 +237,10 @@ export default function MyToolDetailPage() {
           <ol className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {(
               tool.versionHistory ?? [
-                { version: tool.version, updatedAt: tool.updatedAt || '날짜 정보 없음' },
+                {
+                  version: tool.version,
+                  updatedAt: tool.updatedAt || tool.createdAt || '날짜 정보 없음',
+                },
               ]
             ).map((item, index) => (
               <li
