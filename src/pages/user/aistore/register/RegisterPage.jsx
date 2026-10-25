@@ -31,6 +31,18 @@ import ReviewProgress from '../components/ReviewProgress.jsx';
 const reviewTabs = ['전체', '검사 대기', '심사 진행중', '승인 완료', '반려'];
 const MOCK_UPLOADS = [
   {
+    id: 'mock-report-writer-update-v130',
+    name: '보고서 작성 도우미',
+    fileName: 'report_writer_v1.3.0.zip',
+    size: '4.6 MB',
+    createdAt: '2026. 10. 21. 10:15',
+    requestType: '업데이트',
+    previousVersion: '1.2.0',
+    version: '1.3.0',
+    updateNotes: '표 자동 생성 기능을 추가하고 문서 내보내기 속도를 개선했습니다.',
+    status: '심사 진행중',
+  },
+  {
     id: 'mock-contract-review',
     name: '계약서 검토 도우미',
     fileName: 'contract_review_assistant.zip',
@@ -771,31 +783,43 @@ export default function RegisterPage() {
                         aria-hidden="true"
                       />
                     )}
-                    <span className="flex min-w-0 flex-1 items-center gap-2">
-                      <span
-                        className="min-w-0 max-w-full shrink-0 truncate text-base font-semibold text-slate-900 lg:max-w-[55%]"
-                        title={upload.name}
-                      >
-                        {upload.name}
+                    <span className="min-w-0 flex-1">
+                      <span className="flex min-w-0 items-center gap-2">
+                        <span
+                          className="min-w-0 truncate text-base font-semibold text-slate-900"
+                          title={upload.name}
+                        >
+                          {upload.name}
+                        </span>
+                        <span
+                          className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${
+                            upload.requestType === '업데이트'
+                              ? 'border-blue-600 bg-blue-600 text-white'
+                              : 'border-slate-200 bg-white text-slate-600'
+                          }`}
+                        >
+                          {upload.requestType === '업데이트' ? '업데이트' : '신규 등록'}
+                        </span>
                       </span>
-                      <span
-                        className="hidden min-w-0 truncate text-xs text-slate-500 lg:block"
-                        title={
-                          upload.requestType === '업데이트' ? '업데이트 요청' : upload.fileName
-                        }
-                      >
-                        {upload.requestType === '업데이트'
-                          ? `업데이트 요청 · v${upload.version}`
-                          : upload.fileName}
+                      <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
+                        <span className="truncate" title={upload.fileName || 'ZIP 파일 미첨부'}>
+                          {upload.fileName || 'ZIP 파일 미첨부'}
+                        </span>
+                        <span className="shrink-0 text-slate-300">·</span>
+                        <span className="shrink-0">{upload.size || '미첨부'}</span>
+                        {upload.requestType === '업데이트' && upload.version && (
+                          <>
+                            <span className="shrink-0 text-slate-300">·</span>
+                            <span className="shrink-0 font-medium text-blue-600">
+                              {upload.previousVersion
+                                ? `v${upload.previousVersion} → v${upload.version}`
+                                : `v${upload.version}`}
+                            </span>
+                          </>
+                        )}
                       </span>
                     </span>
                   </span>
-                  {upload.requestType !== '업데이트' && (
-                    <span className="hidden shrink-0 text-xs text-slate-600 sm:inline">
-                      <span className="sr-only">파일 크기 </span>
-                      {upload.size}
-                    </span>
-                  )}
                   <span className="hidden shrink-0 text-xs text-slate-500 md:inline">
                     <span className="sr-only">목록 추가 </span>
                     {upload.createdAt}
