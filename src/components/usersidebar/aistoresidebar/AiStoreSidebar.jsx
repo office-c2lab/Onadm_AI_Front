@@ -69,8 +69,8 @@ export function AiStoreSidebarRail({ onOpen, onNavigate }) {
       <div className="flex flex-1 flex-col items-center gap-1 px-1.5 py-3">
         <div className="group relative mb-4 h-9 w-9 shrink-0">
           <img
-            src="/simbol.png"
-            alt="ONDAM AI"
+            src="/store.png"
+            alt="AI App Store"
             className="absolute inset-0 h-9 w-9 object-contain transition-opacity group-hover:opacity-0 group-focus-within:opacity-0"
           />
           <button

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, Store } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const services = [
@@ -22,11 +22,7 @@ function ServiceIcon({ serviceId }) {
     return <img src="/simbol.png" alt="" className="h-6 w-6 object-contain" />;
   }
 
-  return (
-    <span className="grid h-6 w-6 place-items-center rounded-md bg-[#eef2ff] text-[#4f63d8]">
-      <Store className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
-    </span>
-  );
+  return <img src="/store.png" alt="" className="h-6 w-6 object-contain" />;
 }
 
 export default function UserServiceSwitcher({ className = '' }) {
