@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, ClipboardList, Plus, RefreshCw } from 'lucide-react';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
@@ -11,6 +10,8 @@ import {
   REVIEW_REQUESTS_KEY,
 } from '../data/reviewRequests.js';
 import { reviewSteps } from '../data/reviewSteps.js';
+import AiStoreActionButton from '../components/AiStoreActionButton.jsx';
+import AiStoreConfirmModal from '../components/AiStoreConfirmModal.jsx';
 import ReviewProgress from '../components/ReviewProgress.jsx';
 
 const reviewTabs = ['전체', '검사 대기', '심사 진행중', '승인 완료', '반려'];
@@ -146,82 +147,6 @@ function reviewStatusTab(status) {
   return status;
 }
 
-function ReviewActionModal({ action, upload, error, onClose, onConfirm }) {
-  useEffect(() => {
-    const closeOnEscape = event => {
-      if (event.key === 'Escape') onClose();
-    };
-
-    window.addEventListener('keydown', closeOnEscape);
-    return () => window.removeEventListener('keydown', closeOnEscape);
-  }, [onClose]);
-
-  if (typeof document === 'undefined') return null;
-
-  const isCancel = action === 'cancel';
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/40 p-4"
-      role="presentation"
-      onMouseDown={event => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="review-action-title"
-        className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl"
-      >
-        <div className="px-6 py-6 sm:px-7">
-          <h2 id="review-action-title" className="text-lg font-bold text-slate-900">
-            {isCancel ? '검사를 취소하시겠습니까?' : '수정 후 다시 요청하시겠습니까?'}
-          </h2>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
-            {isCancel ? (
-              <>
-                <strong className="font-semibold text-slate-900">{upload.name}</strong>의 심사가
-                중단되며, 현재까지의 검사 결과는 저장되지 않습니다.
-              </>
-            ) : (
-              <>
-                <strong className="font-semibold text-slate-900">{upload.name}</strong>의 기존
-                정보를 불러옵니다. 반려 사유를 보완하고 ZIP 파일을 다시 첨부해 주세요.
-              </>
-            )}
-          </p>
-          {error && (
-            <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-              {error}
-            </p>
-          )}
-        </div>
-        <div className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:px-7">
-          <button
-            type="button"
-            onClick={onClose}
-            autoFocus
-            className="inline-flex h-10 items-center rounded-lg border border-slate-200 bg-white px-4 text-slate-700 hover:bg-slate-50"
-          >
-            <span className="text-sm font-semibold">돌아가기</span>
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="inline-flex h-10 items-center rounded-lg bg-red-600 px-4 text-white shadow-sm transition-colors hover:bg-red-700"
-          >
-            <span className="text-sm font-semibold">
-              {isCancel ? '검사 취소' : '수정 후 다시 요청'}
-            </span>
-          </button>
-        </div>
-      </section>
-    </div>,
-    document.body
-  );
-}
-
 export default function RegisterPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -293,14 +218,13 @@ export default function RegisterPage() {
             </button>
           ))}
         </nav>
-        <button
-          type="button"
+        <AiStoreActionButton
           onClick={() => navigate('/user/aistore/register/new')}
-          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-lg bg-blue-600 px-4 text-white shadow-sm transition-colors hover:bg-blue-700 sm:self-auto"
+          icon={Plus}
+          className="self-start sm:self-auto"
         >
-          <Plus size={17} aria-hidden="true" />
-          <span className="text-sm font-semibold">새 도구 등록</span>
-        </button>
+          새 도구 등록
+        </AiStoreActionButton>
       </div>
 
       <section className="mt-5">
@@ -425,9 +349,14 @@ export default function RegisterPage() {
         )}
       </section>
       {reviewAction && (
-        <ReviewActionModal
-          action={reviewAction.action}
-          upload={reviewAction.upload}
+        <AiStoreConfirmModal
+          open
+          title={
+            reviewAction.action === 'cancel'
+              ? '검사를 취소하시겠습니까?'
+              : '수정 후 다시 요청하시겠습니까?'
+          }
+          confirmLabel={reviewAction.action === 'cancel' ? '검사 취소' : '수정 후 다시 요청'}
           error={cancelError}
           onClose={() => {
             setReviewAction(null);
@@ -442,7 +371,19 @@ export default function RegisterPage() {
               state: { draft: reviewAction.upload },
             });
           }}
-        />
+        >
+          {reviewAction.action === 'cancel' ? (
+            <>
+              <strong className="font-semibold text-slate-900">{reviewAction.upload.name}</strong>의
+              심사가 중단되며, 현재까지의 검사 결과는 저장되지 않습니다.
+            </>
+          ) : (
+            <>
+              <strong className="font-semibold text-slate-900">{reviewAction.upload.name}</strong>의
+              기존 정보를 불러옵니다. 반려 사유를 보완하고 ZIP 파일을 다시 첨부해 주세요.
+            </>
+          )}
+        </AiStoreConfirmModal>
       )}
     </div>
   );

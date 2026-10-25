@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Download, MoreVertical, RefreshCw } from 'lucide-react';
 import StoreToolIcon from '../../components/StoreToolIcon.jsx';
 import ToolHoverPreview from '../../components/ToolHoverPreview.jsx';
+import AiStoreActionButton from '../../components/AiStoreActionButton.jsx';
 import { getLatestVersionNotes } from '../../data/versionNotes.js';
 
 function VersionNotesModal({ tool, onClose }) {
@@ -57,14 +58,9 @@ function VersionNotesModal({ tool, onClose }) {
           </ul>
         </div>
         <div className="flex justify-end border-t border-slate-200 bg-slate-50 px-6 py-4 sm:px-7">
-          <button
-            type="button"
-            onClick={onClose}
-            autoFocus
-            className="inline-flex h-10 items-center rounded-lg border border-slate-200 bg-white px-4 text-slate-700 transition-colors hover:bg-slate-50"
-          >
-            <span className="text-sm font-semibold">닫기</span>
-          </button>
+          <AiStoreActionButton variant="secondary" onClick={onClose} autoFocus>
+            닫기
+          </AiStoreActionButton>
         </div>
       </section>
     </div>,
@@ -110,39 +106,37 @@ export default function LibraryToolRow({
 
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           {isFavorite ? (
-            <button
-              type="button"
+            <AiStoreActionButton
               onClick={() => onDownload(tool.id)}
               disabled={downloaded}
-              className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-default disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none"
               aria-label={`${tool.name} ${downloaded ? '다운로드 됨' : '다운로드'}`}
+              size="compact"
+              icon={Download}
             >
-              <Download size={15} aria-hidden="true" />
               {downloaded ? '다운로드 됨' : '다운로드'}
-            </button>
+            </AiStoreActionButton>
           ) : updateAvailable ? (
-            <button
-              type="button"
+            <AiStoreActionButton
               onClick={() => {
                 onUpdate(tool);
                 setVersionNotesOpen(true);
               }}
-              className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
               aria-label={`${tool.name} 업데이트`}
+              size="compact"
+              icon={RefreshCw}
             >
-              <RefreshCw size={14} strokeWidth={2.2} aria-hidden="true" />
               업데이트
-            </button>
+            </AiStoreActionButton>
           ) : (
-            <button
-              type="button"
+            <AiStoreActionButton
               disabled
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 text-xs font-medium text-slate-500"
               aria-label={`${tool.name} 다운로드 됨`}
+              variant="muted"
+              size="compact"
+              icon={Download}
             >
-              <Download size={15} aria-hidden="true" />
               다운로드 됨
-            </button>
+            </AiStoreActionButton>
           )}
           <div
             className="relative"

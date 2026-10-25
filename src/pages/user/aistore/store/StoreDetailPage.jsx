@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import { StoreToolPreviewScreen, storePreviewTabs } from '../components/StoreToolPreviewScreen.jsx';
+import AiStoreActionButton from '../components/AiStoreActionButton.jsx';
 import { publishedTools, useDownloads, useFavorites } from '../data/manageStore.js';
 import {
   detailContent,
@@ -117,16 +118,15 @@ export default function StoreDetailPage() {
             >
               <Bookmark size={18} fill={isFavorite ? 'currentColor' : 'none'} />
             </button>
-            <button
-              type="button"
+            <AiStoreActionButton
               onClick={() => addDownload(tool.id)}
               disabled={isAdded}
               aria-label={`${tool.name} ${isAdded ? '다운로드 됨' : '다운로드'}`}
-              className="inline-flex h-11 items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-5 text-white shadow-sm transition-colors hover:border-blue-700 hover:bg-blue-700 disabled:cursor-default disabled:border-transparent disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none"
+              size="large"
+              icon={isAdded ? Check : Download}
             >
-              {isAdded ? <Check size={17} /> : <Download size={17} />}
-              <span className="text-sm font-semibold">{isAdded ? '다운로드 됨' : '다운로드'}</span>
-            </button>
+              {isAdded ? '다운로드 됨' : '다운로드'}
+            </AiStoreActionButton>
           </div>
         </header>
 

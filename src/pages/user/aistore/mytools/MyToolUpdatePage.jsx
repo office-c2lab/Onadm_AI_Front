@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { ArrowLeft, CloudUpload } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import projectImage from '../../../../assets/images/project.png';
+import AiStoreActionButton from '../components/AiStoreActionButton.jsx';
 import ToolRegistrationFields from '../components/ToolRegistrationFields.jsx';
 import {
   EMPTY_SUPPORT_ENVIRONMENT,
@@ -90,19 +91,15 @@ export default function MyToolUpdatePage() {
           현재 요청의 심사가 끝난 후 새 업데이트를 요청할 수 있습니다.
         </p>
         <div className="mt-6 flex items-center justify-center gap-2">
-          <Link
-            to={`/user/aistore/mytools/${tool.id}`}
-            className="inline-flex h-10 items-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
+          <AiStoreActionButton to={`/user/aistore/mytools/${tool.id}`} variant="secondary">
             도구 상세로 돌아가기
-          </Link>
-          <Link
+          </AiStoreActionButton>
+          <AiStoreActionButton
             to="/user/aistore/register"
             state={{ openReviewId: activeUpdate.id, activeTab: activeUpdate.status }}
-            className="inline-flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
           >
             심사 진행 내역 보기
-          </Link>
+          </AiStoreActionButton>
         </div>
       </div>
     );
@@ -407,18 +404,10 @@ export default function MyToolUpdatePage() {
 
         <div className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 py-7">
           {error && <p className="mr-auto text-sm font-medium text-red-600">{error}</p>}
-          <Link
-            to={`/user/aistore/mytools/${tool.id}`}
-            className="inline-flex h-10 items-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
+          <AiStoreActionButton to={`/user/aistore/mytools/${tool.id}`} variant="secondary">
             취소
-          </Link>
-          <button
-            type="submit"
-            className="inline-flex h-10 items-center rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
-          >
-            업데이트 승인 요청
-          </button>
+          </AiStoreActionButton>
+          <AiStoreActionButton type="submit">업데이트 승인 요청</AiStoreActionButton>
         </div>
       </form>
     </div>

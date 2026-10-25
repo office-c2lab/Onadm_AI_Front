@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { ArrowLeft, CloudUpload } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import projectImage from '../../../../assets/images/project.png';
+import AiStoreActionButton from '../components/AiStoreActionButton.jsx';
 import ToolRegistrationFields from '../components/ToolRegistrationFields.jsx';
 import {
   EMPTY_SUPPORT_ENVIRONMENT,
@@ -325,18 +326,12 @@ export default function NewToolRegistrationPage() {
               {error}
             </p>
           )}
-          <Link
-            to="/user/aistore/register"
-            className="inline-flex h-10 items-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
+          <AiStoreActionButton to="/user/aistore/register" variant="secondary">
             취소
-          </Link>
-          <button
-            type="submit"
-            className="inline-flex h-10 items-center rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
-          >
+          </AiStoreActionButton>
+          <AiStoreActionButton type="submit">
             {resubmissionDraft ? '다시 승인 요청' : '승인 요청'}
-          </button>
+          </AiStoreActionButton>
         </div>
       </form>
     </div>

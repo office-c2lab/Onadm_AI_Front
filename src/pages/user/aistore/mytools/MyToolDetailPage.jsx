@@ -13,6 +13,7 @@ import {
 import { Link, useParams } from 'react-router-dom';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import { StoreToolPreviewScreen, storePreviewTabs } from '../components/StoreToolPreviewScreen.jsx';
+import AiStoreActionButton from '../components/AiStoreActionButton.jsx';
 import { useMyTools } from '../data/manageStore.js';
 import { CURRENT_TOOL_MAKER, getActiveToolUpdateReview } from '../data/reviewRequests.js';
 import {
@@ -149,20 +150,23 @@ export default function MyToolDetailPage() {
 
           <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
             {activeUpdate ? (
-              <Link
+              <AiStoreActionButton
                 to="/user/aistore/register"
                 state={{ openReviewId: activeUpdate.id, activeTab: activeUpdate.status }}
-                className="inline-flex h-11 items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+                variant="info"
+                size="large"
+                icon={RefreshCw}
               >
-                <RefreshCw size={17} /> 업데이트 심사 보기
-              </Link>
+                업데이트 심사 보기
+              </AiStoreActionButton>
             ) : (
-              <Link
+              <AiStoreActionButton
                 to={`/user/aistore/mytools/${tool.id}/edit`}
-                className="inline-flex h-11 items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:border-blue-700 hover:bg-blue-700"
+                size="large"
+                icon={RefreshCw}
               >
-                <RefreshCw size={17} /> 업데이트
-              </Link>
+                업데이트
+              </AiStoreActionButton>
             )}
           </div>
         </header>

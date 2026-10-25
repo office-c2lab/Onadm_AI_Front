@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   CheckCircle2,
   ChevronDown,
@@ -9,6 +8,7 @@ import {
   LoaderCircle,
   XCircle,
 } from 'lucide-react';
+import AiStoreActionButton from './AiStoreActionButton.jsx';
 import {
   AUTOMATED_REVIEW_DURATION_MS,
   reviewSteps,
@@ -219,31 +219,30 @@ export default function ReviewProgress({
           </p>
         )}
         {isRejected ? (
-          <Link
+          <AiStoreActionButton
             to="/user/aistore/register/new"
-            onClick={event => {
-              event.preventDefault();
-              onRetry();
-            }}
-            className="inline-flex h-9 shrink-0 items-center rounded-lg bg-red-600 px-3.5 text-white transition-colors hover:bg-red-700"
+            state={{ draft: upload }}
+            variant="danger"
+            size="small"
+            onClick={
+              onRetry
+                ? event => {
+                    event.preventDefault();
+                    onRetry();
+                  }
+                : undefined
+            }
           >
-            <span className="text-sm font-semibold">수정 후 다시 요청</span>
-          </Link>
+            수정 후 다시 요청
+          </AiStoreActionButton>
         ) : isComplete ? (
-          <Link
-            to="/user/aistore/mytools"
-            className="inline-flex h-9 shrink-0 items-center rounded-lg bg-emerald-600 px-3.5 text-white transition-colors hover:bg-emerald-700"
-          >
-            <span className="text-sm font-semibold">내 도구 보기</span>
-          </Link>
+          <AiStoreActionButton to="/user/aistore/mytools" variant="success" size="small">
+            내 도구 보기
+          </AiStoreActionButton>
         ) : onCancel ? (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="inline-flex h-9 shrink-0 appearance-none items-center rounded-lg bg-red-600 px-3.5 text-white transition-colors hover:bg-red-700"
-          >
-            <span className="text-sm font-semibold">검사 취소</span>
-          </button>
+          <AiStoreActionButton variant="danger" size="small" onClick={onCancel}>
+            검사 취소
+          </AiStoreActionButton>
         ) : null}
       </div>
     </div>
