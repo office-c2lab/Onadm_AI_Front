@@ -1,30 +1,9 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  ChevronDown,
-  ClipboardList,
-  CloudUpload,
-  FileArchive,
-  Plus,
-  RefreshCw,
-  X,
-} from 'lucide-react';
-import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
+import { ChevronDown, ClipboardList, Plus, RefreshCw } from 'lucide-react';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import zipFileImage from '../../../../assets/images/zipfile.png';
-import ToolInfoModalShell from '../components/ToolInfoModalShell.jsx';
-import {
-  CATEGORY_OPTIONS,
-  EMPTY_SUPPORT_ENVIRONMENT,
-  MAX_SCREENSHOTS,
-  SUPPORT_ENVIRONMENT_FIELDS,
-  TOOL_TYPE_OPTIONS,
-} from '../components/toolRegistrationConfig.js';
-import {
-  formatReviewDate,
-  REVIEW_REQUESTS_KEY,
-  saveReviewRequests,
-} from '../data/reviewRequests.js';
+import { REVIEW_REQUESTS_KEY } from '../data/reviewRequests.js';
 import { reviewSteps } from '../data/reviewSteps.js';
 import ReviewProgress from '../components/ReviewProgress.jsx';
 
@@ -72,6 +51,22 @@ const MOCK_UPLOADS = [
     fileName: 'customer_data_export.zip',
     size: '1.2 MB',
     createdAt: '2026. 10. 17. 11:26',
+    summary: '고객 데이터를 조건별로 정리해 파일로 내보내는 도구',
+    type: '자동화 도구',
+    category: '데이터·분석',
+    description:
+      '고객 데이터를 선택한 조건에 따라 조회하고 업무에 활용할 수 있는 파일로 내보냅니다.',
+    features:
+      '기간과 고객 유형별 데이터를 조회할 수 있으며 결과를 표준 파일 형식으로 내보낼 수 있습니다.',
+    instructions:
+      '조회 조건을 선택한 뒤 미리보기에서 항목을 확인하고 내보내기 버튼을 눌러 결과를 저장합니다.',
+    version: '0.9.0',
+    supportEnvironment: {
+      audience: '고객지원팀 및 영업팀',
+      operatingSystem: 'Windows 11, macOS 14 이상',
+      browser: 'Chrome, Edge 최신 버전',
+      other: '사내 네트워크 연결 필요',
+    },
     status: '반려',
     rejectionReason:
       '고객 개인정보가 포함된 원본 데이터를 외부 파일로 저장할 수 있습니다. 개인정보 마스킹과 다운로드 권한 제한을 적용한 후 다시 요청해 주세요.',
@@ -104,38 +99,6 @@ function readUploads() {
   } catch {
     return MOCK_UPLOADS;
   }
-}
-
-const initialForm = {
-  name: '',
-  summary: '',
-  type: 'AI App',
-  category: '문서·생산성',
-  description: '',
-  features: '',
-  instructions: '',
-  version: '1.0.0',
-  iconName: '',
-  iconData: '',
-  screenshots: [],
-  supportEnvironment: EMPTY_SUPPORT_ENVIRONMENT,
-};
-
-function formatSize(bytes) {
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function ZipIcon({ large = false }) {
-  return (
-    <span
-      className={`flex shrink-0 flex-col items-center justify-center rounded-lg bg-blue-50 font-semibold text-blue-600 ${large ? 'h-14 w-14 gap-0.5 text-[11px]' : 'h-12 w-12 text-[9px]'}`}
-      aria-hidden="true"
-    >
-      <FileArchive size={large ? 24 : 17} strokeWidth={1.8} />
-      ZIP
-    </span>
-  );
 }
 
 const updateReviewSteps = [
@@ -197,10 +160,7 @@ function reviewStatusTab(status) {
 export default function RegisterPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const inputRef = useRef(null);
-  const iconInputRef = useRef(null);
-  const screenshotInputRef = useRef(null);
-  const [uploads, setUploads] = useState(() => {
+  const [uploads] = useState(() => {
     const savedUploads = readUploads();
     const submittedReview = location.state?.submittedReview;
     if (!submittedReview) return savedUploads;
@@ -209,12 +169,6 @@ export default function RegisterPage() {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState(location.state?.activeTab ?? '전체');
   const [openUploadId, setOpenUploadId] = useState(location.state?.openReviewId ?? null);
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [form, setForm] = useState(initialForm);
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
   const keyword = search.trim().toLowerCase();
   const tabCounts = Object.fromEntries(
     reviewTabs.map(tab => [
@@ -233,202 +187,13 @@ export default function RegisterPage() {
     return matchesTab && matchesKeyword;
   });
 
-  const saveUploads = next => {
-    try {
-      saveReviewRequests(next);
-      setUploads(next);
-      return true;
-    } catch {
-      setError('목록을 브라우저에 저장하지 못했습니다. 저장 공간을 확인해 주세요.');
-      return false;
-    }
-  };
-
-  const selectZipFile = fileList => {
-    const files = Array.from(fileList || []);
-    if (!files.length) return;
-
-    const file = files[0];
-    if (!file.name.toLowerCase().endsWith('.zip')) {
-      setError('ZIP 형식의 파일만 선택할 수 있습니다.');
-      return;
-    }
-    setSelectedFile(file);
-    setError('');
-    setForm(current => ({
-      ...current,
-      name: current.name || file.name.replace(/\.zip$/i, '').replace(/[-_]+/g, ' '),
-    }));
-  };
-
-  const updateForm = (field, value) => {
-    setForm(current => ({ ...current, [field]: value }));
-  };
-
-  const updateEnvironment = (field, value) => {
-    setForm(current => ({
-      ...current,
-      supportEnvironment: { ...current.supportEnvironment, [field]: value },
-    }));
-  };
-
-  const selectIconFile = fileList => {
-    const file = Array.from(fileList || [])[0];
-    if (!file) return;
-    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-      setError('도구 아이콘은 PNG, JPG 또는 WEBP 이미지만 사용할 수 있습니다.');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setForm(current => ({
-        ...current,
-        iconName: file.name,
-        iconData: typeof reader.result === 'string' ? reader.result : '',
-      }));
-      setError('');
-    };
-    reader.onerror = () => setError('아이콘 이미지를 불러오지 못했습니다. 다시 선택해 주세요.');
-    reader.readAsDataURL(file);
-  };
-
-  const selectScreenshots = async fileList => {
-    const files = Array.from(fileList || []);
-    if (!files.length) return;
-    if (files.length + form.screenshots.length > MAX_SCREENSHOTS) {
-      setError(`화면 이미지는 최대 ${MAX_SCREENSHOTS}장까지 등록할 수 있습니다.`);
-      return;
-    }
-    if (files.some(file => !['image/png', 'image/jpeg', 'image/webp'].includes(file.type))) {
-      setError('화면 이미지는 PNG, JPG 또는 WEBP 형식만 사용할 수 있습니다.');
-      return;
-    }
-    try {
-      const screenshots = await Promise.all(
-        files.map(
-          file =>
-            new Promise((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () =>
-                resolve({
-                  name: file.name,
-                  data: typeof reader.result === 'string' ? reader.result : '',
-                });
-              reader.onerror = () => reject(new Error('이미지를 읽지 못했습니다.'));
-              reader.readAsDataURL(file);
-            })
-        )
-      );
-      setForm(current => ({
-        ...current,
-        screenshots: [...current.screenshots, ...screenshots].slice(0, MAX_SCREENSHOTS),
-      }));
-      setError('');
-    } catch {
-      setError('화면 이미지를 불러오지 못했습니다. 다시 선택해 주세요.');
-    }
-  };
-
-  const closeRegistration = () => {
-    setIsRegistering(false);
-    setSelectedFile(null);
-    setForm(initialForm);
-    setError('');
-    setIsDragging(false);
-  };
-
-  const submitRegistration = () => {
-    if (!selectedFile) {
-      setError('등록할 ZIP 파일을 먼저 선택해 주세요.');
-      return;
-    }
-    if (
-      !form.name.trim() ||
-      !form.summary.trim() ||
-      !form.description.trim() ||
-      !form.features.trim() ||
-      !form.instructions.trim() ||
-      !form.version.trim()
-    ) {
-      setError('도구 이름, 설명, 주요 기능, 사용 방법, 버전을 입력해 주세요.');
-      return;
-    }
-    if (
-      !form.supportEnvironment.audience.trim() ||
-      !form.supportEnvironment.operatingSystem.trim() ||
-      !form.supportEnvironment.browser.trim()
-    ) {
-      setError('지원 환경의 사용 가능 대상, 운영체제, 브라우저를 입력해 주세요.');
-      return;
-    }
-
-    const now = new Date();
-    const nextRow = {
-      ...form,
-      id: `upload-${now.getTime()}-${Math.random().toString(36).slice(2)}`,
-      fileName: selectedFile.name,
-      name: form.name.trim(),
-      summary: form.summary.trim(),
-      description: form.description.trim(),
-      features: form.features.trim(),
-      instructions: form.instructions.trim(),
-      version: form.version.trim(),
-      supportEnvironment: Object.fromEntries(
-        Object.entries(form.supportEnvironment).map(([key, value]) => [key, value.trim()])
-      ),
-      size: formatSize(selectedFile.size),
-      createdAt: formatReviewDate(now),
-      status: '심사 진행중',
-    };
-
-    if (!saveUploads([nextRow, ...uploads])) return;
-    setSearch('');
-    setActiveTab('심사 진행중');
-    setMessage('승인 요청을 접수했습니다. 심사 진행 내역에서 상태를 확인해 주세요.');
-    closeRegistration();
-  };
-
   return (
     <div className="w-full">
       <SearchHeader
         value={search}
         onSearchChange={setSearch}
-        placeholder="등록한 도구 또는 ZIP 파일 검색"
+        placeholder="도구명, 파일명 또는 요청 유형 검색"
         ariaLabel="등록 목록 검색"
-      />
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".zip,application/zip,application/x-zip-compressed"
-        className="sr-only"
-        tabIndex={-1}
-        onChange={event => {
-          selectZipFile(event.target.files);
-          event.target.value = '';
-        }}
-      />
-      <input
-        ref={iconInputRef}
-        type="file"
-        accept="image/png,image/jpeg,image/webp"
-        className="sr-only"
-        tabIndex={-1}
-        onChange={event => {
-          selectIconFile(event.target.files);
-          event.target.value = '';
-        }}
-      />
-      <input
-        ref={screenshotInputRef}
-        type="file"
-        accept="image/png,image/jpeg,image/webp"
-        multiple
-        className="sr-only"
-        tabIndex={-1}
-        onChange={event => {
-          void selectScreenshots(event.target.files);
-          event.target.value = '';
-        }}
       />
 
       <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -457,294 +222,6 @@ export default function RegisterPage() {
           <Plus size={17} aria-hidden="true" />새 도구 등록
         </button>
       </div>
-
-      {isRegistering && (
-        <ToolInfoModalShell
-          title="도구 등록 정보"
-          description="파일과 정보를 입력한 후 승인을 요청하세요."
-          onClose={closeRegistration}
-          onSubmit={event => {
-            event.preventDefault();
-            submitRegistration();
-          }}
-          footer={
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              승인 요청
-            </button>
-          }
-        >
-          <ol className="grid grid-cols-3 border-b border-slate-100 px-5 py-4 text-xs sm:px-6">
-            {['파일 업로드', '도구 정보 입력', '승인 요청'].map((label, index) => (
-              <li key={label} className="flex items-center text-slate-500">
-                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blue-600 font-semibold text-white">
-                  {index + 1}
-                </span>
-                <span className="ml-2 hidden font-medium sm:inline">{label}</span>
-                {index < 2 && <span className="mx-3 h-px flex-1 bg-slate-200" />}
-              </li>
-            ))}
-          </ol>
-
-          {error && (
-            <p
-              role="alert"
-              className="mx-5 mt-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 sm:mx-6"
-            >
-              {error}
-            </p>
-          )}
-
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-6">
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              onDragEnter={event => {
-                event.preventDefault();
-                setIsDragging(true);
-              }}
-              onDragOver={event => event.preventDefault()}
-              onDragLeave={event => {
-                if (!event.currentTarget.contains(event.relatedTarget)) setIsDragging(false);
-              }}
-              onDrop={event => {
-                event.preventDefault();
-                setIsDragging(false);
-                selectZipFile(event.dataTransfer.files);
-              }}
-              aria-label="ZIP 파일 선택 또는 드래그 앤 드롭"
-              className={`flex min-h-[190px] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors ${
-                isDragging
-                  ? 'border-blue-500 bg-blue-50'
-                  : selectedFile
-                    ? 'border-blue-300 bg-blue-50/40'
-                    : 'border-slate-200 bg-slate-50/50 hover:border-blue-300 hover:bg-blue-50/30'
-              }`}
-            >
-              <ZipIcon large />
-              <strong className="mt-3 text-sm font-semibold text-slate-900">
-                {selectedFile ? selectedFile.name : '도구의 ZIP 파일을 업로드하세요'}
-              </strong>
-              <span className="mt-1 text-xs text-slate-500">
-                {selectedFile
-                  ? `${formatSize(selectedFile.size)} · 클릭하여 파일 변경`
-                  : '파일을 드래그하거나 클릭하여 선택할 수 있습니다.'}
-              </span>
-              {!selectedFile && (
-                <span className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white">
-                  <CloudUpload size={15} aria-hidden="true" />
-                  파일 선택
-                </span>
-              )}
-            </button>
-
-            <fieldset className="mt-7">
-              <legend className="text-base font-semibold text-slate-900">도구 정보 입력</legend>
-              <div className="mt-4 grid gap-5 sm:grid-cols-2">
-                <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-                  도구 이름 <span className="text-red-500">*</span>
-                  <input
-                    value={form.name}
-                    onChange={event => updateForm('name', event.target.value)}
-                    placeholder="예: 보고서 작성 도우미"
-                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    required
-                  />
-                </label>
-                <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-                  한 줄 설명 <span className="text-red-500">*</span>
-                  <input
-                    value={form.summary}
-                    onChange={event => updateForm('summary', event.target.value)}
-                    placeholder="어떤 도구인지 간단히 설명해 주세요."
-                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    required
-                  />
-                </label>
-                <div className="text-sm font-medium text-slate-700">
-                  <span>
-                    도구 유형 <span className="text-red-500">*</span>
-                  </span>
-                  <CustomDropdown
-                    value={form.type}
-                    options={TOOL_TYPE_OPTIONS}
-                    onChange={value => updateForm('type', value)}
-                    ariaLabel="도구 유형 선택"
-                    className="mt-2"
-                  />
-                </div>
-                <div className="text-sm font-medium text-slate-700">
-                  <span>
-                    카테고리 <span className="text-red-500">*</span>
-                  </span>
-                  <CustomDropdown
-                    value={form.category}
-                    options={CATEGORY_OPTIONS}
-                    onChange={value => updateForm('category', value)}
-                    ariaLabel="카테고리 선택"
-                    className="mt-2"
-                  />
-                </div>
-                <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-                  상세 설명 <span className="text-red-500">*</span>
-                  <textarea
-                    value={form.description}
-                    onChange={event => updateForm('description', event.target.value)}
-                    placeholder="도구의 주요 기능과 활용 목적을 자세히 작성해 주세요."
-                    rows={4}
-                    className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    required
-                  />
-                </label>
-                <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-                  주요 기능 <span className="text-red-500">*</span>
-                  <textarea
-                    value={form.features}
-                    onChange={event => updateForm('features', event.target.value)}
-                    placeholder="주요 기능을 한 줄에 하나씩 작성해 주세요."
-                    rows={4}
-                    required
-                    className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-                  사용 방법
-                  <span className="ml-1 text-red-500">*</span>
-                  <textarea
-                    value={form.instructions}
-                    onChange={event => updateForm('instructions', event.target.value)}
-                    placeholder="입력할 내용과 결과 확인 방법을 문장으로 자세히 작성해 주세요."
-                    rows={4}
-                    required
-                    className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  />
-                </label>
-                <label className="text-sm font-medium text-slate-700 sm:col-span-2">
-                  버전 <span className="text-red-500">*</span>
-                  <input
-                    value={form.version}
-                    onChange={event => updateForm('version', event.target.value)}
-                    placeholder="예: 1.0.0"
-                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    required
-                  />
-                </label>
-                <div className="text-sm font-medium text-slate-700 sm:col-span-2">
-                  도구 아이콘 <span className="text-xs font-normal text-slate-400">(선택)</span>
-                  <button
-                    type="button"
-                    onClick={() => iconInputRef.current?.click()}
-                    className="mt-2 flex w-full items-center gap-3 rounded-lg border border-dashed border-slate-200 px-4 py-3 text-left text-sm font-normal text-slate-500 hover:border-blue-300 hover:bg-blue-50/30"
-                  >
-                    {form.iconData ? (
-                      <img
-                        src={form.iconData}
-                        alt="업로드한 도구 아이콘 미리보기"
-                        className="h-10 w-10 shrink-0 rounded-lg border border-slate-200 bg-white object-cover"
-                      />
-                    ) : (
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600">
-                        <Plus size={18} aria-hidden="true" />
-                      </span>
-                    )}
-                    <span className="min-w-0 truncate">
-                      {form.iconName || 'PNG, JPG 또는 WEBP 이미지'}
-                    </span>
-                  </button>
-                </div>
-                <div className="text-sm font-medium text-slate-700 sm:col-span-2">
-                  화면 이미지{' '}
-                  <span className="text-xs font-normal text-slate-400">(선택 · 최대 3장)</span>
-                  <button
-                    type="button"
-                    onClick={() => screenshotInputRef.current?.click()}
-                    disabled={form.screenshots.length >= MAX_SCREENSHOTS}
-                    className="mt-2 flex w-full items-center gap-3 rounded-lg border border-dashed border-slate-200 px-4 py-3 text-left text-sm font-normal text-slate-500 hover:border-blue-300 hover:bg-blue-50/30 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600">
-                      <Plus size={18} aria-hidden="true" />
-                    </span>
-                    화면 이미지 선택 ({form.screenshots.length}/{MAX_SCREENSHOTS})
-                  </button>
-                  {form.screenshots.length > 0 && (
-                    <div className="mt-3 grid grid-cols-3 gap-3">
-                      {form.screenshots.map((screenshot, index) => (
-                        <div key={`${screenshot.name}-${index}`} className="min-w-0">
-                          <div className="relative">
-                            <img
-                              src={screenshot.data}
-                              alt={`${index + 1}번째 화면 이미지 미리보기`}
-                              className="aspect-video w-full rounded-lg border border-slate-200 bg-slate-50 object-cover"
-                            />
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setForm(current => ({
-                                  ...current,
-                                  screenshots: current.screenshots.filter(
-                                    (_, imageIndex) => imageIndex !== index
-                                  ),
-                                }))
-                              }
-                              aria-label={`${screenshot.name} 제거`}
-                              className="absolute right-1 top-1 rounded-full bg-slate-900/70 p-1 text-white hover:bg-slate-900"
-                            >
-                              <X size={13} aria-hidden="true" />
-                            </button>
-                          </div>
-                          <p
-                            className="mt-1 truncate text-xs font-normal text-slate-500"
-                            title={screenshot.name}
-                          >
-                            {screenshot.name}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </fieldset>
-
-            <fieldset className="mt-8 border-t border-slate-100 pt-7">
-              <legend className="text-base font-semibold text-slate-900">지원 환경</legend>
-              <p className="mt-1 text-xs leading-5 text-slate-500">
-                실제로 사용할 수 있는 기기와 환경을 입력해 주세요. 상세 페이지에 표시할 정보입니다.
-              </p>
-              <div className="mt-4 grid gap-5 sm:grid-cols-2">
-                {SUPPORT_ENVIRONMENT_FIELDS.map(field => (
-                  <label
-                    key={field.key}
-                    className={`text-sm font-medium text-slate-700 ${field.key === 'other' ? 'sm:col-span-2' : ''}`}
-                  >
-                    {field.label} {field.required && <span className="text-red-500">*</span>}
-                    <input
-                      value={form.supportEnvironment[field.key]}
-                      onChange={event => updateEnvironment(field.key, event.target.value)}
-                      placeholder={field.placeholder}
-                      required={field.required}
-                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          </div>
-        </ToolInfoModalShell>
-      )}
-
-      {!isRegistering && error && (
-        <p role="alert" className="mt-3 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600">
-          {error}
-        </p>
-      )}
-      {message && (
-        <p role="status" className="mt-3 rounded-lg bg-blue-50 px-4 py-2.5 text-sm text-blue-700">
-          {message}
-        </p>
-      )}
 
       <section className="mt-5">
         {filteredUploads.length ? (
@@ -839,7 +316,7 @@ export default function RegisterPage() {
           </div>
         ) : keyword ? (
           <p className="py-12 text-center text-sm text-slate-500">
-            검색 조건에 맞는 ZIP 파일이 없습니다.
+            검색 조건에 맞는 심사 요청이 없습니다.
           </p>
         ) : activeTab !== '전체' ? (
           <p className="py-12 text-center text-sm text-slate-500">

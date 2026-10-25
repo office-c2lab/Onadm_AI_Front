@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   CheckCircle2,
   ChevronDown,
@@ -183,7 +184,7 @@ export default function ReviewProgress({ upload, stageStates, steps = reviewStep
         })}
       </ol>
       <div
-        className={`border-t px-4 py-3 text-sm leading-6 sm:px-6 ${
+        className={`flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-sm leading-6 sm:px-6 ${
           isRejected
             ? 'border-red-100 bg-red-50/70 text-red-700'
             : isComplete
@@ -194,20 +195,38 @@ export default function ReviewProgress({ upload, stageStates, steps = reviewStep
         }`}
       >
         {isRejected ? (
-          <div>
+          <div className="min-w-0 flex-1">
             <strong className="font-semibold">관리자 반려 사유</strong>
             <p className="mt-1 text-slate-700">
               {upload.rejectionReason ??
                 '심사 기준을 충족하지 못했습니다. 필요한 내용을 수정한 후 다시 요청해 주세요.'}
             </p>
           </div>
-        ) : isComplete ? (
-          '모든 심사를 통과해 도구 등록이 승인되었습니다.'
-        ) : isWaiting ? (
-          '요청이 접수되었습니다. 자동 검사가 시작되면 심사 진행중으로 변경됩니다.'
         ) : (
-          '자동 검사 결과를 바탕으로 관리자가 도구의 운영 적합성을 검토하고 있습니다.'
+          <p className="min-w-0 flex-1">
+            {isComplete
+              ? '모든 심사를 통과해 도구 등록이 승인되었습니다.'
+              : isWaiting
+                ? '요청이 접수되었습니다. 자동 검사가 시작되면 심사 진행중으로 변경됩니다.'
+                : '자동 검사 결과를 바탕으로 관리자가 도구의 운영 적합성을 검토하고 있습니다.'}
+          </p>
         )}
+        {isRejected ? (
+          <Link
+            to="/user/aistore/register/new"
+            state={{ draft: upload }}
+            className="inline-flex h-9 shrink-0 items-center rounded-lg border border-red-200 bg-white px-3.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100"
+          >
+            수정 후 다시 요청
+          </Link>
+        ) : isComplete ? (
+          <Link
+            to="/user/aistore/mytools"
+            className="inline-flex h-9 shrink-0 items-center rounded-lg bg-emerald-600 px-3.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
+          >
+            내 도구 보기
+          </Link>
+        ) : null}
       </div>
     </div>
   );

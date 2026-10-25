@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { ArrowLeft, CloudUpload } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import projectImage from '../../../../assets/images/project.png';
 import ToolRegistrationFields from '../components/ToolRegistrationFields.jsx';
 import {
@@ -24,19 +24,44 @@ const initialForm = {
   supportEnvironment: { ...EMPTY_SUPPORT_ENVIRONMENT },
 };
 
+function createInitialForm(draft) {
+  if (!draft) return initialForm;
+
+  return {
+    ...initialForm,
+    name: draft.name ?? '',
+    summary: draft.summary ?? '',
+    type: draft.type ?? initialForm.type,
+    category: draft.category ?? initialForm.category,
+    description: draft.description ?? '',
+    features: draft.features ?? '',
+    instructions: draft.instructions ?? '',
+    version: draft.version ?? initialForm.version,
+    iconName: draft.iconName ?? '',
+    iconData: draft.iconData ?? '',
+    screenshots: draft.screenshots ?? [],
+    supportEnvironment: {
+      ...EMPTY_SUPPORT_ENVIRONMENT,
+      ...(draft.supportEnvironment ?? {}),
+    },
+  };
+}
+
 function formatSize(bytes) {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export default function NewToolRegistrationPage() {
+  const location = useLocation();
   const navigate = useNavigate();
+  const resubmissionDraft = location.state?.draft;
   const zipInputRef = useRef(null);
   const iconInputRef = useRef(null);
   const screenshotInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(() => createInitialForm(resubmissionDraft));
   const [error, setError] = useState('');
 
   const updateForm = (field, value) => {
@@ -148,7 +173,8 @@ export default function NewToolRegistrationPage() {
       ...form,
       ...CURRENT_TOOL_MAKER,
       id: `upload-${now.getTime()}-${Math.random().toString(36).slice(2)}`,
-      requestType: '신규 등록',
+      requestType: resubmissionDraft?.requestType ?? '신규 등록',
+      previousRequestId: resubmissionDraft?.id,
       fileName: selectedFile?.name || 'ZIP 파일 미첨부',
       name: form.name.trim(),
       summary: form.summary.trim(),
@@ -189,10 +215,12 @@ export default function NewToolRegistrationPage() {
       <form onSubmit={submit} noValidate className="mt-2">
         <header className="py-8 sm:py-10">
           <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
-            새 도구 등록
+            {resubmissionDraft ? '도구 수정 후 다시 요청' : '새 도구 등록'}
           </h1>
           <p className="mt-4 max-w-3xl text-[15px] leading-7 text-slate-600">
-            ZIP 파일과 도구 정보를 입력한 후 승인을 요청하세요.
+            {resubmissionDraft
+              ? '반려 사유를 확인하고 필요한 정보를 수정한 후 다시 요청하세요.'
+              : 'ZIP 파일과 도구 정보를 입력한 후 승인을 요청하세요.'}
           </p>
         </header>
 
@@ -236,7 +264,7 @@ export default function NewToolRegistrationPage() {
 
         <section className="border-t border-slate-200 py-9 sm:py-10">
           <h2 className="text-lg font-bold tracking-tight text-slate-900">
-            도구 파일 <span className="text-sm font-normal text-slate-400">(선택)</span>
+            도구 파일 <span className="text-red-500">*</span>
           </h2>
           <button
             type="button"
@@ -268,7 +296,7 @@ export default function NewToolRegistrationPage() {
             <span className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
               {selectedFile
                 ? `${formatSize(selectedFile.size)} · 클릭하여 파일 변경`
-                : '목업에서는 파일 없이 승인 요청할 수 있습니다.'}
+                : 'ZIP 파일을 드래그하거나 클릭하여 선택해 주세요.'}
             </span>
             {!selectedFile && (
               <span className="mt-5 inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm">
@@ -303,7 +331,7 @@ export default function NewToolRegistrationPage() {
             type="submit"
             className="inline-flex h-10 items-center rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
           >
-            승인 요청
+            {resubmissionDraft ? '다시 승인 요청' : '승인 요청'}
           </button>
         </div>
       </form>
