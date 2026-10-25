@@ -8,6 +8,7 @@ import {
   Store,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import UserAccountMenu from '../UserAccountMenu.jsx';
 import UserServiceSwitcher from '../UserServiceSwitcher.jsx';
 
 const toolItems = [
@@ -171,18 +172,7 @@ export default function AiStoreSidebar({ className = '', onNavigate, onClose }) 
       </div>
 
       <div className="shrink-0 border-t border-black/5 p-2">
-        <button
-          type="button"
-          className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-[#ececec]"
-        >
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#e3e3e3] text-[#4b4b4b]">
-            <Atom className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-[13px] font-medium leading-[18px]">ONDAM AI</span>
-            <span className="block truncate text-[11px] leading-4 text-[#777]">Manage</span>
-          </span>
-        </button>
+        <UserAccountMenu />
       </div>
     </aside>
   );

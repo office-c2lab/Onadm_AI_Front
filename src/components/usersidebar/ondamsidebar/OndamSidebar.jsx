@@ -12,6 +12,7 @@ import {
   SquarePen,
   X,
 } from 'lucide-react';
+import UserAccountMenu from '../UserAccountMenu.jsx';
 import UserServiceSwitcher from '../UserServiceSwitcher.jsx';
 
 const primaryItems = [
@@ -287,21 +288,7 @@ export default function OndamSidebar({
       </div>
 
       <div className="shrink-0 border-t border-black/5 p-2">
-        <button
-          type="button"
-          className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left hover:bg-[#ececec]"
-          onClick={() => onSelectMenu?.('account')}
-        >
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#e3e3e3] text-[11px] font-semibold text-[#4b4b4b]">
-            {user.name.slice(0, 2).toUpperCase()}
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-[13px] font-medium leading-[18px]">
-              {user.name}
-            </span>
-            <span className="block truncate text-[11px] leading-4 text-[#777]">{user.plan}</span>
-          </span>
-        </button>
+        <UserAccountMenu user={user} onAction={onSelectMenu} />
       </div>
     </aside>
   );
