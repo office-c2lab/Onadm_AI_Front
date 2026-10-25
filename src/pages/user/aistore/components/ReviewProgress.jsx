@@ -75,9 +75,9 @@ export default function ReviewProgress({ upload, stageStates, steps = reviewStep
   const [selectedOpenStep, setSelectedOpenStep] = useState(null);
   const [hasSelectedStep, setHasSelectedStep] = useState(false);
   const openStep = hasSelectedStep ? selectedOpenStep : runningStep >= 0 ? runningStep : null;
-  const hasFailed = states.includes('failed');
   const isComplete = states.every(state => state === 'complete');
   const isWaiting = upload.status === '검사 대기';
+  const isRejected = upload.status === '반려';
 
   useEffect(() => {
     if (!isAutomatedReviewRunning || elapsed >= AUTOMATED_REVIEW_DURATION_MS) return undefined;
@@ -95,33 +95,21 @@ export default function ReviewProgress({ upload, stageStates, steps = reviewStep
       <div className="flex flex-wrap items-end justify-between gap-2 px-4 py-4 sm:px-6">
         <div>
           <div className="flex items-center gap-2">
-            <h4 className="text-sm font-semibold text-slate-900">심사 진행 내역</h4>
+            <h4 className="text-base font-semibold text-slate-950">심사 진행 내역</h4>
           </div>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-sm text-slate-600">
             {upload.displayLabel ?? upload.fileName} · {upload.createdAt}
           </p>
         </div>
-        <div className="flex items-center gap-3 text-xs">
-          <span className="text-slate-400">
+        <div className="grid shrink-0 grid-cols-[5rem_6.5rem] items-center gap-3 text-sm">
+          <span className="text-right text-slate-500">
+            {isComplete ? '소요' : '경과'}{' '}
             {duration ?? (isComplete ? '1m 24s' : completedCount ? '20s' : '0s')}
           </span>
-          <span className="font-medium text-blue-600">
+          <span className="text-right font-semibold whitespace-nowrap text-blue-600">
             {completedCount}/{steps.length}단계 완료
           </span>
         </div>
-      </div>
-      <div
-        role="progressbar"
-        aria-label="완료된 심사 단계"
-        aria-valuemin={0}
-        aria-valuemax={steps.length}
-        aria-valuenow={completedCount}
-        className="h-1 bg-slate-100"
-      >
-        <div
-          className={`h-full transition-[width] ${hasFailed ? 'bg-red-500' : 'bg-blue-600'}`}
-          style={{ width: `${(completedCount / steps.length) * 100}%` }}
-        />
       </div>
       <ol className="divide-y divide-slate-100">
         {steps.map((step, index) => {
@@ -152,17 +140,21 @@ export default function ReviewProgress({ upload, stageStates, steps = reviewStep
                   className={`shrink-0 ${color} ${state === 'running' ? 'animate-spin' : ''}`}
                   aria-hidden="true"
                 />
-                <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">
+                <span className="min-w-0 flex-1 truncate text-[15px] font-semibold text-slate-900">
                   {step.label}
                 </span>
-                <span className={`hidden shrink-0 text-xs sm:inline ${color}`}>{label}</span>
-                <span className="w-14 shrink-0 text-right text-xs text-slate-400">
-                  {stepDuration}
+                <span className="grid shrink-0 grid-cols-[3.5rem] items-center gap-3 sm:grid-cols-[5rem_6.5rem]">
+                  <span className="text-right text-sm text-slate-500">{stepDuration}</span>
+                  <span
+                    className={`hidden text-right text-sm font-medium whitespace-nowrap sm:inline ${color}`}
+                  >
+                    {label}
+                  </span>
                 </span>
               </button>
               {isOpen && (
-                <div className="border-t border-slate-100 bg-slate-50/80 px-4 py-3 font-mono text-[11px] leading-5 text-slate-600 sm:px-14 sm:text-xs">
-                  <p className="mb-2 font-sans text-slate-500">{step.description}</p>
+                <div className="border-t border-slate-100 bg-slate-50/80 px-4 py-3 font-mono text-xs leading-6 text-slate-700 sm:px-14 sm:text-[13px]">
+                  <p className="mb-2 font-sans text-sm text-slate-600">{step.description}</p>
                   {step.checks.map((check, checkIndex) => {
                     const checkState = getCheckState(state, checkIndex);
                     const timestamp = `00:00:${String(checkIndex * 2 + 1).padStart(2, '0')}`;
@@ -190,10 +182,32 @@ export default function ReviewProgress({ upload, stageStates, steps = reviewStep
           );
         })}
       </ol>
-      <div className="border-t border-slate-100 bg-slate-50/40 px-4 py-3 text-xs leading-5 text-slate-500 sm:px-6">
-        {isWaiting
-          ? '요청이 접수되었습니다. 자동 검사가 시작되면 심사 진행중으로 변경됩니다.'
-          : '현재 표시된 로그는 화면 예시입니다. 실제 검사 로그와 보완 사유는 서버 연동 후 제공됩니다.'}
+      <div
+        className={`border-t px-4 py-3 text-sm leading-6 sm:px-6 ${
+          isRejected
+            ? 'border-red-100 bg-red-50/70 text-red-700'
+            : isComplete
+              ? 'border-emerald-100 bg-emerald-50/60 text-emerald-700'
+              : isWaiting
+                ? 'border-slate-100 bg-slate-50/60 text-slate-600'
+                : 'border-blue-100 bg-blue-50/60 text-blue-700'
+        }`}
+      >
+        {isRejected ? (
+          <div>
+            <strong className="font-semibold">관리자 반려 사유</strong>
+            <p className="mt-1 text-slate-700">
+              {upload.rejectionReason ??
+                '심사 기준을 충족하지 못했습니다. 필요한 내용을 수정한 후 다시 요청해 주세요.'}
+            </p>
+          </div>
+        ) : isComplete ? (
+          '모든 심사를 통과해 도구 등록이 승인되었습니다.'
+        ) : isWaiting ? (
+          '요청이 접수되었습니다. 자동 검사가 시작되면 심사 진행중으로 변경됩니다.'
+        ) : (
+          '자동 검사 결과를 바탕으로 관리자가 도구의 운영 적합성을 검토하고 있습니다.'
+        )}
       </div>
     </div>
   );

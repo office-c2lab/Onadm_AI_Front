@@ -1,16 +1,13 @@
 import { useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  CheckCircle2,
   ChevronDown,
   ClipboardList,
-  Clock3,
   CloudUpload,
   FileArchive,
   Plus,
   RefreshCw,
   X,
-  XCircle,
 } from 'lucide-react';
 import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
@@ -64,6 +61,8 @@ const MOCK_UPLOADS = [
     size: '1.2 MB',
     createdAt: '2026. 10. 17. 11:26',
     status: '반려',
+    rejectionReason:
+      '고객 개인정보가 포함된 원본 데이터를 외부 파일로 저장할 수 있습니다. 개인정보 마스킹과 다운로드 권한 제한을 적용한 후 다시 요청해 주세요.',
   },
 ];
 
@@ -162,7 +161,6 @@ function ReviewDetails({ upload }) {
 function ReviewStatus({ status }) {
   const isApproved = status === '승인 완료';
   const isRejected = status === '반려';
-  const Icon = isApproved ? CheckCircle2 : isRejected ? XCircle : Clock3;
   const color = isApproved
     ? 'bg-emerald-50 text-emerald-700'
     : isRejected
@@ -173,9 +171,8 @@ function ReviewStatus({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium ${color}`}
+      className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ${color}`}
     >
-      <Icon size={14} aria-hidden="true" />
       {status}
     </span>
   );
