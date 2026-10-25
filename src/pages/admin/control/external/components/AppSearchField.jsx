@@ -17,4 +17,3 @@ export default function AppSearchField({ value, onChange, placeholder, className
     </label>
   );
 }
-

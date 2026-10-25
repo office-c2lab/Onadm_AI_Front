@@ -8,4 +8,3 @@ export const APP_BODY_TEXT_CLASS = 'text-[clamp(0.92rem,1vw,1rem)]';
 export const APP_META_TEXT_CLASS = 'text-[clamp(0.84rem,0.95vw,0.92rem)]';
 export const APP_SMALL_META_TEXT_CLASS = 'text-[clamp(0.78rem,0.9vw,0.86rem)]';
 export const APP_BUTTON_TEXT_CLASS = 'text-[clamp(0.9rem,1vw,0.98rem)]';
-

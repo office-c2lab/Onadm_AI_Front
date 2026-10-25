@@ -333,7 +333,10 @@ function PrivacyKeywordModal({ draft, isSaving = false, onChange, onClose, onSav
       >
         <div className="app-modal-header flex items-center justify-between border-b border-slate-200">
           <div>
-            <h2 id="privacy-keyword-modal-title" className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-slate-900">
+            <h2
+              id="privacy-keyword-modal-title"
+              className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-slate-900"
+            >
               개인정보 분류 추가
             </h2>
             <p className="mt-1 text-sm text-slate-400">
@@ -532,7 +535,10 @@ function PrivacyKeywordDetailModal({
       >
         <div className="app-modal-header flex items-center justify-between border-b border-slate-200">
           <div>
-            <h2 id="privacy-detail-modal-title" className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-slate-900">
+            <h2
+              id="privacy-detail-modal-title"
+              className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-slate-900"
+            >
               개인정보 분류 상세 설정
             </h2>
             <p className="mt-1 text-sm text-slate-400">
@@ -751,7 +757,10 @@ function PrivacyCategoryDeleteModal({ target, isSaving = false, onClose, onConfi
         className="app-modal-panel"
       >
         <div className="app-modal-header flex items-center justify-between gap-[var(--app-gap-md)] border-b border-[#E7EBF4]">
-          <h3 id="delete-privacy-category-modal-title" className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-[#111827]">
+          <h3
+            id="delete-privacy-category-modal-title"
+            className="text-[clamp(1rem,1.2vw,1.125rem)] font-bold text-[#111827]"
+          >
             개인정보 분류 삭제
           </h3>
           <button
@@ -1846,4 +1855,3 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
     </>
   );
 }
-

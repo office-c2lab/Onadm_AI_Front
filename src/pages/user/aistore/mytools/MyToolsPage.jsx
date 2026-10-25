@@ -1,20 +1,8 @@
 import { useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  BarChart3,
-  Bot,
-  CalendarDays,
-  Code2,
-  Database,
-  FileText,
-  Image as ImageIcon,
-  Languages,
-  MessageSquareText,
-  Search,
-  Workflow,
-} from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Download } from 'lucide-react';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
-import { ToolDetailModal } from '../components/ManageToolCard/ManageToolCard.jsx';
+import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import ToolInfoModalShell from '../components/ToolInfoModalShell.jsx';
 import ToolRegistrationFields from '../components/ToolRegistrationFields.jsx';
 import {
@@ -23,48 +11,6 @@ import {
 } from '../components/toolRegistrationConfig.js';
 import { useMyTools } from '../data/manageStore.js';
 import { addReviewRequest, formatReviewDate } from '../data/reviewRequests.js';
-
-const toolVisuals = {
-  'mine-1': [FileText, 'bg-blue-50 text-blue-600'],
-  'mine-2': [Database, 'bg-emerald-50 text-emerald-600'],
-  'mine-3': [Workflow, 'bg-orange-50 text-orange-600'],
-  'mine-4': [Search, 'bg-violet-50 text-violet-600'],
-  'mine-5': [MessageSquareText, 'bg-violet-50 text-violet-600'],
-  'mine-6': [Workflow, 'bg-orange-50 text-orange-600'],
-  'mine-7': [BarChart3, 'bg-emerald-50 text-emerald-600'],
-  'mine-8': [Code2, 'bg-indigo-50 text-indigo-600'],
-  'mine-9': [ImageIcon, 'bg-amber-50 text-amber-600'],
-  'mine-10': [MessageSquareText, 'bg-sky-50 text-sky-600'],
-  'mine-11': [Languages, 'bg-cyan-50 text-cyan-600'],
-  'mine-12': [CalendarDays, 'bg-purple-50 text-purple-600'],
-};
-
-function MyToolIcon({ tool }) {
-  if (tool.iconData) {
-    return (
-      <img
-        src={tool.iconData}
-        alt=""
-        className="h-12 w-12 shrink-0 rounded-xl border border-slate-200 bg-white object-cover"
-        aria-hidden="true"
-      />
-    );
-  }
-
-  const [Icon, color] =
-    toolVisuals[tool.id] ||
-    (tool.type === 'AI Agent'
-      ? [Bot, 'bg-violet-50 text-violet-600']
-      : tool.type === '자동화 도구'
-        ? [Workflow, 'bg-orange-50 text-orange-600']
-        : [FileText, 'bg-blue-50 text-blue-600']);
-
-  return (
-    <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ${color}`}>
-      <Icon size={24} strokeWidth={1.8} aria-hidden="true" />
-    </span>
-  );
-}
 
 function EditToolModal({ tool, onClose, onSave }) {
   const iconInputRef = useRef(null);
@@ -263,7 +209,7 @@ function EditToolModal({ tool, onClose, onSave }) {
               className="h-12 w-12 shrink-0 rounded-xl border border-slate-200 bg-white object-cover"
             />
           ) : (
-            <MyToolIcon tool={tool} />
+            <StoreToolIcon tool={tool} small />
           )}
           <div className="min-w-0">
             <p className="truncate font-semibold text-slate-900">{tool.name}</p>
@@ -289,10 +235,12 @@ function EditToolModal({ tool, onClose, onSave }) {
 
 export default function MyToolsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { myTools } = useMyTools();
   const [search, setSearch] = useState('');
-  const [selectedTool, setSelectedTool] = useState(null);
-  const [editingTool, setEditingTool] = useState(null);
+  const [editingTool, setEditingTool] = useState(() =>
+    myTools.find(tool => tool.id === location.state?.editToolId)
+  );
   const approvedTools = useMemo(
     () => myTools.filter(tool => tool.status === '승인 완료'),
     [myTools]
@@ -318,8 +266,6 @@ export default function MyToolsPage() {
       />
 
       <section className="mt-4" aria-label="승인된 도구 목록">
-       
-
         {filteredTools.length > 0 ? (
           <div className="grid gap-2">
             {filteredTools.map(tool => (
@@ -329,43 +275,34 @@ export default function MyToolsPage() {
               >
                 <button
                   type="button"
-                  onClick={() => setSelectedTool(tool)}
+                  onClick={() => navigate(`/user/aistore/mytools/${tool.id}`)}
                   aria-label={`${tool.name} 상세 정보 보기`}
                   className="absolute inset-0 z-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
                 />
                 <div className="flex min-w-0 flex-1 items-center gap-4">
-                  <MyToolIcon tool={tool} />
-                  <div className="flex min-w-0 flex-1 items-center gap-2">
-                    <strong className="min-w-0 max-w-full shrink-0 truncate text-left text-base font-semibold text-slate-900 lg:max-w-[55%]">
+                  <StoreToolIcon tool={tool} small />
+                  <div className="min-w-0 flex-1">
+                    <strong className="block truncate text-left text-base font-semibold text-slate-900">
                       {tool.name}
                     </strong>
-                    <p
-                      className="hidden min-w-0 truncate text-xs text-slate-500 lg:block"
-                      title={tool.summary}
-                    >
-                      {tool.summary}
-                    </p>
+                    <span className="mt-1 block truncate text-sm text-slate-500">
+                      {tool.category}
+                    </span>
                   </div>
                 </div>
                 <span className="hidden shrink-0 items-center gap-1.5 text-xs text-slate-600 md:inline-flex">
-                  <BarChart3 size={16} className="text-blue-600" aria-hidden="true" />
-                  <strong className="font-semibold text-slate-800">
-                    {(tool.usageCount ?? 0).toLocaleString('ko-KR')}
-                  </strong>
-                  <span className="text-slate-400">월 사용</span>
+                  <Download size={16} className="text-blue-600" aria-hidden="true" />
+                  <span className="text-slate-500">
+                    다운로드{' '}
+                    <strong className="font-semibold text-slate-800">
+                      {(tool.downloadCount ?? tool.usageCount ?? 0).toLocaleString('ko-KR')}회
+                    </strong>
+                  </span>
                 </span>
                 <span className="hidden shrink-0 text-xs text-slate-500 xl:inline">
-                  v{tool.version} · 등록 {tool.createdAt || tool.updatedAt || '—'}
+                  등록 {tool.createdAt || tool.updatedAt || '—'} ·{' '}
+                  <strong className="font-semibold text-blue-600">v{tool.version}</strong>
                 </span>
-                <div className="relative z-10 flex shrink-0 items-center">
-                  <button
-                    type="button"
-                    onClick={() => setEditingTool(tool)}
-                    className="inline-flex h-8 cursor-pointer items-center rounded-lg bg-blue-50 px-2.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-100"
-                  >
-                    업데이트
-                  </button>
-                </div>
               </article>
             ))}
           </div>
@@ -376,7 +313,6 @@ export default function MyToolsPage() {
         )}
       </section>
 
-      <ToolDetailModal tool={selectedTool} mine onClose={() => setSelectedTool(null)} />
       {editingTool && (
         <EditToolModal
           key={editingTool.id}

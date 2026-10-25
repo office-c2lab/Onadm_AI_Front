@@ -5,11 +5,7 @@ import {
 } from '../constants/contentLayout.js';
 import GlassPagination from './GlassPagination.jsx';
 
-export default function FixedPaginationBar({
-  currentPage,
-  totalPages,
-  onPageChange,
-}) {
+export default function FixedPaginationBar({ currentPage, totalPages, onPageChange }) {
   if (totalPages <= 0) {
     return null;
   }

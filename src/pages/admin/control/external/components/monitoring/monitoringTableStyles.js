@@ -34,4 +34,3 @@ export function monitoringTableCellClass(index, className = '') {
 
   return `${borderClass} px-[var(--app-pad-md)] py-[var(--app-pad-sm)] ${className}`.trim();
 }
-

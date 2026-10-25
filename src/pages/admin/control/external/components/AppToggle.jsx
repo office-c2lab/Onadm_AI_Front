@@ -15,10 +15,11 @@ export default function AppToggle({ checked, onChange, ariaLabel, disabled = fal
     >
       <span
         className={`h-[clamp(1.1rem,1.4vw,1.25rem)] w-[clamp(1.1rem,1.4vw,1.25rem)] rounded-full bg-white shadow-[0_0.125rem_0.5rem_rgba(15,18,20,0.18)] transition duration-200 ${
-          checked ? 'translate-x-[clamp(1.18rem,1.48vw,1.35rem)]' : 'translate-x-[clamp(0.12rem,0.18vw,0.15rem)]'
+          checked
+            ? 'translate-x-[clamp(1.18rem,1.48vw,1.35rem)]'
+            : 'translate-x-[clamp(0.12rem,0.18vw,0.15rem)]'
         }`.trim()}
       />
     </button>
   );
 }
-

@@ -25,7 +25,7 @@ export default function DownloadsPage() {
 
   return (
     <>
-      <section className="mt-7">
+      <section className="pt-3">
         {actionMessage && (
           <p role="status" className="mb-3 rounded-lg bg-blue-50 px-4 py-2.5 text-sm text-blue-700">
             {actionMessage}
@@ -33,7 +33,7 @@ export default function DownloadsPage() {
         )}
 
         {downloadedTools.length > 0 ? (
-          <div className="grid gap-2 md:grid-cols-2">
+          <div className="grid gap-x-5 md:grid-cols-2">
             {downloadedTools.map(tool => (
               <LibraryToolRow
                 key={tool.id}

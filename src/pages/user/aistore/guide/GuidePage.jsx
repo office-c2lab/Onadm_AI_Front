@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -56,20 +55,17 @@ const BROWSE_STEPS = [
   {
     number: '01',
     title: '도구 검색',
-    description:
-      '이름이나 기능을 검색하고, 카테고리와 유형으로 원하는 도구를 찾아보세요.',
+    description: '이름이나 기능을 검색하고, 카테고리와 유형으로 원하는 도구를 찾아보세요.',
   },
   {
     number: '02',
     title: '도구 정보 확인',
-    description:
-      '도구의 소개, 주요 기능, 제작자, 버전 등 상세 정보를 확인하세요.',
+    description: '도구의 소개, 주요 기능, 제작자, 버전 등 상세 정보를 확인하세요.',
   },
   {
     number: '03',
     title: '도구 이용',
-    description:
-      '사용 가능한 도구를 실행하거나 즐겨찾기에 저장해 편리하게 접근하세요.',
+    description: '사용 가능한 도구를 실행하거나 즐겨찾기에 저장해 편리하게 접근하세요.',
   },
 ];
 
@@ -77,20 +73,17 @@ const REGISTER_STEPS = [
   {
     number: '01',
     title: '기본 정보 입력',
-    description:
-      '도구 유형, 이름, 카테고리, 버전 및 주요 기능을 입력합니다.',
+    description: '도구 유형, 이름, 카테고리, 버전 및 주요 기능을 입력합니다.',
   },
   {
     number: '02',
     title: '실행 정보 등록',
-    description:
-      '소스코드 저장소, 실행 주소, 사용 방법 등 필요한 정보를 등록합니다.',
+    description: '소스코드 저장소, 실행 주소, 사용 방법 등 필요한 정보를 등록합니다.',
   },
   {
     number: '03',
     title: '등록 요청',
-    description:
-      '입력한 내용을 검토하고 등록 요청을 완료합니다.',
+    description: '입력한 내용을 검토하고 등록 요청을 완료합니다.',
   },
 ];
 
@@ -206,19 +199,11 @@ const FAQS = [
 function SectionHeader({ number, title, description }) {
   return (
     <div className="mb-7">
-      <span className="text-xs font-semibold tracking-wide text-blue-600">
-        {number}
-      </span>
+      <span className="text-xs font-semibold tracking-wide text-blue-600">{number}</span>
 
-      <h2 className="mt-2 text-[22px] font-bold tracking-tight text-slate-900">
-        {title}
-      </h2>
+      <h2 className="mt-2 text-[22px] font-bold tracking-tight text-slate-900">{title}</h2>
 
-      {description && (
-        <p className="mt-2 text-sm leading-7 text-slate-500">
-          {description}
-        </p>
-      )}
+      {description && <p className="mt-2 text-sm leading-7 text-slate-500">{description}</p>}
     </div>
   );
 }
@@ -231,9 +216,7 @@ function StepList({ items }) {
         <div
           key={item.number}
           className={`flex gap-5 px-6 py-5 ${
-            index !== items.length - 1
-              ? 'border-b border-slate-100'
-              : ''
+            index !== items.length - 1 ? 'border-b border-slate-100' : ''
           }`}
         >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xs font-semibold text-blue-600">
@@ -241,13 +224,9 @@ function StepList({ items }) {
           </div>
 
           <div className="min-w-0 pt-0.5">
-            <h3 className="text-sm font-semibold text-slate-900">
-              {item.title}
-            </h3>
+            <h3 className="text-sm font-semibold text-slate-900">{item.title}</h3>
 
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              {item.description}
-            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">{item.description}</p>
           </div>
         </div>
       ))}
@@ -264,10 +243,7 @@ function PageLink({ children, onClick }) {
       className="group inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
     >
       {children}
-      <ArrowRight
-        size={15}
-        className="transition-transform group-hover:translate-x-0.5"
-      />
+      <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
     </button>
   );
 }
@@ -281,12 +257,9 @@ export default function GuidePage() {
         <div className="grid items-start gap-12 xl:grid-cols-[minmax(0,1fr)_210px] xl:gap-16">
           {/* 본문 */}
           <div className="min-w-0">
-
             {/* 페이지 제목 */}
             <header>
-              <p className="text-xs font-semibold tracking-wide text-blue-600">
-                MANAGE
-              </p>
+              <p className="text-xs font-semibold tracking-wide text-blue-600">MANAGE</p>
 
               <h1 className="mt-2 text-[28px] font-bold tracking-tight text-slate-900">
                 이용 가이드
@@ -295,8 +268,7 @@ export default function GuidePage() {
               <p className="mt-3 text-sm leading-7 text-slate-500">
                 온담AI Manage를 처음 사용하시나요?
                 <br />
-                도구 탐색부터 등록, 보안검사와 승인까지
-                이용 방법을 안내합니다.
+                도구 탐색부터 등록, 보안검사와 승인까지 이용 방법을 안내합니다.
               </p>
             </header>
 
@@ -314,8 +286,8 @@ export default function GuidePage() {
                 </h2>
 
                 <p className="mt-4 text-sm leading-7 text-slate-600">
-                  사내에 등록된 도구를 찾아 사용하고,
-                  직접 만든 도구를 등록해 동료와 공유할 수 있습니다.
+                  사내에 등록된 도구를 찾아 사용하고, 직접 만든 도구를 등록해 동료와 공유할 수
+                  있습니다.
                 </p>
 
                 <button
@@ -348,7 +320,7 @@ export default function GuidePage() {
               />
 
               <div className="grid gap-4 md:grid-cols-3">
-                {QUICK_MENUS.map((menu) => {
+                {QUICK_MENUS.map(menu => {
                   const Icon = menu.icon;
 
                   return (
@@ -362,9 +334,7 @@ export default function GuidePage() {
                         <Icon size={19} strokeWidth={1.7} />
                       </div>
 
-                      <h3 className="mt-5 text-sm font-semibold text-slate-900">
-                        {menu.title}
-                      </h3>
+                      <h3 className="mt-5 text-sm font-semibold text-slate-900">{menu.title}</h3>
 
                       <p className="mt-2 min-h-12 text-xs leading-6 text-slate-500">
                         {menu.description}
@@ -395,36 +365,30 @@ export default function GuidePage() {
                 <div className="rounded-xl bg-slate-50 p-5">
                   <div className="flex items-center gap-2">
                     <Search size={17} className="text-slate-600" />
-                    <h3 className="text-sm font-semibold text-slate-900">
-                      검색 및 필터
-                    </h3>
+                    <h3 className="text-sm font-semibold text-slate-900">검색 및 필터</h3>
                   </div>
 
                   <p className="mt-3 text-sm leading-7 text-slate-600">
-                    도구의 이름과 기능으로 검색하거나 유형,
-                    카테고리를 선택하여 원하는 도구를 찾을 수 있습니다.
+                    도구의 이름과 기능으로 검색하거나 유형, 카테고리를 선택하여 원하는 도구를 찾을
+                    수 있습니다.
                   </p>
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-5">
                   <div className="flex items-center gap-2">
                     <Bookmark size={17} className="text-slate-600" />
-                    <h3 className="text-sm font-semibold text-slate-900">
-                      즐겨찾기
-                    </h3>
+                    <h3 className="text-sm font-semibold text-slate-900">즐겨찾기</h3>
                   </div>
 
                   <p className="mt-3 text-sm leading-7 text-slate-600">
-                    자주 사용하는 도구를 즐겨찾기에 추가해
-                    별도의 검색 없이 빠르게 찾아볼 수 있습니다.
+                    자주 사용하는 도구를 즐겨찾기에 추가해 별도의 검색 없이 빠르게 찾아볼 수
+                    있습니다.
                   </p>
                 </div>
               </div>
 
               <div className="mt-6">
-                <PageLink onClick={() => navigate(ROUTES.store)}>
-                  도구 둘러보기
-                </PageLink>
+                <PageLink onClick={() => navigate(ROUTES.store)}>도구 둘러보기</PageLink>
               </div>
             </section>
 
@@ -436,41 +400,28 @@ export default function GuidePage() {
                 description="직접 제작한 도구를 온담AI에 등록하고 보안검사 및 관리자 검토를 요청할 수 있습니다."
               />
 
-              <h3 className="mb-4 text-sm font-semibold text-slate-900">
-                등록할 수 있는 도구
-              </h3>
+              <h3 className="mb-4 text-sm font-semibold text-slate-900">등록할 수 있는 도구</h3>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                {TOOL_TYPES.map((item) => (
-                  <div
-                    key={item.name}
-                    className="rounded-xl border border-slate-200 bg-white p-5"
-                  >
+                {TOOL_TYPES.map(item => (
+                  <div key={item.name} className="rounded-xl border border-slate-200 bg-white p-5">
                     <div className="flex items-center gap-2">
                       <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                      <h4 className="text-sm font-semibold text-slate-900">
-                        {item.name}
-                      </h4>
+                      <h4 className="text-sm font-semibold text-slate-900">{item.name}</h4>
                     </div>
 
-                    <p className="mt-3 text-xs leading-6 text-slate-500">
-                      {item.description}
-                    </p>
+                    <p className="mt-3 text-xs leading-6 text-slate-500">{item.description}</p>
                   </div>
                 ))}
               </div>
 
-              <h3 className="mb-4 mt-9 text-sm font-semibold text-slate-900">
-                도구 등록 방법
-              </h3>
+              <h3 className="mb-4 mt-9 text-sm font-semibold text-slate-900">도구 등록 방법</h3>
 
               <StepList items={REGISTER_STEPS} />
 
               {/* 준비 사항 */}
               <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/60 p-6">
-                <h3 className="text-sm font-semibold text-slate-900">
-                  등록 전 준비 사항
-                </h3>
+                <h3 className="text-sm font-semibold text-slate-900">등록 전 준비 사항</h3>
 
                 <p className="mt-2 text-xs leading-6 text-slate-500">
                   등록을 시작하기 전에 다음 정보를 준비해 주세요.
@@ -482,27 +433,17 @@ export default function GuidePage() {
                     '도구 유형 및 카테고리',
                     '소스코드 또는 저장소 관련 정보',
                     '실행 주소 및 사용 방법 (해당하는 경우)',
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-start gap-3"
-                    >
-                      <Check
-                        size={15}
-                        className="mt-0.5 shrink-0 text-blue-600"
-                      />
-                      <span className="text-sm text-slate-600">
-                        {item}
-                      </span>
+                  ].map(item => (
+                    <div key={item} className="flex items-start gap-3">
+                      <Check size={15} className="mt-0.5 shrink-0 text-blue-600" />
+                      <span className="text-sm text-slate-600">{item}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div className="mt-6">
-                <PageLink onClick={() => navigate(ROUTES.register)}>
-                  새 도구 등록하기
-                </PageLink>
+                <PageLink onClick={() => navigate(ROUTES.register)}>새 도구 등록하기</PageLink>
               </div>
             </section>
 
@@ -517,17 +458,12 @@ export default function GuidePage() {
               {/* 처리 흐름 */}
               <div className="rounded-xl border border-slate-200 bg-white p-6">
                 <div className="mb-6 flex items-center gap-2">
-                  <ShieldCheck
-                    size={18}
-                    className="text-blue-600"
-                  />
-                  <h3 className="text-sm font-semibold text-slate-900">
-                    등록부터 배포까지
-                  </h3>
+                  <ShieldCheck size={18} className="text-blue-600" />
+                  <h3 className="text-sm font-semibold text-slate-900">등록부터 배포까지</h3>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {REVIEW_STEPS.map((item) => (
+                  {REVIEW_STEPS.map(item => (
                     <div
                       key={item.number}
                       className="rounded-lg border border-slate-100 bg-slate-50/70 p-4"
@@ -536,21 +472,15 @@ export default function GuidePage() {
                         STEP {item.number}
                       </span>
 
-                      <h4 className="mt-2 text-sm font-semibold text-slate-900">
-                        {item.title}
-                      </h4>
+                      <h4 className="mt-2 text-sm font-semibold text-slate-900">{item.title}</h4>
 
-                      <p className="mt-2 text-xs leading-6 text-slate-500">
-                        {item.description}
-                      </p>
+                      <p className="mt-2 text-xs leading-6 text-slate-500">{item.description}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <h3 className="mb-4 mt-9 text-sm font-semibold text-slate-900">
-                진행 상태 안내
-              </h3>
+              <h3 className="mb-4 mt-9 text-sm font-semibold text-slate-900">진행 상태 안내</h3>
 
               {/* 상태별 설명 */}
               <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -558,9 +488,7 @@ export default function GuidePage() {
                   <div
                     key={item.name}
                     className={`flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center ${
-                      index !== STATUSES.length - 1
-                        ? 'border-b border-slate-100'
-                        : ''
+                      index !== STATUSES.length - 1 ? 'border-b border-slate-100' : ''
                     }`}
                   >
                     <div className="w-28 shrink-0">
@@ -571,9 +499,7 @@ export default function GuidePage() {
                       </span>
                     </div>
 
-                    <p className="text-sm leading-6 text-slate-600">
-                      {item.description}
-                    </p>
+                    <p className="text-sm leading-6 text-slate-600">{item.description}</p>
                   </div>
                 ))}
               </div>
@@ -581,10 +507,7 @@ export default function GuidePage() {
               {/* 안내 */}
               <div className="mt-5 rounded-lg border border-blue-100 bg-blue-50/60 px-5 py-4">
                 <div className="flex items-start gap-3">
-                  <ClipboardCheck
-                    size={18}
-                    className="mt-0.5 shrink-0 text-blue-600"
-                  />
+                  <ClipboardCheck size={18} className="mt-0.5 shrink-0 text-blue-600" />
 
                   <div>
                     <p className="text-sm font-semibold text-slate-900">
@@ -592,17 +515,15 @@ export default function GuidePage() {
                     </p>
 
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      내 도구 페이지에서 검사 진행 상태와 검토 결과,
-                      개선이 필요한 항목을 확인할 수 있도록 구성합니다.
+                      내 도구 페이지에서 검사 진행 상태와 검토 결과, 개선이 필요한 항목을 확인할 수
+                      있도록 구성합니다.
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="mt-6">
-                <PageLink onClick={() => navigate(ROUTES.myTools)}>
-                  내 도구 확인하기
-                </PageLink>
+                <PageLink onClick={() => navigate(ROUTES.myTools)}>내 도구 확인하기</PageLink>
               </div>
             </section>
 
@@ -619,16 +540,12 @@ export default function GuidePage() {
                   <details
                     key={faq.question}
                     className={`group ${
-                      index !== FAQS.length - 1
-                        ? 'border-b border-slate-100'
-                        : ''
+                      index !== FAQS.length - 1 ? 'border-b border-slate-100' : ''
                     }`}
                   >
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 [&::-webkit-details-marker]:hidden">
                       <div className="flex min-w-0 items-start gap-3">
-                        <span className="shrink-0 text-sm font-semibold text-blue-600">
-                          Q.
-                        </span>
+                        <span className="shrink-0 text-sm font-semibold text-blue-600">Q.</span>
 
                         <span className="text-sm font-medium leading-6 text-slate-800">
                           {faq.question}
@@ -642,9 +559,7 @@ export default function GuidePage() {
                     </summary>
 
                     <div className="px-6 pb-6 pl-12">
-                      <p className="text-sm leading-7 text-slate-600">
-                        {faq.answer}
-                      </p>
+                      <p className="text-sm leading-7 text-slate-600">{faq.answer}</p>
                     </div>
                   </details>
                 ))}
@@ -664,9 +579,7 @@ export default function GuidePage() {
                   </p>
                 </div>
 
-                <PageLink onClick={() => navigate(ROUTES.store)}>
-                  도구 둘러보기
-                </PageLink>
+                <PageLink onClick={() => navigate(ROUTES.store)}>도구 둘러보기</PageLink>
               </div>
             </div>
           </div>
@@ -677,12 +590,10 @@ export default function GuidePage() {
               aria-label="이용 가이드 목차"
               className="sticky top-8 border-l border-slate-200 pl-5"
             >
-              <p className="mb-5 text-xs font-semibold text-slate-900">
-                목차
-              </p>
+              <p className="mb-5 text-xs font-semibold text-slate-900">목차</p>
 
               <div className="space-y-1">
-                {SECTIONS.map((section) => (
+                {SECTIONS.map(section => (
                   <a
                     key={section.id}
                     href={`#${section.id}`}
@@ -697,14 +608,11 @@ export default function GuidePage() {
                 <div className="flex items-center gap-2 text-slate-600">
                   <HelpCircle size={15} />
 
-                  <span className="text-xs font-medium">
-                    도움이 필요하신가요?
-                  </span>
+                  <span className="text-xs font-medium">도움이 필요하신가요?</span>
                 </div>
 
                 <p className="mt-2 text-xs leading-6 text-slate-500">
-                  추가 문의가 있다면 사내 서비스 담당자에게
-                  문의해 주세요.
+                  추가 문의가 있다면 사내 서비스 담당자에게 문의해 주세요.
                 </p>
               </div>
             </nav>

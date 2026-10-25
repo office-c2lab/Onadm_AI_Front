@@ -169,7 +169,9 @@ export default function DownloadPage() {
             운영지원
           </h1>
           <p className="mx-auto mt-6 max-w-[42rem] text-xl font-semibold leading-8 ">
-            ONDAM AI 적용에 필요한 압축 파일을 다운로드하고<br />실행 및 적용 방법을 확인해 주세요.
+            ONDAM AI 적용에 필요한 압축 파일을 다운로드하고
+            <br />
+            실행 및 적용 방법을 확인해 주세요.
           </p>
           <div className="mt-9 flex flex-wrap justify-center">
             <AppButton
@@ -448,4 +450,3 @@ export default function DownloadPage() {
     </main>
   );
 }
-

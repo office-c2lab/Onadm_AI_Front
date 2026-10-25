@@ -64,8 +64,9 @@ function FeaturedCard({ tool, favorite, onFavorite, onDetail, previewAlign }) {
         <button
           type="button"
           onClick={() => onFavorite(tool.id)}
-          className={`absolute right-2 top-2 rounded-lg bg-white/80 p-1.5 opacity-0 shadow-sm backdrop-blur-sm transition hover:bg-white group-hover:opacity-100 ${favorite ? 'text-blue-600 opacity-100' : 'text-slate-500'}`}
+          className={`absolute right-2 top-2 rounded-lg bg-white p-1.5 shadow-sm transition hover:bg-slate-50 focus:opacity-100 group-hover:opacity-100 ${favorite ? 'text-blue-600 opacity-100' : 'text-slate-500 opacity-0'}`}
           aria-label={`${tool.name} 즐겨찾기 ${favorite ? '해제' : '추가'}`}
+          aria-pressed={favorite}
         >
           <Bookmark size={17} fill={favorite ? 'currentColor' : 'none'} />
         </button>
@@ -79,22 +80,19 @@ function FeaturedCard({ tool, favorite, onFavorite, onDetail, previewAlign }) {
         <span className="mt-1 block truncate text-xs text-slate-500">
           {tool.storeCategory || tool.category}
         </span>
-        <span className="absolute bottom-3 right-3 grid h-8 w-8 place-items-center rounded-full bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
-          <ChevronRight size={19} strokeWidth={2} aria-hidden="true" />
-        </span>
       </button>
       <ToolHoverPreview tool={tool} align={previewAlign} />
     </article>
   );
 }
 
-function CompactTool({ tool, onDetail, previewAlign }) {
+function CompactTool({ tool, favorite, onFavorite, onDetail, previewAlign }) {
   return (
-    <article className="group relative min-w-0 rounded-xl hover:z-20 focus-within:z-20">
+    <article className="group relative flex min-h-[82px] min-w-0 items-center rounded-xl border border-transparent transition hover:z-20 hover:border-slate-100 hover:bg-white hover:shadow-sm focus-within:z-20">
       <button
         type="button"
         onClick={() => onDetail(tool)}
-        className="flex h-[82px] w-full min-w-0 items-center gap-4 rounded-xl border border-transparent px-3 text-left transition hover:border-slate-100 hover:bg-white hover:shadow-sm"
+        className="flex min-w-0 flex-1 items-center gap-4 self-stretch rounded-xl px-3 text-left"
       >
         <StoreToolIcon tool={tool} small />
         <span className="min-w-0 flex-1">
@@ -103,9 +101,15 @@ function CompactTool({ tool, onDetail, previewAlign }) {
             {tool.storeCategory || tool.category}
           </span>
         </span>
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
-          <ChevronRight size={19} strokeWidth={2} aria-hidden="true" />
-        </span>
+      </button>
+      <button
+        type="button"
+        onClick={() => onFavorite(tool.id)}
+        className={`mr-3 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white shadow-sm transition hover:bg-slate-50 focus:opacity-100 group-hover:opacity-100 ${favorite ? 'text-blue-600 opacity-100' : 'text-slate-500 opacity-0'}`}
+        aria-label={`${tool.name} 즐겨찾기 ${favorite ? '해제' : '추가'}`}
+        aria-pressed={favorite}
+      >
+        <Bookmark size={17} fill={favorite ? 'currentColor' : 'none'} aria-hidden="true" />
       </button>
       <ToolHoverPreview tool={tool} align={previewAlign} />
     </article>
@@ -161,7 +165,7 @@ export default function StorePage() {
               type="button"
               onClick={() => setSelectedCategory(category)}
               aria-pressed={selectedCategory === category}
-              className={`shrink-0 cursor-pointer whitespace-nowrap rounded-full px-4 py-1 text-sm transition-colors ${
+              className={`inline-flex h-8 shrink-0 cursor-pointer items-center whitespace-nowrap rounded-full px-4 text-sm transition-colors ${
                 selectedCategory === category
                   ? 'bg-[#ededed] font-medium text-[#333]'
                   : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
@@ -291,6 +295,8 @@ export default function StorePage() {
               <CompactTool
                 key={tool.id}
                 tool={tool}
+                favorite={favorites.includes(tool.id)}
+                onFavorite={toggleFavorite}
                 onDetail={openTool}
                 previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
               />
@@ -314,6 +320,8 @@ export default function StorePage() {
                     <CompactTool
                       key={tool.id}
                       tool={tool}
+                      favorite={favorites.includes(tool.id)}
+                      onFavorite={toggleFavorite}
                       onDetail={openTool}
                       previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
                     />

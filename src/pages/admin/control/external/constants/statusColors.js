@@ -31,4 +31,3 @@ export function getStatusTextClassName(statusKeyOrLabel) {
 
   return STATUS_TEXT_CLASS_NAMES[statusKey] ?? STATUS_TEXT_CLASS_NAMES.normal;
 }
-

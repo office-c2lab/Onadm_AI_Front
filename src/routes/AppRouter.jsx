@@ -5,7 +5,6 @@ import GamgikModalDemo from '../components/character/GamgikModalDemo.jsx';
 
 // 레이아웃
 import AiStoreLayout from '../layouts/AiStoreLayout.jsx';
-import LibraryLayout from '../layouts/LibraryLayout.jsx';
 import AdminLayout from '../layouts/AdminLayout.jsx';
 
 // ================================
@@ -14,6 +13,7 @@ import AdminLayout from '../layouts/AdminLayout.jsx';
 import StorePage from '../pages/user/aistore/store/StorePage.jsx';
 import StoreDetailPage from '../pages/user/aistore/store/StoreDetailPage.jsx';
 import MyToolsPage from '../pages/user/aistore/mytools/MyToolsPage.jsx';
+import MyToolDetailPage from '../pages/user/aistore/mytools/MyToolDetailPage.jsx';
 import RegisterPage from '../pages/user/aistore/register/RegisterPage.jsx';
 import GuidePage from '../pages/user/aistore/guide/GuidePage.jsx';
 import FavoritesPage from '../pages/user/aistore/library/favorites/FavoritesPage.jsx';
@@ -101,9 +101,10 @@ export default function AppRouter() {
           <Route path="store" element={<StorePage />} />
           <Route path="store/:toolId" element={<StoreDetailPage />} />
           <Route path="mytools" element={<MyToolsPage />} />
+          <Route path="mytools/:toolId" element={<MyToolDetailPage />} />
 
           {/* 라이브러리 */}
-          <Route path="library" element={<LibraryLayout />}>
+          <Route path="library">
             <Route index element={<Navigate to="downloads" replace />} />
             <Route path="downloads" element={<DownloadsPage />} />
             <Route path="favorites" element={<FavoritesPage />} />

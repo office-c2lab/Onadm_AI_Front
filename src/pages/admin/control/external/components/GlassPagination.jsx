@@ -1,9 +1,4 @@
-import {
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import './GlassPagination.css';
 
@@ -11,32 +6,21 @@ const MAX_VISIBLE_PAGES = 5;
 
 function buildPageRange(currentPage, totalPages) {
   if (totalPages <= MAX_VISIBLE_PAGES) {
-    return Array.from(
-      { length: totalPages },
-      (_, index) => index + 1
-    );
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
   }
 
   const halfWindow = Math.floor(MAX_VISIBLE_PAGES / 2);
 
-  let startPage = Math.max(
-    1,
-    currentPage - halfWindow
-  );
+  let startPage = Math.max(1, currentPage - halfWindow);
 
-  let endPage =
-    startPage + MAX_VISIBLE_PAGES - 1;
+  let endPage = startPage + MAX_VISIBLE_PAGES - 1;
 
   if (endPage > totalPages) {
     endPage = totalPages;
-    startPage =
-      endPage - MAX_VISIBLE_PAGES + 1;
+    startPage = endPage - MAX_VISIBLE_PAGES + 1;
   }
 
-  return Array.from(
-    { length: endPage - startPage + 1 },
-    (_, index) => startPage + index
-  );
+  return Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index);
 }
 
 function PaginationArrowIcon({ direction }) {
@@ -66,24 +50,10 @@ function PaginationArrowIcon({ direction }) {
 
 function GooFilter() {
   return (
-    <svg
-      className="da-pagination__defs"
-      aria-hidden="true"
-      focusable="false"
-    >
+    <svg className="da-pagination__defs" aria-hidden="true" focusable="false">
       <defs>
-        <filter
-          id="pagination-goo"
-          x="-50%"
-          y="-50%"
-          width="200%"
-          height="200%"
-        >
-          <feGaussianBlur
-            in="SourceGraphic"
-            stdDeviation="6"
-            result="blur"
-          />
+        <filter id="pagination-goo" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
 
           <feColorMatrix
             in="blur"
@@ -97,43 +67,29 @@ function GooFilter() {
             result="goo"
           />
 
-          <feBlend
-            in="SourceGraphic"
-            in2="goo"
-          />
+          <feBlend in="SourceGraphic" in2="goo" />
         </filter>
       </defs>
     </svg>
   );
 }
 
-export default function GlassPagination({
-  currentPage,
-  totalPages,
-  onPageChange,
-}) {
+export default function GlassPagination({ currentPage, totalPages, onPageChange }) {
   const listRef = useRef(null);
 
-  const pageRefs = useRef(
-    new Map()
-  );
+  const pageRefs = useRef(new Map());
 
   const animationFrameRef = useRef(null);
 
-  const [indicatorStyle, setIndicatorStyle] =
-    useState({
-      transform: 'translate3d(0px, 0px, 0)',
-      width: 0,
-      height: 0,
-      opacity: 0,
-    });
+  const [indicatorStyle, setIndicatorStyle] = useState({
+    transform: 'translate3d(0px, 0px, 0)',
+    width: 0,
+    height: 0,
+    opacity: 0,
+  });
 
   const visiblePages = useMemo(
-    () =>
-      buildPageRange(
-        currentPage,
-        totalPages
-      ),
+    () => buildPageRange(currentPage, totalPages),
     [currentPage, totalPages]
   );
 
@@ -144,8 +100,7 @@ export default function GlassPagination({
 
     const syncIndicator = () => {
       const listNode = listRef.current;
-      const currentNode =
-        pageRefs.current.get(currentPage);
+      const currentNode = pageRefs.current.get(currentPage);
 
       if (!listNode || !currentNode) {
         setIndicatorStyle(prev => ({
@@ -156,17 +111,13 @@ export default function GlassPagination({
         return;
       }
 
-      const listRect =
-        listNode.getBoundingClientRect();
+      const listRect = listNode.getBoundingClientRect();
 
-      const itemRect =
-        currentNode.getBoundingClientRect();
+      const itemRect = currentNode.getBoundingClientRect();
 
-      const x =
-        itemRect.left - listRect.left;
+      const x = itemRect.left - listRect.left;
 
-      const y =
-        itemRect.top - listRect.top;
+      const y = itemRect.top - listRect.top;
 
       setIndicatorStyle({
         transform: `translate3d(${x}px, ${y}px, 0)`,
@@ -178,18 +129,14 @@ export default function GlassPagination({
 
     const requestSync = () => {
       if (animationFrameRef.current) {
-        cancelAnimationFrame(
-          animationFrameRef.current
-        );
+        cancelAnimationFrame(animationFrameRef.current);
       }
 
-      animationFrameRef.current =
-        requestAnimationFrame(() => {
-          syncIndicator();
+      animationFrameRef.current = requestAnimationFrame(() => {
+        syncIndicator();
 
-          animationFrameRef.current =
-            null;
-        });
+        animationFrameRef.current = null;
+      });
     };
 
     /*
@@ -205,56 +152,37 @@ export default function GlassPagination({
      * sidebar / 부모 width / breakpoint 등에 의한
      * 레이아웃 변경도 감지할 수 있음.
      */
-    const resizeObserver =
-      new ResizeObserver(() => {
-        requestSync();
-      });
+    const resizeObserver = new ResizeObserver(() => {
+      requestSync();
+    });
 
     if (listRef.current) {
-      resizeObserver.observe(
-        listRef.current
-      );
+      resizeObserver.observe(listRef.current);
     }
 
     /*
      * 현재 page button 자체 사이즈도 관찰
      */
-    const currentNode =
-      pageRefs.current.get(currentPage);
+    const currentNode = pageRefs.current.get(currentPage);
 
     if (currentNode) {
-      resizeObserver.observe(
-        currentNode
-      );
+      resizeObserver.observe(currentNode);
     }
 
-    window.addEventListener(
-      'resize',
-      requestSync
-    );
+    window.addEventListener('resize', requestSync);
 
     return () => {
       resizeObserver.disconnect();
 
-      window.removeEventListener(
-        'resize',
-        requestSync
-      );
+      window.removeEventListener('resize', requestSync);
 
       if (animationFrameRef.current) {
-        cancelAnimationFrame(
-          animationFrameRef.current
-        );
+        cancelAnimationFrame(animationFrameRef.current);
 
-        animationFrameRef.current =
-          null;
+        animationFrameRef.current = null;
       }
     };
-  }, [
-    currentPage,
-    totalPages,
-    visiblePages,
-  ]);
+  }, [currentPage, totalPages, visiblePages]);
 
   if (totalPages <= 0) {
     return null;
@@ -277,23 +205,11 @@ export default function GlassPagination({
   };
 
   return (
-    <nav
-      className="da-pagination"
-      aria-label="페이지 이동"
-    >
-      <ul
-        ref={listRef}
-        className="da-pagination__list"
-      >
+    <nav className="da-pagination" aria-label="페이지 이동">
+      <ul ref={listRef} className="da-pagination__list">
         {/* 움직이는 active indicator */}
-        <li
-          className="da-pagination__active-shell"
-          aria-hidden="true"
-        >
-          <span
-            className="da-pagination__active"
-            style={indicatorStyle}
-          />
+        <li className="da-pagination__active-shell" aria-hidden="true">
+          <span className="da-pagination__active" style={indicatorStyle} />
         </li>
 
         {/* 이전 */}
@@ -313,52 +229,34 @@ export default function GlassPagination({
             disabled={currentPage === 1}
             aria-label="이전 페이지"
           >
-            <PaginationArrowIcon
-              direction="left"
-            />
+            <PaginationArrowIcon direction="left" />
           </button>
         </li>
 
         {/* 페이지 번호 */}
         {visiblePages.map(page => {
-          const isCurrent =
-            page === currentPage;
+          const isCurrent = page === currentPage;
 
           return (
             <li
               key={page}
               ref={node => {
                 if (node) {
-                  pageRefs.current.set(
-                    page,
-                    node
-                  );
+                  pageRefs.current.set(page, node);
                 } else {
-                  pageRefs.current.delete(
-                    page
-                  );
+                  pageRefs.current.delete(page);
                 }
               }}
               className={`
                 da-pagination__item
-                ${
-                  isCurrent
-                    ? 'is-current'
-                    : ''
-                }
+                ${isCurrent ? 'is-current' : ''}
               `.trim()}
             >
               <button
                 type="button"
                 className="da-pagination__button"
-                onClick={() =>
-                  onPageChange(page)
-                }
-                aria-current={
-                  isCurrent
-                    ? 'page'
-                    : undefined
-                }
+                onClick={() => onPageChange(page)}
+                aria-current={isCurrent ? 'page' : undefined}
                 aria-label={`${page}페이지`}
               >
                 {page}
@@ -381,14 +279,10 @@ export default function GlassPagination({
               da-pagination__button--arrow
             "
             onClick={handleNext}
-            disabled={
-              currentPage === totalPages
-            }
+            disabled={currentPage === totalPages}
             aria-label="다음 페이지"
           >
-            <PaginationArrowIcon
-              direction="right"
-            />
+            <PaginationArrowIcon direction="right" />
           </button>
         </li>
       </ul>

@@ -112,7 +112,7 @@ export default function LibraryToolRow({
               type="button"
               onClick={() => onDownload(tool.id)}
               disabled={downloaded}
-            className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-default disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none"
+              className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-default disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none"
               aria-label={`${tool.name} ${downloaded ? '다운로드 됨' : '다운로드'}`}
             >
               <Download size={15} aria-hidden="true" />

@@ -23,9 +23,9 @@ export default function FavoritesPage() {
 
   return (
     <>
-      <section className="mt-7">
+      <section className="pt-3">
         {savedTools.length > 0 ? (
-          <div className="grid gap-2 md:grid-cols-2">
+          <div className="grid gap-x-5 md:grid-cols-2">
             {savedTools.map(tool => (
               <LibraryToolRow
                 key={tool.id}

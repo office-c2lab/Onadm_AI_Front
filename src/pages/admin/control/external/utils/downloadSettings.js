@@ -23,4 +23,3 @@ export function normalizeDownloadSettings(settings = {}) {
     downloadPath: normalizeDownloadPath(settings.download_path),
   };
 }
-

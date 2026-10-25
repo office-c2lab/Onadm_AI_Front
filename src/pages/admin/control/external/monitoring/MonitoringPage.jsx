@@ -80,9 +80,10 @@ function normalizeMonitoringEvent(event, index) {
   if (event.detectedAt) {
     const originalPrompt = getOriginalPromptDetail(event);
     const forwardedPrompt = getForwardedPromptDetail(event);
-    const displayPrompt = getLogStatusCategory(event) === 'normal' && (!forwardedPrompt || forwardedPrompt === '-')
-      ? originalPrompt
-      : forwardedPrompt;
+    const displayPrompt =
+      getLogStatusCategory(event) === 'normal' && (!forwardedPrompt || forwardedPrompt === '-')
+        ? originalPrompt
+        : forwardedPrompt;
     const eventId = event.id ?? event.event_id ?? event.no ?? `${event.detectedAt}-${index}`;
 
     return {
@@ -110,9 +111,8 @@ function normalizeMonitoringEvent(event, index) {
   const isNormal = result === '정상';
   const originalPrompt = getOriginalPromptDetail(event);
   const forwardedPrompt = getForwardedPromptDetail(event);
-  const displayPrompt = isNormal && (!forwardedPrompt || forwardedPrompt === '-')
-    ? originalPrompt
-    : forwardedPrompt;
+  const displayPrompt =
+    isNormal && (!forwardedPrompt || forwardedPrompt === '-') ? originalPrompt : forwardedPrompt;
   const answer = event.ai_response ?? '-';
   const userName =
     event.username ?? event.user_name ?? event.user ?? event.user_id ?? event.userId ?? '-';
@@ -852,9 +852,7 @@ function UserScopeFilterDropdown({
             }`.trim()}
           >
             <div className="flex min-h-[3.25rem] items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3">
-              <p className="text-sm font-semibold text-slate-900">
-                사용자 및 조직 필터
-              </p>
+              <p className="text-sm font-semibold text-slate-900">사용자 및 조직 필터</p>
               <button
                 type="button"
                 aria-expanded={isSelectionPanelOpen}
@@ -984,9 +982,7 @@ function UserScopeFilterDropdown({
           {isSelectionPanelOpen ? (
             <aside className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-900/10">
               <div className="flex min-h-[3.25rem] items-center border-b border-slate-200 bg-white px-4 py-3">
-                <p className="text-sm font-semibold text-slate-700">
-                  선택 항목
-                </p>
+                <p className="text-sm font-semibold text-slate-700">선택 항목</p>
               </div>
               <div className="divide-y divide-[#E7EBF4] px-[var(--app-pad-md)]">
                 {activeFilterRows.map(row => (
@@ -1931,4 +1927,3 @@ export function MonitoringLogView({
 export default function MonitoringPage() {
   return <MonitoringLogView useStatusFilter />;
 }
-
