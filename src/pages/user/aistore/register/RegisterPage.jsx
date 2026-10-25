@@ -3,24 +3,17 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, ClipboardList, Plus, RefreshCw } from 'lucide-react';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import zipFileImage from '../../../../assets/images/zipfile.png';
-import { REVIEW_REQUESTS_KEY } from '../data/reviewRequests.js';
+import {
+  MOCK_TOOL_UPDATE_REVIEW,
+  normalizeReviewStatus,
+  REVIEW_REQUESTS_KEY,
+} from '../data/reviewRequests.js';
 import { reviewSteps } from '../data/reviewSteps.js';
 import ReviewProgress from '../components/ReviewProgress.jsx';
 
 const reviewTabs = ['전체', '검사 대기', '심사 진행중', '승인 완료', '반려'];
 const MOCK_UPLOADS = [
-  {
-    id: 'mock-report-writer-update-v130',
-    name: '보고서 작성 도우미',
-    fileName: 'report_writer_v1.3.0.zip',
-    size: '4.6 MB',
-    createdAt: '2026. 10. 21. 10:15',
-    requestType: '업데이트',
-    previousVersion: '1.2.0',
-    version: '1.3.0',
-    updateNotes: '표 자동 생성 기능을 추가하고 문서 내보내기 속도를 개선했습니다.',
-    status: '심사 진행중',
-  },
+  MOCK_TOOL_UPDATE_REVIEW,
   {
     id: 'mock-contract-review',
     name: '계약서 검토 도우미',
@@ -82,16 +75,7 @@ function readUploads() {
     const uploads = Array.isArray(rows)
       ? rows.map(row => ({
           ...row,
-          status:
-            {
-              '등록 대기': '검사 대기',
-              '제출 준비': '검사 대기',
-              '승인 대기': '검사 대기',
-              '검사 중': '심사 진행중',
-              '검토 중': '심사 진행중',
-              '보완 필요': '반려',
-              '등록 완료': '승인 완료',
-            }[row.status] ?? row.status,
+          status: normalizeReviewStatus(row.status),
         }))
       : [];
     const savedIds = new Set(uploads.map(row => row.id));

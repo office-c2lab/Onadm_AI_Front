@@ -147,6 +147,10 @@ export default function NewToolRegistrationPage() {
 
   const submit = event => {
     event.preventDefault();
+    if (!selectedFile) {
+      setError('도구의 ZIP 파일을 첨부해 주세요.');
+      return;
+    }
     if (
       !form.name.trim() ||
       !form.summary.trim() ||
@@ -175,7 +179,7 @@ export default function NewToolRegistrationPage() {
       id: `upload-${now.getTime()}-${Math.random().toString(36).slice(2)}`,
       requestType: resubmissionDraft?.requestType ?? '신규 등록',
       previousRequestId: resubmissionDraft?.id,
-      fileName: selectedFile?.name || 'ZIP 파일 미첨부',
+      fileName: selectedFile.name,
       name: form.name.trim(),
       summary: form.summary.trim(),
       description: form.description.trim(),
@@ -185,7 +189,7 @@ export default function NewToolRegistrationPage() {
       supportEnvironment: Object.fromEntries(
         Object.entries(form.supportEnvironment).map(([key, value]) => [key, value.trim()])
       ),
-      size: selectedFile ? formatSize(selectedFile.size) : '미첨부',
+      size: formatSize(selectedFile.size),
       createdAt: submittedAt,
       updatedAt: submittedAt,
       versionHistory: [{ version: form.version.trim(), updatedAt: submittedAt }],

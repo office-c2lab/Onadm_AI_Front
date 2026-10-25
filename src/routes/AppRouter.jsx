@@ -14,6 +14,7 @@ import StorePage from '../pages/user/aistore/store/StorePage.jsx';
 import StoreDetailPage from '../pages/user/aistore/store/StoreDetailPage.jsx';
 import MyToolsPage from '../pages/user/aistore/mytools/MyToolsPage.jsx';
 import MyToolDetailPage from '../pages/user/aistore/mytools/MyToolDetailPage.jsx';
+import MyToolUpdatePage from '../pages/user/aistore/mytools/MyToolUpdatePage.jsx';
 import RegisterPage from '../pages/user/aistore/register/RegisterPage.jsx';
 import NewToolRegistrationPage from '../pages/user/aistore/register/NewToolRegistrationPage.jsx';
 import GuidePage from '../pages/user/aistore/guide/GuidePage.jsx';
@@ -103,6 +104,7 @@ export default function AppRouter() {
           <Route path="store/:toolId" element={<StoreDetailPage />} />
           <Route path="mytools" element={<MyToolsPage />} />
           <Route path="mytools/:toolId" element={<MyToolDetailPage />} />
+          <Route path="mytools/:toolId/edit" element={<MyToolUpdatePage />} />
 
           {/* 라이브러리 */}
           <Route path="library">

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Download, MoreVertical, RefreshCw } from 'lucide-react';
 import StoreToolIcon from '../../components/StoreToolIcon.jsx';
 import ToolHoverPreview from '../../components/ToolHoverPreview.jsx';
+import { getLatestVersionNotes } from '../../data/versionNotes.js';
 
 function VersionNotesModal({ tool, onClose }) {
   useEffect(() => {
@@ -16,8 +17,9 @@ function VersionNotesModal({ tool, onClose }) {
 
   if (typeof document === 'undefined') return null;
 
-  const notes = tool.releaseNotes?.length
-    ? tool.releaseNotes
+  const versionNotes = getLatestVersionNotes(tool);
+  const notes = versionNotes.length
+    ? versionNotes
     : ['사용성과 안정성을 개선하고 발견된 오류를 수정했습니다.'];
 
   return createPortal(
@@ -59,7 +61,7 @@ function VersionNotesModal({ tool, onClose }) {
             type="button"
             onClick={onClose}
             autoFocus
-            className="h-9 min-w-28 rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            className="inline-flex h-10 items-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
           >
             닫기
           </button>

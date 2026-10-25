@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getApprovedToolUpdateReview, getToolUpdateReviews } from './reviewRequests.js';
 
 // 스토어 샘플 데이터
 export const publishedTools = [
@@ -323,6 +324,27 @@ const initialMyTools = [
     type: 'AI App',
     category: '문서·생산성',
     version: '1.2.0',
+    versionHistory: [
+      {
+        version: '1.2.0',
+        updatedAt: '2026.10.18',
+        notes: [
+          '보고서 목적에 맞는 문서 구조 추천 기능을 개선했습니다.',
+          '긴 메모를 입력했을 때 핵심 내용을 더 안정적으로 정리합니다.',
+          '문서 초안의 문단 간격과 제목 형식을 다듬었습니다.',
+        ],
+      },
+      {
+        version: '1.1.0',
+        updatedAt: '2026.09.24',
+        notes: ['보고서 유형별 기본 목차와 문장 추천 기능을 추가했습니다.'],
+      },
+      {
+        version: '1.0.0',
+        updatedAt: '2026.08.12',
+        notes: ['보고서 작성 도우미를 처음 등록했습니다.'],
+      },
+    ],
     status: '승인 완료',
     updatedAt: '2026.10.18',
     createdAt: '2026.10.18 14:32',
@@ -574,7 +596,37 @@ export function useDownloads() {
 
 // 내 도구 관리
 export function useMyTools() {
-  const [myTools, setMyTools] = useState(() => load(MY_TOOLS_KEY, initialMyTools));
+  const [myTools, setMyTools] = useState(() => {
+    const updateReviews = getToolUpdateReviews();
+
+    return load(MY_TOOLS_KEY, initialMyTools).map(tool => {
+      const approvedUpdate = getApprovedToolUpdateReview(tool, updateReviews);
+      if (!approvedUpdate || approvedUpdate.version === tool.version) return tool;
+
+      return {
+        ...tool,
+        name: approvedUpdate.name || tool.name,
+        summary: approvedUpdate.summary || tool.summary,
+        type: approvedUpdate.type || tool.type,
+        category: approvedUpdate.category || tool.category,
+        description: approvedUpdate.description || tool.description,
+        features: approvedUpdate.features || tool.features,
+        instructions: approvedUpdate.instructions || tool.instructions,
+        version: approvedUpdate.version,
+        versionHistory: approvedUpdate.versionHistory || tool.versionHistory,
+        updateNotes: approvedUpdate.updateNotes,
+        fileName: approvedUpdate.fileName || tool.fileName,
+        size: approvedUpdate.size || tool.size,
+        iconName: approvedUpdate.iconName || tool.iconName,
+        iconData: approvedUpdate.iconData || tool.iconData,
+        screenshots: approvedUpdate.screenshots?.length
+          ? approvedUpdate.screenshots
+          : tool.screenshots,
+        supportEnvironment: approvedUpdate.supportEnvironment || tool.supportEnvironment,
+        updatedAt: approvedUpdate.updatedAt || approvedUpdate.createdAt || tool.updatedAt,
+      };
+    });
+  });
 
   const addMyTool = tool => {
     const next = [tool, ...load(MY_TOOLS_KEY, initialMyTools)];

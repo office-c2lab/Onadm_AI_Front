@@ -19,6 +19,7 @@ import {
   getToolDownloadSize,
   supportedEnvironment,
 } from '../data/storeDetailContent.js';
+import { getLatestVersionNotes } from '../data/versionNotes.js';
 
 function DetailSection({ title, children }) {
   return (
@@ -65,6 +66,10 @@ export default function StoreDetailPage() {
     ['다운로드 용량', getToolDownloadSize(tool)],
     ['제작자', makerLabel],
     ['제공 위치', 'ONDAM AI App Store'],
+  ];
+  const latestVersionNotes = getLatestVersionNotes(tool);
+  const versionHistory = tool.versionHistory ?? [
+    { version: tool.version, updatedAt: '날짜 정보 없음' },
   ];
 
   return (
@@ -184,6 +189,22 @@ export default function StoreDetailPage() {
           <p className="max-w-[52rem] text-[15px] leading-7 text-slate-600">{content.usage}</p>
         </DetailSection>
 
+        {latestVersionNotes.length > 0 && (
+          <DetailSection title="업데이트 내용">
+            <div className="max-w-[52rem]">
+              <h3 className="text-sm font-semibold text-slate-800">변경 사항</h3>
+              <ul className="mt-3 space-y-2 text-[15px] leading-7 text-slate-600">
+                {latestVersionNotes.map(note => (
+                  <li key={note} className="flex items-start gap-2.5">
+                    <span className="mt-3 h-1 w-1 shrink-0 rounded-full bg-slate-400" />
+                    <span>{note}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </DetailSection>
+        )}
+
         <DetailSection title="지원 환경">
           <dl className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {supportedEnvironment.map(({ label, value, icon: Icon }) => (
@@ -219,22 +240,20 @@ export default function StoreDetailPage() {
 
         <DetailSection title="버전 정보">
           <ol className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
-            {(tool.versionHistory ?? [{ version: tool.version, updatedAt: '날짜 정보 없음' }]).map(
-              (item, index) => (
-                <li
-                  key={`${item.version}-${item.updatedAt}`}
-                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-6 py-4 sm:grid-cols-[14rem_1fr]"
-                >
-                  <time className="text-slate-500">{item.updatedAt}</time>
-                  <span className="flex items-center justify-end gap-3 sm:justify-start">
-                    <strong className="font-semibold text-slate-800">v{item.version}</strong>
-                    {index === 0 && (
-                      <span className="text-xs font-medium text-blue-600">현재 버전</span>
-                    )}
-                  </span>
-                </li>
-              )
-            )}
+            {versionHistory.map((item, index) => (
+              <li
+                key={`${item.version}-${item.updatedAt}`}
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-6 py-4 sm:grid-cols-[14rem_1fr]"
+              >
+                <time className="text-slate-500">{item.updatedAt}</time>
+                <span className="flex items-center justify-end gap-3 sm:justify-start">
+                  <strong className="font-semibold text-blue-600">v{item.version}</strong>
+                  {index === 0 && (
+                    <span className="text-xs font-medium text-blue-600">현재 버전</span>
+                  )}
+                </span>
+              </li>
+            ))}
           </ol>
         </DetailSection>
 

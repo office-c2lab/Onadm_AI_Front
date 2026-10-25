@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Download,
   FileText,
+  HardDrive,
   RefreshCw,
   ShieldCheck,
 } from 'lucide-react';
@@ -13,12 +14,13 @@ import { Link, useParams } from 'react-router-dom';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import { StoreToolPreviewScreen, storePreviewTabs } from '../components/StoreToolPreviewScreen.jsx';
 import { useMyTools } from '../data/manageStore.js';
-import { CURRENT_TOOL_MAKER } from '../data/reviewRequests.js';
+import { CURRENT_TOOL_MAKER, getActiveToolUpdateReview } from '../data/reviewRequests.js';
 import {
   detailContent,
   getToolDownloadSize,
   supportedEnvironment,
 } from '../data/storeDetailContent.js';
+import { getLatestVersionNotes } from '../data/versionNotes.js';
 
 const sampleDetailKeys = {
   'mine-1': 'report',
@@ -89,6 +91,14 @@ export default function MyToolDetailPage() {
     ...item,
     value: tool.supportEnvironment?.[supportEnvironmentKeys[index]] || item.value,
   }));
+  const latestVersionNotes = getLatestVersionNotes(tool);
+  const activeUpdate = getActiveToolUpdateReview(tool);
+  const versionHistory = tool.versionHistory ?? [
+    {
+      version: tool.version,
+      updatedAt: tool.updatedAt || tool.createdAt || '날짜 정보 없음',
+    },
+  ];
 
   return (
     <div className="pb-14 pt-6 text-slate-900">
@@ -104,9 +114,18 @@ export default function MyToolDetailPage() {
           <div className="flex min-w-0 items-start gap-5">
             <StoreToolIcon tool={tool} featured />
             <div className="min-w-0">
-              <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
-                {tool.name}
-              </h1>
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
+                  {tool.name}
+                </h1>
+                {activeUpdate && (
+                  <span
+                    className={`rounded-md px-2.5 py-1 text-xs font-medium ${activeUpdate.status === '심사 진행중' ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600'}`}
+                  >
+                    업데이트 {activeUpdate.status}
+                  </span>
+                )}
+              </div>
               <p className="mt-1.5 text-sm font-semibold text-blue-600">
                 {tool.type} · {tool.category}
               </p>
@@ -116,7 +135,11 @@ export default function MyToolDetailPage() {
                   <FileText size={14} /> v{tool.version}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <Download size={14} /> {getToolDownloadSize(tool)}
+                  <HardDrive size={14} /> {getToolDownloadSize(tool)}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Download size={14} /> 다운로드{' '}
+                  {(tool.downloadCount ?? tool.usageCount ?? 0).toLocaleString('ko-KR')}회
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <ShieldCheck size={14} /> 사내 등록 도구
@@ -127,13 +150,22 @@ export default function MyToolDetailPage() {
           </div>
 
           <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
-            <Link
-              to="/user/aistore/mytools"
-              state={{ editToolId: tool.id }}
-              className="inline-flex h-11 items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:border-blue-700 hover:bg-blue-700"
-            >
-              <RefreshCw size={17} /> 업데이트
-            </Link>
+            {activeUpdate ? (
+              <Link
+                to="/user/aistore/register"
+                state={{ openReviewId: activeUpdate.id, activeTab: activeUpdate.status }}
+                className="inline-flex h-11 items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+              >
+                <RefreshCw size={17} /> 업데이트 심사 보기
+              </Link>
+            ) : (
+              <Link
+                to={`/user/aistore/mytools/${tool.id}/edit`}
+                className="inline-flex h-11 items-center gap-2 rounded-lg border border-blue-600 bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:border-blue-700 hover:bg-blue-700"
+              >
+                <RefreshCw size={17} /> 업데이트
+              </Link>
+            )}
           </div>
         </header>
 
@@ -200,6 +232,22 @@ export default function MyToolDetailPage() {
           <p className="max-w-[52rem] text-[15px] leading-7 text-slate-600">{content.usage}</p>
         </DetailSection>
 
+        {latestVersionNotes.length > 0 && (
+          <DetailSection title="업데이트 내용">
+            <div className="max-w-[52rem]">
+              <h3 className="text-sm font-semibold text-slate-800">변경 사항</h3>
+              <ul className="mt-3 space-y-2 text-[15px] leading-7 text-slate-600">
+                {latestVersionNotes.map(note => (
+                  <li key={note} className="flex items-start gap-2.5">
+                    <span className="mt-3 h-1 w-1 shrink-0 rounded-full bg-slate-400" />
+                    <span>{note}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </DetailSection>
+        )}
+
         <DetailSection title="지원 환경">
           <dl className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {environmentRows.map(({ label, value, icon: Icon }) => (
@@ -235,21 +283,14 @@ export default function MyToolDetailPage() {
 
         <DetailSection title="버전 정보">
           <ol className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
-            {(
-              tool.versionHistory ?? [
-                {
-                  version: tool.version,
-                  updatedAt: tool.updatedAt || tool.createdAt || '날짜 정보 없음',
-                },
-              ]
-            ).map((item, index) => (
+            {versionHistory.map((item, index) => (
               <li
                 key={`${item.version}-${item.updatedAt}`}
                 className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-6 py-4 sm:grid-cols-[14rem_1fr]"
               >
                 <time className="text-slate-500">{item.updatedAt}</time>
                 <span className="flex items-center justify-end gap-3 sm:justify-start">
-                  <strong className="font-semibold text-slate-800">v{item.version}</strong>
+                  <strong className="font-semibold text-blue-600">v{item.version}</strong>
                   {index === 0 && (
                     <span className="text-xs font-medium text-blue-600">현재 버전</span>
                   )}
