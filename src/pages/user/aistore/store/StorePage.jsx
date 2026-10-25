@@ -18,9 +18,20 @@ const featuredBackgrounds = {
   expense: 'from-sky-50 to-blue-100',
   translate: 'from-cyan-50 to-sky-100',
   support: 'from-indigo-50 to-violet-100',
+  contract: 'from-rose-50 to-pink-100',
+  email: 'from-cyan-50 to-blue-100',
+  inquiry: 'from-fuchsia-50 to-purple-100',
+  schedule: 'from-teal-50 to-emerald-100',
 };
 
-function SectionTitle({ children, viewAll = false }) {
+const categoryRecommendations = [
+  { title: '문서 작업을 더 빠르게', category: '문서 작성' },
+  { title: '반복 업무를 줄이는 자동화 도구', category: '업무 자동화' },
+  { title: '회의와 협업을 더 매끄럽게', category: '협업' },
+  { title: 'AI 에이전트로 더 스마트하게', category: 'AI 에이전트' },
+];
+
+function SectionTitle({ children, onViewAll }) {
   return (
     <div className="mb-2 flex items-end justify-between gap-4">
       <div>
@@ -28,8 +39,12 @@ function SectionTitle({ children, viewAll = false }) {
           {children} <ChevronRight size={18} aria-hidden="true" />
         </h2>
       </div>
-      {viewAll && (
-        <button type="button" className="text-sm text-slate-500 hover:text-slate-900">
+      {onViewAll && (
+        <button
+          type="button"
+          onClick={onViewAll}
+          className="text-sm text-slate-500 transition-colors hover:text-slate-900"
+        >
           전체 보기
         </button>
       )}
@@ -103,6 +118,11 @@ export default function StorePage() {
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const { favorites, toggleFavorite } = useFavorites();
   const openTool = tool => navigate(`/user/aistore/store/${tool.id}`);
+  const showCategory = category => {
+    setSearch('');
+    setSelectedCategory(category);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   const isDefaultView = !search.trim() && selectedCategory === '전체';
 
   const visibleTools = useMemo(() => {
@@ -112,7 +132,7 @@ export default function StorePage() {
         selectedCategory === '전체' || tool.storeTags.includes(selectedCategory);
       const matchesSearch =
         !keyword ||
-        `${tool.name} ${tool.summary} ${tool.maker} ${tool.category} ${tool.storeTags.join(' ')}`
+        `${tool.name} ${tool.summary} ${tool.maker} ${tool.makerPosition ?? ''} ${tool.makerName ?? ''} ${tool.category} ${tool.storeTags.join(' ')}`
           .toLowerCase()
           .includes(keyword);
       return matchesCategory && matchesSearch;
@@ -126,7 +146,7 @@ export default function StorePage() {
         description="업무에 필요한 도구를 발견하고, 안전하게 활용해 보세요."
         value={search}
         onSearchChange={setSearch}
-        placeholder="확장 프로그램 및 테마 검색"
+        placeholder="앱·에이전트 및 도구 검색"
         ariaLabel="도구 검색"
       />
 
@@ -280,37 +300,29 @@ export default function StorePage() {
       </section>
 
       {isDefaultView && (
-        <>
-          <section className="py-6">
-            <SectionTitle viewAll>지금 써봐야 할 AI 도구</SectionTitle>
-            <div className="grid gap-x-5 md:grid-cols-2 lg:grid-cols-3">
-              {publishedTools.slice(0, 6).map((tool, index) => (
-                <CompactTool
-                  key={tool.id}
-                  tool={tool}
-                  onDetail={openTool}
-                  previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
-                />
-              ))}
-            </div>
-          </section>
-          <section className="pt-6">
-            <SectionTitle viewAll>업무 효율을 높이는 도구</SectionTitle>
-            <div className="grid gap-x-5 md:grid-cols-2 lg:grid-cols-3">
-              {[...publishedTools]
-                .reverse()
-                .slice(0, 6)
-                .map((tool, index) => (
-                  <CompactTool
-                    key={tool.id}
-                    tool={tool}
-                    onDetail={openTool}
-                    previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
-                  />
-                ))}
-            </div>
-          </section>
-        </>
+        <div>
+          {categoryRecommendations.map(({ title, category }) => {
+            const categoryTools = publishedTools
+              .filter(tool => tool.storeTags.includes(category))
+              .slice(0, 6);
+
+            return (
+              <section key={category} className="py-6">
+                <SectionTitle onViewAll={() => showCategory(category)}>{title}</SectionTitle>
+                <div className="grid gap-x-5 md:grid-cols-2 lg:grid-cols-3">
+                  {categoryTools.map((tool, index) => (
+                    <CompactTool
+                      key={tool.id}
+                      tool={tool}
+                      onDetail={openTool}
+                      previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
       )}
     </div>
   );

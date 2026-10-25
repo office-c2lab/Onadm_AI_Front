@@ -1,10 +1,18 @@
-import { Atom, CircleHelp, Grid2X2, LibraryBig, PanelLeft, Plus, Store } from 'lucide-react';
+import {
+  Atom,
+  CircleHelp,
+  ClipboardCheck,
+  Grid2X2,
+  LibraryBig,
+  PanelLeft,
+  Store,
+} from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import UserServiceSwitcher from '../UserServiceSwitcher.jsx';
 
 const toolItems = [
   { label: '내 도구', to: '/user/aistore/mytools', icon: Grid2X2 },
-  { label: '등록 및 심사', to: '/user/aistore/register', icon: Plus },
+  { label: '등록 및 심사', to: '/user/aistore/register', icon: ClipboardCheck },
 ];
 
 const storeItems = [

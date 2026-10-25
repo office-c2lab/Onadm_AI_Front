@@ -64,9 +64,6 @@ export default function AppsPage() {
           '업무 목적과 필요한 내용을 입력한 뒤 결과를 원자료와 대조해 확인해 주세요. 필요한 내용을 수정하고 담당자의 검토를 거쳐 활용할 수 있습니다.',
       })
     : null;
-  const selectedFeatures = selected
-    ? [selected.summary, ...(selected.storeTags ?? []).map(tag => `${tag} 업무에 활용`)].slice(0, 5)
-    : [];
   const selectedStoreTool = selected ? { ...selected, id: selected.storeId ?? selected.id } : null;
   const openDetails = item => {
     setSelected(item);
@@ -212,14 +209,9 @@ export default function AppsPage() {
             </div>
           </DetailSection>
           <DetailSection title="주요 기능">
-            <ul className="space-y-2 text-sm text-slate-600">
-              {selectedFeatures.map(feature => (
-                <li key={feature} className="flex items-start gap-2">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
+            <p className="max-w-3xl text-sm leading-7 text-slate-600">
+              {selectedContent.features ?? selected.summary}
+            </p>
           </DetailSection>
           <DetailSection title="사용 방법">
             <p className="max-w-3xl text-sm leading-7 text-slate-600">{selectedContent.usage}</p>

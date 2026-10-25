@@ -162,6 +162,8 @@ const publishedAppRecords = publishedTools.map((tool, index) => {
     storeTags: tool.storeTags,
     description: tool.description,
     maker: tool.maker,
+    makerPosition: tool.makerPosition,
+    makerName: tool.makerName,
     owner: existing?.owner ?? tool.maker,
     department: existing?.department ?? tool.maker,
     version: tool.version,

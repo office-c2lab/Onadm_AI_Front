@@ -1,31 +1,24 @@
 import { useMemo, useState } from 'react';
 import { Download } from 'lucide-react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { publishedTools, useDownloads } from '../../data/manageStore.js';
+import { publishedTools } from '../../data/manageStore.js';
 import LibraryToolRow from '../components/LibraryToolRow.jsx';
 
 export default function DownloadsPage() {
   const navigate = useNavigate();
-  const { keyword } = useOutletContext();
-  const { downloads, installedVersions, removeDownload, updateDownload } = useDownloads();
+  const { keyword, downloads, installedVersions, removeDownload, updateDownload } =
+    useOutletContext();
   const [actionMessage, setActionMessage] = useState('');
   const openDetail = tool => navigate(`/user/aistore/store/${tool.id}`);
-
-  const openTool = tool => {
-    if (tool.launchUrl) {
-      window.open(tool.launchUrl, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    setActionMessage(`${tool.name}의 실행 주소가 아직 연결되지 않았습니다.`);
-  };
 
   const downloadedTools = useMemo(() => {
     const query = keyword.trim().toLowerCase();
     return publishedTools.filter(tool => {
       return (
         downloads.includes(tool.id) &&
-        `${tool.name} ${tool.summary} ${tool.maker}`.toLowerCase().includes(query)
+        `${tool.name} ${tool.summary} ${tool.maker} ${tool.makerPosition ?? ''} ${tool.makerName ?? ''}`
+          .toLowerCase()
+          .includes(query)
       );
     });
   }, [downloads, keyword]);
@@ -33,7 +26,6 @@ export default function DownloadsPage() {
   return (
     <>
       <section className="mt-7">
-       
         {actionMessage && (
           <p role="status" className="mb-3 rounded-lg bg-blue-50 px-4 py-2.5 text-sm text-blue-700">
             {actionMessage}
@@ -57,7 +49,6 @@ export default function DownloadsPage() {
                     `${tool.name}의 버전 상태를 최신으로 표시했습니다. 실제 업데이트는 아직 연결되지 않았습니다.`
                   );
                 }}
-                onOpen={openTool}
                 onRemove={removeDownload}
               />
             ))}

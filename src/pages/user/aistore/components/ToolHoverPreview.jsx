@@ -12,6 +12,7 @@ export default function ToolHoverPreview({ tool, label, align = 'left' }) {
   const [visible, setVisible] = useState(false);
   const [placement, setPlacement] = useState('bottom');
   const category = tool.storeCategory || tool.category;
+  const makerLabel = [tool.maker, tool.makerPosition, tool.makerName].filter(Boolean).join(' · ');
 
   useLayoutEffect(() => {
     const card = anchorRef.current?.parentElement;
@@ -75,8 +76,8 @@ export default function ToolHoverPreview({ tool, label, align = 'left' }) {
             {tool.summary}
           </p>
           <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 px-4 py-2.5 text-xs text-slate-500">
-            <span className="truncate">{tool.maker}</span>
-            <span className="shrink-0">v{tool.version}</span>
+            <span className="truncate">{makerLabel}</span>
+            <span className="shrink-0 font-semibold text-blue-600">v{tool.version}</span>
           </div>
         </div>
       )}

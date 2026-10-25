@@ -28,9 +28,11 @@ export default function AiStoreLayout() {
         )}
       </div>
 
-      <main className="relative min-h-screen min-w-0 flex-1 bg-[#f9f9f9] px-8">
-        <div className="mx-auto w-full max-w-7xl px-5 pb-9 md:px-8">
-          <Outlet />
+      <main className="relative min-h-screen min-w-0 flex-1 bg-[#f9f9f9]">
+        <div className="mx-auto flex min-h-full w-full max-w-[88rem] px-[clamp(0.875rem,2vw,1.5rem)] pb-[clamp(2rem,4vw,3rem)]">
+          <div className="mx-auto w-full max-w-[74rem]">
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>

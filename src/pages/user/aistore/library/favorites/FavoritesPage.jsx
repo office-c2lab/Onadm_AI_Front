@@ -1,14 +1,12 @@
 import { useMemo } from 'react';
 import { Bookmark } from 'lucide-react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { publishedTools, useDownloads, useFavorites } from '../../data/manageStore.js';
+import { publishedTools } from '../../data/manageStore.js';
 import LibraryToolRow from '../components/LibraryToolRow.jsx';
 
 export default function FavoritesPage() {
   const navigate = useNavigate();
-  const { keyword } = useOutletContext();
-  const { favorites, toggleFavorite } = useFavorites();
-  const { downloads, addDownload } = useDownloads();
+  const { keyword, favorites, toggleFavorite, downloads, addDownload } = useOutletContext();
   const openDetail = tool => navigate(`/user/aistore/store/${tool.id}`);
 
   const savedTools = useMemo(() => {
@@ -16,7 +14,9 @@ export default function FavoritesPage() {
     return publishedTools.filter(tool => {
       return (
         favorites.includes(tool.id) &&
-        `${tool.name} ${tool.summary} ${tool.maker}`.toLowerCase().includes(query)
+        `${tool.name} ${tool.summary} ${tool.maker} ${tool.makerPosition ?? ''} ${tool.makerName ?? ''}`
+          .toLowerCase()
+          .includes(query)
       );
     });
   }, [favorites, keyword]);
@@ -24,8 +24,6 @@ export default function FavoritesPage() {
   return (
     <>
       <section className="mt-7">
-        
-
         {savedTools.length > 0 ? (
           <div className="grid gap-2 md:grid-cols-2">
             {savedTools.map(tool => (

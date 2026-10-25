@@ -2,9 +2,13 @@ import {
   BarChart3,
   Bot,
   Braces,
+  CalendarClock,
   FileText,
   Languages,
+  MailPen,
   MessageSquareText,
+  MessagesSquare,
+  Scale,
   Sparkles,
   Workflow,
 } from 'lucide-react';
@@ -18,6 +22,10 @@ const toolVisuals = {
   expense: [Sparkles, 'bg-amber-100 text-amber-600'],
   translate: [Languages, 'bg-sky-100 text-sky-600'],
   support: [Bot, 'bg-indigo-100 text-indigo-600'],
+  contract: [Scale, 'bg-rose-100 text-rose-600'],
+  email: [MailPen, 'bg-cyan-100 text-cyan-700'],
+  inquiry: [MessagesSquare, 'bg-fuchsia-100 text-fuchsia-600'],
+  schedule: [CalendarClock, 'bg-teal-100 text-teal-700'],
 };
 
 export default function StoreToolIcon({ tool, small = false, featured = false, promo = false }) {
