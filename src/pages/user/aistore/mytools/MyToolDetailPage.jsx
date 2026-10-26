@@ -103,7 +103,7 @@ export default function MyToolDetailPage() {
   ];
 
   return (
-    <div className="pb-14 pt-6 text-slate-900">
+    <div className="mx-auto w-full max-w-4xl pb-14 pt-6 text-slate-900">
       <Link
         to="/user/aistore/mytools"
         className="inline-flex h-9 items-center gap-2 rounded-lg pr-3 text-sm font-medium text-slate-500 transition-colors hover:text-blue-600"

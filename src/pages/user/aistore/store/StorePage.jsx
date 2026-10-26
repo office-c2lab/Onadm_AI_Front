@@ -7,7 +7,7 @@ import banner2 from '../../../../assets/images/banner2.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import ToolHoverPreview from '../components/ToolHoverPreview.jsx';
-import { publishedTools, storeCategories, useFavorites } from '../data/manageStore.js';
+import { getAvailablePublishedTools, storeCategories, useFavorites } from '../data/manageStore.js';
 
 const featuredBackgrounds = {
   report: 'from-rose-50 to-rose-100',
@@ -128,6 +128,7 @@ export default function StorePage() {
   });
   const [fullyVisibleCategories, setFullyVisibleCategories] = useState(storeCategories);
   const { favorites, toggleFavorite } = useFavorites();
+  const availableTools = useMemo(() => getAvailablePublishedTools(), []);
   const openTool = tool => navigate(`/user/aistore/store/${tool.id}`);
   const showCategory = category => {
     setSearch('');
@@ -200,7 +201,7 @@ export default function StorePage() {
 
   const visibleTools = useMemo(() => {
     const keyword = search.trim().toLowerCase();
-    return publishedTools.filter(tool => {
+    return availableTools.filter(tool => {
       const matchesCategory =
         selectedCategory === '전체' || tool.storeTags.includes(selectedCategory);
       const matchesSearch =
@@ -210,7 +211,7 @@ export default function StorePage() {
           .includes(keyword);
       return matchesCategory && matchesSearch;
     });
-  }, [search, selectedCategory]);
+  }, [availableTools, search, selectedCategory]);
 
   return (
     <div className="w-full">
@@ -282,14 +283,14 @@ export default function StorePage() {
         )}
       </div>
 
-      {isDefaultView && (
+      {isDefaultView && availableTools.length >= 4 && (
         <section
           className="mt-3 grid gap-2 lg:aspect-[4.8/1] lg:grid-cols-[1.35fr_1fr]"
           aria-label="추천 프로모션"
         >
           <button
             type="button"
-            onClick={() => openTool(publishedTools[0])}
+            onClick={() => openTool(availableTools[0])}
             className="group relative min-h-[220px] overflow-hidden rounded-lg text-left shadow-sm lg:min-h-0"
           >
             <img
@@ -303,7 +304,7 @@ export default function StorePage() {
                 AI Report Agent
               </span>
               <strong className="mt-2.5 text-xl font-bold tracking-tight md:text-2xl">
-                보고서 작성 도우미
+                {availableTools[0].name}
               </strong>
               <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-800">
                 자세히 보기 <ArrowRight size={14} />
@@ -314,7 +315,7 @@ export default function StorePage() {
           <div className="grid h-full gap-2 sm:grid-cols-2 lg:grid-rows-[1.35fr_1fr]">
             <button
               type="button"
-              onClick={() => openTool(publishedTools[2])}
+              onClick={() => openTool(availableTools[2])}
               className="group relative min-h-[130px] overflow-hidden rounded-lg text-left sm:col-span-2 lg:min-h-0"
             >
               <img
@@ -327,14 +328,14 @@ export default function StorePage() {
                   AI Agent
                 </span>
                 <strong className="mt-2 text-lg font-bold text-slate-800">
-                  업무 자동화 에이전트
+                  {availableTools[2].name}
                 </strong>
               </span>
             </button>
 
             <button
               type="button"
-              onClick={() => openTool(publishedTools[3])}
+              onClick={() => openTool(availableTools[3])}
               className="flex min-h-[100px] items-center justify-between gap-2 rounded-lg bg-gradient-to-br from-emerald-50 to-cyan-100 p-4 text-left hover:brightness-[0.98] lg:min-h-0"
             >
               <span className="min-w-0 flex-1">
@@ -342,15 +343,15 @@ export default function StorePage() {
                   데이터 분석
                 </span>
                 <strong className="mt-2 line-clamp-2 text-base leading-5 text-slate-800">
-                  데이터 인사이트 도구
+                  {availableTools[3].name}
                 </strong>
               </span>
-              <StoreToolIcon tool={publishedTools[3]} promo />
+              <StoreToolIcon tool={availableTools[3]} promo />
             </button>
 
             <button
               type="button"
-              onClick={() => openTool(publishedTools[1])}
+              onClick={() => openTool(availableTools[1])}
               className="flex min-h-[100px] items-center justify-between gap-2 rounded-lg bg-gradient-to-br from-indigo-50 to-violet-100 p-4 text-left hover:brightness-[0.98] lg:min-h-0"
             >
               <span className="min-w-0 flex-1">
@@ -358,10 +359,10 @@ export default function StorePage() {
                   생산성
                 </span>
                 <strong className="mt-2 line-clamp-2 text-base leading-5 text-slate-800">
-                  회의록 정리 도우미
+                  {availableTools[1].name}
                 </strong>
               </span>
-              <StoreToolIcon tool={publishedTools[1]} promo />
+              <StoreToolIcon tool={availableTools[1]} promo />
             </button>
           </div>
         </section>
@@ -413,7 +414,7 @@ export default function StorePage() {
       {isDefaultView && (
         <div>
           {categoryRecommendations.map(({ title, category }) => {
-            const categoryTools = publishedTools
+            const categoryTools = availableTools
               .filter(tool => tool.storeTags.includes(category))
               .slice(0, 6);
 

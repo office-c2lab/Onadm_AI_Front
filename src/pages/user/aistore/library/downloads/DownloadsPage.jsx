@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Download } from 'lucide-react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { publishedTools } from '../../data/manageStore.js';
+import { getAvailablePublishedTools } from '../../data/manageStore.js';
 import LibraryToolRow from '../components/LibraryToolRow.jsx';
 
 export default function DownloadsPage() {
@@ -13,7 +13,7 @@ export default function DownloadsPage() {
 
   const downloadedTools = useMemo(() => {
     const query = keyword.trim().toLowerCase();
-    return publishedTools.filter(tool => {
+    return getAvailablePublishedTools().filter(tool => {
       return (
         downloads.includes(tool.id) &&
         `${tool.name} ${tool.summary} ${tool.maker} ${tool.makerPosition ?? ''} ${tool.makerName ?? ''}`

@@ -49,7 +49,6 @@ export function StatusBadge({ children }) {
     '확인 필요': 'bg-orange-50 text-orange-700',
     실패: 'bg-red-50 text-red-700',
     반려: 'bg-red-50 text-red-700',
-    중지: 'bg-red-50 text-red-600',
     숨김: 'bg-slate-100 text-slate-600',
     미게시: 'bg-slate-100 text-slate-600',
     높음: 'bg-red-50 text-red-700',

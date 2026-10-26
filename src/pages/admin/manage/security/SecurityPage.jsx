@@ -28,7 +28,7 @@ function ReviewStatus({ status }) {
       : status === '반려'
         ? 'bg-red-50 text-red-700'
         : status === '관리자 검토'
-          ? 'bg-amber-50 text-amber-700'
+          ? 'bg-blue-50 text-blue-700'
           : status === '심사 진행중'
             ? 'bg-blue-50 text-blue-700'
             : 'bg-slate-100 text-slate-700';

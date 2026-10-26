@@ -16,7 +16,7 @@ import {
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import { StoreToolPreviewScreen, storePreviewTabs } from '../components/StoreToolPreviewScreen.jsx';
 import AiStoreActionButton from '../components/AiStoreActionButton.jsx';
-import { publishedTools, useDownloads, useFavorites } from '../data/manageStore.js';
+import { getAvailablePublishedTools, useDownloads, useFavorites } from '../data/manageStore.js';
 import {
   detailContent,
   getToolDownloadSize,
@@ -38,7 +38,7 @@ export default function StoreDetailPage() {
   const [activePreview, setActivePreview] = useState(0);
   const { favorites, toggleFavorite } = useFavorites();
   const { downloads, addDownload } = useDownloads();
-  const tool = publishedTools.find(item => item.id === toolId);
+  const tool = getAvailablePublishedTools().find(item => item.id === toolId);
 
   if (!tool) {
     return (
@@ -76,7 +76,7 @@ export default function StoreDetailPage() {
   ];
 
   return (
-    <div className="pb-14 pt-6 text-slate-900">
+    <div className="mx-auto w-full max-w-4xl pb-14 pt-6 text-slate-900">
       <Link
         to="/user/aistore/store"
         className="inline-flex h-9 items-center gap-2 rounded-lg pr-3 text-sm font-medium text-slate-500 transition-colors hover:text-blue-600"

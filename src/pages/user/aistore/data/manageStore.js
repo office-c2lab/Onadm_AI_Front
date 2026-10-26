@@ -5,6 +5,20 @@ import {
   normalizeReviewStatus,
 } from './reviewRequests.js';
 
+export const ADMIN_DELETED_APPS_KEY = 'ondam:admin:deleted-apps';
+
+export function getDeletedAppIds() {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const saved = window.localStorage.getItem(ADMIN_DELETED_APPS_KEY);
+    const ids = saved ? JSON.parse(saved) : [];
+    return Array.isArray(ids) ? ids : [];
+  } catch {
+    return [];
+  }
+}
+
 // 스토어 샘플 데이터
 export const publishedTools = [
   {
@@ -282,6 +296,11 @@ export const publishedTools = [
     description: '참석자의 일정과 회의 조건을 바탕으로 가능한 시간을 추천합니다.',
   },
 ];
+
+export function getAvailablePublishedTools() {
+  const deletedIds = getDeletedAppIds();
+  return publishedTools.filter(tool => !deletedIds.includes(tool.id));
+}
 
 // 카테고리
 export const categories = [

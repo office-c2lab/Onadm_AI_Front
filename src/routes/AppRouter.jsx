@@ -58,6 +58,7 @@ import ExternalSupportPage from '../pages/admin/control/external/support/Support
 // 관리자 - Manage
 // ================================
 import AppsPage from '../pages/admin/manage/apps/AppsPage.jsx';
+import AppsDetailPage from '../pages/admin/manage/apps/AppsDetailPage.jsx';
 import SecurityPage from '../pages/admin/manage/security/SecurityPage.jsx';
 import SecurityDetailPage from '../pages/admin/manage/security/SecurityDetailPage.jsx';
 import ApprovalsPage from '../pages/admin/manage/approvals/ApprovalsPage.jsx';
@@ -202,6 +203,7 @@ export default function AppRouter() {
             <Route index element={<Navigate to="apps" replace />} />
             <Route path="overview" element={<Navigate to="/admin/manage/apps" replace />} />
             <Route path="apps" element={<AppsPage />} />
+            <Route path="apps/:appId" element={<AppsDetailPage />} />
             <Route path="security" element={<SecurityPage />} />
             <Route path="security/:reviewId" element={<SecurityDetailPage />} />
             <Route path="approvals" element={<ApprovalsPage />} />
