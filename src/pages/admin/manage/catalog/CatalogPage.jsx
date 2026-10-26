@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { GripVertical, ImageIcon, LayoutGrid, MoreVertical, Plus } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  GripVertical,
+  ImageIcon,
+  LayoutGrid,
+  MoreVertical,
+  Plus,
+  RefreshCw,
+} from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import categoryImage from '../../../../assets/images/category.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
@@ -15,6 +25,46 @@ import {
 } from './catalogStore.js';
 
 const tabs = ['홈 진열', '카테고리'];
+const STORE_PREVIEW_WIDTH = 1280;
+
+function StorePreviewFrame({ previewKey }) {
+  const frameContainerRef = useRef(null);
+  const [previewScale, setPreviewScale] = useState(1);
+
+  useEffect(() => {
+    const frameContainer = frameContainerRef.current;
+    if (!frameContainer) return undefined;
+
+    const updatePreviewScale = () => {
+      setPreviewScale(Math.min(frameContainer.clientWidth / STORE_PREVIEW_WIDTH, 1));
+    };
+
+    updatePreviewScale();
+    const resizeObserver = new ResizeObserver(updatePreviewScale);
+    resizeObserver.observe(frameContainer);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={frameContainerRef}
+      className="relative h-[30rem] w-full overflow-hidden rounded-xl border border-slate-200 bg-white lg:h-[38rem]"
+    >
+      <iframe
+        key={previewKey}
+        src="/user/aistore/store?preview=1"
+        title="사용자 AI App Store 미리보기"
+        className="absolute top-0 left-0 border-0 bg-white"
+        style={{
+          width: `${STORE_PREVIEW_WIDTH}px`,
+          height: `${100 / previewScale}%`,
+          transform: `scale(${previewScale})`,
+          transformOrigin: 'top left',
+        }}
+      />
+    </div>
+  );
+}
 
 export default function CatalogPage() {
   const navigate = useNavigate();
@@ -27,6 +77,8 @@ export default function CatalogPage() {
   const [draggedSectionId, setDraggedSectionId] = useState(null);
   const [banners, setBanners] = useState(getCatalogBanners);
   const [draggedBannerId, setDraggedBannerId] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(true);
+  const [previewKey, setPreviewKey] = useState(0);
   const [categories, setCategories] = useState(getCatalogCategories);
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
@@ -320,6 +372,40 @@ export default function CatalogPage() {
               reorderable: true,
               emptyMessage: '검색 조건에 맞는 진열 영역이 없습니다.',
             })}
+          </div>
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-5">
+              <h2 className="text-base font-semibold text-slate-900">사용자 스토어 미리보기</h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <AiStoreActionButton
+                  icon={previewOpen ? ChevronUp : ChevronDown}
+                  onClick={() => setPreviewOpen(current => !current)}
+                >
+                  {previewOpen ? '미리보기 접기' : '미리보기 열기'}
+                </AiStoreActionButton>
+                <AiStoreActionButton
+                  href="/user/aistore/store"
+                  target="_blank"
+                  rel="noreferrer"
+                  variant="secondary"
+                  icon={ExternalLink}
+                >
+                  새 탭에서 열기
+                </AiStoreActionButton>
+                <AiStoreActionButton
+                  variant="secondary"
+                  icon={RefreshCw}
+                  onClick={() => setPreviewKey(current => current + 1)}
+                >
+                  새로고침
+                </AiStoreActionButton>
+              </div>
+            </div>
+            {previewOpen && (
+              <div className="border-t border-slate-200 bg-slate-100/70 px-4 py-4 sm:px-5">
+                <StorePreviewFrame previewKey={previewKey} />
+              </div>
+            )}
           </div>
         </section>
       ) : (

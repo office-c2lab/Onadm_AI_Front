@@ -16,7 +16,8 @@ const libraryTabs = [
 ensureAiStoreStorageVersion();
 
 export default function AiStoreLayout() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+  const isStorePreview = new URLSearchParams(search).get('preview') === '1';
   const isSidebarOpen = useSidebarStore(state => state.aiStoreOpen);
   const setSidebarOpen = useSidebarStore(state => state.setAiStoreOpen);
   const [libraryKeyword, setLibraryKeyword] = useState('');
@@ -30,17 +31,19 @@ export default function AiStoreLayout() {
 
   return (
     <div className="flex min-h-screen bg-white text-[#0d0d0d]">
-      <div
-        className={`sticky top-0 h-screen shrink-0 overflow-hidden transition-[width] duration-200 ease-out ${
-          isSidebarOpen ? 'w-[260px]' : 'w-12'
-        }`}
-      >
-        {isSidebarOpen ? (
-          <AiStoreSidebar className="h-screen" onClose={() => setSidebarOpen(false)} />
-        ) : (
-          <AiStoreSidebarRail onOpen={() => setSidebarOpen(true)} />
-        )}
-      </div>
+      {!isStorePreview && (
+        <div
+          className={`sticky top-0 h-screen shrink-0 overflow-hidden transition-[width] duration-200 ease-out ${
+            isSidebarOpen ? 'w-[260px]' : 'w-12'
+          }`}
+        >
+          {isSidebarOpen ? (
+            <AiStoreSidebar className="h-screen" onClose={() => setSidebarOpen(false)} />
+          ) : (
+            <AiStoreSidebarRail onOpen={() => setSidebarOpen(true)} />
+          )}
+        </div>
+      )}
 
       <main className="relative min-h-screen min-w-0 flex-1 bg-white">
         <div className="mx-auto flex min-h-full w-full max-w-[88rem] px-[clamp(0.875rem,2vw,1.5rem)] pb-[clamp(2rem,4vw,3rem)]">
