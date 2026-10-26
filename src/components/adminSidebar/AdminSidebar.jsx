@@ -77,12 +77,12 @@ const adminMenus = [
         to: '/admin/manage/apps',
       },
       {
-        label: '심사 관리',
-        to: '/admin/manage/security',
-      },
-      {
         label: '스토어 진열 관리',
         to: '/admin/manage/catalog',
+      },
+      {
+        label: '심사 관리',
+        to: '/admin/manage/security',
       },
       {
         label: '등록·심사 정책',

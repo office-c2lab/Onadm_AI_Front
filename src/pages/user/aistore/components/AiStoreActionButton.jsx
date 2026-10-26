@@ -24,6 +24,7 @@ const iconSizes = { compact: 15, small: 15, medium: 17, large: 17 };
 
 export default function AiStoreActionButton({
   to,
+  href,
   variant = 'primary',
   size = 'medium',
   icon: Icon,
@@ -47,6 +48,14 @@ export default function AiStoreActionButton({
       <Link to={to} className={classes} {...props}>
         {content}
       </Link>
+    );
+  }
+
+  if (href) {
+    return (
+      <a href={href} className={classes} {...props}>
+        {content}
+      </a>
     );
   }
 

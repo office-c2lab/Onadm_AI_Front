@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, ClipboardList, RefreshCw } from 'lucide-react';
+import { ChevronDown, ClipboardList, Download, RefreshCw } from 'lucide-react';
 import zipFileImage from '../../../../assets/images/zipfile.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import { appRecords, reviewRequests } from '../data.js';
@@ -116,16 +116,18 @@ export default function SecurityPage() {
                   key={item.id}
                   className={`group relative min-w-0 rounded-xl border transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20 ${isOpen ? 'border-slate-200 bg-[#f5f5f5] shadow-sm' : 'border-transparent'}`}
                 >
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setOpenRequestId(current => (current === item.id ? null : item.id))
-                    }
-                    aria-expanded={isOpen}
-                    aria-controls={`review-detail-${item.id}`}
-                    className="flex min-h-[82px] w-full cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left"
-                  >
-                    <span className="flex min-w-0 flex-1 items-center gap-4">
+                  <div className="relative flex min-h-[82px] w-full items-center gap-4 rounded-xl px-3 py-3 text-left">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOpenRequestId(current => (current === item.id ? null : item.id))
+                      }
+                      aria-expanded={isOpen}
+                      aria-controls={`review-detail-${item.id}`}
+                      aria-label={`${item.name} 심사 진행 내역 ${isOpen ? '접기' : '펼치기'}`}
+                      className="absolute inset-0 z-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+                    />
+                    <span className="pointer-events-none relative z-10 flex min-w-0 flex-1 items-center gap-4">
                       {item.requestType === '업데이트' ? (
                         <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
                           <RefreshCw size={24} strokeWidth={1.8} aria-hidden="true" />
@@ -150,9 +152,15 @@ export default function SecurityPage() {
                           </span>
                         </span>
                         <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
-                          <span className="truncate" title={item.fileName}>
-                            {item.fileName}
-                          </span>
+                          <a
+                            href={`/api/admin/reviews/${item.id}/file`}
+                            download={item.fileName}
+                            title={`${item.fileName} 다운로드`}
+                            className="pointer-events-auto inline-flex min-w-0 items-center gap-1 text-blue-600 hover:underline focus-visible:underline focus-visible:outline-none"
+                          >
+                            <Download size={14} className="shrink-0" aria-hidden="true" />
+                            <span className="truncate">{item.fileName}</span>
+                          </a>
                           <span className="shrink-0 text-slate-300">·</span>
                           <span className="shrink-0">{item.size}</span>
                           {item.requestType === '업데이트' && item.version && (
@@ -168,17 +176,17 @@ export default function SecurityPage() {
                         </span>
                       </span>
                     </span>
-                    <span className="hidden shrink-0 text-xs text-slate-500 lg:inline">
+                    <span className="pointer-events-none relative z-10 hidden shrink-0 text-xs text-slate-500 lg:inline">
                       {item.submittedAt}
                     </span>
-                    <span className="flex shrink-0 items-center gap-2">
+                    <span className="pointer-events-none relative z-10 flex shrink-0 items-center gap-2">
                       <ReviewStatus status={status} />
                       <ChevronDown
                         size={19}
                         className={`shrink-0 text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
                       />
                     </span>
-                  </button>
+                  </div>
 
                   {isOpen && (
                     <AdminReviewProgress

@@ -64,6 +64,7 @@ import SecurityDetailPage from '../pages/admin/manage/security/SecurityDetailPag
 import ApprovalsPage from '../pages/admin/manage/approvals/ApprovalsPage.jsx';
 import CatalogPage from '../pages/admin/manage/catalog/CatalogPage.jsx';
 import CatalogDetailPage from '../pages/admin/manage/catalog/CatalogDetailPage.jsx';
+import CategoryDetailPage from '../pages/admin/manage/catalog/CategoryDetailPage.jsx';
 import ManagePoliciesPage from '../pages/admin/manage/policies/PoliciesPage.jsx';
 
 // ================================
@@ -209,6 +210,7 @@ export default function AppRouter() {
             <Route path="security/:reviewId" element={<SecurityDetailPage />} />
             <Route path="approvals" element={<ApprovalsPage />} />
             <Route path="catalog" element={<CatalogPage />} />
+            <Route path="catalog/category/:categoryId" element={<CategoryDetailPage />} />
             <Route path="catalog/:sectionId" element={<CatalogDetailPage />} />
             <Route path="policies" element={<ManagePoliciesPage />} />
           </Route>

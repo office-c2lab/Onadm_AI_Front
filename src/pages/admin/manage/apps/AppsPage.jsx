@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { EmptyState, SearchField, StatusBadge, ToolAvatar } from '../components.jsx';
 import { appRecords } from '../data.js';
@@ -100,6 +101,13 @@ export default function AppsPage() {
                   </div>
                 </div>
                 <div className="relative z-10 flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs text-slate-500">
+                    <Download size={15} className="text-blue-600" aria-hidden="true" />
+                    다운로드{' '}
+                    <strong className="font-semibold text-slate-800">
+                      {(item.downloadCount ?? item.users ?? 0).toLocaleString('ko-KR')}회
+                    </strong>
+                  </span>
                   <StatusBadge>{item.publication === '게시 중' ? '게시 중' : '숨김'}</StatusBadge>
                 </div>
               </article>

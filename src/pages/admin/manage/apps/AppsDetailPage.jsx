@@ -132,6 +132,17 @@ export default function AppsDetailPage() {
               </div>
             </div>
           </div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+            <AiStoreActionButton
+              size="large"
+              icon={Download}
+              aria-label={`${sourceApp.name} 현재 버전 다운로드`}
+              href={`/api/admin/apps/${sourceApp.id}/download`}
+              download={`${sourceApp.name}_v${sourceApp.version}.zip`}
+            >
+              다운로드
+            </AiStoreActionButton>
+          </div>
         </header>
 
         <DetailSection title="스크린샷">

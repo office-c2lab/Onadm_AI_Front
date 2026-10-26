@@ -4,6 +4,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Download,
   FileText,
   HardDrive,
   ShieldCheck,
@@ -156,6 +157,17 @@ export default function SecurityDetailPage() {
               </div>
             </div>
           </div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+            <AiStoreActionButton
+              size="large"
+              icon={Download}
+              aria-label={`${review.fileName} 다운로드`}
+              href={`/api/admin/reviews/${review.id}/file`}
+              download={review.fileName}
+            >
+              다운로드
+            </AiStoreActionButton>
+          </div>
         </header>
 
         <DetailSection title="스크린샷">
@@ -290,7 +302,20 @@ export default function SecurityDetailPage() {
             ].map(([label, value]) => (
               <div key={label} className="grid gap-1 py-4 sm:grid-cols-[14rem_1fr] sm:gap-4">
                 <dt className="font-medium text-slate-500">{label}</dt>
-                <dd className="break-words font-medium text-slate-800">{value}</dd>
+                <dd className="break-words font-medium text-slate-800">
+                  {label === '등록 파일' ? (
+                    <a
+                      href={`/api/admin/reviews/${review.id}/file`}
+                      download={review.fileName}
+                      className="inline-flex items-center gap-1.5 text-blue-600 hover:underline focus-visible:underline focus-visible:outline-none"
+                    >
+                      <Download size={15} aria-hidden="true" />
+                      {value}
+                    </a>
+                  ) : (
+                    value
+                  )}
+                </dd>
               </div>
             ))}
           </dl>

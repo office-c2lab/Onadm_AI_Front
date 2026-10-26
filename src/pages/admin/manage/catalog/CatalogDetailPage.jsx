@@ -123,29 +123,13 @@ export default function CatalogDetailPage() {
       </Link>
 
       <header className="py-8 sm:py-10">
-        <div className="flex flex-wrap items-start justify-between gap-5">
-          <div>
-            <span className="text-sm font-semibold text-blue-600">{section.label}</span>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-              {section.name}
-            </h1>
-            <p className="mt-3 text-sm text-slate-500">
-              진열 영역의 정보와 포함할 도구의 순서를 설정합니다.
-            </p>
-          </div>
-          <label className="flex cursor-pointer items-center gap-3">
-            <span className="text-sm font-medium text-slate-600">
-              {section.active ? '게시 중' : '숨김'}
-            </span>
-            <input
-              type="checkbox"
-              className="peer sr-only"
-              checked={section.active}
-              onChange={event => update({ active: event.target.checked })}
-              aria-label={`${section.name} 게시 상태`}
-            />
-            <span className="relative h-6 w-11 rounded-full bg-slate-200 transition peer-checked:bg-blue-600 after:absolute after:top-1 after:left-1 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" />
-          </label>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            {section.name}
+          </h1>
+          <p className="mt-3 text-sm text-slate-500">
+            진열 영역의 정보와 포함할 도구의 순서를 설정합니다.
+          </p>
         </div>
       </header>
 
