@@ -95,7 +95,7 @@ export default function AppsPage() {
                       {item.name}
                     </strong>
                     <span className="mt-1 block truncate text-sm text-slate-500">
-                      {item.category}
+                      {item.type} · {item.storeCategory || item.category}
                     </span>
                   </div>
                 </div>

@@ -100,7 +100,9 @@ export default function LibraryToolRow({
             <span className="block truncate text-base font-semibold text-slate-900">
               {tool.name}
             </span>
-            <span className="mt-1 block truncate text-sm text-slate-500">{category}</span>
+            <span className="mt-1 block truncate text-sm text-slate-500">
+              {tool.type} · {category}
+            </span>
           </span>
         </button>
 

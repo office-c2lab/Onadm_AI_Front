@@ -78,7 +78,7 @@ function FeaturedCard({ tool, favorite, onFavorite, onDetail, previewAlign }) {
       >
         <h3 className="truncate text-[15px] font-semibold leading-5 text-slate-900">{tool.name}</h3>
         <span className="mt-1 block truncate text-xs text-slate-500">
-          {tool.storeCategory || tool.category}
+          {tool.type} · {tool.storeCategory || tool.category}
         </span>
       </button>
       <ToolHoverPreview tool={tool} align={previewAlign} />
@@ -98,7 +98,7 @@ function CompactTool({ tool, favorite, onFavorite, onDetail, previewAlign }) {
         <span className="min-w-0 flex-1">
           <strong className="block truncate text-base text-slate-900">{tool.name}</strong>
           <span className="mt-1 block truncate text-sm text-slate-500">
-            {tool.storeCategory || tool.category}
+            {tool.type} · {tool.storeCategory || tool.category}
           </span>
         </span>
       </button>

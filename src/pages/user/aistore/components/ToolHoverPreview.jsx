@@ -64,7 +64,9 @@ export default function ToolHoverPreview({ tool, label, align = 'left' }) {
             <StoreToolIcon tool={tool} featured />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-slate-900">{tool.name}</p>
-              <p className="mt-1 truncate text-xs text-slate-500">{category}</p>
+              <p className="mt-1 truncate text-xs text-slate-500">
+                {tool.type} · {category}
+              </p>
             </div>
             {label && (
               <span className="shrink-0 rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">

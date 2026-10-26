@@ -66,7 +66,7 @@ export default function MyToolsPage() {
                         )}
                       </span>
                       <span className="mt-1 block truncate text-sm text-slate-500">
-                        {tool.category}
+                        {tool.type} · {tool.storeCategory || tool.category}
                       </span>
                     </div>
                   </div>

@@ -127,7 +127,7 @@ export default function MyToolDetailPage() {
                 )}
               </div>
               <p className="mt-1.5 text-sm font-semibold text-blue-600">
-                {tool.type} · {tool.category}
+                {tool.type} · {tool.storeCategory || tool.category}
               </p>
               <p className="mt-4 max-w-3xl text-[15px] leading-7 text-slate-600">{tool.summary}</p>
               <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2.5 text-sm font-semibold text-slate-700">

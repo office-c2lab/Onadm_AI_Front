@@ -61,11 +61,9 @@ export function ToolCard({ tool, favorite, onToggleFavorite, onDetail }) {
 
       <p className="mt-2 min-h-12 text-sm leading-6 text-slate-500">{tool.summary}</p>
 
-      <div className="mt-4 flex flex-wrap gap-1.5 text-xs text-slate-600">
-        <span className="rounded-md bg-slate-100 px-2 py-1">{tool.category}</span>
-
-        <span className="rounded-md bg-slate-100 px-2 py-1">{tool.type}</span>
-      </div>
+      <p className="mt-4 text-xs text-slate-600">
+        {tool.type} · {tool.storeCategory || tool.category}
+      </p>
 
       <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 text-xs">
         <span className="text-slate-500">{tool.maker}</span>
@@ -99,10 +97,9 @@ export function ManageToolCard({ tool, onDetail }) {
       <h3 className="mt-4 text-[15px] font-semibold text-slate-900">{tool.name}</h3>
       <p className="mt-2 min-h-12 text-sm leading-6 text-slate-500">{tool.summary}</p>
 
-      <div className="mt-4 flex flex-wrap gap-1.5 text-xs text-slate-600">
-        <span className="rounded-md bg-slate-100 px-2 py-1">{tool.category}</span>
-        <span className="rounded-md bg-slate-100 px-2 py-1">{tool.type}</span>
-      </div>
+      <p className="mt-4 text-xs text-slate-600">
+        {tool.type} · {tool.storeCategory || tool.category}
+      </p>
 
       <div className="mt-auto pt-5">
         <div className="flex items-center justify-between border-t border-slate-100 pt-4 text-xs text-slate-500">
@@ -275,7 +272,7 @@ export function ToolDetailModal({ tool, onClose, mine = false }) {
             <h2 className="text-xl font-semibold text-slate-900">{tool.name}</h2>
 
             <p className="mt-1 text-xs text-slate-500">
-              {tool.type} · {tool.category}
+              {tool.type} · {tool.storeCategory || tool.category}
             </p>
           </div>
         </div>
