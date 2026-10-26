@@ -1,21 +1,25 @@
 import { catalogItems } from '../data.js';
 import banner1 from '../../../../assets/images/banner1.png';
 import banner2 from '../../../../assets/images/banner2.png';
+import banner3 from '../../../../assets/images/banner3.png';
+import banner4 from '../../../../assets/images/banner4.png';
 
 const SECTIONS_KEY = 'ondam:admin:catalog-sections';
 const CATEGORIES_KEY = 'ondam:admin:catalog-categories';
 const BANNERS_KEY = 'ondam:admin:catalog-banners';
+const BANNERS_VERSION_KEY = 'ondam:admin:catalog-banners-version';
 
 const publishedItems = catalogItems.filter(item => item.publication === '게시 중');
 const ids = items => items.map(item => item.id);
 
-const defaultBanners = publishedItems.slice(0, 2).map((tool, index) => ({
+const defaultBannerImages = [banner1, banner2, banner3, banner4];
+const defaultBanners = publishedItems.slice(0, 4).map((tool, index) => ({
   id: `banner-${index + 1}`,
   toolId: tool.storeId ?? tool.id,
   title: tool.name,
   description: tool.summary,
-  image: index === 0 ? banner1 : index === 1 ? banner2 : '',
-  imageName: index === 0 ? 'banner1.png' : index === 1 ? 'banner2.png' : '',
+  image: defaultBannerImages[index],
+  imageName: `banner${index + 1}.png`,
 }));
 
 const defaultSections = [
@@ -133,7 +137,22 @@ export function deleteCatalogSection(sectionId) {
   saveCatalogSections(getCatalogSections().filter(item => item.id !== sectionId));
 }
 export function getCatalogBanners() {
-  return read(BANNERS_KEY, defaultBanners).slice(0, 4);
+  const banners = read(BANNERS_KEY, defaultBanners);
+  if (
+    typeof window !== 'undefined' &&
+    window.localStorage.getItem(BANNERS_VERSION_KEY) !== '4-default-banners'
+  ) {
+    const migrated = [...banners];
+    defaultBanners.slice(2).forEach(defaultBanner => {
+      if (migrated.length < 4 && !migrated.some(item => item.id === defaultBanner.id)) {
+        migrated.push(defaultBanner);
+      }
+    });
+    window.localStorage.setItem(BANNERS_KEY, JSON.stringify(migrated.slice(0, 4)));
+    window.localStorage.setItem(BANNERS_VERSION_KEY, '4-default-banners');
+    return migrated.slice(0, 4);
+  }
+  return banners.slice(0, 4);
 }
 export function saveCatalogBanners(banners) {
   window.localStorage.setItem(BANNERS_KEY, JSON.stringify(banners.slice(0, 4)));

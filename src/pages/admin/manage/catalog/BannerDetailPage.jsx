@@ -121,6 +121,9 @@ export default function BannerDetailPage() {
         <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
           {isCreating ? '배너 추가' : '배너 수정'}
         </h1>
+        <p className="mt-3 text-sm text-slate-500">
+          사용자 스토어 홈에 노출할 배너와 연결 도구를 설정합니다.
+        </p>
       </header>
 
       <section className="border-t border-slate-200 py-9">
