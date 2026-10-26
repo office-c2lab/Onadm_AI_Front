@@ -6,7 +6,7 @@ export const publishedTools = [
   {
     id: 'report',
     name: '보고서 작성 도우미',
-    summary: '핵심 내용만 입력하면 보고서 초안을 체계적으로 작성해요.',
+    summary: '핵검 내용만 입력하면 보고서 초안을 체계적으로 작성해요.',
     type: 'AI App',
     category: '문서·생산성',
     storeCategory: '문서 자동화',
@@ -22,7 +22,7 @@ export const publishedTools = [
     ],
     releaseNotes: [
       '보고서 목적에 맞는 문서 구조 추천 기능을 개선했습니다.',
-      '긴 메모를 입력했을 때 핵심 내용을 더 안정적으로 정리합니다.',
+      '긴 메모를 입력했을 때 핵검 내용을 더 안정적으로 정리합니다.',
       '문서 초안의 문단 간격과 제목 형식을 다듬었습니다.',
     ],
     featured: true,
@@ -95,7 +95,7 @@ export const publishedTools = [
     releaseNotes: [
       '기간별 추세와 이상값 탐지 정확도를 개선했습니다.',
       '누락된 데이터가 있을 때 안내 문구를 추가했습니다.',
-      '분석 결과의 핵심 지표 표시 방식을 정리했습니다.',
+      '분석 결과의 핵검 지표 표시 방식을 정리했습니다.',
     ],
     description: '표 데이터의 추세와 이상값을 분석합니다.',
   },
@@ -330,7 +330,7 @@ const initialMyTools = [
         updatedAt: '2026.10.18',
         notes: [
           '보고서 목적에 맞는 문서 구조 추천 기능을 개선했습니다.',
-          '긴 메모를 입력했을 때 핵심 내용을 더 안정적으로 정리합니다.',
+          '긴 메모를 입력했을 때 핵검 내용을 더 안정적으로 정리합니다.',
           '문서 초안의 문단 간격과 제목 형식을 다듬었습니다.',
         ],
       },
@@ -373,7 +373,7 @@ const initialMyTools = [
     type: '자동화 도구',
     category: '업무 자동화',
     version: '0.3.1',
-    status: '심사 진행중',
+    status: '검사 진행중',
     updatedAt: '2026.10.16',
     createdAt: '2026.10.16 09:42',
     usageCount: 0,

@@ -30,7 +30,7 @@ const ROUTES = {
 const SECTIONS = [
   { id: 'start', label: '빠른 시작' },
   { id: 'use', label: '도구 사용하기' },
-  { id: 'publish', label: '등록 및 심사' },
+  { id: 'publish', label: '등록 및 검사' },
   { id: 'manage', label: '운영·업데이트' },
   { id: 'faq', label: '자주 묻는 질문' },
 ];
@@ -98,7 +98,7 @@ const PUBLISH_FLOW = [
   },
   {
     step: '03',
-    title: '검사 및 관리자 심사',
+    title: '검사 및 관리자 검사',
     description: '파일 검사가 끝나면 관리자가 운영 적합성과 데이터 접근 범위를 검토합니다.',
   },
   {
@@ -115,7 +115,7 @@ const STATUSES = [
     color: 'bg-slate-100 text-slate-600',
   },
   {
-    name: '심사 진행중',
+    name: '검사 진행중',
     description: '자동 검사 또는 관리자 검토가 진행 중입니다.',
     color: 'bg-blue-50 text-blue-700',
   },
@@ -143,9 +143,9 @@ const FAQS = [
       '실행에 필요한 파일을 묶은 ZIP 파일은 필수입니다. 도구 아이콘과 화면 이미지는 도구를 더 쉽게 이해하도록 돕는 정보로 함께 등록할 수 있습니다.',
   },
   {
-    question: '심사가 진행 중일 때 요청을 취소할 수 있나요?',
+    question: '검사가 진행 중일 때 요청을 취소할 수 있나요?',
     answer:
-      '검사 대기 또는 심사 진행중인 요청은 진행 내역 하단의 검사 취소 버튼으로 취소할 수 있습니다. 취소한 업데이트는 다시 요청할 수 있습니다.',
+      '검사 대기 또는 검사 진행중인 요청은 진행 내역 하단의 검사 취소 버튼으로 취소할 수 있습니다. 취소한 업데이트는 다시 요청할 수 있습니다.',
   },
   {
     question: '반려된 도구는 처음부터 다시 작성해야 하나요?',
@@ -364,7 +364,7 @@ export default function GuidePage() {
           <section id="publish" className="scroll-mt-24">
             <SectionHeader
               eyebrow="FOR MAKERS"
-              title="새 도구 등록과 심사 흐름"
+              title="새 도구 등록과 검사 흐름"
               description="도구 파일과 상세 정보를 한 번에 제출하면 검사와 관리자 검토가 순서대로 진행됩니다."
             />
 
@@ -417,7 +417,7 @@ export default function GuidePage() {
 
             <div className="mt-12 sm:mt-14">
               <h3 className="text-base font-semibold text-slate-950">
-                심사 상태는 이렇게 읽으세요
+                검사 상태는 이렇게 읽으세요
               </h3>
               <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
                 {STATUSES.map((item, index) => (
@@ -441,7 +441,7 @@ export default function GuidePage() {
                 새 도구 등록
               </AiStoreActionButton>
               <AiStoreActionButton to={ROUTES.register} variant="secondary" icon={ClipboardCheck}>
-                심사 진행 내역
+                검사 진행 내역
               </AiStoreActionButton>
             </div>
           </section>
@@ -463,7 +463,7 @@ export default function GuidePage() {
                 {
                   icon: RefreshCw,
                   title: '업데이트 요청',
-                  description: '새 ZIP 파일, 버전과 변경 사항을 입력해 심사를 요청합니다.',
+                  description: '새 ZIP 파일, 버전과 변경 사항을 입력해 검사를 요청합니다.',
                 },
                 {
                   icon: ShieldCheck,
@@ -494,10 +494,10 @@ export default function GuidePage() {
               <CircleHelp size={18} className="mt-0.5 shrink-0 text-amber-600" aria-hidden="true" />
               <div>
                 <p className="text-sm font-semibold text-slate-900">
-                  업데이트 심사 중에는 중복 요청할 수 없습니다.
+                  업데이트 검사 중에는 중복 요청할 수 없습니다.
                 </p>
                 <p className="mt-1.5 text-sm leading-6 text-slate-600">
-                  내 도구의 상태 배지나 업데이트 심사 보기 버튼을 선택하면 현재 진행 내역으로 바로
+                  내 도구의 상태 배지나 업데이트 검사 보기 버튼을 선택하면 현재 진행 내역으로 바로
                   이동합니다.
                 </p>
               </div>

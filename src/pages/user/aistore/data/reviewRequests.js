@@ -16,15 +16,15 @@ export const MOCK_TOOL_UPDATE_REVIEW = {
   previousVersion: '1.2.0',
   version: '1.3.0',
   updateNotes: '표 자동 생성 기능을 추가하고 문서 내보내기 속도를 개선했습니다.',
-  status: '심사 진행중',
+  status: '검사 진행중',
 };
 
 const reviewStatusAliases = {
   '등록 대기': '검사 대기',
   '제출 준비': '검사 대기',
   '승인 대기': '검사 대기',
-  '검사 중': '심사 진행중',
-  '검토 중': '심사 진행중',
+  '검사 중': '검사 진행중',
+  '검토 중': '검사 진행중',
   '보완 필요': '반려',
   '등록 완료': '승인 완료',
 };
@@ -66,7 +66,7 @@ function isReviewForTool(review, tool) {
 
 export function getActiveToolUpdateReview(tool, reviews = getToolUpdateReviews()) {
   return reviews.find(
-    review => isReviewForTool(review, tool) && ['검사 대기', '심사 진행중'].includes(review.status)
+    review => isReviewForTool(review, tool) && ['검사 대기', '검사 진행중'].includes(review.status)
   );
 }
 

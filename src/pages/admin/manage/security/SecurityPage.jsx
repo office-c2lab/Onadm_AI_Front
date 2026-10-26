@@ -5,14 +5,14 @@ import { ToolAvatar } from '../components.jsx';
 import { appRecords, reviewRequests } from '../data.js';
 import AdminReviewProgress from './AdminReviewProgress.jsx';
 
-const tabs = ['전체', '검사 대기', '심사 진행중', '승인 완료', '반려'];
+const tabs = ['전체', '검사 대기', '검사 진행중', '승인 완료', '반려'];
 const appsById = new Map(appRecords.map(app => [app.id, app]));
 
 function getReviewStatus(item) {
   if (item.scan === '대기') return '검사 대기';
   if (item.approval === '승인') return '승인 완료';
   if (['반려', '보완 필요'].includes(item.approval)) return '반려';
-  return '심사 진행중';
+  return '검사 진행중';
 }
 
 function ReviewStatus({ status }) {
@@ -21,7 +21,7 @@ function ReviewStatus({ status }) {
       ? 'bg-emerald-50 text-emerald-700'
       : status === '반려'
         ? 'bg-red-50 text-red-700'
-        : status === '심사 진행중'
+        : status === '검사 진행중'
           ? 'bg-blue-50 text-blue-700'
           : 'bg-slate-100 text-slate-700';
 
@@ -71,12 +71,12 @@ export default function SecurityPage() {
         value={search}
         onSearchChange={setSearch}
         placeholder="도구명, 요청 ID, 요청자 또는 부서 검색"
-        ariaLabel="심사 요청 검색"
+        ariaLabel="검사 요청 검색"
       />
 
       <nav
         className="mt-5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        aria-label="심사 관리 상태"
+        aria-label="검사 관리 상태"
       >
         <div className="flex w-max min-w-full justify-start gap-1">
           {tabs.map(tab => (
@@ -164,7 +164,7 @@ export default function SecurityPage() {
           <div className="flex min-h-[220px] flex-col items-center justify-center px-6 py-10 text-center">
             <ClipboardList size={30} className="text-slate-300" />
             <h3 className="mt-4 text-sm font-semibold text-slate-900">
-              {keyword ? '검색 조건에 맞는 심사 요청이 없습니다.' : `${activeTab} 요청이 없습니다.`}
+              {keyword ? '검색 조건에 맞는 검사 요청이 없습니다.' : `${activeTab} 요청이 없습니다.`}
             </h3>
             <p className="mt-1 text-xs text-slate-500">다른 상태나 검색 조건을 확인해 보세요.</p>
           </div>
