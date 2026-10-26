@@ -40,7 +40,7 @@ const defaultSections = [
     name: '신규 등록 도구',
     description: '최근 승인된 도구를 자동으로 보여줍니다.',
     automatic: true,
-    limit: 5,
+    limit: 6,
     toolIds: ids(publishedItems.slice(0, 5)),
   },
 ];
@@ -101,6 +101,7 @@ export function getCatalogSections() {
     if (normalized.id === 'promotions' && normalized.name === '상단 프로모션') {
       normalized.name = '상단 배너';
     }
+    if (normalized.id !== 'promotions') normalized.limit = 6;
     return normalized;
   });
 }
@@ -108,7 +109,16 @@ export function saveCatalogSections(sections) {
   window.localStorage.setItem(SECTIONS_KEY, JSON.stringify(sections));
 }
 export function updateCatalogSection(section) {
-  saveCatalogSections(getCatalogSections().map(item => (item.id === section.id ? section : item)));
+  const sections = getCatalogSections();
+  const exists = sections.some(item => item.id === section.id);
+  saveCatalogSections(
+    exists
+      ? sections.map(item => (item.id === section.id ? section : item))
+      : [...sections, section]
+  );
+}
+export function deleteCatalogSection(sectionId) {
+  saveCatalogSections(getCatalogSections().filter(item => item.id !== sectionId));
 }
 export function getCatalogCategories() {
   return read(CATEGORIES_KEY, defaultCategories).map(category => ({

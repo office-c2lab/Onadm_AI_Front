@@ -10,7 +10,7 @@ const publicationTabs = ['전체', '게시 중', '숨김'];
 export default function AppsPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const [publication, setPublication] = useState('게시 중');
+  const [publication, setPublication] = useState(publicationTabs[0]);
   const [deletedAppIds] = useState(getDeletedAppIds);
 
   const approvedApps = useMemo(

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, ClipboardList, Plus, RefreshCw } from 'lucide-react';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
@@ -162,6 +162,11 @@ export default function RegisterPage() {
   const [openUploadId, setOpenUploadId] = useState(location.state?.openReviewId ?? null);
   const [reviewAction, setReviewAction] = useState(null);
   const [cancelError, setCancelError] = useState('');
+  useEffect(() => {
+    if (!location.state) return;
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate]);
+
   const cancelUpload = () => {
     if (!reviewAction?.upload) return;
     try {

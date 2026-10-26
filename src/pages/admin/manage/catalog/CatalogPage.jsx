@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronRight, GripVertical, LayoutGrid, MoreVertical, Plus, Tags } from 'lucide-react';
+import { GripVertical, LayoutGrid, MoreVertical, Plus, Tags } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
@@ -11,12 +11,14 @@ import {
   saveCatalogSections,
 } from './catalogStore.js';
 
-const tabs = ['배너 관리', '홈 진열', '카테고리'];
+const tabs = ['홈 진열', '카테고리'];
 
 export default function CatalogPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [tab, setTab] = useState(() => location.state?.catalogTab ?? '홈 진열');
+  const [tab, setTab] = useState(() =>
+    location.state?.catalogTab === '카테고리' ? '카테고리' : '홈 진열'
+  );
   const [search, setSearch] = useState('');
   const [sections, setSections] = useState(getCatalogSections);
   const [draggedSectionId, setDraggedSectionId] = useState(null);
@@ -32,13 +34,16 @@ export default function CatalogPage() {
   const visibleSections = sections.filter(section =>
     `${section.name} ${section.description}`.toLowerCase().includes(keyword)
   );
-  const displayedSections =
-    tab === '배너 관리'
-      ? visibleSections.filter(section => section.id === 'promotions')
-      : visibleSections.filter(section => section.id !== 'promotions');
+  const bannerSections = visibleSections.filter(section => section.id === 'promotions');
+  const homeSections = visibleSections.filter(section => section.id !== 'promotions');
   const visibleCategories = categories.filter(category =>
     `${category.name} ${category.description}`.toLowerCase().includes(keyword)
   );
+
+  useEffect(() => {
+    if (!location.state?.catalogTab) return;
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state?.catalogTab, navigate]);
 
   useEffect(() => {
     if (!openCategoryMenuId) return undefined;
@@ -68,7 +73,6 @@ export default function CatalogPage() {
     const to = sections.findIndex(item => item.id === targetId);
     if (from < 0 || to < 0) return;
     move(sections, setSections, saveCatalogSections, from, to);
-    setDraggedSectionId(targetId);
   };
   const saveCategories = next => {
     setCategories(next);
@@ -101,6 +105,64 @@ export default function CatalogPage() {
     }
     closeCategoryModal();
   };
+  const renderSectionList = (items, { reorderable = false, emptyMessage }) => (
+    <div className="grid gap-2">
+      {items.map(section => (
+        <article
+          key={section.id}
+          draggable={reorderable && !keyword}
+          onDragStart={event => {
+            if (!reorderable || keyword) return;
+            setDraggedSectionId(section.id);
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', section.id);
+          }}
+          onDragEnd={() => setDraggedSectionId(null)}
+          onDragEnter={() => {
+            if (reorderable && !keyword) moveSectionTo(section.id);
+          }}
+          onDragOver={event => {
+            if (reorderable && !keyword) event.preventDefault();
+          }}
+          onDrop={event => {
+            if (!reorderable) return;
+            event.preventDefault();
+            moveSectionTo(section.id);
+          }}
+          className={`group relative flex min-h-[82px] items-center gap-3 rounded-xl border border-transparent px-3 py-3 transition hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm ${
+            reorderable && !keyword ? 'cursor-grab active:cursor-grabbing' : ''
+          } hover:z-20 ${draggedSectionId === section.id ? 'z-20 border-slate-200 bg-[#f5f5f5] opacity-60 shadow-sm' : ''}`}
+        >
+          {reorderable && (
+            <span
+              className={`hidden h-9 w-7 shrink-0 place-items-center rounded-lg sm:grid ${keyword ? 'text-slate-200' : 'text-slate-400 group-hover:text-blue-500'}`}
+              title={
+                keyword ? '검색 중에는 순서를 변경할 수 없습니다.' : '카드를 드래그하여 순서 변경'
+              }
+            >
+              <GripVertical size={18} />
+            </span>
+          )}
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
+            <LayoutGrid size={20} />
+          </span>
+          <button
+            type="button"
+            onClick={() => navigate(`/admin/manage/catalog/${section.id}`)}
+            className="min-w-0 flex-1 text-left"
+          >
+            <strong className="block text-[15px] font-semibold text-slate-900">
+              {section.name}
+            </strong>
+            <span className="mt-1 block truncate text-sm text-slate-500">
+              {section.description}
+            </span>
+          </button>
+        </article>
+      ))}
+      {!items.length && <p className="py-10 text-center text-sm text-slate-400">{emptyMessage}</p>}
+    </div>
+  );
 
   return (
     <div className="space-y-5">
@@ -108,11 +170,7 @@ export default function CatalogPage() {
         value={search}
         onSearchChange={setSearch}
         placeholder={
-          tab === '배너 관리'
-            ? '배너 이름 또는 설명 검색'
-            : tab === '홈 진열'
-              ? '진열 영역 이름 또는 설명 검색'
-              : '카테고리 이름 또는 설명 검색'
+          tab === '홈 진열' ? '배너 또는 진열 영역 이름 검색' : '카테고리 이름 또는 설명 검색'
         }
         ariaLabel="스토어 진열 관리 검색"
       />
@@ -135,7 +193,11 @@ export default function CatalogPage() {
             </button>
           ))}
         </nav>
-        {tab === '카테고리' && (
+        {tab === '홈 진열' ? (
+          <AiStoreActionButton icon={Plus} onClick={() => navigate('/admin/manage/catalog/new')}>
+            홈 콘텐츠 추가
+          </AiStoreActionButton>
+        ) : (
           <AiStoreActionButton
             icon={Plus}
             onClick={() => {
@@ -151,72 +213,19 @@ export default function CatalogPage() {
       </div>
 
       {tab !== '카테고리' ? (
-        <section>
-          <div className="divide-y divide-slate-100 border-y border-slate-200">
-            {displayedSections.map(section => (
-              <article
-                key={section.id}
-                onDragOver={event => {
-                  if (tab === '홈 진열' && !keyword) event.preventDefault();
-                }}
-                onDrop={event => {
-                  if (tab !== '홈 진열') return;
-                  event.preventDefault();
-                  moveSectionTo(section.id);
-                }}
-                className={`group flex min-h-24 items-center gap-3 py-3 transition-opacity ${draggedSectionId === section.id ? 'opacity-50' : ''}`}
-              >
-                {tab === '홈 진열' && (
-                  <span
-                    draggable={!keyword}
-                    onDragStart={event => {
-                      setDraggedSectionId(section.id);
-                      event.dataTransfer.effectAllowed = 'move';
-                    }}
-                    onDragEnd={() => setDraggedSectionId(null)}
-                    className={`hidden h-9 w-7 shrink-0 place-items-center rounded-lg text-slate-300 sm:grid ${keyword ? 'cursor-default opacity-40' : 'cursor-grab hover:bg-slate-100 hover:text-slate-500 active:cursor-grabbing'}`}
-                    title={
-                      keyword ? '검색 중에는 순서를 변경할 수 없습니다.' : '드래그하여 순서 변경'
-                    }
-                  >
-                    <GripVertical size={18} />
-                  </span>
-                )}
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
-                  <LayoutGrid size={20} />
-                </span>
-                <button
-                  type="button"
-                  onClick={() => navigate(`/admin/manage/catalog/${section.id}`)}
-                  className="min-w-0 flex-1 text-left"
-                >
-                  <strong className="block text-[15px] font-semibold text-slate-900">
-                    {section.name}
-                  </strong>
-                  <span className="mt-1 block truncate text-sm text-slate-500">
-                    {section.description}
-                  </span>
-                  <span className="mt-1.5 block text-xs text-slate-400">
-                    도구 {section.toolIds.length}개 · 최대 {section.limit}개
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate(`/admin/manage/catalog/${section.id}`)}
-                  aria-label={`${section.name} 편집`}
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-blue-600"
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </article>
-            ))}
-            {!displayedSections.length && (
-              <p className="py-16 text-center text-sm text-slate-400">
-                {tab === '배너 관리'
-                  ? '검색 조건에 맞는 배너가 없습니다.'
-                  : '검색 조건에 맞는 진열 영역이 없습니다.'}
-              </p>
-            )}
+        <section className="space-y-8">
+          <div>
+            <h2 className="mb-3 text-base font-semibold text-slate-900">배너 관리</h2>
+            {renderSectionList(bannerSections, {
+              emptyMessage: '검색 조건에 맞는 배너가 없습니다.',
+            })}
+          </div>
+          <div>
+            <h2 className="mb-3 text-base font-semibold text-slate-900">홈 콘텐츠 진열</h2>
+            {renderSectionList(homeSections, {
+              reorderable: true,
+              emptyMessage: '검색 조건에 맞는 진열 영역이 없습니다.',
+            })}
           </div>
         </section>
       ) : (
