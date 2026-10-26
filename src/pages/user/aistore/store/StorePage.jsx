@@ -2,9 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import banner1 from '../../../../assets/images/banner1.png';
-import banner2 from '../../../../assets/images/banner2.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
+import { getCatalogBanners } from '../../../admin/manage/catalog/catalogStore.js';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import ToolHoverPreview from '../components/ToolHoverPreview.jsx';
 import { getAvailablePublishedTools, storeCategories, useFavorites } from '../data/manageStore.js';
@@ -129,6 +128,16 @@ export default function StorePage() {
   const [fullyVisibleCategories, setFullyVisibleCategories] = useState(storeCategories);
   const { favorites, toggleFavorite } = useFavorites();
   const availableTools = useMemo(() => getAvailablePublishedTools(), []);
+  const storeBanners = useMemo(
+    () =>
+      getCatalogBanners()
+        .map(banner => ({
+          ...banner,
+          tool: availableTools.find(tool => tool.id === banner.toolId),
+        }))
+        .filter(banner => banner.tool),
+    [availableTools]
+  );
   const openTool = tool => navigate(`/user/aistore/store/${tool.id}`);
   const showCategory = category => {
     setSearch('');
@@ -283,88 +292,69 @@ export default function StorePage() {
         )}
       </div>
 
-      {isDefaultView && availableTools.length >= 4 && (
+      {isDefaultView && storeBanners.length > 0 && (
         <section
-          className="mt-3 grid gap-2 lg:aspect-[4.8/1] lg:grid-cols-[1.35fr_1fr]"
+          className="mt-3 grid auto-rows-[110px] gap-2 sm:grid-cols-2 lg:grid-cols-4"
           aria-label="추천 프로모션"
         >
-          <button
-            type="button"
-            onClick={() => openTool(availableTools[0])}
-            className="group relative min-h-[220px] overflow-hidden rounded-lg text-left shadow-sm lg:min-h-0"
-          >
-            <img
-              src={banner1}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.015]"
-            />
-            <span className="absolute inset-0 bg-gradient-to-r from-[#102e65]/40 via-transparent to-transparent" />
-            <span className="relative flex h-full flex-col items-start justify-center px-7 text-white md:px-8">
-              <span className="rounded-full bg-blue-500 px-2 py-1 text-[11px] font-semibold text-white">
-                AI Report Agent
-              </span>
-              <strong className="mt-2.5 text-xl font-bold tracking-tight md:text-2xl">
-                {availableTools[0].name}
-              </strong>
-              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-800">
-                자세히 보기 <ArrowRight size={14} />
-              </span>
-            </span>
-          </button>
-
-          <div className="grid h-full gap-2 sm:grid-cols-2 lg:grid-rows-[1.35fr_1fr]">
-            <button
-              type="button"
-              onClick={() => openTool(availableTools[2])}
-              className="group relative min-h-[130px] overflow-hidden rounded-lg text-left sm:col-span-2 lg:min-h-0"
-            >
-              <img
-                src={banner2}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
-              />
-              <span className="relative flex h-full flex-col items-start justify-center px-6">
-                <span className="rounded-full bg-blue-500 px-2 py-1 text-[11px] font-semibold text-white">
-                  AI Agent
+          {storeBanners.map((banner, index) => {
+            const primary = index === 0;
+            const primaryLayout =
+              storeBanners.length === 1
+                ? 'sm:col-span-2 sm:row-span-2 lg:col-span-4'
+                : 'sm:col-span-2 sm:row-span-2';
+            const secondaryLayout =
+              storeBanners.length === 2
+                ? 'sm:col-span-2 sm:row-span-2'
+                : storeBanners.length === 3 || index === 1
+                  ? 'sm:col-span-2'
+                  : '';
+            return (
+              <button
+                key={banner.id}
+                type="button"
+                onClick={() => openTool(banner.tool)}
+                className={`group relative overflow-hidden rounded-lg bg-gradient-to-br from-blue-950 to-blue-600 text-left shadow-sm ${
+                  primary ? `min-h-[220px] ${primaryLayout}` : `min-h-[110px] ${secondaryLayout}`
+                }`}
+              >
+                {banner.image ? (
+                  <img
+                    src={banner.image}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                  />
+                ) : (
+                  <span className="absolute right-5 bottom-4 opacity-80">
+                    <StoreToolIcon tool={banner.tool} promo />
+                  </span>
+                )}
+                <span className="absolute inset-0 bg-gradient-to-r from-slate-950/65 via-slate-950/25 to-transparent" />
+                <span
+                  className={`relative flex h-full flex-col items-start justify-center text-white ${primary ? 'px-7 md:px-8' : 'px-5'}`}
+                >
+                  <span className="rounded-full bg-blue-500 px-2 py-1 text-[11px] font-semibold">
+                    {banner.tool.type}
+                  </span>
+                  <strong
+                    className={`mt-2 line-clamp-2 font-bold tracking-tight ${primary ? 'text-xl md:text-2xl' : 'text-base'}`}
+                  >
+                    {banner.title}
+                  </strong>
+                  {primary && banner.description && (
+                    <span className="mt-2 line-clamp-2 max-w-lg text-sm text-white/85">
+                      {banner.description}
+                    </span>
+                  )}
+                  {primary && (
+                    <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-800">
+                      자세히 보기 <ArrowRight size={14} />
+                    </span>
+                  )}
                 </span>
-                <strong className="mt-2 text-lg font-bold text-slate-800">
-                  {availableTools[2].name}
-                </strong>
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => openTool(availableTools[3])}
-              className="flex min-h-[100px] items-center justify-between gap-2 rounded-lg bg-gradient-to-br from-emerald-50 to-cyan-100 p-4 text-left hover:brightness-[0.98] lg:min-h-0"
-            >
-              <span className="min-w-0 flex-1">
-                <span className="rounded-full bg-emerald-500 px-2 py-1 text-[11px] font-semibold text-white">
-                  데이터 분석
-                </span>
-                <strong className="mt-2 line-clamp-2 text-base leading-5 text-slate-800">
-                  {availableTools[3].name}
-                </strong>
-              </span>
-              <StoreToolIcon tool={availableTools[3]} promo />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => openTool(availableTools[1])}
-              className="flex min-h-[100px] items-center justify-between gap-2 rounded-lg bg-gradient-to-br from-indigo-50 to-violet-100 p-4 text-left hover:brightness-[0.98] lg:min-h-0"
-            >
-              <span className="min-w-0 flex-1">
-                <span className="rounded-full bg-indigo-500 px-2 py-1 text-[11px] font-semibold text-white">
-                  생산성
-                </span>
-                <strong className="mt-2 line-clamp-2 text-base leading-5 text-slate-800">
-                  {availableTools[1].name}
-                </strong>
-              </span>
-              <StoreToolIcon tool={availableTools[1]} promo />
-            </button>
-          </div>
+              </button>
+            );
+          })}
         </section>
       )}
 

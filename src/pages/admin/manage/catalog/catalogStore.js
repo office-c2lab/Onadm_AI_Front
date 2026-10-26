@@ -1,10 +1,22 @@
 import { catalogItems } from '../data.js';
+import banner1 from '../../../../assets/images/banner1.png';
+import banner2 from '../../../../assets/images/banner2.png';
 
 const SECTIONS_KEY = 'ondam:admin:catalog-sections';
 const CATEGORIES_KEY = 'ondam:admin:catalog-categories';
+const BANNERS_KEY = 'ondam:admin:catalog-banners';
 
 const publishedItems = catalogItems.filter(item => item.publication === '게시 중');
 const ids = items => items.map(item => item.id);
+
+const defaultBanners = publishedItems.slice(0, 2).map((tool, index) => ({
+  id: `banner-${index + 1}`,
+  toolId: tool.storeId ?? tool.id,
+  title: tool.name,
+  description: tool.summary,
+  image: index === 0 ? banner1 : index === 1 ? banner2 : '',
+  imageName: index === 0 ? 'banner1.png' : index === 1 ? 'banner2.png' : '',
+}));
 
 const defaultSections = [
   {
@@ -119,6 +131,22 @@ export function updateCatalogSection(section) {
 }
 export function deleteCatalogSection(sectionId) {
   saveCatalogSections(getCatalogSections().filter(item => item.id !== sectionId));
+}
+export function getCatalogBanners() {
+  return read(BANNERS_KEY, defaultBanners).slice(0, 4);
+}
+export function saveCatalogBanners(banners) {
+  window.localStorage.setItem(BANNERS_KEY, JSON.stringify(banners.slice(0, 4)));
+}
+export function updateCatalogBanner(banner) {
+  const banners = getCatalogBanners();
+  const exists = banners.some(item => item.id === banner.id);
+  saveCatalogBanners(
+    exists ? banners.map(item => (item.id === banner.id ? banner : item)) : [...banners, banner]
+  );
+}
+export function deleteCatalogBanner(bannerId) {
+  saveCatalogBanners(getCatalogBanners().filter(item => item.id !== bannerId));
 }
 export function getCatalogCategories() {
   return read(CATEGORIES_KEY, defaultCategories).map(category => ({

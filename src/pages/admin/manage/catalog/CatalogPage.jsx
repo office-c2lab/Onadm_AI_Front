@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { GripVertical, LayoutGrid, MoreVertical, Plus, Tags } from 'lucide-react';
+import { GripVertical, ImageIcon, LayoutGrid, MoreVertical, Plus } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import categoryImage from '../../../../assets/images/category.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
 import AiStoreConfirmModal from '../../../user/aistore/components/AiStoreConfirmModal.jsx';
 import {
   getCatalogCategories,
+  getCatalogBanners,
   getCatalogSections,
+  saveCatalogBanners,
   saveCatalogCategories,
   saveCatalogSections,
 } from './catalogStore.js';
@@ -22,6 +25,8 @@ export default function CatalogPage() {
   const [search, setSearch] = useState('');
   const [sections, setSections] = useState(getCatalogSections);
   const [draggedSectionId, setDraggedSectionId] = useState(null);
+  const [banners, setBanners] = useState(getCatalogBanners);
+  const [draggedBannerId, setDraggedBannerId] = useState(null);
   const [categories, setCategories] = useState(getCatalogCategories);
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
@@ -34,8 +39,10 @@ export default function CatalogPage() {
   const visibleSections = sections.filter(section =>
     `${section.name} ${section.description}`.toLowerCase().includes(keyword)
   );
-  const bannerSections = visibleSections.filter(section => section.id === 'promotions');
   const homeSections = visibleSections.filter(section => section.id !== 'promotions');
+  const visibleBanners = banners.filter(banner =>
+    `${banner.title} ${banner.description}`.toLowerCase().includes(keyword)
+  );
   const visibleCategories = categories.filter(category =>
     `${category.name} ${category.description}`.toLowerCase().includes(keyword)
   );
@@ -73,6 +80,13 @@ export default function CatalogPage() {
     const to = sections.findIndex(item => item.id === targetId);
     if (from < 0 || to < 0) return;
     move(sections, setSections, saveCatalogSections, from, to);
+  };
+  const moveBannerTo = targetId => {
+    if (!draggedBannerId || draggedBannerId === targetId) return;
+    const from = banners.findIndex(item => item.id === draggedBannerId);
+    const to = banners.findIndex(item => item.id === targetId);
+    if (from < 0 || to < 0) return;
+    move(banners, setBanners, saveCatalogBanners, from, to);
   };
   const saveCategories = next => {
     setCategories(next);
@@ -163,6 +177,74 @@ export default function CatalogPage() {
       {!items.length && <p className="py-10 text-center text-sm text-slate-400">{emptyMessage}</p>}
     </div>
   );
+  const renderBannerList = () => (
+    <div className="grid gap-2">
+      {visibleBanners.map(banner => (
+        <article
+          key={banner.id}
+          draggable={!keyword}
+          onDragStart={event => {
+            if (keyword) return;
+            setDraggedBannerId(banner.id);
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', banner.id);
+          }}
+          onDragEnd={() => setDraggedBannerId(null)}
+          onDragEnter={() => {
+            if (!keyword) moveBannerTo(banner.id);
+          }}
+          onDragOver={event => {
+            if (!keyword) event.preventDefault();
+          }}
+          onDrop={event => {
+            if (!keyword) event.preventDefault();
+          }}
+          className={`group relative flex min-h-[82px] items-center gap-3 rounded-xl border border-transparent px-3 py-3 transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm ${
+            keyword ? '' : 'cursor-grab active:cursor-grabbing'
+          } ${draggedBannerId === banner.id ? 'z-20 border-slate-200 bg-[#f5f5f5] opacity-60 shadow-sm' : ''}`}
+        >
+          <button
+            type="button"
+            onClick={() => navigate(`/admin/manage/catalog/banner/${banner.id}`)}
+            aria-label={`${banner.title} 배너 상세 보기`}
+            className="absolute inset-0 z-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+          />
+          <span
+            className={`pointer-events-none relative z-10 hidden h-9 w-7 shrink-0 place-items-center rounded-lg sm:grid ${keyword ? 'text-slate-200' : 'text-slate-400 group-hover:text-blue-500'}`}
+            title={
+              keyword ? '검색 중에는 순서를 변경할 수 없습니다.' : '카드를 드래그하여 순서 변경'
+            }
+          >
+            <GripVertical size={18} />
+          </span>
+          {banner.image ? (
+            <img
+              src={banner.image}
+              alt=""
+              className="pointer-events-none relative z-10 h-14 w-24 shrink-0 rounded-lg object-cover"
+            />
+          ) : (
+            <span className="pointer-events-none relative z-10 grid h-14 w-24 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600">
+              <ImageIcon size={20} />
+            </span>
+          )}
+          <span className="pointer-events-none relative z-10 min-w-0 flex-1 text-left">
+            <strong className="block truncate text-[15px] font-semibold text-slate-900">
+              {banner.title}
+            </strong>
+            <span className="mt-1 block truncate text-sm text-slate-500">
+              {banner.description || '설명 없음'}
+            </span>
+          </span>
+        </article>
+      ))}
+      {!visibleBanners.length && (
+        <p className="py-10 text-center text-sm text-slate-400">
+          {keyword ? '검색 조건에 맞는 배너가 없습니다.' : '등록된 배너가 없습니다.'}
+        </p>
+      )}
+    </div>
+  );
 
   return (
     <div className="space-y-5">
@@ -193,11 +275,7 @@ export default function CatalogPage() {
             </button>
           ))}
         </nav>
-        {tab === '홈 진열' ? (
-          <AiStoreActionButton icon={Plus} onClick={() => navigate('/admin/manage/catalog/new')}>
-            홈 콘텐츠 추가
-          </AiStoreActionButton>
-        ) : (
+        {tab === '카테고리' && (
           <AiStoreActionButton
             icon={Plus}
             onClick={() => {
@@ -215,13 +293,29 @@ export default function CatalogPage() {
       {tab !== '카테고리' ? (
         <section className="space-y-8">
           <div>
-            <h2 className="mb-3 text-base font-semibold text-slate-900">배너 관리</h2>
-            {renderSectionList(bannerSections, {
-              emptyMessage: '검색 조건에 맞는 배너가 없습니다.',
-            })}
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-base font-semibold text-slate-900">배너 관리</h2>
+              <AiStoreActionButton
+                icon={Plus}
+                disabled={banners.length >= 4}
+                title={banners.length >= 4 ? '배너는 최대 4개까지 추가할 수 있습니다.' : undefined}
+                onClick={() => navigate('/admin/manage/catalog/banner/new')}
+              >
+                배너 추가
+              </AiStoreActionButton>
+            </div>
+            {renderBannerList()}
           </div>
           <div>
-            <h2 className="mb-3 text-base font-semibold text-slate-900">홈 콘텐츠 진열</h2>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="text-base font-semibold text-slate-900">홈 콘텐츠 진열</h2>
+              <AiStoreActionButton
+                icon={Plus}
+                onClick={() => navigate('/admin/manage/catalog/new')}
+              >
+                홈 콘텐츠 추가
+              </AiStoreActionButton>
+            </div>
             {renderSectionList(homeSections, {
               reorderable: true,
               emptyMessage: '검색 조건에 맞는 진열 영역이 없습니다.',
@@ -246,9 +340,12 @@ export default function CatalogPage() {
                   aria-label={`${category.name} 상세 보기`}
                   className="absolute inset-0 z-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
                 />
-                <span className="pointer-events-none relative z-10 grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600">
-                  <Tags size={19} />
-                </span>
+                <img
+                  src={categoryImage}
+                  alt=""
+                  className="pointer-events-none relative z-10 h-12 w-12 shrink-0 object-contain"
+                  aria-hidden="true"
+                />
                 <span className="pointer-events-none relative z-10 min-w-0 flex-1">
                   <strong className="block truncate text-base font-semibold text-slate-900">
                     {category.name}
