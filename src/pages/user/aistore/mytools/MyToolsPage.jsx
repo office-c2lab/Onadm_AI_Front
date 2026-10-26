@@ -70,7 +70,7 @@ export default function MyToolsPage() {
                       </span>
                     </div>
                   </div>
-                  <span className="hidden shrink-0 items-center gap-1.5 text-xs text-slate-600 md:inline-flex">
+                  <span className="hidden shrink-0 items-center gap-1.5 text-sm text-slate-600 md:inline-flex">
                     <Download size={16} className="text-blue-600" aria-hidden="true" />
                     <span className="text-slate-500">
                       다운로드{' '}
@@ -79,7 +79,7 @@ export default function MyToolsPage() {
                       </strong>
                     </span>
                   </span>
-                  <span className="hidden shrink-0 text-xs text-slate-500 xl:inline">
+                  <span className="hidden shrink-0 text-sm text-slate-500 xl:inline">
                     등록 {tool.createdAt || tool.updatedAt || '—'} ·{' '}
                     <strong className="font-semibold text-blue-600">v{tool.version}</strong>
                   </span>

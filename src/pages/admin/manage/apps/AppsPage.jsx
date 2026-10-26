@@ -101,7 +101,7 @@ export default function AppsPage() {
                   </div>
                 </div>
                 <div className="relative z-10 flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs text-slate-500">
+                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-slate-500">
                     <Download size={15} className="text-blue-600" aria-hidden="true" />
                     다운로드{' '}
                     <strong className="font-semibold text-slate-800">

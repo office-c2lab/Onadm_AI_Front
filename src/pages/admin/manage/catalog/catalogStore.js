@@ -50,35 +50,35 @@ const defaultCategories = [
     id: 'documents',
     name: '문서·생산성',
     sourceName: '문서·생산성',
-    tags: '문서 작성, 회의·요약, 번역',
+    description: '문서 작성과 회의 요약, 번역을 돕는 도구를 모아봅니다.',
     active: true,
   },
   {
     id: 'automation',
     name: '업무 자동화',
     sourceName: '업무 자동화',
-    tags: '워크플로, 파일·정산, 사내 업무',
+    description: '반복되는 워크플로와 파일·정산 업무를 자동화합니다.',
     active: true,
   },
   {
     id: 'data',
     name: '데이터·분석',
     sourceName: '데이터·분석',
-    tags: '데이터 분석, 시각화, 리포트',
+    description: '데이터 분석과 시각화, 리포트 작성을 지원합니다.',
     active: true,
   },
   {
     id: 'development',
     name: '개발·IT',
     sourceName: '개발·IT',
-    tags: '코드 리뷰, 개발 도구, 운영',
+    description: '코드 리뷰와 개발·운영 업무에 필요한 도구를 제공합니다.',
     active: true,
   },
   {
     id: 'support',
     name: '고객·지원',
     sourceName: '고객·지원',
-    tags: '고객 지원, 문의 분류, 상담',
+    description: '고객 문의 분류와 상담 업무를 효율적으로 지원합니다.',
     active: true,
   },
 ];
@@ -113,6 +113,7 @@ export function updateCatalogSection(section) {
 export function getCatalogCategories() {
   return read(CATEGORIES_KEY, defaultCategories).map(category => ({
     ...category,
+    description: category.description ?? category.tags ?? '',
     sourceName:
       category.sourceName ??
       defaultCategories.find(item => item.id === category.id)?.sourceName ??

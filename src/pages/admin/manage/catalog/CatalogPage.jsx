@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react';
-import { ChevronRight, GripVertical, LayoutGrid, Plus, Tags } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronRight, GripVertical, LayoutGrid, MoreVertical, Plus, Tags } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
 import AiStoreConfirmModal from '../../../user/aistore/components/AiStoreConfirmModal.jsx';
-import { catalogItems } from '../data.js';
 import {
   getCatalogCategories,
   getCatalogSections,
@@ -23,7 +22,11 @@ export default function CatalogPage() {
   const [draggedSectionId, setDraggedSectionId] = useState(null);
   const [categories, setCategories] = useState(getCatalogCategories);
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
-  const [categoryDraft, setCategoryDraft] = useState({ name: '', tags: '' });
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [openCategoryMenuId, setOpenCategoryMenuId] = useState(null);
+  const categoryMenuRef = useRef(null);
+  const [categoryDraft, setCategoryDraft] = useState({ name: '', description: '' });
   const [categoryError, setCategoryError] = useState('');
   const keyword = search.trim().toLowerCase();
   const visibleSections = sections.filter(section =>
@@ -34,20 +37,24 @@ export default function CatalogPage() {
       ? visibleSections.filter(section => section.id === 'promotions')
       : visibleSections.filter(section => section.id !== 'promotions');
   const visibleCategories = categories.filter(category =>
-    `${category.name} ${category.tags}`.toLowerCase().includes(keyword)
-  );
-  const categoryCounts = useMemo(
-    () =>
-      Object.fromEntries(
-        categories.map(category => [
-          category.id,
-          catalogItems.filter(item => item.category === (category.sourceName || category.name))
-            .length,
-        ])
-      ),
-    [categories]
+    `${category.name} ${category.description}`.toLowerCase().includes(keyword)
   );
 
+  useEffect(() => {
+    if (!openCategoryMenuId) return undefined;
+    const closeOnOutside = event => {
+      if (!categoryMenuRef.current?.contains(event.target)) setOpenCategoryMenuId(null);
+    };
+    const closeOnEscape = event => {
+      if (event.key === 'Escape') setOpenCategoryMenuId(null);
+    };
+    document.addEventListener('pointerdown', closeOnOutside);
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutside);
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [openCategoryMenuId]);
   const move = (items, setItems, saveItems, from, to) => {
     const next = [...items];
     const [moved] = next.splice(from, 1);
@@ -67,25 +74,31 @@ export default function CatalogPage() {
     setCategories(next);
     saveCatalogCategories(next);
   };
-  const updateCategory = (id, changes) => {
-    saveCategories(categories.map(item => (item.id === id ? { ...item, ...changes } : item)));
-  };
   const closeCategoryModal = () => {
     setAddCategoryOpen(false);
-    setCategoryDraft({ name: '', tags: '' });
+    setEditingCategoryId(null);
+    setCategoryDraft({ name: '', description: '' });
     setCategoryError('');
   };
-  const addCategory = () => {
+  const saveCategory = () => {
     const name = categoryDraft.name.trim();
-    const tags = categoryDraft.tags.trim();
+    const description = categoryDraft.description.trim();
     if (!name) {
       setCategoryError('카테고리 이름을 입력해 주세요.');
       return;
     }
-    saveCategories([
-      ...categories,
-      { id: `category-${Date.now()}`, name, sourceName: name, tags, active: true },
-    ]);
+    if (editingCategoryId) {
+      saveCategories(
+        categories.map(item =>
+          item.id === editingCategoryId ? { ...item, name, description } : item
+        )
+      );
+    } else {
+      saveCategories([
+        ...categories,
+        { id: `category-${Date.now()}`, name, sourceName: name, description, active: true },
+      ]);
+    }
     closeCategoryModal();
   };
 
@@ -99,12 +112,12 @@ export default function CatalogPage() {
             ? '배너 이름 또는 설명 검색'
             : tab === '홈 진열'
               ? '진열 영역 이름 또는 설명 검색'
-              : '카테고리 또는 태그 검색'
+              : '카테고리 이름 또는 설명 검색'
         }
         ariaLabel="스토어 진열 관리 검색"
       />
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <nav className="flex gap-1 overflow-x-auto" aria-label="스토어 진열 관리 영역">
           {tabs.map(item => (
             <button
@@ -122,6 +135,19 @@ export default function CatalogPage() {
             </button>
           ))}
         </nav>
+        {tab === '카테고리' && (
+          <AiStoreActionButton
+            icon={Plus}
+            onClick={() => {
+              setAddCategoryOpen(true);
+              setEditingCategoryId(null);
+              setCategoryDraft({ name: '', description: '' });
+              setCategoryError('');
+            }}
+          >
+            카테고리 추가
+          </AiStoreActionButton>
+        )}
       </div>
 
       {tab !== '카테고리' ? (
@@ -195,25 +221,12 @@ export default function CatalogPage() {
         </section>
       ) : (
         <section>
-          <div className="mb-3 flex justify-end">
-            <AiStoreActionButton
-              size="small"
-              icon={Plus}
-              onClick={() => {
-                setAddCategoryOpen(true);
-                setCategoryDraft({ name: '', tags: '' });
-                setCategoryError('');
-              }}
-            >
-              카테고리 추가
-            </AiStoreActionButton>
-          </div>
-          <div className="divide-y divide-slate-100 border-y border-slate-200">
+          <div className="grid gap-2 md:grid-cols-2">
             {visibleCategories.map(category => (
-              <article key={category.id} className="flex items-center gap-3 py-4">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600">
-                  <Tags size={18} />
-                </span>
+              <article
+                key={category.id}
+                className={`group relative flex min-h-[82px] min-w-0 items-center gap-3 rounded-xl border border-transparent px-3 py-3 transition hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm ${openCategoryMenuId === category.id ? 'z-40' : 'hover:z-10 focus-within:z-20'}`}
+              >
                 <button
                   type="button"
                   onClick={() =>
@@ -221,38 +234,89 @@ export default function CatalogPage() {
                       state: { catalogTab: '카테고리' },
                     })
                   }
-                  className="grid min-w-0 flex-1 gap-1 text-left sm:grid-cols-[minmax(10rem,0.7fr)_minmax(16rem,1.3fr)] sm:items-center sm:gap-4"
-                >
-                  <strong className="truncate text-sm font-semibold text-slate-800">
+                  aria-label={`${category.name} 상세 보기`}
+                  className="absolute inset-0 z-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
+                />
+                <span className="pointer-events-none relative z-10 grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600">
+                  <Tags size={19} />
+                </span>
+                <span className="pointer-events-none relative z-10 min-w-0 flex-1">
+                  <strong className="block truncate text-base font-semibold text-slate-900">
                     {category.name}
                   </strong>
-                  <span className="truncate text-sm text-slate-500">
-                    {category.tags || '연결 태그 없음'}
+                  <span className="mt-1 block truncate text-sm text-slate-500">
+                    {category.description || '설명 없음'}
                   </span>
-                </button>
-                <span className="hidden shrink-0 text-xs text-slate-500 md:block">
-                  {categoryCounts[category.id]}개
                 </span>
-                <label className="flex shrink-0 cursor-pointer items-center gap-2">
-                  <span className="text-xs font-medium text-slate-500">
-                    {category.active ? '노출' : '숨김'}
-                  </span>
-                  <input
-                    type="checkbox"
-                    className="peer sr-only"
-                    checked={category.active}
-                    onChange={event =>
-                      updateCategory(category.id, { active: event.target.checked })
+                <div
+                  ref={openCategoryMenuId === category.id ? categoryMenuRef : undefined}
+                  className="relative z-20 shrink-0"
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenCategoryMenuId(current =>
+                        current === category.id ? null : category.id
+                      )
                     }
-                    aria-label={`${category.name} 노출`}
-                  />
-                  <span className="relative h-6 w-11 rounded-full bg-slate-200 transition peer-checked:bg-blue-600 after:absolute after:top-1 after:left-1 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" />
-                </label>
-                <ChevronRight size={18} className="shrink-0 text-slate-400" aria-hidden="true" />
+                    aria-label={`${category.name} 관리 메뉴`}
+                    aria-haspopup="menu"
+                    aria-expanded={openCategoryMenuId === category.id}
+                    className="grid h-9 w-9 place-items-center rounded-lg text-slate-500 hover:bg-white hover:text-slate-900"
+                  >
+                    <MoreVertical size={18} />
+                  </button>
+                  {openCategoryMenuId === category.id && (
+                    <div
+                      role="menu"
+                      className="absolute right-0 top-10 z-50 w-36 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
+                    >
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() =>
+                          navigate(`/admin/manage/catalog/category/${category.id}`, {
+                            state: { catalogTab: '카테고리' },
+                          })
+                        }
+                        className="flex h-9 w-full items-center gap-2 rounded-lg px-2.5 text-sm text-slate-700 hover:bg-slate-100"
+                      >
+                        상세 보기
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setOpenCategoryMenuId(null);
+                          setEditingCategoryId(category.id);
+                          setCategoryDraft({
+                            name: category.name,
+                            description: category.description,
+                          });
+                          setCategoryError('');
+                        }}
+                        className="flex h-9 w-full items-center gap-2 rounded-lg px-2.5 text-sm text-slate-700 hover:bg-slate-100"
+                      >
+                        수정
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setOpenCategoryMenuId(null);
+                          setDeleteTarget(category);
+                        }}
+                        className="flex h-9 w-full items-center gap-2 rounded-lg px-2.5 text-sm text-red-600 hover:bg-red-50"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  )}
+                </div>
               </article>
             ))}
             {!visibleCategories.length && (
-              <p className="py-16 text-center text-sm text-slate-400">
+              <p className="py-16 text-center text-sm text-slate-400 md:col-span-2">
                 검색 조건에 맞는 카테고리나 태그가 없습니다.
               </p>
             )}
@@ -261,13 +325,13 @@ export default function CatalogPage() {
       )}
 
       <AiStoreConfirmModal
-        open={addCategoryOpen}
-        title="카테고리 추가"
-        confirmLabel="추가"
+        open={addCategoryOpen || Boolean(editingCategoryId)}
+        title={editingCategoryId ? '카테고리 수정' : '카테고리 추가'}
+        confirmLabel={editingCategoryId ? '저장' : '추가'}
         confirmVariant="primary"
         error={categoryError}
         onClose={closeCategoryModal}
-        onConfirm={addCategory}
+        onConfirm={saveCategory}
       >
         <div className="grid gap-4">
           <label className="text-sm font-medium text-slate-700">
@@ -283,17 +347,31 @@ export default function CatalogPage() {
             />
           </label>
           <label className="text-sm font-medium text-slate-700">
-            연결 태그
-            <input
-              value={categoryDraft.tags}
+            설명
+            <textarea
+              value={categoryDraft.description}
               onChange={event =>
-                setCategoryDraft(current => ({ ...current, tags: event.target.value }))
+                setCategoryDraft(current => ({ ...current, description: event.target.value }))
               }
-              placeholder="예: 문서 작성, 회의·요약, 번역"
-              className="mt-2 h-11 w-full rounded-lg border border-slate-200 px-3.5 text-sm text-slate-900 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              placeholder="카테고리 설명을 입력하세요."
+              className="mt-2 min-h-24 w-full resize-y rounded-lg border border-slate-200 px-3.5 py-3 text-sm leading-6 text-slate-900 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
             />
           </label>
         </div>
+      </AiStoreConfirmModal>
+
+      <AiStoreConfirmModal
+        open={Boolean(deleteTarget)}
+        title="카테고리를 삭제하시겠습니까?"
+        confirmLabel="삭제"
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          saveCategories(categories.filter(item => item.id !== deleteTarget.id));
+          setDeleteTarget(null);
+        }}
+      >
+        <strong className="font-semibold text-slate-900">{deleteTarget?.name}</strong> 카테고리가
+        관리 목록에서 제거됩니다.
       </AiStoreConfirmModal>
     </div>
   );

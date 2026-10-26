@@ -136,7 +136,7 @@ function ReviewStatus({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ${color}`}
+      className={`inline-flex items-center rounded-md px-2.5 py-1 text-sm font-medium ${color}`}
     >
       {status}
     </span>
@@ -302,7 +302,7 @@ export default function RegisterPage() {
                       </span>
                     </span>
                   </span>
-                  <span className="hidden shrink-0 text-xs text-slate-500 md:inline">
+                  <span className="hidden shrink-0 text-sm text-slate-500 md:inline">
                     <span className="sr-only">목록 추가 </span>
                     {upload.createdAt}
                   </span>

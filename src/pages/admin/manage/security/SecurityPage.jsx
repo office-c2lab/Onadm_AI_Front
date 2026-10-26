@@ -36,7 +36,7 @@ function ReviewStatus({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ${color}`}
+      className={`inline-flex items-center rounded-md px-2.5 py-1 text-sm font-medium ${color}`}
     >
       {status}
     </span>
@@ -176,7 +176,7 @@ export default function SecurityPage() {
                         </span>
                       </span>
                     </span>
-                    <span className="pointer-events-none relative z-10 hidden shrink-0 text-xs text-slate-500 lg:inline">
+                    <span className="pointer-events-none relative z-10 hidden shrink-0 text-sm text-slate-500 lg:inline">
                       {item.submittedAt}
                     </span>
                     <span className="pointer-events-none relative z-10 flex shrink-0 items-center gap-2">
