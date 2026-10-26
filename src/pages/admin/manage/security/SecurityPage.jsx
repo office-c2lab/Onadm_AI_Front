@@ -1,234 +1,175 @@
 import { useMemo, useState } from 'react';
-import { Check, ChevronRight, CircleAlert, Clock3 } from 'lucide-react';
-import { Drawer, EmptyState, SearchField, StatusBadge, ToolAvatar } from '../components.jsx';
+import { ChevronDown, ClipboardList } from 'lucide-react';
+import SearchHeader from '../../../../components/search/SearchHeader.jsx';
+import { ToolAvatar } from '../components.jsx';
 import { appRecords, reviewRequests } from '../data.js';
-import ReviewProgress from '../../../user/aistore/components/ReviewProgress.jsx';
+import AdminReviewProgress from './AdminReviewProgress.jsx';
 
-const tabs = ['전체', '자동검사 중', '관리자 검토 필요', '심사 완료'];
-const appCategoryById = new Map(appRecords.map(app => [app.id, app.category]));
+const tabs = ['전체', '검사 대기', '심사 진행중', '승인 완료', '반려'];
+const appsById = new Map(appRecords.map(app => [app.id, app]));
 
-function getCurrentReviewStage(item) {
-  if (item.approval === '승인') return { name: '승인 및 게시', state: '완료' };
-  if (item.approval === '반려') return { name: '심사 완료', state: '반려' };
-  if (item.scan === '검사 중') return { name: '파일 제출·보안 검사', state: '진행 중' };
-  if (item.scan === '실패') return { name: '파일 제출·보안 검사', state: '확인 필요' };
-  if (item.approval === '보완 필요') return { name: '관리자 검토', state: '보완 필요' };
-  return { name: '관리자 검토', state: '대기 중' };
+function getReviewStatus(item) {
+  if (item.scan === '대기') return '검사 대기';
+  if (item.approval === '승인') return '승인 완료';
+  if (['반려', '보완 필요'].includes(item.approval)) return '반려';
+  return '심사 진행중';
 }
 
-function getReviewStageStates(item) {
-  const approved = item.approval === '승인';
-  const needsAttention = ['보완 필요', '반려'].includes(item.approval);
-  const scanState =
-    item.scan === '검사 중' ? 'running' : item.scan === '실패' ? 'failed' : 'complete';
-  const adminState = approved ? 'complete' : needsAttention ? 'failed' : 'queued';
-  return ['complete', scanState, adminState, approved ? 'complete' : 'pending'];
+function ReviewStatus({ status }) {
+  const color =
+    status === '승인 완료'
+      ? 'bg-emerald-50 text-emerald-700'
+      : status === '반려'
+        ? 'bg-red-50 text-red-700'
+        : status === '심사 진행중'
+          ? 'bg-blue-50 text-blue-700'
+          : 'bg-slate-100 text-slate-700';
+
+  return (
+    <span
+      className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ${color}`}
+    >
+      {status}
+    </span>
+  );
 }
 
 export default function SecurityPage() {
-  const [tab, setTab] = useState('관리자 검토 필요');
-  const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState(null);
-  const [requests, setRequests] = useState(reviewRequests);
-  const [notice, setNotice] = useState('');
+  const [activeTab, setActiveTab] = useState('전체');
+  const [search, setSearch] = useState('');
+  const [openRequestId, setOpenRequestId] = useState(null);
+  const requests = reviewRequests;
+  const keyword = search.trim().toLowerCase();
+
+  const tabCounts = Object.fromEntries(
+    tabs.map(tab => [
+      tab,
+      tab === '전체'
+        ? requests.length
+        : requests.filter(item => getReviewStatus(item) === tab).length,
+    ])
+  );
+
   const rows = useMemo(
     () =>
       requests.filter(item => {
-        const matches = `${item.name} ${item.id} ${item.requester}`
-          .toLowerCase()
-          .includes(query.toLowerCase());
-        if (tab === '전체') return matches;
-        if (tab === '자동검사 중') return matches && item.scan === '검사 중';
-        if (tab === '관리자 검토 필요')
-          return (
-            matches && ['대기', '보완 필요'].includes(item.approval) && item.scan !== '검사 중'
-          );
-        return matches && ['승인', '반려'].includes(item.approval);
+        const app = appsById.get(item.appId);
+        const matchesTab = activeTab === '전체' || getReviewStatus(item) === activeTab;
+        const matchesKeyword =
+          !keyword ||
+          `${item.name} ${item.id} ${item.requester} ${item.requestType} ${app?.category ?? ''}`
+            .toLowerCase()
+            .includes(keyword);
+        return matchesTab && matchesKeyword;
       }),
-    [query, requests, tab]
+    [activeTab, keyword, requests]
   );
 
-  const updateApproval = status => {
-    setRequests(current =>
-      current.map(item =>
-        item.id === selected.id ? { ...item, approval: status, assignee: '정하늘' } : item
-      )
-    );
-    setNotice(`${selected.name} 요청을 '${status}' 상태로 변경했습니다.`);
-    setSelected(null);
-  };
-
   return (
-    <div className="space-y-5">
-      {notice ? (
-        <div
-          role="status"
-          className="flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700"
-        >
-          <span>{notice}</span>
-          <button onClick={() => setNotice('')} className="text-xs font-semibold">
-            닫기
-          </button>
-        </div>
-      ) : null}
-      <div className="sticky top-0 z-20 -mx-4 bg-[#f9f9f9]/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
-        <div className="mx-auto flex max-w-xl items-center">
-          <SearchField value={query} onChange={setQuery} placeholder="앱, 요청 ID, 요청자 검색" />
-        </div>
-      </div>
+    <div className="w-full">
+      <SearchHeader
+        value={search}
+        onSearchChange={setSearch}
+        placeholder="도구명, 요청 ID, 요청자 또는 부서 검색"
+        ariaLabel="심사 요청 검색"
+      />
+
       <nav
-        aria-label="심사 관리 항목"
-        className="overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="mt-5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        aria-label="심사 관리 상태"
       >
         <div className="flex w-max min-w-full justify-start gap-1">
-          {tabs.map(item => (
+          {tabs.map(tab => (
             <button
-              key={item}
-              onClick={() => setTab(item)}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${tab === item ? 'bg-[#ededed] font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+              key={tab}
+              type="button"
+              onClick={() => {
+                setActiveTab(tab);
+                setOpenRequestId(null);
+              }}
+              aria-pressed={activeTab === tab}
+              className={`inline-flex h-8 shrink-0 items-center rounded-full px-4 text-sm transition-colors ${activeTab === tab ? 'bg-[#ededed] font-medium text-[#333]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
             >
-              {item}
+              {tab}
+              <span className="ml-1.5 text-xs tabular-nums text-slate-400">{tabCounts[tab]}</span>
             </button>
           ))}
         </div>
       </nav>
 
-      <section>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="flex items-center gap-0.5 text-[17px] font-bold text-slate-900">
-            {tab} <ChevronRight size={18} />
-          </h2>
-          <span className="text-xs text-slate-400">{rows.length}건</span>
-        </div>
+      <section className="mt-5">
         {rows.length ? (
           <div className="grid gap-2">
-            {rows.map(item => (
-              <article
-                key={item.id}
-                className="group relative flex min-h-[92px] min-w-0 flex-col gap-4 rounded-xl border border-transparent px-3 py-3 transition hover:z-10 hover:border-slate-100 hover:bg-white hover:shadow-sm sm:flex-row sm:items-center"
-              >
-                <button
-                  type="button"
-                  onClick={() => setSelected(item)}
-                  aria-label={`${item.name} 심사 상세 보기`}
-                  className="absolute inset-0 z-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
-                />
-                <div className="flex min-w-0 flex-1 items-center gap-4">
-                  <ToolAvatar
-                    type={
-                      item.name.includes('에이전트') || item.name.includes('검색')
-                        ? 'AI Agent'
-                        : 'AI App'
+            {rows.map(item => {
+              const app = appsById.get(item.appId);
+              const status = getReviewStatus(item);
+              const isOpen = openRequestId === item.id;
+
+              return (
+                <article
+                  key={item.id}
+                  className={`group relative min-w-0 rounded-xl border transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20 ${isOpen ? 'border-slate-200 bg-[#f5f5f5] shadow-sm' : 'border-transparent'}`}
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenRequestId(current => (current === item.id ? null : item.id))
                     }
-                  />
-                  <div className="min-w-0 flex-1">
-                    <strong className="block truncate text-left text-base font-semibold text-slate-900">
-                      {item.name}
-                    </strong>
-                    <span className="mt-1 block truncate text-sm text-slate-500">
-                      {appCategoryById.get(item.appId) ?? '미분류'}
+                    aria-expanded={isOpen}
+                    aria-controls={`review-detail-${item.id}`}
+                    className="flex min-h-[82px] w-full cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left"
+                  >
+                    <span className="flex min-w-0 flex-1 items-center gap-4">
+                      <ToolAvatar type={app?.type ?? 'AI App'} />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex min-w-0 items-center gap-2">
+                          <strong className="min-w-0 truncate text-base font-semibold text-slate-900">
+                            {item.name}
+                          </strong>
+                          <span
+                            className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${item.requestType === '업데이트' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-600'}`}
+                          >
+                            {item.requestType}
+                          </span>
+                        </span>
+                        <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
+                          <span className="truncate">{item.requester}</span>
+                          <span className="shrink-0 text-slate-300">·</span>
+                          <span className="shrink-0">{item.id}</span>
+                          <span className="hidden shrink-0 text-slate-300 sm:inline">·</span>
+                          <span className="hidden shrink-0 sm:inline">
+                            {app?.category ?? '미분류'}
+                          </span>
+                        </span>
+                      </span>
                     </span>
-                  </div>
-                </div>
-                <div className="relative z-10 flex min-w-0 flex-wrap items-center gap-2 text-xs sm:min-w-48 sm:justify-end">
-                  <span className="text-slate-500">{getCurrentReviewStage(item).name}</span>
-                  <StatusBadge>{getCurrentReviewStage(item).state}</StatusBadge>
-                  <span className="text-slate-400">{item.requester}</span>
-                  <span className="text-slate-400">· {item.submittedAt}</span>
-                </div>
-              </article>
-            ))}
+                    <span className="hidden shrink-0 text-xs text-slate-500 lg:inline">
+                      {item.submittedAt}
+                    </span>
+                    <span className="flex shrink-0 items-center gap-2">
+                      <ReviewStatus status={status} />
+                      <ChevronDown
+                        size={19}
+                        className={`shrink-0 text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                      />
+                    </span>
+                  </button>
+
+                  {isOpen && <AdminReviewProgress review={item} />}
+                </article>
+              );
+            })}
           </div>
         ) : (
-          <EmptyState message="이 단계에 해당하는 심사 요청이 없습니다." />
+          <div className="flex min-h-[220px] flex-col items-center justify-center px-6 py-10 text-center">
+            <ClipboardList size={30} className="text-slate-300" />
+            <h3 className="mt-4 text-sm font-semibold text-slate-900">
+              {keyword ? '검색 조건에 맞는 심사 요청이 없습니다.' : `${activeTab} 요청이 없습니다.`}
+            </h3>
+            <p className="mt-1 text-xs text-slate-500">다른 상태나 검색 조건을 확인해 보세요.</p>
+          </div>
         )}
       </section>
-
-      {selected ? (
-        <Drawer
-          title={selected.name}
-          subtitle={`${selected.id} · ${selected.requestType} · ${selected.requester}`}
-          onClose={() => setSelected(null)}
-          footer={
-            <div className="flex flex-wrap justify-end gap-2">
-              <button
-                onClick={() => updateApproval('반려')}
-                className="h-9 rounded-lg border border-red-200 px-4 text-xs font-semibold text-red-600"
-              >
-                반려
-              </button>
-              <button
-                onClick={() => updateApproval('보완 필요')}
-                className="h-9 rounded-lg border border-orange-200 px-4 text-xs font-semibold text-orange-600"
-              >
-                보완 요청
-              </button>
-              <button
-                onClick={() => updateApproval('승인')}
-                disabled={selected.scan === '실패' || selected.scan === '검사 중'}
-                className="h-9 rounded-lg bg-blue-600 px-4 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
-              >
-                승인
-              </button>
-            </div>
-          }
-        >
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              ['위험도', selected.risk],
-              ['자동검사', selected.scan],
-              ['승인 상태', selected.approval],
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-xl border border-slate-200 p-3">
-                <p className="text-[11px] text-slate-400">{label}</p>
-                <div className="mt-2">
-                  <StatusBadge>{value}</StatusBadge>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-5 rounded-xl border border-slate-200">
-            <ReviewProgress
-              upload={{
-                id: selected.id,
-                name: selected.name,
-                status:
-                  selected.approval === '승인'
-                    ? '승인 완료'
-                    : ['보완 필요', '반려'].includes(selected.approval)
-                      ? selected.approval
-                      : selected.scan === '검사 중'
-                        ? '검토 중'
-                        : '심사 대기',
-                displayLabel: `${selected.requestType} · ${selected.requester}`,
-                createdAt: selected.submittedAt,
-              }}
-              stageStates={getReviewStageStates(selected)}
-            />
-          </div>
-          <div className="mt-5 rounded-xl bg-slate-50 p-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-              <CircleAlert size={16} className="text-blue-600" /> 심사 메모
-            </div>
-            <textarea
-              className="mt-3 min-h-24 w-full resize-none rounded-lg border border-slate-200 bg-white p-3 text-sm outline-none focus:border-blue-400"
-              placeholder="승인, 보완 요청 또는 반려 사유를 입력하세요."
-            />
-            <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-400">
-              <Clock3 size={12} /> 모든 결정과 의견은 감사 로그에 기록됩니다.
-            </p>
-          </div>
-          {selected.scan === '실패' ? (
-            <p className="mt-3 flex items-center gap-2 text-xs text-red-600">
-              <CircleAlert size={14} /> 검사 실패 항목을 해결하기 전에는 승인할 수 없습니다.
-            </p>
-          ) : (
-            <p className="mt-3 flex items-center gap-2 text-xs text-emerald-600">
-              <Check size={14} /> 필수 승인 조건을 확인했습니다.
-            </p>
-          )}
-        </Drawer>
-      ) : null}
     </div>
   );
 }

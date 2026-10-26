@@ -59,7 +59,7 @@ export default function PoliciesPage() {
           {notice}
         </div>
       ) : null}
-      <div className="sticky top-0 z-20 -mx-4 bg-[#f9f9f9]/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
+      <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
         <div className="mx-auto flex max-w-xl items-center">
           <SearchField value={query} onChange={setQuery} placeholder="검사 정책 검색" />
         </div>

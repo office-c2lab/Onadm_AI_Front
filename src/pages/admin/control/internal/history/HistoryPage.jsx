@@ -345,8 +345,8 @@ export default function HistoryPage() {
       : 'xl:grid-cols-[9rem_repeat(4,minmax(0,1fr))_5.25rem]';
 
   return (
-    <div className="garim-external-root min-h-full bg-[#f9f9f9] text-[#111827]">
-      <div className="bg-[#f9f9f9]/95">
+    <div className="garim-external-root min-h-full bg-white text-[#111827]">
+      <div className="bg-white/95">
         <nav
           className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-4 overflow-x-auto border-b border-[#E2E8F0] px-[var(--app-page-x)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           aria-label="AI 요청 이력 유형"

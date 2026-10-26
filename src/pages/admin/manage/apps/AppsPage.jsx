@@ -72,7 +72,7 @@ export default function AppsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="sticky top-0 z-20 -mx-4 bg-[#f9f9f9]/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
+      <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
         <div className="mx-auto flex max-w-xl items-center">
           <SearchField value={query} onChange={setQuery} placeholder="이름, ID, 소유자 검색" />
         </div>
@@ -103,7 +103,7 @@ export default function AppsPage() {
             {rows.map(item => (
               <article
                 key={item.id}
-                className="group relative flex min-h-[82px] min-w-0 flex-wrap items-center gap-4 rounded-xl border border-transparent px-3 py-3 transition hover:z-20 hover:border-slate-100 hover:bg-white hover:shadow-sm focus-within:z-20 focus-within:border-slate-100 focus-within:bg-white"
+                className="group relative flex min-h-[82px] min-w-0 flex-wrap items-center gap-4 rounded-xl border border-transparent px-3 py-3 transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20 focus-within:border-slate-100 focus-within:bg-[#f5f5f5]"
               >
                 <button
                   type="button"

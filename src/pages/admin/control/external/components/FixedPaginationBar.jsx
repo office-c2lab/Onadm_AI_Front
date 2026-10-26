@@ -25,7 +25,7 @@ export default function FixedPaginationBar({ currentPage, totalPages, onPageChan
           z-20
           border-t
           border-[#E5E8ED]
-          bg-[#f9f9f9]
+          bg-white
           py-3
         "
       >

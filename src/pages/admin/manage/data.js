@@ -186,6 +186,21 @@ export const appRecords = [
 
 export const reviewRequests = [
   {
+    id: 'REV-1083',
+    appId: 'APP-0237',
+    name: '정산 파일 일괄 취합',
+    requestType: '신규 등록',
+    requester: '한지민 · 재무팀',
+    submittedAt: '2026.10.21 09:10',
+    elapsed: '대기',
+    priority: '보통',
+    risk: '검사 대기',
+    scan: '대기',
+    approval: '대기',
+    assignee: '미배정',
+    findings: 0,
+  },
+  {
     id: 'REV-1082',
     appId: 'APP-0240',
     name: '고객 문의 분류 에이전트',
