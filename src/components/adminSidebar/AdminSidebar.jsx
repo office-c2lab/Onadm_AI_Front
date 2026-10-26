@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
   Atom,
   PanelLeft,
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import AdminAccountMenu from './AdminAccountMenu.jsx';
+import useSidebarStore from '../../stores/sidebarStore.js';
 
 // ================================
 // 관리자 메뉴 설정
@@ -357,12 +358,9 @@ export function AdminSidebarRail({ onOpen, onNavigate }) {
 export default function AdminSidebar({ className = '', onNavigate, onClose }) {
   const location = useLocation();
 
-  // 하위 메뉴가 있는 그룹만 펼침 상태 관리
-  const [expandedMenus, setExpandedMenus] = useState(() =>
-    adminMenus
-      .filter(menu => menu.children?.length > 0 && isMenuActive(menu, location.pathname))
-      .map(menu => menu.label)
-  );
+  const expandedMenus = useSidebarStore(state => state.adminExpandedMenus);
+  const toggleMenu = useSidebarStore(state => state.toggleAdminMenu);
+  const expandMenus = useSidebarStore(state => state.expandAdminMenus);
 
   // 현재 페이지가 속한 그룹 자동 펼침
   useEffect(() => {
@@ -372,15 +370,8 @@ export default function AdminSidebar({ className = '', onNavigate, onClose }) {
 
     if (activeMenus.length === 0) return;
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setExpandedMenus(prev => [...new Set([...prev, ...activeMenus])]);
-  }, [location.pathname]);
-
-  const toggleMenu = label => {
-    setExpandedMenus(prev =>
-      prev.includes(label) ? prev.filter(item => item !== label) : [...prev, label]
-    );
-  };
+    expandMenus(activeMenus);
+  }, [expandMenus, location.pathname]);
 
   return (
     <aside

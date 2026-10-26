@@ -1,7 +1,21 @@
 import { useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, ChevronRight, GripVertical, LayoutGrid, Tags } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  ChevronRight,
+  GripVertical,
+  LayoutGrid,
+  Pencil,
+  Plus,
+  Tags,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
+import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
+import AiStoreConfirmModal from '../../../user/aistore/components/AiStoreConfirmModal.jsx';
 import { catalogItems } from '../data.js';
 import { StatusBadge } from '../components.jsx';
 import {
@@ -11,7 +25,7 @@ import {
   saveCatalogSections,
 } from './catalogStore.js';
 
-const tabs = ['홈 진열', '카테고리·태그'];
+const tabs = ['홈 진열', '카테고리'];
 
 function OrderButtons({ index, length, onMove }) {
   return (
@@ -41,6 +55,9 @@ export default function CatalogPage() {
   const [search, setSearch] = useState('');
   const [sections, setSections] = useState(getCatalogSections);
   const [categories, setCategories] = useState(getCatalogCategories);
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [categoryDraft, setCategoryDraft] = useState({ name: '', tags: '' });
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const keyword = search.trim().toLowerCase();
   const visibleSections = sections.filter(section =>
     `${section.name} ${section.description} ${section.label}`.toLowerCase().includes(keyword)
@@ -66,10 +83,34 @@ export default function CatalogPage() {
     setItems(next);
     saveItems(next);
   };
-  const updateCategory = (id, changes) => {
-    const next = categories.map(item => (item.id === id ? { ...item, ...changes } : item));
+  const saveCategories = next => {
     setCategories(next);
     saveCatalogCategories(next);
+  };
+  const updateCategory = (id, changes) => {
+    saveCategories(categories.map(item => (item.id === id ? { ...item, ...changes } : item)));
+  };
+  const startCategoryEdit = category => {
+    setEditingCategoryId(category.id);
+    setCategoryDraft({ name: category.name, tags: category.tags });
+  };
+  const cancelCategoryEdit = () => {
+    setEditingCategoryId(null);
+    setCategoryDraft({ name: '', tags: '' });
+  };
+  const saveCategoryEdit = () => {
+    const name = categoryDraft.name.trim();
+    const tags = categoryDraft.tags.trim();
+    if (!name) return;
+
+    if (editingCategoryId === 'new') {
+      saveCategories([...categories, { id: `category-${Date.now()}`, name, tags, active: true }]);
+    } else {
+      saveCategories(
+        categories.map(item => (item.id === editingCategoryId ? { ...item, name, tags } : item))
+      );
+    }
+    cancelCategoryEdit();
   };
 
   return (
@@ -92,6 +133,7 @@ export default function CatalogPage() {
               onClick={() => {
                 setTab(item);
                 setSearch('');
+                cancelCategoryEdit();
               }}
               aria-pressed={tab === item}
               className={`inline-flex h-8 shrink-0 items-center rounded-full px-4 text-sm transition-colors ${tab === item ? 'bg-[#ededed] font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
@@ -158,27 +200,98 @@ export default function CatalogPage() {
         </section>
       ) : (
         <section>
+          <div className="mb-3 flex justify-end">
+            <AiStoreActionButton
+              size="small"
+              icon={Plus}
+              onClick={() => {
+                setEditingCategoryId('new');
+                setCategoryDraft({ name: '', tags: '' });
+              }}
+            >
+              카테고리 추가
+            </AiStoreActionButton>
+          </div>
           <div className="divide-y divide-slate-100 border-y border-slate-200">
-            {visibleCategories.map((category, index) => (
-              <article key={category.id} className="flex items-center gap-3 py-4">
-                <GripVertical size={18} className="hidden shrink-0 text-slate-300 sm:block" />
+            {editingCategoryId === 'new' && (
+              <article className="flex items-center gap-3 py-4">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600">
                   <Tags size={18} />
                 </span>
                 <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-[minmax(10rem,0.7fr)_minmax(16rem,1.3fr)]">
                   <input
-                    value={category.name}
-                    onChange={event => updateCategory(category.id, { name: event.target.value })}
-                    aria-label="카테고리 이름"
-                    className="min-w-0 rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm font-semibold text-slate-800 outline-none hover:border-slate-200 focus:border-blue-400"
+                    value={categoryDraft.name}
+                    onChange={event =>
+                      setCategoryDraft(current => ({ ...current, name: event.target.value }))
+                    }
+                    placeholder="카테고리 이름"
+                    aria-label="새 카테고리 이름"
+                    autoFocus
+                    className="h-10 min-w-0 rounded-lg border border-blue-300 px-3 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
                   />
                   <input
-                    value={category.tags}
-                    onChange={event => updateCategory(category.id, { tags: event.target.value })}
-                    aria-label={`${category.name} 연결 태그`}
-                    className="min-w-0 rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm text-slate-500 outline-none hover:border-slate-200 focus:border-blue-400"
+                    value={categoryDraft.tags}
+                    onChange={event =>
+                      setCategoryDraft(current => ({ ...current, tags: event.target.value }))
+                    }
+                    placeholder="연결 태그를 쉼표로 구분해 입력"
+                    aria-label="새 카테고리 연결 태그"
+                    className="h-10 min-w-0 rounded-lg border border-slate-200 px-3 text-sm text-slate-600 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                   />
                 </div>
+                <AiStoreActionButton
+                  variant="secondary"
+                  size="compact"
+                  icon={X}
+                  onClick={cancelCategoryEdit}
+                >
+                  취소
+                </AiStoreActionButton>
+                <AiStoreActionButton
+                  size="compact"
+                  icon={Check}
+                  disabled={!categoryDraft.name.trim()}
+                  onClick={saveCategoryEdit}
+                >
+                  추가
+                </AiStoreActionButton>
+              </article>
+            )}
+            {visibleCategories.map(category => (
+              <article key={category.id} className="flex items-center gap-3 py-4">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600">
+                  <Tags size={18} />
+                </span>
+                {editingCategoryId === category.id ? (
+                  <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-[minmax(10rem,0.7fr)_minmax(16rem,1.3fr)]">
+                    <input
+                      value={categoryDraft.name}
+                      onChange={event =>
+                        setCategoryDraft(current => ({ ...current, name: event.target.value }))
+                      }
+                      aria-label="카테고리 이름 수정"
+                      autoFocus
+                      className="h-10 min-w-0 rounded-lg border border-blue-300 px-3 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-blue-100"
+                    />
+                    <input
+                      value={categoryDraft.tags}
+                      onChange={event =>
+                        setCategoryDraft(current => ({ ...current, tags: event.target.value }))
+                      }
+                      aria-label="연결 태그 수정"
+                      className="h-10 min-w-0 rounded-lg border border-slate-200 px-3 text-sm text-slate-600 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                ) : (
+                  <div className="grid min-w-0 flex-1 gap-1 sm:grid-cols-[minmax(10rem,0.7fr)_minmax(16rem,1.3fr)] sm:items-center sm:gap-4">
+                    <strong className="truncate text-sm font-semibold text-slate-800">
+                      {category.name}
+                    </strong>
+                    <span className="truncate text-sm text-slate-500">
+                      {category.tags || '연결 태그 없음'}
+                    </span>
+                  </div>
+                )}
                 <span className="hidden shrink-0 text-xs text-slate-500 md:block">
                   {categoryCounts[category.id]}개
                 </span>
@@ -197,14 +310,44 @@ export default function CatalogPage() {
                   />
                   <span className="relative h-6 w-11 rounded-full bg-slate-200 transition peer-checked:bg-blue-600 after:absolute after:top-1 after:left-1 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" />
                 </label>
-                {!keyword && (
-                  <OrderButtons
-                    index={index}
-                    length={categories.length}
-                    onMove={(from, to) =>
-                      move(categories, setCategories, saveCatalogCategories, from, to)
-                    }
-                  />
+                {editingCategoryId === category.id ? (
+                  <>
+                    <AiStoreActionButton
+                      variant="secondary"
+                      size="compact"
+                      icon={X}
+                      onClick={cancelCategoryEdit}
+                    >
+                      취소
+                    </AiStoreActionButton>
+                    <AiStoreActionButton
+                      size="compact"
+                      icon={Check}
+                      disabled={!categoryDraft.name.trim()}
+                      onClick={saveCategoryEdit}
+                    >
+                      저장
+                    </AiStoreActionButton>
+                  </>
+                ) : (
+                  <>
+                    <AiStoreActionButton
+                      variant="secondary"
+                      size="compact"
+                      icon={Pencil}
+                      onClick={() => startCategoryEdit(category)}
+                    >
+                      수정
+                    </AiStoreActionButton>
+                    <AiStoreActionButton
+                      variant="secondary"
+                      size="compact"
+                      icon={Trash2}
+                      onClick={() => setDeleteTarget(category)}
+                    >
+                      삭제
+                    </AiStoreActionButton>
+                  </>
                 )}
               </article>
             ))}
@@ -216,6 +359,21 @@ export default function CatalogPage() {
           </div>
         </section>
       )}
+
+      <AiStoreConfirmModal
+        open={Boolean(deleteTarget)}
+        title="카테고리를 삭제하시겠습니까?"
+        confirmLabel="삭제"
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          saveCategories(categories.filter(item => item.id !== deleteTarget.id));
+          if (editingCategoryId === deleteTarget.id) cancelCategoryEdit();
+          setDeleteTarget(null);
+        }}
+      >
+        <strong className="font-semibold text-slate-900">{deleteTarget?.name}</strong> 카테고리와
+        연결 태그가 관리 목록에서 제거됩니다.
+      </AiStoreConfirmModal>
     </div>
   );
 }

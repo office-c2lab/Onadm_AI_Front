@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
 import AdminSidebar, { AdminSidebarRail } from '../components/adminSidebar/AdminSidebar';
+import useSidebarStore from '../stores/sidebarStore.js';
 
 export default function AdminLayout() {
   const location = useLocation();
@@ -19,14 +19,8 @@ export default function AdminLayout() {
   const isTopFlushPage =
     location.pathname === '/admin/discover/intelligence' ||
     location.pathname.startsWith('/admin/manage');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    return window.localStorage.getItem('admin-sidebar-open') !== 'false';
-  });
-
-  const setSidebarOpen = isOpen => {
-    setIsSidebarOpen(isOpen);
-    window.localStorage.setItem('admin-sidebar-open', String(isOpen));
-  };
+  const isSidebarOpen = useSidebarStore(state => state.adminOpen);
+  const setSidebarOpen = useSidebarStore(state => state.setAdminOpen);
 
   return (
     <div className="flex min-h-screen bg-white text-[#0d0d0d]">

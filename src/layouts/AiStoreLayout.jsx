@@ -6,6 +6,7 @@ import AiStoreSidebar, {
 import SearchHeader from '../components/search/SearchHeader.jsx';
 import { useDownloads, useFavorites } from '../pages/user/aistore/data/manageStore.js';
 import { ensureAiStoreStorageVersion } from '../pages/user/aistore/data/storageMigration.js';
+import useSidebarStore from '../stores/sidebarStore.js';
 
 const libraryTabs = [
   { id: 'downloads', label: '다운로드한 도구', to: '/user/aistore/library/downloads' },
@@ -16,9 +17,8 @@ ensureAiStoreStorageVersion();
 
 export default function AiStoreLayout() {
   const { pathname } = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    return window.localStorage.getItem('ai-store-sidebar-open') !== 'false';
-  });
+  const isSidebarOpen = useSidebarStore(state => state.aiStoreOpen);
+  const setSidebarOpen = useSidebarStore(state => state.setAiStoreOpen);
   const [libraryKeyword, setLibraryKeyword] = useState('');
   const favoriteState = useFavorites();
   const downloadState = useDownloads();
@@ -26,11 +26,6 @@ export default function AiStoreLayout() {
   const libraryCounts = {
     downloads: downloadState.downloads.length,
     favorites: favoriteState.favorites.length,
-  };
-
-  const setSidebarOpen = isOpen => {
-    setIsSidebarOpen(isOpen);
-    window.localStorage.setItem('ai-store-sidebar-open', String(isOpen));
   };
 
   return (
