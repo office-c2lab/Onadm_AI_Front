@@ -13,7 +13,10 @@ const publishedItems = catalogItems.filter(item => item.publication === '게시 
 const ids = items => items.map(item => item.id);
 
 const defaultBannerImages = [banner1, banner2, banner3, banner4];
-const defaultBanners = publishedItems.slice(0, 4).map((tool, index) => ({
+const defaultBannerTools = publishedItems.slice(0, 4);
+const codeReviewTool = publishedItems.find(item => (item.storeId ?? item.id) === 'review');
+if (codeReviewTool) defaultBannerTools[2] = codeReviewTool;
+const defaultBanners = defaultBannerTools.map((tool, index) => ({
   id: `banner-${index + 1}`,
   toolId: tool.storeId ?? tool.id,
   title: tool.name,
@@ -140,16 +143,18 @@ export function getCatalogBanners() {
   const banners = read(BANNERS_KEY, defaultBanners);
   if (
     typeof window !== 'undefined' &&
-    window.localStorage.getItem(BANNERS_VERSION_KEY) !== '4-default-banners'
+    window.localStorage.getItem(BANNERS_VERSION_KEY) !== 'banner-3-code-review'
   ) {
     const migrated = [...banners];
+    const thirdBannerIndex = migrated.findIndex(item => item.id === 'banner-3');
+    if (thirdBannerIndex >= 0) migrated[thirdBannerIndex] = defaultBanners[2];
     defaultBanners.slice(2).forEach(defaultBanner => {
       if (migrated.length < 4 && !migrated.some(item => item.id === defaultBanner.id)) {
         migrated.push(defaultBanner);
       }
     });
     window.localStorage.setItem(BANNERS_KEY, JSON.stringify(migrated.slice(0, 4)));
-    window.localStorage.setItem(BANNERS_VERSION_KEY, '4-default-banners');
+    window.localStorage.setItem(BANNERS_VERSION_KEY, 'banner-3-code-review');
     return migrated.slice(0, 4);
   }
   return banners.slice(0, 4);

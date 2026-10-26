@@ -77,7 +77,7 @@ export default function CatalogPage() {
   const [draggedSectionId, setDraggedSectionId] = useState(null);
   const [banners, setBanners] = useState(getCatalogBanners);
   const [draggedBannerId, setDraggedBannerId] = useState(null);
-  const [previewOpen, setPreviewOpen] = useState(true);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [categories, setCategories] = useState(getCatalogCategories);
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
