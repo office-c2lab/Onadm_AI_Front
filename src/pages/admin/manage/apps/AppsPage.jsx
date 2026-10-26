@@ -33,6 +33,16 @@ export default function AppsPage() {
       }),
     [approvedApps, publication, query]
   );
+  const publicationCounts = Object.fromEntries(
+    publicationTabs.map(item => [
+      item,
+      item === '전체'
+        ? approvedApps.length
+        : approvedApps.filter(app =>
+            item === '숨김' ? app.publication !== '게시 중' : app.publication === item
+          ).length,
+    ])
+  );
 
   return (
     <div className="space-y-5">
@@ -53,9 +63,12 @@ export default function AppsPage() {
               type="button"
               onClick={() => setPublication(item)}
               aria-pressed={publication === item}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors ${publication === item ? 'bg-[#ededed] font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+              className={`inline-flex h-8 shrink-0 items-center rounded-full px-4 text-sm transition-colors ${publication === item ? 'bg-[#ededed] font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
             >
               {item}
+              <span className="ml-1.5 text-xs tabular-nums text-slate-400">
+                {publicationCounts[item]}
+              </span>
             </button>
           ))}
         </div>

@@ -10,9 +10,10 @@ import {
   UserRound,
   X,
 } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { appRecords, reviewRequests } from '../data.js';
 import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
+import AiStoreConfirmModal from '../../../user/aistore/components/AiStoreConfirmModal.jsx';
 import StoreToolIcon from '../../../user/aistore/components/StoreToolIcon.jsx';
 import {
   StoreToolPreviewScreen,
@@ -22,6 +23,7 @@ import {
   detailContent,
   supportedEnvironment,
 } from '../../../user/aistore/data/storeDetailContent.js';
+import { applyReviewDecision, saveReviewDecision } from './reviewDecisionStore.js';
 
 function DetailSection({ title, children }) {
   return (
@@ -32,15 +34,30 @@ function DetailSection({ title, children }) {
   );
 }
 
+function formatProcessedAt(date = new Date()) {
+  const pad = value => String(value).padStart(2, '0');
+  return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 export default function SecurityDetailPage() {
   const { reviewId } = useParams();
-  const [activePreview, setActivePreview] = useState(0);
-  const [decision, setDecision] = useState('');
-  const [rejectionOpen, setRejectionOpen] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
-  const [rejectionError, setRejectionError] = useState('');
-  const review = reviewRequests.find(item => item.id === reviewId);
+  const navigate = useNavigate();
+  const sourceReview = reviewRequests.find(item => item.id === reviewId);
+  const review = sourceReview ? applyReviewDecision(sourceReview) : null;
   const app = review ? appRecords.find(item => item.id === review.appId) : null;
+  const [activePreview, setActivePreview] = useState(0);
+  const [approvalConfirmOpen, setApprovalConfirmOpen] = useState(false);
+  const [rejectionOpen, setRejectionOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState(review?.rejectionReason ?? '');
+  const [rejectionError, setRejectionError] = useState('');
+  const decisionHistory =
+    !review || review.approval === '대기'
+      ? null
+      : {
+          result: review.approval === '승인' ? '승인 완료' : '반려',
+          processedAt: review.processedAt ?? '처리 일시 정보 없음',
+          reason: review.rejectionReason ?? '',
+        };
 
   if (!review || !app) {
     return (
@@ -84,6 +101,23 @@ export default function SecurityDetailPage() {
       ? [{ version: review.previousVersion, updatedAt: '기존 제공 버전' }]
       : []),
   ];
+  const canMakeDecision = review.scan === '통과' && review.approval === '대기';
+  const automaticReviewLabel =
+    review.scan === '통과'
+      ? '자동 심사 통과'
+      : review.scan === '대기'
+        ? '자동 심사 대기'
+        : review.scan === '심사 중'
+          ? '자동 심사 진행중'
+          : '자동 심사 확인 필요';
+  const completeReview = (result, reason = '') => {
+    saveReviewDecision(review.id, {
+      approval: result === '승인 완료' ? '승인' : '반려',
+      processedAt: formatProcessedAt(),
+      rejectionReason: reason,
+    });
+    navigate('/admin/manage/security');
+  };
 
   return (
     <div className="mx-auto w-full max-w-4xl pb-14 pt-6 text-slate-900">
@@ -114,7 +148,7 @@ export default function SecurityDetailPage() {
                   <HardDrive size={16} className="text-blue-600" /> {review.size}
                 </span>
                 <span className="inline-flex items-center gap-2">
-                  <ShieldCheck size={16} className="text-blue-600" /> 자동 심사 통과
+                  <ShieldCheck size={16} className="text-blue-600" /> {automaticReviewLabel}
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <UserRound size={16} className="text-blue-600" /> {registrantLabel}
@@ -262,21 +296,39 @@ export default function SecurityDetailPage() {
           </dl>
         </DetailSection>
 
+        <DetailSection title="심사 이력">
+          <dl className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
+            {[
+              ['처리 결과', decisionHistory?.result ?? '처리 전'],
+              ['처리 일시', decisionHistory?.processedAt ?? '—'],
+              ...(decisionHistory?.result === '반려'
+                ? [['반려 사유', decisionHistory.reason || '반려 사유 정보 없음']]
+                : []),
+            ].map(([label, value]) => (
+              <div key={label} className="grid gap-1 py-4 sm:grid-cols-[14rem_1fr] sm:gap-4">
+                <dt className="font-medium text-slate-500">{label}</dt>
+                <dd className="break-words font-medium leading-6 text-slate-800">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </DetailSection>
+
         <div className="border-t border-slate-200 py-7">
-          {decision ? (
+          {decisionHistory ? (
             <div
               role="status"
-              className={`rounded-xl px-4 py-3 text-sm font-medium ${decision === '승인 완료' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}
+              className={`rounded-xl px-4 py-3 text-sm font-medium ${decisionHistory.result === '승인 완료' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}
             >
-              <p>
-                {review.name} 심사 요청을{' '}
-                {decision === '승인 완료' ? '승인했습니다.' : '반려했습니다.'}
-              </p>
-              {decision === '반려' && rejectionReason && (
-                <p className="mt-2 font-normal leading-6 text-slate-700">
-                  반려 사유: {rejectionReason}
-                </p>
-              )}
+              {review.name} 심사 요청은{' '}
+              {decisionHistory.result === '승인 완료' ? '승인 완료되었습니다.' : '반려되었습니다.'}
+            </div>
+          ) : !canMakeDecision ? (
+            <div className="rounded-xl bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-700">
+              {review.scan === '대기'
+                ? '자동 심사를 기다리고 있습니다. 심사를 통과하면 관리자 검토를 진행할 수 있습니다.'
+                : review.scan === '심사 중'
+                  ? '자동 심사가 진행 중입니다. 완료 후 결과를 확인해 주세요.'
+                  : '자동 심사에서 확인이 필요한 항목이 발견되었습니다. 결과를 확인한 후 보완이 필요합니다.'}
             </div>
           ) : rejectionOpen ? (
             <div>
@@ -320,8 +372,10 @@ export default function SecurityDetailPage() {
                       setRejectionError('반려 사유를 입력해 주세요.');
                       return;
                     }
-                    setRejectionReason(rejectionReason.trim());
-                    setDecision('반려');
+                    const reason = rejectionReason.trim();
+                    setRejectionReason(reason);
+                    setRejectionOpen(false);
+                    completeReview('반려', reason);
                   }}
                 >
                   반려 확정
@@ -348,7 +402,7 @@ export default function SecurityDetailPage() {
                 <AiStoreActionButton
                   size="large"
                   icon={Check}
-                  onClick={() => setDecision('승인 완료')}
+                  onClick={() => setApprovalConfirmOpen(true)}
                 >
                   승인
                 </AiStoreActionButton>
@@ -357,6 +411,21 @@ export default function SecurityDetailPage() {
           )}
         </div>
       </article>
+
+      <AiStoreConfirmModal
+        open={approvalConfirmOpen}
+        title="심사 요청을 승인하시겠습니까?"
+        confirmLabel="승인"
+        confirmVariant="primary"
+        onClose={() => setApprovalConfirmOpen(false)}
+        onConfirm={() => {
+          setApprovalConfirmOpen(false);
+          completeReview('승인 완료');
+        }}
+      >
+        <strong className="font-semibold text-slate-900">{review.name}</strong>의 등록 정보와 자동
+        심사 결과를 확인했습니다. 승인하면 최종 심사가 완료됩니다.
+      </AiStoreConfirmModal>
     </div>
   );
 }

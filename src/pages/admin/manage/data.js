@@ -235,6 +235,9 @@ export const reviewRequests = [
     scan: '실패',
     approval: '보완 필요',
     assignee: '정하늘',
+    processedAt: '2026.10.19 15:08',
+    rejectionReason:
+      '문서 접근 권한 검증 범위를 보완하고, 검색 결과에 원문 출처가 항상 표시되도록 수정해 주세요.',
     findings: 4,
   },
   {
@@ -275,6 +278,7 @@ export const reviewRequests = [
     scan: '통과',
     approval: '승인',
     assignee: '정하늘',
+    processedAt: '2026.10.18 15:04',
     findings: 0,
   },
 ];

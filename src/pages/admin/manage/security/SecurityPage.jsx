@@ -4,6 +4,7 @@ import zipFileImage from '../../../../assets/images/zipfile.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import { appRecords, reviewRequests } from '../data.js';
 import AdminReviewProgress from './AdminReviewProgress.jsx';
+import { applyReviewDecision } from './reviewDecisionStore.js';
 
 const tabs = ['전체', '자동 심사', '관리자 검토', '승인 완료', '반려'];
 const appsById = new Map(appRecords.map(app => [app.id, app]));
@@ -46,7 +47,7 @@ export default function SecurityPage() {
   const [activeTab, setActiveTab] = useState('전체');
   const [search, setSearch] = useState('');
   const [openRequestId, setOpenRequestId] = useState(null);
-  const requests = reviewRequests;
+  const [requests] = useState(() => reviewRequests.map(applyReviewDecision));
   const keyword = search.trim().toLowerCase();
 
   const tabCounts = Object.fromEntries(

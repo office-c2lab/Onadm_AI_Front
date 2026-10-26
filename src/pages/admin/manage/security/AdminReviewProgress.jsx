@@ -86,7 +86,6 @@ export default function AdminReviewProgress({ review, detailTo }) {
   const [selectedOpenStep, setSelectedOpenStep] = useState(initialOpenStep);
   const isComplete = states.every(state => state === 'complete');
   const needsAttention = states.includes('failed');
-  const needsManagerReview = review.scan === '통과' && review.approval === '대기';
 
   return (
     <div
@@ -208,7 +207,7 @@ export default function AdminReviewProgress({ review, detailTo }) {
                     ? '심사 결과에서 확인이 필요한 항목이 발견되었습니다.'
                     : '자동 심사 결과를 바탕으로 관리자의 검토가 필요합니다.'}
         </p>
-        {needsManagerReview && detailTo && (
+        {detailTo && (
           <AiStoreActionButton to={detailTo} size="small">
             상세 보기
           </AiStoreActionButton>
