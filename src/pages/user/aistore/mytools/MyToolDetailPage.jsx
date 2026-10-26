@@ -9,6 +9,7 @@ import {
   HardDrive,
   RefreshCw,
   ShieldCheck,
+  UserRound,
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
@@ -129,21 +130,23 @@ export default function MyToolDetailPage() {
                 {tool.type} · {tool.category}
               </p>
               <p className="mt-4 max-w-3xl text-[15px] leading-7 text-slate-600">{tool.summary}</p>
-              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] text-slate-500">
-                <span className="inline-flex items-center gap-1.5">
-                  <FileText size={14} /> v{tool.version}
+              <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2.5 text-sm font-semibold text-slate-700">
+                <span className="inline-flex items-center gap-2">
+                  <FileText size={16} className="text-blue-600" /> v{tool.version}
                 </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <HardDrive size={14} /> {getToolDownloadSize(tool)}
+                <span className="inline-flex items-center gap-2">
+                  <HardDrive size={16} className="text-blue-600" /> {getToolDownloadSize(tool)}
                 </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <Download size={14} /> 다운로드{' '}
+                <span className="inline-flex items-center gap-2">
+                  <Download size={16} className="text-blue-600" /> 다운로드{' '}
                   {(tool.downloadCount ?? tool.usageCount ?? 0).toLocaleString('ko-KR')}회
                 </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <ShieldCheck size={14} /> 사내 등록 도구
+                <span className="inline-flex items-center gap-2">
+                  <ShieldCheck size={16} className="text-blue-600" /> 사내 등록 도구
                 </span>
-                <span>{makerLabel}</span>
+                <span className="inline-flex items-center gap-2">
+                  <UserRound size={16} className="text-blue-600" /> {makerLabel}
+                </span>
               </div>
             </div>
           </div>
