@@ -14,13 +14,14 @@ import {
   reviewSteps,
   ZIP_PREPARATION_DURATION_MS,
 } from '../data/reviewSteps.js';
+import { CURRENT_TOOL_MAKER } from '../data/reviewRequests.js';
 
 function getStepState(status, index) {
   if (status === '승인 완료') return 'complete';
-  if (status === '검사 대기') return 'pending';
+  if (status === '심사 대기') return 'pending';
   if (index < 2) return 'complete';
   if (index !== 2) return 'pending';
-  if (status === '검사 진행중') return 'running';
+  if (status === '심사 진행중') return 'running';
   if (status === '반려') return 'failed';
   return 'pending';
 }
@@ -70,7 +71,7 @@ export default function ReviewProgress({
 }) {
   const reviewStartedAt = Date.parse(upload.reviewStartedAt ?? '');
   const isAutomatedReviewRunning =
-    upload.status === '검사 진행중' && Number.isFinite(reviewStartedAt);
+    upload.status === '심사 진행중' && Number.isFinite(reviewStartedAt);
   const [clock, setClock] = useState(() => Date.now());
   const elapsed = isAutomatedReviewRunning ? Math.max(0, clock - reviewStartedAt) : 0;
   const states =
@@ -84,8 +85,13 @@ export default function ReviewProgress({
   const [hasSelectedStep, setHasSelectedStep] = useState(false);
   const openStep = hasSelectedStep ? selectedOpenStep : runningStep >= 0 ? runningStep : null;
   const isComplete = states.every(state => state === 'complete');
-  const isWaiting = upload.status === '검사 대기';
+  const isWaiting = upload.status === '심사 대기';
   const isRejected = upload.status === '반려';
+  const registrantLabel = [
+    upload.maker || CURRENT_TOOL_MAKER.maker,
+    upload.makerPosition || CURRENT_TOOL_MAKER.makerPosition,
+    upload.makerName || CURRENT_TOOL_MAKER.makerName,
+  ].join(' · ');
 
   useEffect(() => {
     if (!isAutomatedReviewRunning || elapsed >= AUTOMATED_REVIEW_DURATION_MS) return undefined;
@@ -97,17 +103,15 @@ export default function ReviewProgress({
     <div
       id={`review-detail-${upload.id}`}
       role="region"
-      aria-label={`${upload.name} 검사 진행 내역`}
+      aria-label={`${upload.name} 심사 진행 내역`}
       className="border-t border-slate-200 bg-transparent"
     >
       <div className="flex flex-wrap items-end justify-between gap-2 px-4 py-4 sm:px-6">
         <div>
           <div className="flex items-center gap-2">
-            <h4 className="text-base font-semibold text-slate-950">검사 진행 내역</h4>
+            <h4 className="text-base font-semibold text-slate-950">심사 진행 내역</h4>
           </div>
-          <p className="mt-1 text-sm text-slate-600">
-            {upload.displayLabel ?? upload.fileName} · {upload.createdAt}
-          </p>
+          <p className="mt-1 text-sm text-slate-600">{registrantLabel}</p>
         </div>
         <div className="grid shrink-0 grid-cols-[5rem_6.5rem] items-center gap-3 text-sm">
           <span className="text-right text-slate-500">
@@ -206,16 +210,16 @@ export default function ReviewProgress({
             <strong className="font-semibold">관리자 반려 사유</strong>
             <p className="mt-1 text-slate-700">
               {upload.rejectionReason ??
-                '검사 기준을 충족하지 못했습니다. 필요한 내용을 수정한 후 다시 요청해 주세요.'}
+                '심사 기준을 충족하지 못했습니다. 필요한 내용을 수정한 후 다시 요청해 주세요.'}
             </p>
           </div>
         ) : (
           <p className="min-w-0 flex-1">
             {isComplete
-              ? '모든 검사를 통과해 도구 등록이 승인되었습니다.'
+              ? '모든 심사를 통과해 도구 등록이 승인되었습니다.'
               : isWaiting
-                ? '요청이 접수되었습니다. 자동 검사가 시작되면 검사 진행중으로 변경됩니다.'
-                : '자동 검사 결과를 바탕으로 관리자가 도구의 운영 적합성을 검토하고 있습니다.'}
+                ? '요청이 접수되었습니다. 자동 심사가 시작되면 심사 진행중으로 변경됩니다.'
+                : '자동 심사 결과를 바탕으로 관리자가 도구의 운영 적합성을 검토하고 있습니다.'}
           </p>
         )}
         {isRejected ? (
@@ -241,7 +245,7 @@ export default function ReviewProgress({
           </AiStoreActionButton>
         ) : onCancel ? (
           <AiStoreActionButton variant="danger" size="small" onClick={onCancel}>
-            검사 취소
+            심사 취소
           </AiStoreActionButton>
         ) : null}
       </div>

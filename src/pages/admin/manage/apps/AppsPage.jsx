@@ -256,7 +256,7 @@ export default function AppsPage() {
           <DetailSection title="관리 정보">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {[
-                ['보안검사', selected.scan],
+                ['보안 심사', selected.scan],
                 ['관리자 승인', selected.approval],
                 ['운영 상태', selected.operation],
                 ['스토어 게시', selected.publication === '게시 중' ? '게시 중' : '숨김'],

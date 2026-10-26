@@ -13,7 +13,7 @@ const settingGroups = [
   {
     icon: ScanSearch,
     title: '위험도·차단 기준',
-    description: '검사 항목별 위험도와 자동 차단 조건',
+    description: '심사 항목별 위험도와 자동 차단 조건',
     value: '차단 규칙 7개',
   },
   {
@@ -61,7 +61,7 @@ export default function PoliciesPage() {
       ) : null}
       <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
         <div className="mx-auto flex max-w-xl items-center">
-          <SearchField value={query} onChange={setQuery} placeholder="검사 정책 검색" />
+          <SearchField value={query} onChange={setQuery} placeholder="심사 정책 검색" />
         </div>
       </div>
       <nav className="overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -102,7 +102,7 @@ export default function PoliciesPage() {
         <div className="mb-3 flex items-end justify-between gap-4">
           <div>
             <h2 className="flex items-center gap-0.5 text-[17px] font-bold text-slate-900">
-              검사 정책 <ChevronRight size={18} />
+              심사 정책 <ChevronRight size={18} />
             </h2>
           </div>
           <div className="flex items-center gap-3">
@@ -132,7 +132,7 @@ export default function PoliciesPage() {
               </div>
               <h3 className="mt-4 text-[15px] font-semibold text-slate-900">{item.name}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-500">
-                {item.scope} 대상 · 검사 항목 {item.checks}개
+                {item.scope} 대상 · 심사 항목 {item.checks}개
               </p>
               <div className="mt-4 flex flex-wrap gap-1.5 text-xs text-slate-600">
                 <span className="rounded-md bg-slate-100 px-2 py-1">{item.scope}</span>
@@ -154,13 +154,13 @@ export default function PoliciesPage() {
         </div>
         {!visiblePolicies.length ? (
           <p className="py-16 text-center text-sm text-slate-500">
-            조건에 맞는 검사 정책이 없습니다.
+            조건에 맞는 심사 정책이 없습니다.
           </p>
         ) : null}
       </section>
       <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
         <strong>정책 변경 원칙</strong> · 시행 중인 정책은 직접 수정하지 않고 새 버전을 만들어야
-        합니다. 변경 사항을 기존 앱에 소급 적용할 경우 재검사 대상을 먼저 확인하세요.
+        합니다. 변경 사항을 기존 앱에 소급 적용할 경우 재심사 대상을 먼저 확인하세요.
       </div>
 
       {selected ? (
@@ -183,7 +183,7 @@ export default function PoliciesPage() {
             {[
               ['적용 대상', selected.scope],
               ['상태', selected.status],
-              ['검사 항목', `${selected.checks}개`],
+              ['심사 항목', `${selected.checks}개`],
               ['담당 조직', selected.owner],
             ].map(([label, value]) => (
               <div key={label} className="rounded-xl border border-slate-200 p-3">
@@ -192,14 +192,14 @@ export default function PoliciesPage() {
               </div>
             ))}
           </div>
-          <h3 className="mt-6 text-sm font-bold text-slate-900">주요 검사 규칙</h3>
+          <h3 className="mt-6 text-sm font-bold text-slate-900">주요 심사 규칙</h3>
           <div className="mt-3 divide-y divide-slate-100 rounded-xl border border-slate-200">
             {[
-              '악성 파일 및 실행 코드 검사',
+              '악성 파일 및 실행 코드 확인',
               '비밀키·개인정보 탐지',
               '외부 네트워크 연결 검토',
-              '요청 권한 최소화 검사',
-              '오픈소스 라이선스 검사',
+              '요청 권한 최소화 확인',
+              '오픈소스 라이선스 확인',
             ].map((rule, index) => (
               <div key={rule} className="flex items-center justify-between px-4 py-3">
                 <span className="text-sm text-slate-700">{rule}</span>
@@ -212,7 +212,7 @@ export default function PoliciesPage() {
             <div>
               <p className="text-sm font-semibold text-slate-800">{selected.version} · 현재</p>
               <p className="mt-1 text-xs text-slate-400">
-                {selected.updatedAt} · 외부 연결 검사 기준 강화
+                {selected.updatedAt} · 외부 연결 심사 기준 강화
               </p>
             </div>
             <div>

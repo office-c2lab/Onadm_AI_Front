@@ -80,15 +80,15 @@ export default function MyToolUpdatePage() {
     return (
       <div className="mx-auto w-full max-w-4xl py-20 text-center">
         <span
-          className={`inline-flex rounded-md px-2.5 py-1 text-xs font-medium ${activeUpdate.status === '검사 진행중' ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600'}`}
+          className={`inline-flex rounded-md px-2.5 py-1 text-xs font-medium ${activeUpdate.status === '심사 진행중' ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600'}`}
         >
           업데이트 {activeUpdate.status}
         </span>
         <h1 className="mt-4 text-xl font-semibold text-slate-900">
-          이미 업데이트 검사가 진행 중입니다.
+          이미 업데이트 심사가 진행 중입니다.
         </h1>
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          현재 요청의 검사가 끝난 후 새 업데이트를 요청할 수 있습니다.
+          현재 요청의 심사가 끝난 후 새 업데이트를 요청할 수 있습니다.
         </p>
         <div className="mt-6 flex items-center justify-center gap-2">
           <AiStoreActionButton to={`/user/aistore/mytools/${tool.id}`} variant="secondary">
@@ -98,7 +98,7 @@ export default function MyToolUpdatePage() {
             to="/user/aistore/register"
             state={{ openReviewId: activeUpdate.id, activeTab: activeUpdate.status }}
           >
-            검사 진행 내역 보기
+            심사 진행 내역 보기
           </AiStoreActionButton>
         </div>
       </div>
@@ -255,7 +255,7 @@ export default function MyToolUpdatePage() {
       ),
       createdAt: submittedAt,
       updatedAt: submittedAt,
-      status: '검사 진행중',
+      status: '심사 진행중',
       reviewStartedAt: now.toISOString(),
     };
 
@@ -264,7 +264,7 @@ export default function MyToolUpdatePage() {
       navigate('/user/aistore/register', {
         state: {
           openReviewId: request.id,
-          activeTab: '검사 진행중',
+          activeTab: '심사 중',
           submittedReview: request,
         },
       });

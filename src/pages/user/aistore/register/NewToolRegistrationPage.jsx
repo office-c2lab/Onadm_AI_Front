@@ -194,14 +194,14 @@ export default function NewToolRegistrationPage() {
       createdAt: submittedAt,
       updatedAt: submittedAt,
       versionHistory: [{ version: form.version.trim(), updatedAt: submittedAt }],
-      status: '검사 진행중',
+      status: '심사 진행중',
       reviewStartedAt: now.toISOString(),
     };
 
     try {
       addReviewRequest(request);
       navigate('/user/aistore/register', {
-        state: { openReviewId: request.id, activeTab: '검사 진행중', submittedReview: request },
+        state: { openReviewId: request.id, activeTab: '심사 중', submittedReview: request },
       });
     } catch {
       setError('승인 요청을 저장하지 못했습니다. 브라우저 저장 공간을 확인해 주세요.');
@@ -214,7 +214,7 @@ export default function NewToolRegistrationPage() {
         to="/user/aistore/register"
         className="inline-flex h-9 items-center gap-2 rounded-lg pr-3 text-sm font-medium text-slate-500 transition-colors hover:text-blue-600"
       >
-        <ArrowLeft size={16} /> 등록 및 검사로 돌아가기
+        <ArrowLeft size={16} /> 등록 및 심사로 돌아가기
       </Link>
 
       <form onSubmit={submit} noValidate className="mt-2">

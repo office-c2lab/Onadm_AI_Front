@@ -9,9 +9,9 @@ export const reviewSteps = [
     duration: '2s',
   },
   {
-    label: '파일 제출·보안 검사',
-    description: '서버에 접수된 파일의 안전성을 검사합니다.',
-    checks: ['파일 수신 및 압축 구조 확인', '악성 파일 검사', '요청 권한과 외부 연결 확인'],
+    label: '파일 제출·보안 심사',
+    description: '서버에 접수된 파일의 안전성을 심사합니다.',
+    checks: ['파일 수신 및 압축 구조 확인', '악성 파일 확인', '요청 권한과 외부 연결 확인'],
     duration: '18s',
   },
   {

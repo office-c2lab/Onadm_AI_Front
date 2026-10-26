@@ -9,8 +9,8 @@ import {
 
 const statusStyle = {
   '승인 완료': 'bg-emerald-50 text-emerald-700',
-  '검사 대기': 'bg-slate-100 text-slate-700',
-  '검사 진행중': 'bg-blue-50 text-blue-700',
+  '심사 대기': 'bg-slate-100 text-slate-700',
+  '심사 진행중': 'bg-blue-50 text-blue-700',
   반려: 'bg-red-50 text-red-600',
 };
 

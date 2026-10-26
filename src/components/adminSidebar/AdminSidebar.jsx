@@ -84,7 +84,7 @@ const adminMenus = [
         to: '/admin/manage/catalog',
       },
       {
-        label: '등록·검사 정책',
+        label: '등록·심사 정책',
         to: '/admin/manage/policies',
       },
     ],
@@ -392,11 +392,7 @@ export default function AdminSidebar({ className = '', onNavigate, onClose }) {
     >
       <header className="flex h-14 shrink-0 items-center gap-1 px-3">
         <div className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-lg px-1.5">
-          <img
-            src="/simbol.png"
-            alt=""
-            className="h-6 w-6 shrink-0 object-contain"
-          />
+          <img src="/simbol.png" alt="" className="h-6 w-6 shrink-0 object-contain" />
           <span className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-[-0.01em]">
             ONDAM Admin
           </span>

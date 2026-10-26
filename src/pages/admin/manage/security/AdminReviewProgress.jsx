@@ -8,6 +8,7 @@ import {
   LoaderCircle,
   XCircle,
 } from 'lucide-react';
+import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
 
 const adminReviewSteps = [
   {
@@ -17,15 +18,15 @@ const adminReviewSteps = [
     duration: '2s',
   },
   {
-    label: '자동 보안 검사',
-    description: '파일과 권한, 데이터 처리 항목을 자동으로 검사합니다.',
-    checks: ['악성 코드 검사', '권한 범위 확인', '데이터 처리 위험 분석'],
+    label: '자동 보안 심사',
+    description: '파일과 권한, 데이터 처리 항목을 자동으로 심사합니다.',
+    checks: ['악성 코드 확인', '권한 범위 확인', '데이터 처리 위험 분석'],
     duration: '18s',
   },
   {
     label: '관리자 검토',
-    description: '자동검사 결과와 등록 정보를 관리자가 검토합니다.',
-    checks: ['검사 결과 확인', '운영 적합성 검토', '검토 의견 기록'],
+    description: '자동 심사 결과와 등록 정보를 관리자가 검토합니다.',
+    checks: ['심사 결과 확인', '운영 적합성 검토', '검토 의견 기록'],
     duration: '—',
   },
   {
@@ -48,7 +49,7 @@ const checkLabels = { complete: '확인 완료', running: '확인 중', pending:
 
 function getStageStates(review) {
   const scanState =
-    review.scan === '검사 중'
+    review.scan === '심사 중'
       ? 'running'
       : ['실패', '경고'].includes(review.scan)
         ? 'failed'
@@ -60,7 +61,7 @@ function getStageStates(review) {
       ? 'complete'
       : ['반려', '보완 필요'].includes(review.approval)
         ? 'failed'
-        : review.scan === '검사 중' || review.scan === '대기'
+        : review.scan === '심사 중' || review.scan === '대기'
           ? 'queued'
           : 'running';
   const publishState =
@@ -76,7 +77,7 @@ function getCheckState(stepState, checkIndex) {
   return 'pending';
 }
 
-export default function AdminReviewProgress({ review }) {
+export default function AdminReviewProgress({ review, detailTo }) {
   const states = getStageStates(review);
   const completedCount = states.filter(state => state === 'complete').length;
   const runningStep = states.findIndex(state => state === 'running');
@@ -85,6 +86,7 @@ export default function AdminReviewProgress({ review }) {
   const [selectedOpenStep, setSelectedOpenStep] = useState(initialOpenStep);
   const isComplete = states.every(state => state === 'complete');
   const needsAttention = states.includes('failed');
+  const needsManagerReview = review.scan === '통과' && review.approval === '대기';
 
   return (
     <div
@@ -99,11 +101,11 @@ export default function AdminReviewProgress({ review }) {
             <h4 className="text-base font-semibold text-slate-950">심사 진행 내역</h4>
           </div>
           <p className="mt-1 text-sm text-slate-600">
-            {review.requestType} · {review.requester} · {review.submittedAt}
+            {review.registrant.department} · {review.registrant.position} · {review.registrant.name}
           </p>
         </div>
-        <div className="grid shrink-0 grid-cols-[5rem_6.5rem] items-center gap-3 text-sm">
-          <span className="text-right text-slate-500">
+        <div className="grid shrink-0 grid-cols-[max-content_6.5rem] items-center gap-3 text-sm">
+          <span className="text-right whitespace-nowrap text-slate-500">
             {isComplete ? '소요' : '경과'} {review.elapsed}
           </span>
           <span className="text-right font-semibold whitespace-nowrap text-blue-600">
@@ -200,12 +202,17 @@ export default function AdminReviewProgress({ review }) {
               ? '관리자 검토 결과 반려 처리된 요청입니다.'
               : review.approval === '보완 필요'
                 ? '등록자에게 보완을 요청한 상태입니다.'
-                : review.scan === '검사 중'
-                  ? '자동 보안 검사가 진행 중입니다.'
+                : review.scan === '심사 중'
+                  ? '자동 보안 심사가 진행 중입니다.'
                   : needsAttention
-                    ? '검사 결과에서 확인이 필요한 항목이 발견되었습니다.'
-                    : '자동검사 결과를 바탕으로 관리자의 검토가 필요합니다.'}
+                    ? '심사 결과에서 확인이 필요한 항목이 발견되었습니다.'
+                    : '자동 심사 결과를 바탕으로 관리자의 검토가 필요합니다.'}
         </p>
+        {needsManagerReview && detailTo && (
+          <AiStoreActionButton to={detailTo} size="small">
+            상세 보기
+          </AiStoreActionButton>
+        )}
       </div>
     </div>
   );

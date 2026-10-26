@@ -14,7 +14,7 @@ import AiStoreActionButton from '../components/AiStoreActionButton.jsx';
 import AiStoreConfirmModal from '../components/AiStoreConfirmModal.jsx';
 import ReviewProgress from '../components/ReviewProgress.jsx';
 
-const reviewTabs = ['전체', '검사 대기', '검사 진행중', '승인 완료', '반려'];
+const reviewTabs = ['전체', '심사 중', '승인 완료', '반려'];
 const MOCK_UPLOADS = [
   MOCK_TOOL_UPDATE_REVIEW,
   {
@@ -23,7 +23,7 @@ const MOCK_UPLOADS = [
     fileName: 'contract_review_assistant.zip',
     size: '2.4 MB',
     createdAt: '2026. 10. 20. 09:42',
-    status: '검사 진행중',
+    status: '심사 진행중',
   },
   {
     id: 'mock-inquiry-sorter',
@@ -31,7 +31,7 @@ const MOCK_UPLOADS = [
     fileName: 'inquiry_sorter_agent.zip',
     size: '1.8 MB',
     createdAt: '2026. 10. 19. 16:18',
-    status: '검사 대기',
+    status: '심사 대기',
   },
   {
     id: 'mock-meeting-summary',
@@ -98,7 +98,7 @@ const updateReviewSteps = [
   },
   {
     label: '업데이트 요청 접수',
-    description: '변경 내용을 검사 목록에 접수합니다.',
+    description: '변경 내용을 심사 목록에 접수합니다.',
     checks: ['요청 정보 저장', '아이콘 형식 확인', '검토 대기열 등록'],
     duration: '18s',
   },
@@ -130,7 +130,7 @@ function ReviewStatus({ status }) {
     ? 'bg-emerald-50 text-emerald-700'
     : isRejected
       ? 'bg-red-50 text-red-700'
-      : status === '검사 진행중'
+      : status === '심사 진행중'
         ? 'bg-blue-50 text-blue-700'
         : 'bg-slate-100 text-slate-700';
 
@@ -144,6 +144,7 @@ function ReviewStatus({ status }) {
 }
 
 function reviewStatusTab(status) {
+  if (['심사 대기', '심사 진행중'].includes(status)) return '심사 중';
   return status;
 }
 
@@ -170,7 +171,7 @@ export default function RegisterPage() {
       setReviewAction(null);
       setCancelError('');
     } catch {
-      setCancelError('검사 요청을 취소하지 못했습니다. 다시 시도해 주세요.');
+      setCancelError('심사 요청을 취소하지 못했습니다. 다시 시도해 주세요.');
     }
   };
   const keyword = search.trim().toLowerCase();
@@ -201,7 +202,7 @@ export default function RegisterPage() {
       />
 
       <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <nav className="flex flex-wrap items-center gap-1" aria-label="등록 및 검사 상태">
+        <nav className="flex flex-wrap items-center gap-1" aria-label="등록 및 심사 상태">
           {reviewTabs.map(tab => (
             <button
               key={tab}
@@ -332,11 +333,11 @@ export default function RegisterPage() {
           </div>
         ) : keyword ? (
           <p className="py-12 text-center text-sm text-slate-500">
-            검색 조건에 맞는 검사 요청이 없습니다.
+            검색 조건에 맞는 심사 요청이 없습니다.
           </p>
         ) : activeTab !== '전체' ? (
           <p className="py-12 text-center text-sm text-slate-500">
-            {activeTab} 상태의 검사 요청이 없습니다.
+            {activeTab} 상태의 심사 요청이 없습니다.
           </p>
         ) : (
           <div className="flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-10 text-center">
@@ -353,10 +354,10 @@ export default function RegisterPage() {
           open
           title={
             reviewAction.action === 'cancel'
-              ? '검사를 취소하시겠습니까?'
+              ? '심사를 취소하시겠습니까?'
               : '수정 후 다시 요청하시겠습니까?'
           }
-          confirmLabel={reviewAction.action === 'cancel' ? '검사 취소' : '수정 후 다시 요청'}
+          confirmLabel={reviewAction.action === 'cancel' ? '심사 취소' : '수정 후 다시 요청'}
           error={cancelError}
           onClose={() => {
             setReviewAction(null);
@@ -375,7 +376,7 @@ export default function RegisterPage() {
           {reviewAction.action === 'cancel' ? (
             <>
               <strong className="font-semibold text-slate-900">{reviewAction.upload.name}</strong>의
-              검사가 중단되며, 현재까지의 검사 결과는 저장되지 않습니다.
+              심사가 중단되며, 현재까지의 심사 결과는 저장되지 않습니다.
             </>
           ) : (
             <>

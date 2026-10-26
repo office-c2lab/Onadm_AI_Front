@@ -59,6 +59,7 @@ import ExternalSupportPage from '../pages/admin/control/external/support/Support
 // ================================
 import AppsPage from '../pages/admin/manage/apps/AppsPage.jsx';
 import SecurityPage from '../pages/admin/manage/security/SecurityPage.jsx';
+import SecurityDetailPage from '../pages/admin/manage/security/SecurityDetailPage.jsx';
 import ApprovalsPage from '../pages/admin/manage/approvals/ApprovalsPage.jsx';
 import CatalogPage from '../pages/admin/manage/catalog/CatalogPage.jsx';
 import ManagePoliciesPage from '../pages/admin/manage/policies/PoliciesPage.jsx';
@@ -202,6 +203,7 @@ export default function AppRouter() {
             <Route path="overview" element={<Navigate to="/admin/manage/apps" replace />} />
             <Route path="apps" element={<AppsPage />} />
             <Route path="security" element={<SecurityPage />} />
+            <Route path="security/:reviewId" element={<SecurityDetailPage />} />
             <Route path="approvals" element={<ApprovalsPage />} />
             <Route path="catalog" element={<CatalogPage />} />
             <Route path="policies" element={<ManagePoliciesPage />} />

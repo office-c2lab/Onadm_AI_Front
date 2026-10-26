@@ -1,18 +1,24 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, ClipboardList } from 'lucide-react';
+import { ChevronDown, ClipboardList, RefreshCw } from 'lucide-react';
+import zipFileImage from '../../../../assets/images/zipfile.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
-import { ToolAvatar } from '../components.jsx';
 import { appRecords, reviewRequests } from '../data.js';
 import AdminReviewProgress from './AdminReviewProgress.jsx';
 
-const tabs = ['전체', '검사 대기', '검사 진행중', '승인 완료', '반려'];
+const tabs = ['전체', '자동 심사', '관리자 검토', '승인 완료', '반려'];
 const appsById = new Map(appRecords.map(app => [app.id, app]));
 
 function getReviewStatus(item) {
-  if (item.scan === '대기') return '검사 대기';
   if (item.approval === '승인') return '승인 완료';
   if (['반려', '보완 필요'].includes(item.approval)) return '반려';
-  return '검사 진행중';
+  if (item.scan === '대기') return '심사 대기';
+  if (item.scan !== '통과') return '심사 진행중';
+  return '관리자 검토';
+}
+
+function getReviewTab(item) {
+  const status = getReviewStatus(item);
+  return ['심사 대기', '심사 진행중'].includes(status) ? '자동 심사' : status;
 }
 
 function ReviewStatus({ status }) {
@@ -21,9 +27,11 @@ function ReviewStatus({ status }) {
       ? 'bg-emerald-50 text-emerald-700'
       : status === '반려'
         ? 'bg-red-50 text-red-700'
-        : status === '검사 진행중'
-          ? 'bg-blue-50 text-blue-700'
-          : 'bg-slate-100 text-slate-700';
+        : status === '관리자 검토'
+          ? 'bg-amber-50 text-amber-700'
+          : status === '심사 진행중'
+            ? 'bg-blue-50 text-blue-700'
+            : 'bg-slate-100 text-slate-700';
 
   return (
     <span
@@ -44,9 +52,7 @@ export default function SecurityPage() {
   const tabCounts = Object.fromEntries(
     tabs.map(tab => [
       tab,
-      tab === '전체'
-        ? requests.length
-        : requests.filter(item => getReviewStatus(item) === tab).length,
+      tab === '전체' ? requests.length : requests.filter(item => getReviewTab(item) === tab).length,
     ])
   );
 
@@ -54,7 +60,7 @@ export default function SecurityPage() {
     () =>
       requests.filter(item => {
         const app = appsById.get(item.appId);
-        const matchesTab = activeTab === '전체' || getReviewStatus(item) === activeTab;
+        const matchesTab = activeTab === '전체' || getReviewTab(item) === activeTab;
         const matchesKeyword =
           !keyword ||
           `${item.name} ${item.id} ${item.requester} ${item.requestType} ${app?.category ?? ''}`
@@ -71,12 +77,12 @@ export default function SecurityPage() {
         value={search}
         onSearchChange={setSearch}
         placeholder="도구명, 요청 ID, 요청자 또는 부서 검색"
-        ariaLabel="검사 요청 검색"
+        ariaLabel="심사 요청 검색"
       />
 
       <nav
         className="mt-5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        aria-label="검사 관리 상태"
+        aria-label="심사 관리 상태"
       >
         <div className="flex w-max min-w-full justify-start gap-1">
           {tabs.map(tab => (
@@ -101,7 +107,6 @@ export default function SecurityPage() {
         {rows.length ? (
           <div className="grid gap-2">
             {rows.map(item => {
-              const app = appsById.get(item.appId);
               const status = getReviewStatus(item);
               const isOpen = openRequestId === item.id;
 
@@ -120,7 +125,18 @@ export default function SecurityPage() {
                     className="flex min-h-[82px] w-full cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left"
                   >
                     <span className="flex min-w-0 flex-1 items-center gap-4">
-                      <ToolAvatar type={app?.type ?? 'AI App'} />
+                      {item.requestType === '업데이트' ? (
+                        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
+                          <RefreshCw size={24} strokeWidth={1.8} aria-hidden="true" />
+                        </span>
+                      ) : (
+                        <img
+                          src={zipFileImage}
+                          alt=""
+                          className="h-12 w-12 shrink-0 object-contain"
+                          aria-hidden="true"
+                        />
+                      )}
                       <span className="min-w-0 flex-1">
                         <span className="flex min-w-0 items-center gap-2">
                           <strong className="min-w-0 truncate text-base font-semibold text-slate-900">
@@ -133,13 +149,21 @@ export default function SecurityPage() {
                           </span>
                         </span>
                         <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
-                          <span className="truncate">{item.requester}</span>
-                          <span className="shrink-0 text-slate-300">·</span>
-                          <span className="shrink-0">{item.id}</span>
-                          <span className="hidden shrink-0 text-slate-300 sm:inline">·</span>
-                          <span className="hidden shrink-0 sm:inline">
-                            {app?.category ?? '미분류'}
+                          <span className="truncate" title={item.fileName}>
+                            {item.fileName}
                           </span>
+                          <span className="shrink-0 text-slate-300">·</span>
+                          <span className="shrink-0">{item.size}</span>
+                          {item.requestType === '업데이트' && item.version && (
+                            <>
+                              <span className="shrink-0 text-slate-300">·</span>
+                              <span className="shrink-0 font-medium text-blue-600">
+                                {item.previousVersion
+                                  ? `v${item.previousVersion} → v${item.version}`
+                                  : `v${item.version}`}
+                              </span>
+                            </>
+                          )}
                         </span>
                       </span>
                     </span>
@@ -155,7 +179,12 @@ export default function SecurityPage() {
                     </span>
                   </button>
 
-                  {isOpen && <AdminReviewProgress review={item} />}
+                  {isOpen && (
+                    <AdminReviewProgress
+                      review={item}
+                      detailTo={`/admin/manage/security/${item.id}`}
+                    />
+                  )}
                 </article>
               );
             })}
@@ -164,7 +193,7 @@ export default function SecurityPage() {
           <div className="flex min-h-[220px] flex-col items-center justify-center px-6 py-10 text-center">
             <ClipboardList size={30} className="text-slate-300" />
             <h3 className="mt-4 text-sm font-semibold text-slate-900">
-              {keyword ? '검색 조건에 맞는 검사 요청이 없습니다.' : `${activeTab} 요청이 없습니다.`}
+              {keyword ? '검색 조건에 맞는 심사 요청이 없습니다.' : `${activeTab} 요청이 없습니다.`}
             </h3>
             <p className="mt-1 text-xs text-slate-500">다른 상태나 검색 조건을 확인해 보세요.</p>
           </div>
