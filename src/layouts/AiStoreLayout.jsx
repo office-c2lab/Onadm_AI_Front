@@ -71,7 +71,7 @@ export default function AiStoreLayout() {
                         key={tab.to}
                         to={tab.to}
                         className={({ isActive }) =>
-                          `inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-full px-4 text-sm transition-colors ${
+                          `inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-full px-4 text-base transition-colors ${
                             isActive
                               ? 'bg-[#ededed] font-medium text-[#333]'
                               : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
@@ -79,7 +79,7 @@ export default function AiStoreLayout() {
                         }
                       >
                         {tab.label}
-                        <span className="ml-1.5 text-xs tabular-nums text-slate-400">
+                        <span className="ml-1.5 text-base tabular-nums text-slate-400">
                           {libraryCounts[tab.id]}
                         </span>
                       </NavLink>

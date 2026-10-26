@@ -11,6 +11,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
+import AdminAccountMenu from './AdminAccountMenu.jsx';
 
 // ================================
 // 관리자 메뉴 설정
@@ -198,8 +199,8 @@ function SidebarGroup({ menu, expanded, onToggle, onNavigate }) {
   const active = isMenuActive(menu, location.pathname);
 
   const menuClassName = `group flex h-9 w-full items-center gap-2.5
-    rounded-lg px-2.5 text-left text-[16px]
-    transition-colors ${active ? 'bg-[#e8e8e8] ' : 'font-normal text-[#333] hover:bg-[#f1f1f1]'}`;
+    rounded-lg px-2.5 text-left text-[14px] font-normal text-[#0d0d0d]
+    transition-colors ${active ? 'bg-[#e8e8e8]' : 'hover:bg-[#ececec]'}`;
 
   const menuContent = (
     <>
@@ -269,7 +270,7 @@ export function AdminSidebarRail({ onOpen, onNavigate }) {
   return (
     <aside
       id="admin-sidebar-rail"
-      className="flex h-full min-h-0 w-12 shrink-0 flex-col
+      className="flex h-full min-h-screen w-12 shrink-0 flex-col
         border-r border-black/5 bg-white text-[#0d0d0d]"
       aria-label="접힌 관리자 메뉴"
     >
@@ -384,19 +385,21 @@ export default function AdminSidebar({ className = '', onNavigate, onClose }) {
   return (
     <aside
       id="admin-sidebar"
-      className={`flex h-full min-h-0 w-[260px] shrink-0
+      className={`flex h-full min-h-screen w-[260px] shrink-0
         flex-col border-r border-black/5 bg-white
         text-[#0d0d0d] ${className}`.trim()}
       aria-label="ONDAM AI 관리자 메뉴"
     >
-      {/* 로고 */}
-      <header className="flex h-16 shrink-0 items-center gap-1 px-3">
-        <div className="flex min-w-0 flex-1 items-center">
+      <header className="flex h-14 shrink-0 items-center gap-1 px-3">
+        <div className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-lg px-1.5">
           <img
-            src="/logo.png"
-            alt="ONDAM AI"
-            className="h-12 w-auto max-w-[165px] object-contain"
+            src="/simbol.png"
+            alt=""
+            className="h-6 w-6 shrink-0 object-contain"
           />
+          <span className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-[-0.01em]">
+            ONDAM Admin
+          </span>
         </div>
 
         <button
@@ -414,9 +417,8 @@ export default function AdminSidebar({ className = '', onNavigate, onClose }) {
         </button>
       </header>
 
-      {/* 메뉴 */}
       <div
-        className="min-h-0 flex-1 overflow-y-auto px-2 pb-4 pt-2
+        className="min-h-0 flex-1 overflow-y-auto px-2 pb-4
           [scrollbar-color:#d9d9d9_transparent]
           [scrollbar-width:thin]"
       >
@@ -433,35 +435,8 @@ export default function AdminSidebar({ className = '', onNavigate, onClose }) {
         </nav>
       </div>
 
-      {/* 관리자 계정 */}
       <div className="shrink-0 border-t border-black/5 p-2">
-        <div
-          className="flex w-full items-center gap-2.5
-            rounded-lg px-2 py-2 text-left"
-        >
-          <span
-            className="grid h-8 w-8 shrink-0 place-items-center
-              rounded-full bg-[#e3e3e3] text-[#4b4b4b]"
-          >
-            <Atom className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
-          </span>
-
-          <span className="min-w-0 flex-1">
-            <span
-              className="block truncate text-[13px]
-                font-medium leading-[18px]"
-            >
-              ONDAM AI
-            </span>
-
-            <span
-              className="block truncate text-[11px]
-                leading-4 text-[#777]"
-            >
-              Administrator
-            </span>
-          </span>
-        </div>
+        <AdminAccountMenu />
       </div>
     </aside>
   );

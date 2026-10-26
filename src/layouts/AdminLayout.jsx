@@ -29,10 +29,9 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f9f9f9] text-[#0d0d0d]">
-      {/* 관리자 사이드바 */}
+    <div className="flex min-h-screen bg-white text-[#0d0d0d]">
       <div
-        className={`sticky top-0 z-30 h-dvh shrink-0 overflow-hidden transition-[width] duration-200 ease-out ${
+        className={`sticky top-0 h-screen shrink-0 overflow-hidden transition-[width] duration-200 ease-out ${
           isSidebarOpen ? 'w-[260px]' : 'w-12'
         }`}
       >
@@ -43,9 +42,8 @@ export default function AdminLayout() {
         )}
       </div>
 
-      {/* 관리자 콘텐츠 */}
       <main
-        className="relative z-0 min-h-screen min-w-0 flex-1 bg-[#f9f9f9]"
+        className="relative min-h-screen min-w-0 flex-1 bg-white"
         style={{ '--ondam-admin-sidebar-width': isSidebarOpen ? '260px' : '48px' }}
       >
         {usesOwnPageLayout ? (
