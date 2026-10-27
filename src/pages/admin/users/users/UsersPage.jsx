@@ -2,6 +2,7 @@ import { Fragment, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import '../../control/external/garim.css';
 import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
+import { AdminInlineDetailSection as DetailSection } from '../../../../layouts/admin/AdminDetailLayout.jsx';
 import AppButton from '../../control/external/components/AppButton.jsx';
 import AppSearchField from '../../control/external/components/AppSearchField.jsx';
 import FixedPaginationBar from '../../control/external/components/FixedPaginationBar.jsx';
@@ -146,15 +147,6 @@ function TextInput({ value, onChange, type = 'text' }) {
       onChange={event => onChange(event.target.value)}
       className="h-10 w-full rounded-md border border-[#D7DDE8] bg-white px-3 text-[13px] font-medium text-[#344054] outline-none transition focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
     />
-  );
-}
-
-function DetailSection({ title, children, className = '' }) {
-  return (
-    <section className={`border-[#E3E8F2] px-5 py-5 ${className}`.trim()}>
-      <h3 className="mb-4 text-[14px] font-bold text-[#23304A]">{title}</h3>
-      <div className="space-y-3.5">{children}</div>
-    </section>
   );
 }
 

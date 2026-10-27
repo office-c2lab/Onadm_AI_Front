@@ -11,6 +11,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { AdminDetailSection } from '../../../../layouts/admin/AdminDetailLayout.jsx';
 import { appRecords } from '../data.js';
 import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
 import AiStoreConfirmModal from '../../../user/aistore/components/AiStoreConfirmModal.jsx';
@@ -28,15 +29,6 @@ import {
   getToolDownloadSize,
   supportedEnvironment,
 } from '../../../user/aistore/data/storeDetailContent.js';
-
-function DetailSection({ title, children }) {
-  return (
-    <section className="border-t border-slate-200 py-9 sm:py-10">
-      <h2 className="text-lg font-bold tracking-tight text-slate-900">{title}</h2>
-      <div className="mt-5">{children}</div>
-    </section>
-  );
-}
 
 export default function AppsDetailPage() {
   const { appId } = useParams();
@@ -90,7 +82,7 @@ export default function AppsDetailPage() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-4xl pb-14 pt-6 text-slate-900">
+    <>
       <Link
         to="/admin/manage/apps"
         className="inline-flex h-9 items-center gap-2 rounded-lg pr-3 text-sm font-medium text-slate-500 transition-colors hover:text-blue-600"
@@ -145,7 +137,7 @@ export default function AppsDetailPage() {
           </div>
         </header>
 
-        <DetailSection title="스크린샷">
+        <AdminDetailSection title="스크린샷">
           <div className="relative rounded-2xl border border-blue-100/80 bg-gradient-to-br from-sky-50 via-white to-indigo-100 px-5 py-7 sm:px-12 sm:py-10">
             <StoreToolPreviewScreen tool={tool} activeIndex={activePreview} />
             <button
@@ -184,28 +176,28 @@ export default function AppsDetailPage() {
           <p className="mt-2 text-center text-xs text-slate-500">
             화면 구성 예시 · {storePreviewTabs[activePreview]}
           </p>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="설명">
+        <AdminDetailSection title="설명">
           <div className="max-w-[52rem] space-y-4 text-[15px] leading-7 text-slate-600">
             {content.description.map(paragraph => (
               <p key={paragraph}>{paragraph}</p>
             ))}
           </div>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="주요 기능">
+        <AdminDetailSection title="주요 기능">
           <p className="max-w-[52rem] text-[15px] leading-7 text-slate-600">
             {content.features ?? sourceApp.summary}
           </p>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="사용 방법">
+        <AdminDetailSection title="사용 방법">
           <p className="max-w-[52rem] text-[15px] leading-7 text-slate-600">{content.usage}</p>
-        </DetailSection>
+        </AdminDetailSection>
 
         {sourceApp.releaseNotes?.length > 0 && (
-          <DetailSection title="업데이트 내용">
+          <AdminDetailSection title="업데이트 내용">
             <div className="max-w-[52rem]">
               <h3 className="text-sm font-semibold text-slate-800">변경 사항</h3>
               <ul className="mt-3 space-y-2 text-[15px] leading-7 text-slate-600">
@@ -217,10 +209,10 @@ export default function AppsDetailPage() {
                 ))}
               </ul>
             </div>
-          </DetailSection>
+          </AdminDetailSection>
         )}
 
-        <DetailSection title="지원 환경">
+        <AdminDetailSection title="지원 환경">
           <dl className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {supportedEnvironment.map(({ label, value, icon: Icon }) => (
               <div
@@ -235,9 +227,9 @@ export default function AppsDetailPage() {
               </div>
             ))}
           </dl>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="도구 정보">
+        <AdminDetailSection title="도구 정보">
           <dl className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {specifications.map(([label, value]) => (
               <div key={label} className="grid gap-1 py-4 sm:grid-cols-[14rem_1fr] sm:gap-4">
@@ -246,9 +238,9 @@ export default function AppsDetailPage() {
               </div>
             ))}
           </dl>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="버전 정보">
+        <AdminDetailSection title="버전 정보">
           <ol className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {versionHistory.map((item, index) => (
               <li
@@ -265,9 +257,9 @@ export default function AppsDetailPage() {
               </li>
             ))}
           </ol>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="스토어 노출">
+        <AdminDetailSection title="스토어 노출">
           <div className="flex max-w-4xl items-center justify-between gap-4 border-y border-slate-200/80 py-4">
             <div>
               <p className="text-sm font-medium text-slate-800">
@@ -291,7 +283,7 @@ export default function AppsDetailPage() {
               <span className="relative h-6 w-11 rounded-full bg-slate-200 transition peer-checked:bg-blue-600 after:absolute after:top-1 after:left-1 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" />
             </label>
           </div>
-        </DetailSection>
+        </AdminDetailSection>
 
         <div className="border-t border-slate-200 py-7">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -334,6 +326,6 @@ export default function AppsDetailPage() {
         <strong className="font-semibold text-slate-900">{sourceApp.name}</strong>이 관리자 목록과
         스토어에서 제거됩니다. 이 작업은 일반 화면에서 되돌릴 수 없습니다.
       </AiStoreConfirmModal>
-    </div>
+    </>
   );
 }

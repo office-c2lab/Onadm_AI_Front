@@ -139,7 +139,7 @@ export default function CatalogDetailPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl pb-14 pt-6 text-slate-900">
+    <>
       <Link
         to="/admin/manage/catalog"
         className="inline-flex h-9 items-center gap-2 rounded-lg pr-3 text-sm font-medium text-slate-500 hover:text-blue-600"
@@ -316,6 +316,6 @@ export default function CatalogDetailPage() {
         <strong className="font-semibold text-slate-900">{section.name}</strong> 홈 콘텐츠와 진열
         설정이 삭제됩니다.
       </AiStoreConfirmModal>
-    </div>
+    </>
   );
 }

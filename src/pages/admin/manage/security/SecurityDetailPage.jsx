@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { AdminDetailSection } from '../../../../layouts/admin/AdminDetailLayout.jsx';
 import { appRecords, reviewRequests } from '../data.js';
 import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
 import AiStoreConfirmModal from '../../../user/aistore/components/AiStoreConfirmModal.jsx';
@@ -25,15 +26,6 @@ import {
   supportedEnvironment,
 } from '../../../user/aistore/data/storeDetailContent.js';
 import { applyReviewDecision, saveReviewDecision } from './reviewDecisionStore.js';
-
-function DetailSection({ title, children }) {
-  return (
-    <section className="border-t border-slate-200 py-9 sm:py-10">
-      <h2 className="text-lg font-bold tracking-tight text-slate-900">{title}</h2>
-      <div className="mt-5">{children}</div>
-    </section>
-  );
-}
 
 function formatProcessedAt(date = new Date()) {
   const pad = value => String(value).padStart(2, '0');
@@ -121,7 +113,7 @@ export default function SecurityDetailPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl pb-14 pt-6 text-slate-900">
+    <>
       <Link
         to="/admin/manage/security"
         className="inline-flex h-9 items-center gap-2 rounded-lg pr-3 text-sm font-medium text-slate-500 transition-colors hover:text-blue-600"
@@ -170,7 +162,7 @@ export default function SecurityDetailPage() {
           </div>
         </header>
 
-        <DetailSection title="스크린샷">
+        <AdminDetailSection title="스크린샷">
           <div className="relative rounded-2xl border border-blue-100/80 bg-gradient-to-br from-sky-50 via-white to-indigo-100 px-5 py-7 sm:px-12 sm:py-10">
             <StoreToolPreviewScreen tool={previewTool} activeIndex={activePreview} />
             <button
@@ -209,28 +201,28 @@ export default function SecurityDetailPage() {
           <p className="mt-2 text-center text-xs text-slate-500">
             화면 구성 예시 · {storePreviewTabs[activePreview]}
           </p>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="설명">
+        <AdminDetailSection title="설명">
           <div className="max-w-[52rem] space-y-4 text-[15px] leading-7 text-slate-600">
             {content.description.map(paragraph => (
               <p key={paragraph}>{paragraph}</p>
             ))}
           </div>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="주요 기능">
+        <AdminDetailSection title="주요 기능">
           <p className="max-w-[52rem] text-[15px] leading-7 text-slate-600">
             {content.features ?? app.summary}
           </p>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="사용 방법">
+        <AdminDetailSection title="사용 방법">
           <p className="max-w-[52rem] text-[15px] leading-7 text-slate-600">{content.usage}</p>
-        </DetailSection>
+        </AdminDetailSection>
 
         {review.updateNotes && (
-          <DetailSection title="업데이트 내용">
+          <AdminDetailSection title="업데이트 내용">
             <div className="max-w-[52rem]">
               <h3 className="text-sm font-semibold text-slate-800">변경 사항</h3>
               <ul className="mt-3 space-y-2 text-[15px] leading-7 text-slate-600">
@@ -240,10 +232,10 @@ export default function SecurityDetailPage() {
                 </li>
               </ul>
             </div>
-          </DetailSection>
+          </AdminDetailSection>
         )}
 
-        <DetailSection title="지원 환경">
+        <AdminDetailSection title="지원 환경">
           <dl className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {supportedEnvironment.map(({ label, value, icon: Icon }) => (
               <div
@@ -258,9 +250,9 @@ export default function SecurityDetailPage() {
               </div>
             ))}
           </dl>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="도구 정보">
+        <AdminDetailSection title="도구 정보">
           <dl className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {specifications.map(([label, value]) => (
               <div key={label} className="grid gap-1 py-4 sm:grid-cols-[14rem_1fr] sm:gap-4">
@@ -269,9 +261,9 @@ export default function SecurityDetailPage() {
               </div>
             ))}
           </dl>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="버전 정보">
+        <AdminDetailSection title="버전 정보">
           <ol className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {versionHistory.map((item, index) => (
               <li
@@ -288,9 +280,9 @@ export default function SecurityDetailPage() {
               </li>
             ))}
           </ol>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="심사 요청 정보">
+        <AdminDetailSection title="심사 요청 정보">
           <dl className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {[
               ['요청 유형', review.requestType],
@@ -319,9 +311,9 @@ export default function SecurityDetailPage() {
               </div>
             ))}
           </dl>
-        </DetailSection>
+        </AdminDetailSection>
 
-        <DetailSection title="심사 이력">
+        <AdminDetailSection title="심사 이력">
           <dl className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {[
               ['처리 결과', decisionHistory?.result ?? '처리 전'],
@@ -336,7 +328,7 @@ export default function SecurityDetailPage() {
               </div>
             ))}
           </dl>
-        </DetailSection>
+        </AdminDetailSection>
 
         <div className="border-t border-slate-200 py-7">
           {decisionHistory ? (
@@ -451,6 +443,6 @@ export default function SecurityDetailPage() {
         <strong className="font-semibold text-slate-900">{review.name}</strong>의 등록 정보와 자동
         심사 결과를 확인했습니다. 승인하면 최종 심사가 완료됩니다.
       </AiStoreConfirmModal>
-    </div>
+    </>
   );
 }

@@ -6,6 +6,8 @@ import GamgikModalDemo from '../components/character/GamgikModalDemo.jsx';
 // 레이아웃
 import AiStoreLayout from '../layouts/AiStoreLayout.jsx';
 import AdminLayout from '../layouts/AdminLayout.jsx';
+import AdminDetailLayout from '../layouts/admin/AdminDetailLayout.jsx';
+import UserDetailLayout from '../layouts/user/UserDetailLayout.jsx';
 
 // ================================
 // 사용자 AI Store
@@ -106,10 +108,14 @@ export default function AppRouter() {
           <Route index element={<Navigate to="/user/aistore/store" replace />} />
 
           <Route path="store" element={<StorePage />} />
-          <Route path="store/:toolId" element={<StoreDetailPage />} />
           <Route path="mytools" element={<MyToolsPage />} />
-          <Route path="mytools/:toolId" element={<MyToolDetailPage />} />
-          <Route path="mytools/:toolId/edit" element={<MyToolUpdatePage />} />
+
+          <Route element={<UserDetailLayout />}>
+            <Route path="store/:toolId" element={<StoreDetailPage />} />
+            <Route path="mytools/:toolId" element={<MyToolDetailPage />} />
+            <Route path="mytools/:toolId/edit" element={<MyToolUpdatePage />} />
+            <Route path="register/new" element={<NewToolRegistrationPage />} />
+          </Route>
 
           {/* 라이브러리 */}
           <Route path="library">
@@ -130,7 +136,6 @@ export default function AppRouter() {
           />
 
           <Route path="register" element={<RegisterPage />} />
-          <Route path="register/new" element={<NewToolRegistrationPage />} />
           <Route path="guide" element={<GuidePage />} />
         </Route>
 
@@ -206,15 +211,18 @@ export default function AppRouter() {
             <Route index element={<Navigate to="apps" replace />} />
             <Route path="overview" element={<Navigate to="/admin/manage/apps" replace />} />
             <Route path="apps" element={<AppsPage />} />
-            <Route path="apps/:appId" element={<AppsDetailPage />} />
             <Route path="security" element={<SecurityPage />} />
-            <Route path="security/:reviewId" element={<SecurityDetailPage />} />
             <Route path="approvals" element={<ApprovalsPage />} />
             <Route path="catalog" element={<CatalogPage />} />
-            <Route path="catalog/banner/:bannerId" element={<BannerDetailPage />} />
             <Route path="catalog/category/:categoryId" element={<CategoryDetailPage />} />
-            <Route path="catalog/:sectionId" element={<CatalogDetailPage />} />
-            <Route path="policies" element={<ManagePoliciesPage />} />
+
+            <Route element={<AdminDetailLayout />}>
+              <Route path="apps/:appId" element={<AppsDetailPage />} />
+              <Route path="security/:reviewId" element={<SecurityDetailPage />} />
+              <Route path="catalog/banner/:bannerId" element={<BannerDetailPage />} />
+              <Route path="catalog/:sectionId" element={<CatalogDetailPage />} />
+              <Route path="policies" element={<ManagePoliciesPage />} />
+            </Route>
           </Route>
 
           {/* 사용자 및 권한 */}

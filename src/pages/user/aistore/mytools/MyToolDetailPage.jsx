@@ -12,6 +12,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
+import { UserDetailSection } from '../../../../layouts/user/UserDetailLayout.jsx';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import { StoreToolPreviewScreen, storePreviewTabs } from '../components/StoreToolPreviewScreen.jsx';
 import AiStoreActionButton from '../components/AiStoreActionButton.jsx';
@@ -33,15 +34,6 @@ const sampleDetailKeys = {
 };
 
 const supportEnvironmentKeys = ['audience', 'operatingSystem', 'browser', 'memory', 'other'];
-
-function DetailSection({ title, children }) {
-  return (
-    <section className="border-t border-slate-200 py-9 sm:py-10">
-      <h2 className="text-lg font-bold tracking-tight text-slate-900">{title}</h2>
-      <div className="mt-5">{children}</div>
-    </section>
-  );
-}
 
 export default function MyToolDetailPage() {
   const { toolId } = useParams();
@@ -103,7 +95,7 @@ export default function MyToolDetailPage() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-4xl pb-14 pt-6 text-slate-900">
+    <>
       <Link
         to="/user/aistore/mytools"
         className="inline-flex h-9 items-center gap-2 rounded-lg pr-3 text-sm font-medium text-slate-500 transition-colors hover:text-blue-600"
@@ -174,7 +166,7 @@ export default function MyToolDetailPage() {
           </div>
         </header>
 
-        <DetailSection title="스크린샷">
+        <UserDetailSection title="스크린샷">
           <div className="relative rounded-2xl border border-blue-100/80 bg-gradient-to-br from-sky-50 via-white to-indigo-100 px-5 py-7 sm:px-12 sm:py-10">
             {hasScreenshots ? (
               <div className="flex min-h-[250px] items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 sm:min-h-[330px]">
@@ -219,26 +211,26 @@ export default function MyToolDetailPage() {
             ))}
           </div>
           <p className="mt-2 text-center text-xs text-slate-500">화면 구성 예시 · {previewLabel}</p>
-        </DetailSection>
+        </UserDetailSection>
 
-        <DetailSection title="설명">
+        <UserDetailSection title="설명">
           <div className="max-w-[52rem] space-y-4 text-[15px] leading-7 text-slate-600">
             {content.description.map(paragraph => (
               <p key={paragraph}>{paragraph}</p>
             ))}
           </div>
-        </DetailSection>
+        </UserDetailSection>
 
-        <DetailSection title="주요 기능">
+        <UserDetailSection title="주요 기능">
           <p className="max-w-[52rem] text-[15px] leading-7 text-slate-600">{content.features}</p>
-        </DetailSection>
+        </UserDetailSection>
 
-        <DetailSection title="사용 방법">
+        <UserDetailSection title="사용 방법">
           <p className="max-w-[52rem] text-[15px] leading-7 text-slate-600">{content.usage}</p>
-        </DetailSection>
+        </UserDetailSection>
 
         {latestVersionNotes.length > 0 && (
-          <DetailSection title="업데이트 내용">
+          <UserDetailSection title="업데이트 내용">
             <div className="max-w-[52rem]">
               <h3 className="text-sm font-semibold text-slate-800">변경 사항</h3>
               <ul className="mt-3 space-y-2 text-[15px] leading-7 text-slate-600">
@@ -250,10 +242,10 @@ export default function MyToolDetailPage() {
                 ))}
               </ul>
             </div>
-          </DetailSection>
+          </UserDetailSection>
         )}
 
-        <DetailSection title="지원 환경">
+        <UserDetailSection title="지원 환경">
           <dl className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {environmentRows.map(({ label, value, icon: Icon }) => (
               <div
@@ -273,9 +265,9 @@ export default function MyToolDetailPage() {
               </div>
             ))}
           </dl>
-        </DetailSection>
+        </UserDetailSection>
 
-        <DetailSection title="도구 정보">
+        <UserDetailSection title="도구 정보">
           <dl className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {specifications.map(([label, value]) => (
               <div key={label} className="grid gap-1 py-4 sm:grid-cols-[14rem_1fr] sm:gap-4">
@@ -284,9 +276,9 @@ export default function MyToolDetailPage() {
               </div>
             ))}
           </dl>
-        </DetailSection>
+        </UserDetailSection>
 
-        <DetailSection title="버전 정보">
+        <UserDetailSection title="버전 정보">
           <ol className="max-w-4xl divide-y divide-slate-200/80 border-y border-slate-200/80 text-sm">
             {versionHistory.map((item, index) => (
               <li
@@ -303,7 +295,7 @@ export default function MyToolDetailPage() {
               </li>
             ))}
           </ol>
-        </DetailSection>
+        </UserDetailSection>
 
         <div className="border-t border-slate-200 py-7">
           <Link
@@ -314,6 +306,6 @@ export default function MyToolDetailPage() {
           </Link>
         </div>
       </article>
-    </div>
+    </>
   );
 }

@@ -109,7 +109,7 @@ export default function BannerDetailPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl pb-14 pt-6 text-slate-900">
+    <>
       <Link
         to="/admin/manage/catalog"
         className="inline-flex h-9 items-center gap-2 rounded-lg pr-3 text-sm font-medium text-slate-500 hover:text-blue-600"
@@ -282,6 +282,6 @@ export default function BannerDetailPage() {
         <strong className="font-semibold text-slate-900">{banner.title}</strong> 배너가 사용자
         스토어 홈에서 제거됩니다.
       </AiStoreConfirmModal>
-    </div>
+    </>
   );
 }

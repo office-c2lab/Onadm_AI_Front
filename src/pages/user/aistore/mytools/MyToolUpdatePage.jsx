@@ -274,7 +274,7 @@ export default function MyToolUpdatePage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl pb-14 pt-6 text-slate-900">
+    <>
       <Link
         to={`/user/aistore/mytools/${tool.id}`}
         className="inline-flex h-9 items-center gap-2 rounded-lg pr-3 text-sm font-medium text-slate-500 transition-colors hover:text-blue-600"
@@ -410,6 +410,6 @@ export default function MyToolUpdatePage() {
           <AiStoreActionButton type="submit">업데이트 승인 요청</AiStoreActionButton>
         </div>
       </form>
-    </div>
+    </>
   );
 }
