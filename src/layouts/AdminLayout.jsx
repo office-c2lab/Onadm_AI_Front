@@ -15,7 +15,10 @@ export default function AdminLayout() {
     '/admin/control/internal/history',
   ].includes(location.pathname);
   const usesOwnPageLayout =
-    isExternalControl || isInternalTabbedPage || location.pathname === '/admin/users';
+    isExternalControl ||
+    isInternalTabbedPage ||
+    location.pathname === '/admin/control/internal/classification' ||
+    location.pathname === '/admin/users';
   const isTopFlushPage =
     location.pathname === '/admin/discover/intelligence' ||
     location.pathname.startsWith('/admin/manage');

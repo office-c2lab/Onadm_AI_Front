@@ -157,6 +157,8 @@ export default function AppRouter() {
           {/* Control */}
           <Route path="control">
             <Route index element={<Navigate to="internal/usage" replace />} />
+            <Route path="internal/classification" element={<ClassificationPage />} />
+            <Route path="internal/policies" element={<ControlPoliciesPage />} />
             <Route path="internal" element={<InternalControlLayout />}>
               <Route index element={<Navigate to="usage" replace />} />
               <Route path="usage" element={<UsagePage />} />
@@ -165,8 +167,6 @@ export default function AppRouter() {
                 path="prompts"
                 element={<ModelsPage key="internal-prompts" initialTab="prompts" />}
               />
-              <Route path="classification" element={<ClassificationPage />} />
-              <Route path="policies" element={<ControlPoliciesPage />} />
               <Route path="limits" element={<LimitsPage />} />
               <Route path="credit-history" element={<CreditHistoryPage />} />
               <Route path="history" element={<HistoryPage />} />

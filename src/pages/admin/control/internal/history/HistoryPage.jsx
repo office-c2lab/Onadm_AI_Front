@@ -5,6 +5,7 @@ import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.js
 import AppButton from '../../external/components/AppButton.jsx';
 import AppSearchField from '../../external/components/AppSearchField.jsx';
 import FixedPaginationBar from '../../external/components/FixedPaginationBar.jsx';
+import TableListHeader from '../../external/components/TableListHeader.jsx';
 import PageLayout from '../../components/PageLayout.jsx';
 import {
   monitoringTableCellClass,
@@ -218,12 +219,7 @@ function LogTable({ tab, query, status, onDetail }) {
   }, [config.rows, query, status]);
   return (
     <section className={monitoringTableSurfaceClass}>
-      <div className="flex items-center gap-3 border-b border-[#E7EBF4] px-5 py-4">
-        <h2 className="text-sm font-bold text-slate-900">{config.title}</h2>
-        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
-          {tabInfo.count.toLocaleString()}건
-        </span>
-      </div>
+      <TableListHeader title={config.title} count={tabInfo.count} />
       <div className="overflow-x-auto">
         <table className={`${monitoringTableClass} min-w-[68rem]`}>
           <colgroup>

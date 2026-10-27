@@ -5,6 +5,7 @@ import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.js
 import AppButton from '../../external/components/AppButton.jsx';
 import AppSearchField from '../../external/components/AppSearchField.jsx';
 import FixedPaginationBar from '../../external/components/FixedPaginationBar.jsx';
+import TableListHeader from '../../external/components/TableListHeader.jsx';
 import PageLayout from '../../components/PageLayout.jsx';
 import {
   monitoringTableCellClass,
@@ -146,6 +147,7 @@ function TransactionTable({ rows, typeFilter, userQuery, requestQuery }) {
 
   return (
     <section className={monitoringTableSurfaceClass}>
+      <TableListHeader title="변동 내역" count={filteredRows.length} />
       <div className="overflow-x-auto">
         <table aria-label="크레딧 변동 내역" className={`${monitoringTableClass} min-w-[68rem]`}>
           <colgroup>
@@ -415,6 +417,7 @@ export default function LimitsPage() {
             <Plus className="h-4 w-4" /> 지급 기준 등록
           </AppButton>
         </div>
+        <TableListHeader title="지급 기준 목록" count={visibleTiers.length} />
         <div className="overflow-x-auto">
           <table className={`${monitoringTableClass} min-w-[58rem]`}>
             <thead className={monitoringTableHeadClass}>

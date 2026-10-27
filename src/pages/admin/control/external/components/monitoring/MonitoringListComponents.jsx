@@ -4,6 +4,7 @@ import { Download, RotateCcw } from 'lucide-react';
 import caretDownIcon from '../../../../../../assets/icons/caret_down.svg';
 import searchIcon from '../../../../../../assets/icons/search-data.svg';
 import ServiceLogoBadge from '../ServiceLogoBadge.jsx';
+import TableListHeader from '../TableListHeader.jsx';
 import { primaryButtonClassName } from '../AppButton.jsx';
 import {
   monitoringTableCellClass,
@@ -665,6 +666,8 @@ function MonitoringResultChip({ result }) {
 
 export function MonitoringDataTable({
   rows,
+  title = '모니터링 목록',
+  count = rows.length,
   activeRowId,
   onSelectRow,
   renderExpandedRow,
@@ -679,6 +682,7 @@ export function MonitoringDataTable({
 
   return (
     <div className={`${monitoringTableSurfaceClass} ${className}`.trim()}>
+      <TableListHeader title={title} count={count} />
       <div className={monitoringTableScrollClass}>
         <table className={`min-w-[min(100%,61.25rem)] ${monitoringTableClass} xl:min-w-0`}>
           <colgroup>

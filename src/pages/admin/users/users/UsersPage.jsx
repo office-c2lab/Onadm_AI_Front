@@ -7,6 +7,7 @@ import AppButton from '../../control/external/components/AppButton.jsx';
 import AppSearchField from '../../control/external/components/AppSearchField.jsx';
 import FixedPaginationBar from '../../control/external/components/FixedPaginationBar.jsx';
 import SectionCard from '../../control/external/components/SectionCard.jsx';
+import TableListHeader from '../../control/external/components/TableListHeader.jsx';
 import {
   MonitoringIconButtonTooltip,
   MonitoringResetButton,
@@ -89,6 +90,12 @@ function normalizeClient(client) {
     id: String(client.id ?? client.client_id),
     name: client.user_name ?? '',
     email: client.email ?? MOCK_USER_EMAILS[client.id] ?? '-',
+    profileImageUrl:
+      client.profile_image_url ??
+      client.profileImageUrl ??
+      client.avatar_url ??
+      client.photo_url ??
+      '',
     departmentOptionId: client.department_option_id ?? null,
     positionOptionId: client.position_option_id ?? null,
     department: client.department ?? '',
@@ -98,6 +105,41 @@ function normalizeClient(client) {
     statusChangeReason: client.status_change_reason ?? '',
     createdAt: client.time_kst ?? '-',
   };
+}
+
+const USER_AVATAR_STYLES = [
+  'bg-[#E8F1FF] text-[#075DF6]',
+  'bg-[#F3E8FF] text-[#7C3AED]',
+  'bg-[#E4F7EE] text-[#15805D]',
+  'bg-[#FFF0E7] text-[#C35A16]',
+  'bg-[#FFF0F1] text-[#D92D45]',
+  'bg-[#E8F7FA] text-[#08798A]',
+];
+
+function UserAvatar({ user }) {
+  const avatarStyleIndex = [...user.id].reduce(
+    (sum, character) => sum + character.charCodeAt(0),
+    0
+  );
+  const avatarStyle = USER_AVATAR_STYLES[avatarStyleIndex % USER_AVATAR_STYLES.length];
+  const initial = user.name.trim().slice(0, 1) || '?';
+
+  return (
+    <span
+      className={`relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full text-sm font-bold ring-1 ring-black/5 ${avatarStyle}`}
+      aria-hidden="true"
+    >
+      {initial}
+      {user.profileImageUrl ? (
+        <img
+          src={user.profileImageUrl}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          onError={event => event.currentTarget.remove()}
+        />
+      ) : null}
+    </span>
+  );
 }
 
 function UserStatusBadge({ status }) {
@@ -619,17 +661,18 @@ export default function UserPage() {
                 ref={tableAreaRef}
                 className={`${monitoringTableSurfaceClass} ${selectedUser ? '!overflow-visible' : ''}`}
               >
+                <TableListHeader title="사용자 목록" count={filteredUsers.length} />
                 <div className={selectedUser ? 'overflow-visible' : 'overflow-hidden'}>
                   <table className={`${monitoringTableClass} text-left`}>
                     <thead className={monitoringTableHeadClass}>
                       <tr className={monitoringTableHeaderRowClass}>
                         <th
-                          className={`${monitoringTableHeaderCellClass} w-[12%] whitespace-nowrap px-4`}
+                          className={`${monitoringTableHeaderCellClass} w-[18%] whitespace-nowrap px-4`}
                         >
                           사용자명
                         </th>
                         <th
-                          className={`${monitoringTableHeaderCellClass} w-[30%] whitespace-nowrap px-3`}
+                          className={`${monitoringTableHeaderCellClass} w-[24%] whitespace-nowrap px-3`}
                         >
                           이메일
                         </th>
@@ -677,7 +720,12 @@ export default function UserPage() {
                                   'whitespace-nowrap px-4'
                                 )}
                               >
-                                {getFallbackValue(user.name)}
+                                <div className="flex min-w-0 items-center gap-3">
+                                  <UserAvatar user={user} />
+                                  <span className="truncate font-semibold text-[#27364F]">
+                                    {getFallbackValue(user.name)}
+                                  </span>
+                                </div>
                               </td>
                               <td
                                 className={monitoringTableCellClass(index, 'min-w-0 px-3')}

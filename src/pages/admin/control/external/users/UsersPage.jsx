@@ -6,6 +6,7 @@ import AppButton from '../components/AppButton.jsx';
 import AppSearchField from '../components/AppSearchField.jsx';
 import FixedPaginationBar from '../components/FixedPaginationBar.jsx';
 import SectionCard from '../components/SectionCard.jsx';
+import TableListHeader from '../components/TableListHeader.jsx';
 import {
   MonitoringIconButtonTooltip,
   MonitoringResetButton,
@@ -539,6 +540,7 @@ export default function UserPage() {
 
         <SectionCard className="overflow-hidden">
           <div ref={tableAreaRef} className={monitoringTableSurfaceClass}>
+            <TableListHeader title="사용자 목록" count={filteredUsers.length} />
             <div className="overflow-hidden">
               <table className={`${monitoringTableClass} text-left`}>
                 <thead className={monitoringTableHeadClass}>

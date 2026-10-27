@@ -6,6 +6,7 @@ import geminiIcon from '../../../../../assets/icons/gemini-color.svg';
 import openaiIcon from '../../../../../assets/icons/openai.svg';
 import AppButton from '../../external/components/AppButton.jsx';
 import AppSearchField from '../../external/components/AppSearchField.jsx';
+import TableListHeader from '../../external/components/TableListHeader.jsx';
 import PageLayout from '../../components/PageLayout.jsx';
 import {
   monitoringTableCellClass,
@@ -73,9 +74,10 @@ function activateOnRowKeyDown(event, onActivate) {
   }
 }
 
-function TableShell({ title, columns, widths, children }) {
+function TableShell({ title, count, columns, widths, children }) {
   return (
     <section className={monitoringTableSurfaceClass}>
+      <TableListHeader title={title} count={count} />
       <div className="overflow-x-auto">
         <table aria-label={title} className={`${monitoringTableClass} min-w-[62rem]`}>
           <colgroup>
@@ -103,6 +105,7 @@ function ProviderTable({ rows, onManage }) {
   return (
     <TableShell
       title="제공자 목록"
+      count={rows.length}
       columns={['제공자', 'ENDPOINT', 'API KEY', '상태', '수정일']}
       widths={['24%', '38%', '16%', '9%', '13%']}
     >
@@ -136,6 +139,7 @@ function ModelTable({ rows, onManage }) {
   return (
     <TableShell
       title="모델 목록"
+      count={rows.length}
       columns={['모델', '단가 (1K)', '점검 결과', '사용 설정', '수정일']}
       widths={['27%', '30%', '17%', '11%', '15%']}
     >
@@ -177,6 +181,7 @@ function PromptTable({ rows, onManage }) {
   return (
     <TableShell
       title="프롬프트 목록"
+      count={rows.length}
       columns={['이름', '본문 미리보기', '상태', '수정일']}
       widths={['25%', '50%', '10%', '15%']}
     >

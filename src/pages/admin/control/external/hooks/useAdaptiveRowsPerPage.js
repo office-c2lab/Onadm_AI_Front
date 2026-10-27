@@ -16,10 +16,13 @@ export default function useAdaptiveRowsPerPage({
       const containerTop = container?.getBoundingClientRect().top ?? 0;
       const tableHeadHeight =
         container?.querySelector('thead')?.getBoundingClientRect().height ?? rowHeight;
+      const listHeaderHeight =
+        container?.querySelector('[data-table-list-header]')?.getBoundingClientRect().height ?? 0;
       const measuredRowHeight =
         container?.querySelector('tbody tr')?.getBoundingClientRect().height ?? rowHeight;
       const effectiveRowHeight = Math.max(1, measuredRowHeight || rowHeight);
-      const availableHeight = viewportHeight - containerTop - tableHeadHeight - bottomReserve;
+      const availableHeight =
+        viewportHeight - containerTop - listHeaderHeight - tableHeadHeight - bottomReserve;
       const measuredRows = Math.floor(availableHeight / effectiveRowHeight);
       const nextRows = Math.max(minRows, Math.min(maxRows, measuredRows));
 

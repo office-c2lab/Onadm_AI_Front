@@ -22,6 +22,7 @@ import {
   monitoringTableSurfaceClass,
 } from '../monitoring/monitoringTableStyles.js';
 import SectionCard from '../SectionCard.jsx';
+import TableListHeader from '../TableListHeader.jsx';
 import { DROPDOWN_SETTING_CATEGORIES } from '../../constants/dropdownSettings.js';
 import useAdaptiveRowsPerPage from '../../hooks/useAdaptiveRowsPerPage.js';
 import {
@@ -41,7 +42,6 @@ import {
   usePutPiiProtectionCategoryMutation,
   usePutFileUploadExtensionsMutation,
 } from '../../queries/policyQueries.js';
-import { useRegisteredClientsQuery } from '../../queries/userManagementQueries.js';
 
 const CATEGORIES = DROPDOWN_SETTING_CATEGORIES;
 
@@ -150,20 +150,6 @@ function buildPiiCategoryPayload(draft) {
     enabled: Boolean(draft?.enabled),
     keywords,
   };
-}
-
-function SummaryCard({ title, value }) {
-  const numberValue = value.replace(/[^\d,]/g, '');
-  const unitValue = value.replace(/[\d,]/g, '');
-
-  return (
-    <div className="inline-flex h-[var(--app-control-lg)] items-center justify-between gap-[var(--app-gap-xs)] rounded-[var(--app-radius-lg)] border border-slate-200 bg-white px-[var(--app-pad-md)] whitespace-nowrap text-slate-600">
-      <span className="text-[clamp(0.9rem,1vw,0.98rem)] font-bold tracking-[-0.02em]">{title}</span>
-      <span className="text-[clamp(0.9rem,1vw,0.98rem)] font-black tracking-[-0.02em]">
-        <span className="text-[#075DF6]">{numberValue}</span> {unitValue}
-      </span>
-    </div>
-  );
 }
 
 function FieldLabel({ children, required = false, htmlFor }) {
@@ -819,7 +805,7 @@ function PrivacyCategoryDeleteModal({ target, isSaving = false, onClose, onConfi
   );
 }
 
-export function DropdownSettingsContent({ toolbarAction = null }) {
+export function DropdownSettingsContent() {
   const [activeCategory, setActiveCategory] = useState(CATEGORIES[0].key);
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -852,7 +838,6 @@ export function DropdownSettingsContent({ toolbarAction = null }) {
   const { mutate: patchDropdownOption, isPending: isPatching } = usePatchDropdownOptionMutation();
   const { mutate: patchDropdownOrder, isPending: isOrdering } = usePatchDropdownOrderMutation();
   const { mutate: deleteDropdownOption, isPending: isDeleting } = useDeleteDropdownOptionMutation();
-  const { data: clientsData } = useRegisteredClientsQuery();
 
   const activeMeta = CATEGORIES.find(category => category.key === activeCategory) ?? CATEGORIES[0];
   const departmentItems = useMemo(
@@ -879,7 +864,6 @@ export function DropdownSettingsContent({ toolbarAction = null }) {
   const modalOpen = Boolean(modalState.mode);
   const isSaving = isCreating || isPatching || isOrdering || isDeleting;
   const isLoading = isDepartmentsLoading || isPositionsLoading;
-  const protectedTargetCount = Array.isArray(clientsData?.clients) ? clientsData.clients.length : 0;
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / rowsPerPage));
   const safePage = Math.min(currentPage, totalPages);
   const visibleItems = filteredItems.slice((safePage - 1) * rowsPerPage, safePage * rowsPerPage);
@@ -1130,17 +1114,6 @@ export function DropdownSettingsContent({ toolbarAction = null }) {
 
   return (
     <>
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        {toolbarAction ? (
-          <div className="flex shrink-0 items-center justify-start">{toolbarAction}</div>
-        ) : null}
-        <div className="grid flex-1 gap-3 sm:grid-cols-3 xl:max-w-[36rem]">
-          <SummaryCard title="부서 항목" value={`${departmentItems.length}개`} />
-          <SummaryCard title="직책 항목" value={`${positionItems.length}개`} />
-          <SummaryCard title="보호 대상" value={`${protectedTargetCount}명`} />
-        </div>
-      </div>
-
       <div className="relative z-10 flex flex-col gap-4">
         <div className="flex flex-col gap-2 border-b border-[#E2E8F0] lg:flex-row lg:items-end lg:justify-between">
           <div className="overflow-x-auto">
@@ -1209,6 +1182,7 @@ export function DropdownSettingsContent({ toolbarAction = null }) {
       </div>
 
       <div ref={tableAreaRef} className={monitoringTableSurfaceClass}>
+        <TableListHeader title={`${activeMeta.label} 목록`} count={filteredItems.length} />
         <div className="overflow-x-auto">
           <table className="w-full min-w-[min(100%,60rem)] table-fixed border-separate border-spacing-0 text-left">
             <thead className="bg-[linear-gradient(180deg,#F8FAFF_0%,#F2F5FC_100%)]">
@@ -1644,6 +1618,10 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
       </div>
 
       <div ref={tableAreaRef} className={monitoringTableSurfaceClass}>
+        <TableListHeader
+          title={isPrivacyVariant ? '개인정보 분류 목록' : '파일 확장자 목록'}
+          count={filteredExtensions.length}
+        />
         <div className="overflow-x-auto">
           <table className={`min-w-[min(100%,53.75rem)] ${monitoringTableClass} text-left`}>
             {isPrivacyVariant ? (

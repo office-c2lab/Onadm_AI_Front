@@ -1760,14 +1760,7 @@ export function MonitoringLogView({
                 </div>
               </div>
             </div>
-            <div className="mt-[var(--app-gap-lg)] flex items-center justify-between gap-[var(--app-gap-sm)]">
-              <p className="text-base font-semibold text-[#526078]">
-                전체 로그 갯수 :{' '}
-                <span className="text-lg font-bold text-[#075DF6]">
-                  {filteredLogs.length.toLocaleString()}
-                </span>{' '}
-                건
-              </p>
+            <div className="mt-[var(--app-gap-lg)] flex items-center justify-end gap-[var(--app-gap-sm)]">
               {downloadErrorMessage ? (
                 <p className="text-sm font-semibold text-[#E11D48]">{downloadErrorMessage}</p>
               ) : null}
@@ -1778,6 +1771,8 @@ export function MonitoringLogView({
         <div ref={tableAreaRef} className="mt-[var(--app-gap-md)] flex min-h-0 flex-1 flex-col">
           <MonitoringDataTable
             rows={pagedLogs}
+            title="모니터링 목록"
+            count={filteredLogs.length}
             activeRowId={selectedLogId}
             selectedRowIds={selectedRowIds}
             onToggleRowSelection={handleToggleRowSelection}

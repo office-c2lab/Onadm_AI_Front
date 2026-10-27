@@ -16,6 +16,7 @@ import {
 import { DateRangePicker } from '../components/monitoring/MonitoringListComponents.jsx';
 import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
 import ServiceLogoBadge from '../components/ServiceLogoBadge.jsx';
+import TableListHeader from '../components/TableListHeader.jsx';
 import { STATUS_COLORS } from '../constants/statusColors.js';
 import PageLayout from '../../components/PageLayout.jsx';
 
@@ -1012,7 +1013,7 @@ function DashboardDetailTable({
 
   if (variant === 'status') {
     return (
-      <div className="overflow-x-auto rounded-[var(--app-radius-lg)] border border-[#ECEFF5] bg-white shadow-[0_0.5rem_1.5rem_rgba(15,23,42,0.06)]">
+      <div className="overflow-x-auto">
         <table className="w-full min-w-[34rem] border-separate border-spacing-0 text-left">
           <thead>
             <tr className="bg-[linear-gradient(180deg,#F8FAFF_0%,#F2F5FC_100%)] text-[0.82rem] font-black text-[#59627A]">
@@ -1050,7 +1051,7 @@ function DashboardDetailTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-[var(--app-radius-lg)] border border-[#ECEFF5] bg-white shadow-[0_0.5rem_1.5rem_rgba(15,23,42,0.06)]">
+    <div className="overflow-x-auto">
       <table className="w-full min-w-[50rem] border-separate border-spacing-0 text-left">
         <thead>
           <tr className="bg-[linear-gradient(180deg,#F8FAFF_0%,#F2F5FC_100%)] text-[0.82rem] font-black text-[#59627A]">
@@ -1367,10 +1368,11 @@ export default function DashboardPage() {
               />
             </DashboardPanel>
           </section>
-          <section className="grid gap-3">
-            <h2 className="px-1 text-[1.12rem] font-bold tracking-[-0.03em] text-[#11182E] xl:text-[1.18rem]">
-              {subTabChartConfig.tableTitle}
-            </h2>
+          <section className="overflow-hidden rounded-[var(--app-radius-lg)] border border-[#ECEFF5] bg-white shadow-[0_0.5rem_1.5rem_rgba(15,23,42,0.06)]">
+            <TableListHeader
+              title={subTabChartConfig.tableTitle}
+              count={subTabChartConfig.tableRows.length}
+            />
             <DashboardDetailTable
               rows={subTabChartConfig.tableRows}
               subjectLabel={subTabChartConfig.tableSubjectLabel}

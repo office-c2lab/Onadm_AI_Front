@@ -1,11 +1,16 @@
-import { Fragment, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 
-import AppButton, { primaryButtonClassName } from '../components/AppButton.jsx';
+import AppButton from '../components/AppButton.jsx';
+import AppSearchField from '../components/AppSearchField.jsx';
 import FixedPaginationBar from '../components/FixedPaginationBar.jsx';
-import ServiceLogoBadge from '../components/ServiceLogoBadge.jsx';
 import SectionCard from '../components/SectionCard.jsx';
+import TableListHeader from '../components/TableListHeader.jsx';
+import {
+  MonitoringIconButtonTooltip,
+  MonitoringResetButton,
+} from '../components/monitoring/MonitoringListComponents.jsx';
 import {
   monitoringTableCellClass,
   monitoringTableClass,
@@ -22,7 +27,6 @@ import { FileUploadProtectionContent } from '../components/settings/SettingsCont
 
 const MAX_ROWS_PER_PAGE = 10;
 const POLICY_SETTINGS_BACK_BUTTON_CLASS = 'h-12 shrink-0 px-5';
-const POLICY_SETTINGS_NAV_BUTTON_CLASS = `${primaryButtonClassName} h-12 shrink-0 px-5`;
 const POLICY_SETTING_DEFINITIONS = [
   {
     view: 'fileUploadSettings',
@@ -56,10 +60,6 @@ function getPolicyEntries(data) {
   if (data && typeof data === 'object') return Object.entries(data);
 
   return [];
-}
-
-function getAppliedServices(data) {
-  return toStringList(data?.applied_services ?? data?.appliedServices);
 }
 
 function toStringList(value) {
@@ -144,14 +144,6 @@ function getPolicySettingDefinition(policy) {
   );
 }
 
-function getPolicySettingsButtonLabel(policy) {
-  const definition = getPolicySettingDefinition(policy);
-  const policyName =
-    definition?.label ?? String(policy?.name ?? '').replace('보호정책', '보호 정책');
-
-  return `${policyName} 설정`;
-}
-
 function normalizePolicy([key, value]) {
   const policy = value && typeof value === 'object' ? value : {};
   const code = String(policy.code ?? policy.policy_code ?? policy.policyCode ?? policy.id ?? key);
@@ -193,48 +185,6 @@ function normalizePolicy([key, value]) {
   };
 }
 
-function createPolicyDraft(policy) {
-  return {
-    ...policy,
-    services: [...policy.services],
-    detects: [...policy.detects],
-    exceptions: [...policy.exceptions],
-    alerts: { ...policy.alerts },
-  };
-}
-
-function SupportedServiceList({ services }) {
-  const normalizedServices = services?.length ? services : [];
-
-  if (!normalizedServices.length) {
-    return (
-      <div className="rounded-[8px] border border-dashed border-[#D8DEEA] bg-white px-5 py-6 text-sm font-semibold text-[#94A3B8]">
-        적용중인 서비스가 없습니다.
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-[repeat(auto-fit,minmax(6.75rem,7.5rem))] gap-3">
-      {normalizedServices.map(service => (
-        <div
-          key={service}
-          className="group flex min-h-[6.75rem] w-full max-w-[7.5rem] flex-col items-center justify-center gap-3 rounded-[8px] border border-[#D6E9FF] bg-white px-3 py-4 shadow-[0_8px_22px_rgba(15,23,42,0.05)] transition duration-300 hover:-translate-y-0.5 hover:border-[#8BC6FF] hover:shadow-[0_14px_30px_rgba(7, 93, 246,0.14)]"
-        >
-          <ServiceLogoBadge
-            name={service}
-            className="h-12 w-12 rounded-[8px] !border-transparent !bg-transparent !shadow-none"
-            iconStyle={{ height: '34px', width: '34px' }}
-          />
-          <span className="max-w-full truncate text-center text-xs font-semibold text-[#57534E] transition group-hover:text-[#075DF6] sm:text-sm">
-            {service}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function StatusToggleIndicator({ checked, ariaLabel, disabled = false, onToggle }) {
   return (
     <button
@@ -261,29 +211,242 @@ function StatusToggleIndicator({ checked, ariaLabel, disabled = false, onToggle 
   );
 }
 
-function PolicyDetailPanel({ draftPolicy, onOpenPolicySettings }) {
-  const settingDefinition = getPolicySettingDefinition(draftPolicy);
-  const description =
-    settingDefinition?.view === 'fileUploadSettings'
-      ? '파일 업로드 시 적용할 차단 기준을 관리할 수 있습니다.'
-      : '선택된 정책의 세부 설정을 관리할 수 있습니다.';
+function PolicyValueList({ items, emptyMessage }) {
+  if (!items.length) {
+    return <p className="text-sm font-medium text-slate-400">{emptyMessage}</p>;
+  }
 
   return (
-    <div className="overflow-hidden bg-white">
-      <div className="flex flex-col gap-3 border-b border-slate-200 bg-[#FCFDFF] px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-        <p className="flex min-w-0 items-center gap-2.5 text-[0.92rem] font-semibold text-[#64708B]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#75BEFF]" aria-hidden="true" />
-          {description}
-        </p>
-        {settingDefinition ? (
-          <button
-            type="button"
-            onClick={() => onOpenPolicySettings(settingDefinition.view)}
-            className={POLICY_SETTINGS_NAV_BUTTON_CLASS}
-          >
-            {getPolicySettingsButtonLabel(draftPolicy)}
-            <ChevronRight className="h-4 w-4" strokeWidth={2.6} aria-hidden="true" />
-          </button>
+    <div className="flex flex-wrap gap-2">
+      {items.map(item => (
+        <span
+          key={item}
+          className="inline-flex rounded-full border border-[#D7E8FF] bg-[#F3F8FF] px-3 py-1.5 text-xs font-semibold text-[#245EA8]"
+        >
+          {item}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function GeneralPolicyDetailContent({ policy, isSaving, onBack, onToggleStatus }) {
+  if (!policy) {
+    return (
+      <div className="flex flex-col items-start gap-4 rounded-[var(--app-radius-lg)] border border-dashed border-[#D8DEEA] bg-white px-6 py-10">
+        <p className="text-sm font-semibold text-slate-500">정책 상세 정보를 찾을 수 없습니다.</p>
+        <AppButton onClick={onBack} className={POLICY_SETTINGS_BACK_BUTTON_CLASS}>
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          정책 관리로 이동
+        </AppButton>
+      </div>
+    );
+  }
+
+  const summaryRows = [
+    ['정책 코드', policy.code],
+    ['정책 분류', policy.category],
+    ['처리 방식', policy.action],
+    ['최근 수정', policy.updatedAt],
+  ];
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div>
+        <AppButton onClick={onBack} className={POLICY_SETTINGS_BACK_BUTTON_CLASS}>
+          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          정책 관리로 이동
+        </AppButton>
+      </div>
+
+      <SectionCard className="overflow-hidden">
+        <header className="flex flex-col gap-5 border-b border-[#E7EBF4] bg-[#FCFDFF] px-5 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xl font-bold tracking-[-0.025em] text-[#11182E]">
+                {policy.name}
+              </h2>
+              <span className="rounded-full bg-[#EAF3FF] px-2.5 py-1 text-xs font-semibold text-[#075DF6]">
+                {policy.category}
+              </span>
+            </div>
+            <p className="mt-2 text-sm font-medium leading-6 text-[#69758D]">
+              {policy.description || '등록된 정책 설명이 없습니다.'}
+            </p>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-3 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3">
+            <div>
+              <p className="text-xs font-semibold text-slate-400">사용 여부</p>
+              <p className="mt-0.5 text-sm font-bold text-slate-700">{policy.status}</p>
+            </div>
+            <StatusToggleIndicator
+              checked={policy.enabled}
+              ariaLabel={`${policy.name} 사용 여부`}
+              disabled={isSaving}
+              onToggle={onToggleStatus}
+            />
+          </div>
+        </header>
+
+        <div className="grid lg:grid-cols-2">
+          <section className="border-b border-[#E7EBF4] px-5 py-6 sm:px-6 lg:border-r">
+            <h3 className="text-sm font-bold text-[#26354D]">기본 정보</h3>
+            <dl className="mt-4 divide-y divide-[#EEF2F7] rounded-xl border border-[#E2E8F0] bg-white px-4">
+              {summaryRows.map(([label, value]) => (
+                <div key={label} className="grid grid-cols-[6rem_1fr] gap-4 py-3 text-sm">
+                  <dt className="font-semibold text-slate-400">{label}</dt>
+                  <dd className="min-w-0 break-words font-semibold text-slate-700">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <section className="border-b border-[#E7EBF4] px-5 py-6 sm:px-6">
+            <h3 className="text-sm font-bold text-[#26354D]">적용 서비스</h3>
+            <div className="mt-4">
+              <PolicyValueList items={policy.services} emptyMessage="적용된 서비스가 없습니다." />
+            </div>
+          </section>
+
+          <section className="px-5 py-6 sm:px-6 lg:border-r">
+            <h3 className="text-sm font-bold text-[#26354D]">탐지 대상</h3>
+            <div className="mt-4">
+              <PolicyValueList items={policy.detects} emptyMessage="등록된 탐지 대상이 없습니다." />
+            </div>
+          </section>
+
+          <section className="border-t border-[#E7EBF4] px-5 py-6 sm:px-6 lg:border-t-0">
+            <h3 className="text-sm font-bold text-[#26354D]">예외 항목</h3>
+            <div className="mt-4">
+              <PolicyValueList
+                items={policy.exceptions}
+                emptyMessage="등록된 예외 항목이 없습니다."
+              />
+            </div>
+          </section>
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
+function PolicyRuleDetailContent({ policy, onBack }) {
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  if (!policy) {
+    return <GeneralPolicyDetailContent policy={policy} onBack={onBack} />;
+  }
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const rules = policy.detects.map((target, index) => ({
+    id: `${policy.code}-${index}`,
+    target,
+    category: policy.category,
+    action: policy.action,
+    services: policy.services,
+  }));
+  const filteredRules = rules.filter(rule => {
+    if (!normalizedQuery) return true;
+
+    return [rule.target, rule.category, rule.action, ...rule.services]
+      .join(' ')
+      .toLowerCase()
+      .includes(normalizedQuery);
+  });
+
+  const handleReset = () => {
+    setSearchInput('');
+    setSearchQuery('');
+  };
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex shrink-0 justify-start">
+          <AppButton onClick={onBack} className={POLICY_SETTINGS_BACK_BUTTON_CLASS}>
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+            정책 관리로 이동
+          </AppButton>
+        </div>
+
+        <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-[38rem] lg:justify-end">
+          <AppSearchField
+            value={searchInput}
+            onChange={event => setSearchInput(event.target.value)}
+            placeholder="탐지 항목, 분류, 처리 방식 검색"
+          />
+          <AppButton onClick={() => setSearchQuery(searchInput)} className="h-12 min-w-[4.5rem]">
+            검색
+          </AppButton>
+          <MonitoringIconButtonTooltip label="초기화">
+            <MonitoringResetButton
+              onClick={handleReset}
+              heightClass="h-12"
+              widthClass="w-12 shrink-0"
+              aria-label="초기화"
+            />
+          </MonitoringIconButtonTooltip>
+        </div>
+      </div>
+
+      <div className={monitoringTableSurfaceClass}>
+        <TableListHeader title="탐지 항목 목록" count={filteredRules.length} />
+        <div className="overflow-x-auto">
+          <table className={`min-w-[min(100%,53.75rem)] ${monitoringTableClass} text-left`}>
+            <colgroup>
+              <col className="w-[25%]" />
+              <col className="w-[18%]" />
+              <col className="w-[20%]" />
+              <col className="w-[37%]" />
+            </colgroup>
+            <thead className={monitoringTableHeadClass}>
+              <tr className={monitoringTableHeaderRowClass}>
+                <th className={monitoringTableHeaderCellClass}>탐지 항목</th>
+                <th className={monitoringTableHeaderCellClass}>분류</th>
+                <th className={monitoringTableHeaderCellClass}>처리 방식</th>
+                <th className={monitoringTableHeaderCellClass}>적용 서비스</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRules.map((rule, index) => (
+                <tr key={rule.id} className={monitoringTableRowClass({ striped: index % 2 === 1 })}>
+                  <td
+                    className={monitoringTableCellClass(
+                      index,
+                      'whitespace-nowrap font-black text-[#075DF6]'
+                    )}
+                  >
+                    {rule.target}
+                  </td>
+                  <td className={monitoringTableCellClass(index, 'font-semibold text-[#50607F]')}>
+                    {rule.category}
+                  </td>
+                  <td className={monitoringTableCellClass(index, 'font-semibold text-[#50607F]')}>
+                    {rule.action}
+                  </td>
+                  <td
+                    className={monitoringTableCellClass(
+                      index,
+                      'truncate font-semibold text-[#64748B]'
+                    )}
+                    title={rule.services.join(', ')}
+                  >
+                    {rule.services.length ? rule.services.join(', ') : '-'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {!filteredRules.length ? (
+          <section className="border-t border-dashed border-[#DCEAF1] px-6 py-4 text-center text-sm font-semibold text-[#94A3B8]">
+            {rules.length
+              ? '검색 조건에 맞는 탐지 항목이 없습니다.'
+              : '등록된 탐지 항목이 없습니다.'}
+          </section>
         ) : null}
       </div>
     </div>
@@ -293,11 +456,12 @@ function PolicyDetailPanel({ draftPolicy, onOpenPolicySettings }) {
 export default function PolicyPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedView = searchParams.get('view');
-  const activeView = ['fileUploadSettings', 'privacySettings'].includes(requestedView)
+  const requestedPolicyCode = searchParams.get('policy');
+  const activeView = ['fileUploadSettings', 'privacySettings', 'policyDetail'].includes(
+    requestedView
+  )
     ? requestedView
     : 'policies';
-  const [selectedId, setSelectedId] = useState(null);
-  const [draftPolicy, setDraftPolicy] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { data, isError, isFetching, isLoading } = usePoliciesQuery();
   const {
@@ -320,49 +484,43 @@ export default function PolicyPage() {
     safePage * rowsPerPage
   );
 
-  const selectedPolicy = policyList.find(policy => policy.id === selectedId) ?? null;
+  const selectedPolicy = policyList.find(policy => policy.code === requestedPolicyCode) ?? null;
   const savingPolicyCode = isSaving ? variables?.code : null;
-  const appliedServices = useMemo(() => {
-    if (draftPolicy?.services?.length) {
-      return draftPolicy.services;
-    }
-
-    return getAppliedServices(data);
-  }, [data, draftPolicy]);
-
-  const handleSelectPolicy = policyId => {
-    if (selectedId === policyId) {
-      setSelectedId(null);
-      setDraftPolicy(null);
-      return;
-    }
-
-    const policy = policyList.find(item => item.id === policyId);
-    setSelectedId(policyId);
-    setDraftPolicy(policy ? createPolicyDraft(policy) : null);
-  };
-
-  const handlePageChange = page => {
-    setCurrentPage(page);
-    setSelectedId(null);
-    setDraftPolicy(null);
-  };
-
-  const handleChangeView = view => {
-    setSelectedId(null);
-    setDraftPolicy(null);
+  const handleChangeView = (view, policyCode = null) => {
     setCurrentPage(1);
     setSearchParams(current => {
       const nextParams = new URLSearchParams(current);
 
       if (view === 'policies') {
         nextParams.delete('view');
+        nextParams.delete('policy');
       } else {
         nextParams.set('view', view);
+        if (policyCode) {
+          nextParams.set('policy', policyCode);
+        } else {
+          nextParams.delete('policy');
+        }
       }
 
       return nextParams;
     });
+  };
+
+  const handleSelectPolicy = policyId => {
+    const policy = policyList.find(item => item.id === policyId);
+    const settingDefinition = getPolicySettingDefinition(policy);
+
+    if (settingDefinition) {
+      handleChangeView(settingDefinition.view);
+      return;
+    }
+
+    if (policy) handleChangeView('policyDetail', policy.code);
+  };
+
+  const handlePageChange = page => {
+    setCurrentPage(page);
   };
 
   const handleTogglePolicyStatus = policyId => {
@@ -390,104 +548,63 @@ export default function PolicyPage() {
       <div className="flex min-h-0 flex-1 flex-col gap-5">
         {activeView === 'policies' ? (
           <>
-            <section className="px-1">
-              <h3 className="mb-3 text-base font-bold text-slate-900">적용중인 서비스</h3>
-              <SupportedServiceList services={appliedServices} />
-            </section>
-
             <SectionCard className="overflow-hidden">
               <div ref={tableAreaRef} className={monitoringTableSurfaceClass}>
+                <TableListHeader title="정책 목록" count={filteredPolicies.length} />
                 <div className="overflow-x-auto">
                   <table className={`min-w-[min(100%,47.5rem)] ${monitoringTableClass} text-left`}>
                     <thead className={monitoringTableHeadClass}>
                       <tr className={monitoringTableHeaderRowClass}>
-                        <th className={`${monitoringTableHeaderCellClass} w-12 px-5 sm:px-6`} />
-                        <th className={`${monitoringTableHeaderCellClass} w-[22%]`}>정책명</th>
-                        <th className={`${monitoringTableHeaderCellClass} w-[64%]`}>설명</th>
-                        <th className={`${monitoringTableHeaderCellClass} w-[14%] !text-center`}>
+                        <th className={`${monitoringTableHeaderCellClass} w-[26%] px-5 sm:px-6`}>
+                          정책명
+                        </th>
+                        <th className={`${monitoringTableHeaderCellClass} w-[58%]`}>설명</th>
+                        <th className={`${monitoringTableHeaderCellClass} w-[16%] !text-center`}>
                           사용 여부
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {visiblePolicies.map((policy, index) => {
-                        const isSelected = policy.id === selectedId;
-
-                        return (
-                          <Fragment key={policy.id}>
-                            <tr
-                              className={monitoringTableRowClass({
-                                selected: isSelected,
-                                striped: index % 2 === 1,
-                                interactive: true,
-                              })}
-                              onClick={() => handleSelectPolicy(policy.id)}
-                            >
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'px-5 align-middle sm:px-6'
-                                )}
-                              >
-                                <button
-                                  type="button"
-                                  aria-label={`${policy.name} 선택`}
-                                  className={joinClasses(
-                                    'flex h-5 w-5 items-center justify-center rounded-full border transition',
-                                    isSelected ? 'border-[#075DF6]' : 'border-slate-300'
-                                  )}
-                                >
-                                  <span
-                                    className={joinClasses(
-                                      'h-2.5 w-2.5 rounded-full transition',
-                                      isSelected ? 'bg-[#075DF6]' : 'bg-transparent'
-                                    )}
-                                  />
-                                </button>
-                              </td>
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'whitespace-nowrap font-semibold text-slate-800'
-                                )}
-                              >
-                                {policy.name}
-                              </td>
-                              <td className={monitoringTableCellClass(index)}>
-                                <div className="truncate text-slate-600" title={policy.description}>
-                                  {policy.description || '-'}
-                                </div>
-                              </td>
-                              <td
-                                className={monitoringTableCellClass(
-                                  index,
-                                  'whitespace-nowrap text-center font-semibold text-slate-600'
-                                )}
-                              >
-                                <StatusToggleIndicator
-                                  checked={policy.status === '사용'}
-                                  ariaLabel={`${policy.name} 사용 여부`}
-                                  disabled={savingPolicyCode === policy.code}
-                                  onToggle={event => {
-                                    event.stopPropagation();
-                                    handleTogglePolicyStatus(policy.id);
-                                  }}
-                                />
-                              </td>
-                            </tr>
-                            {isSelected && selectedPolicy && draftPolicy ? (
-                              <tr className="bg-[#FFFFFF]">
-                                <td colSpan={4} className="border-t border-[#E6EAF4] px-0 py-0">
-                                  <PolicyDetailPanel
-                                    draftPolicy={draftPolicy}
-                                    onOpenPolicySettings={handleChangeView}
-                                  />
-                                </td>
-                              </tr>
-                            ) : null}
-                          </Fragment>
-                        );
-                      })}
+                      {visiblePolicies.map((policy, index) => (
+                        <tr
+                          key={policy.id}
+                          className={monitoringTableRowClass({
+                            striped: index % 2 === 1,
+                            interactive: true,
+                          })}
+                          onClick={() => handleSelectPolicy(policy.id)}
+                        >
+                          <td
+                            className={monitoringTableCellClass(
+                              index,
+                              'whitespace-nowrap px-5 font-semibold text-slate-800 sm:px-6'
+                            )}
+                          >
+                            {policy.name}
+                          </td>
+                          <td className={monitoringTableCellClass(index)}>
+                            <div className="truncate text-slate-600" title={policy.description}>
+                              {policy.description || '-'}
+                            </div>
+                          </td>
+                          <td
+                            className={monitoringTableCellClass(
+                              index,
+                              'whitespace-nowrap text-center font-semibold text-slate-600'
+                            )}
+                          >
+                            <StatusToggleIndicator
+                              checked={policy.status === '사용'}
+                              ariaLabel={`${policy.name} 사용 여부`}
+                              disabled={savingPolicyCode === policy.code}
+                              onToggle={event => {
+                                event.stopPropagation();
+                                handleTogglePolicyStatus(policy.id);
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -518,6 +635,11 @@ export default function PolicyPage() {
                 정책 관리로 이동
               </AppButton>
             }
+          />
+        ) : activeView === 'policyDetail' ? (
+          <PolicyRuleDetailContent
+            policy={selectedPolicy}
+            onBack={() => handleChangeView('policies')}
           />
         ) : (
           <FileUploadProtectionContent
