@@ -427,7 +427,7 @@ export default function LimitsPage() {
               event.preventDefault();
               setNotice(`${targetMonth} 월별 크레딧 지급을 실행했습니다.`);
             }}
-            className="flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-end"
+            className="flex max-full flex-col gap-3 sm:flex-row sm:items-end"
           >
             <label className="min-w-0 flex-1">
               <span className={fieldLabelClass}>대상 월</span>
@@ -528,7 +528,7 @@ export default function LimitsPage() {
           title="수동 지급·회수"
           description="특정 사용자의 크레딧을 즉시 지급하거나 회수합니다. 처리 결과는 변동 내역에 기록됩니다."
         >
-          <form onSubmit={submitCredit} className="max-w-3xl space-y-5">
+          <form onSubmit={submitCredit} className="max-w-full space-y-5">
             <div className="flex items-end justify-between gap-4">
               <fieldset>
                 <legend className={fieldLabelClass}>처리 유형</legend>
