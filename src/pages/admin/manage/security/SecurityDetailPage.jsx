@@ -41,6 +41,7 @@ export default function SecurityDetailPage() {
   const [activePreview, setActivePreview] = useState(0);
   const [approvalConfirmOpen, setApprovalConfirmOpen] = useState(false);
   const [rejectionOpen, setRejectionOpen] = useState(false);
+  const [rejectionConfirmOpen, setRejectionConfirmOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState(review?.rejectionReason ?? '');
   const [rejectionError, setRejectionError] = useState('');
   const decisionHistory =
@@ -391,8 +392,7 @@ export default function SecurityDetailPage() {
                     }
                     const reason = rejectionReason.trim();
                     setRejectionReason(reason);
-                    setRejectionOpen(false);
-                    completeReview('반려', reason);
+                    setRejectionConfirmOpen(true);
                   }}
                 >
                   반려 확정
@@ -442,6 +442,23 @@ export default function SecurityDetailPage() {
       >
         <strong className="font-semibold text-slate-900">{review.name}</strong>의 등록 정보와 자동
         심사 결과를 확인했습니다. 승인하면 최종 심사가 완료됩니다.
+      </AiStoreConfirmModal>
+
+      <AiStoreConfirmModal
+        open={rejectionConfirmOpen}
+        title="심사 요청을 반려하시겠습니까?"
+        confirmLabel="반려 확정"
+        cancelLabel="돌아가기"
+        confirmVariant="danger"
+        onClose={() => setRejectionConfirmOpen(false)}
+        onConfirm={() => {
+          setRejectionConfirmOpen(false);
+          completeReview('반려', rejectionReason);
+        }}
+      >
+        <strong className="font-semibold text-slate-900">{review.name}</strong>의 심사 요청이
+        반려되며 등록자에게 아래 사유가 전달됩니다.
+        <p className="mt-3 rounded-lg bg-slate-100 px-3 py-2.5 text-slate-700">{rejectionReason}</p>
       </AiStoreConfirmModal>
     </>
   );
