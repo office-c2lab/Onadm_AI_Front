@@ -19,7 +19,7 @@ export default function RegistrationAccessPanel() {
   return (
     <div className={panelClass}>
       <Card title="기본 등록 권한">
-        <div className="divide-y divide-slate-100">
+        <div>
           <fieldset className="py-5">
             <legend className="mb-3 text-base font-semibold text-slate-800">
               등록 가능 사용자
@@ -43,47 +43,53 @@ export default function RegistrationAccessPanel() {
             </div>
           </fieldset>
 
-          <fieldset className="py-5">
-            <legend className="mb-3 text-base font-semibold text-slate-800">
-              등록 가능한 자산 유형
-            </legend>
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {['AI App', 'AI Agent', '자동화 도구'].map(type => (
-                <label
-                  key={type}
-                  className="inline-flex cursor-pointer items-center gap-2.5 text-[15px] text-slate-800"
-                >
-                  <input
-                    type="checkbox"
-                    checked={assetTypes.includes(type)}
-                    onChange={() => toggleAssetType(type)}
-                    className="size-4 rounded accent-blue-600"
-                  />
-                  {type}
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          <div className="border-t border-slate-100 pt-6">
+            <fieldset className="pb-5">
+              <legend className="mb-3 text-base font-semibold text-slate-800">
+                등록 가능한 자산 유형
+              </legend>
+              <div className="flex flex-wrap gap-x-4 gap-y-2">
+                {['AI App', 'AI Agent', '자동화 도구'].map(type => (
+                  <label
+                    key={type}
+                    className="inline-flex cursor-pointer items-center gap-2.5 text-[15px] text-slate-800"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={assetTypes.includes(type)}
+                      onChange={() => toggleAssetType(type)}
+                      className="size-4 rounded accent-blue-600"
+                    />
+                    {type}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </div>
 
-          <fieldset className="py-5">
-            <legend className="mb-3 text-base font-semibold text-slate-800">등록 허용 부서</legend>
-            <div className="flex flex-col items-start gap-2.5">
-              {[
-                ['all', '전체 부서 허용'],
-                ['selected', '선택한 부서만 허용'],
-              ].map(([value, label]) => (
-                <RadioChoice
-                  key={value}
-                  name="department-scope"
-                  value={value}
-                  checked={departmentScope === value}
-                  onChange={() => setDepartmentScope(value)}
-                >
-                  {label}
-                </RadioChoice>
-              ))}
-            </div>
-          </fieldset>
+          <div className="border-t border-slate-100 pt-6">
+            <fieldset className="pb-5">
+              <legend className="mb-3 text-base font-semibold text-slate-800">
+                등록 허용 부서
+              </legend>
+              <div className="flex flex-col items-start gap-2.5">
+                {[
+                  ['all', '전체 부서 허용'],
+                  ['selected', '선택한 부서만 허용'],
+                ].map(([value, label]) => (
+                  <RadioChoice
+                    key={value}
+                    name="department-scope"
+                    value={value}
+                    checked={departmentScope === value}
+                    onChange={() => setDepartmentScope(value)}
+                  >
+                    {label}
+                  </RadioChoice>
+                ))}
+              </div>
+            </fieldset>
+          </div>
         </div>
       </Card>
 
