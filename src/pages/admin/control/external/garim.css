@@ -46,7 +46,7 @@
     'Segoe UI',
     sans-serif;
   color: #111827;
-  background: #f9f9f9;
+  background: #ffffff;
   /*
    * Scale the rem-based UI to 110% of a 1920 x 1080 reference viewport.
    * The smaller viewport axis wins so short laptop screens do not overflow,

@@ -75,7 +75,6 @@ import ManagePoliciesPage from '../pages/admin/manage/policies/PoliciesPage.jsx'
 // ================================
 import UsersPage from '../pages/admin/users/users/UsersPage.jsx';
 import DepartmentsPage from '../pages/admin/users/departments/DepartmentsPage.jsx';
-import RolesPage from '../pages/admin/users/roles/RolesPage.jsx';
 
 // ================================
 // 관리자 - 시스템 운영
@@ -228,7 +227,6 @@ export default function AppRouter() {
           {/* 사용자 및 권한 */}
           <Route path="users" element={<UsersPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
-          <Route path="roles" element={<RolesPage />} />
 
           {/* 시스템 운영 */}
           <Route path="system">

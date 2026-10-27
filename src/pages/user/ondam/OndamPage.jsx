@@ -16,7 +16,7 @@ export default function OndamPage() {
   };
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-[#f9f9f9] text-[#0d0d0d]">
+    <div className="flex h-dvh overflow-hidden bg-white text-[#0d0d0d]">
       <div
         className={`h-dvh shrink-0 overflow-hidden transition-[width] duration-200 ease-out ${
           isSidebarOpen ? 'w-[292px]' : 'w-12'
@@ -37,7 +37,7 @@ export default function OndamPage() {
         )}
       </div>
 
-      <main className="min-w-0 flex-1 overflow-y-auto bg-[#f9f9f9]" aria-label="AI 채팅 영역">
+      <main className="min-w-0 flex-1 overflow-y-auto bg-white" aria-label="AI 채팅 영역">
         {!activeChatId && <NewChatView />}
       </main>
     </div>

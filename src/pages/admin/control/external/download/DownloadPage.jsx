@@ -134,7 +134,7 @@ export default function DownloadPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F3F6FA] text-[#111827]">
+    <main className="min-h-screen bg-white text-[#111827]">
       <header className="sticky top-0 z-30 h-[4.5rem] bg-black">
         <div className="mx-auto flex h-full max-w-[min(100%,80rem)] items-center justify-between px-8">
           <div className="flex items-center">

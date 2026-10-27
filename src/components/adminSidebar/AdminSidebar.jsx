@@ -102,10 +102,6 @@ const adminMenus = [
         label: '부서 관리',
         to: '/admin/departments',
       },
-      {
-        label: '역할 및 접근 권한',
-        to: '/admin/roles',
-      },
     ],
   },
   {

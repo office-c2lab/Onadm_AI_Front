@@ -2,7 +2,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { delay, mockStore } from '../data/mockStore.js';
 import { userManagementQueryKeys } from './userManagementQueries.js';
 
-const list = kind => mockStore.dropdowns[kind] ?? [];
+const DROPDOWN_KIND_MAP = {
+  department: 'department',
+  departments: 'department',
+  position: 'position',
+  positions: 'position',
+};
+
+const normalizeKind = kind => DROPDOWN_KIND_MAP[kind] ?? kind;
+const list = kind => mockStore.dropdowns[normalizeKind(kind)] ?? [];
 const getDropdownSelectOptions = () =>
   delay({ departments: list('department'), positions: list('position') });
 const getDropdownOptions = ({ kind, q = '' }) =>
@@ -19,7 +27,9 @@ const createDropdownOption = ({ kind, option }) => {
   return delay(item);
 };
 const patchDropdownOrder = ({ kind, ids }) => {
-  mockStore.dropdowns[kind] = ids
+  const normalizedKind = normalizeKind(kind);
+
+  mockStore.dropdowns[normalizedKind] = ids
     .map(id => list(kind).find(item => item.id === id))
     .filter(Boolean)
     .map((item, index) => ({ ...item, sort_order: index + 1 }));
@@ -31,7 +41,7 @@ const patchDropdownOption = ({ kind, optionId, option }) => {
   return delay(item);
 };
 const deleteDropdownOption = ({ kind, optionId }) => {
-  mockStore.dropdowns[kind] = list(kind).filter(item => item.id !== optionId);
+  mockStore.dropdowns[normalizeKind(kind)] = list(kind).filter(item => item.id !== optionId);
   return delay({ success: true });
 };
 
