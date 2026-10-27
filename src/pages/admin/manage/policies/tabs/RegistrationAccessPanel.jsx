@@ -3,9 +3,8 @@ import { Card, RadioChoice, SelectField, ToggleRow, panelClass } from './PolicyF
 
 export default function RegistrationAccessPanel() {
   const [registrantScope, setRegistrantScope] = useState('all');
-  const [assetTypes, setAssetTypes] = useState(['AI App', 'AI Agent']);
+  const [assetTypes, setAssetTypes] = useState(['AI App', 'AI Agent', '자동화 도구']);
   const [departmentScope, setDepartmentScope] = useState('all');
-  const [maxRegistrations, setMaxRegistrations] = useState('5');
   const [preApply, setPreApply] = useState(true);
   const [allowDuplicateNames, setAllowDuplicateNames] = useState(false);
   const [allowResubmission, setAllowResubmission] = useState(true);
@@ -49,7 +48,7 @@ export default function RegistrationAccessPanel() {
               등록 가능한 자산 유형
             </legend>
             <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {['AI App', 'AI Agent'].map(type => (
+              {['AI App', 'AI Agent', '자동화 도구'].map(type => (
                 <label
                   key={type}
                   className="inline-flex cursor-pointer items-center gap-2.5 text-[15px] text-slate-800"
@@ -85,22 +84,6 @@ export default function RegistrationAccessPanel() {
               ))}
             </div>
           </fieldset>
-
-          <label className="block py-5">
-            <span className="block text-base font-semibold text-slate-800">
-              사용자별 최대 등록 개수
-            </span>
-            <span className="mt-2 flex items-center gap-2">
-              <input
-                type="number"
-                min="0"
-                value={maxRegistrations}
-                onChange={event => setMaxRegistrations(event.target.value)}
-                className="h-9 w-20 rounded-lg border border-slate-200 px-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15"
-              />
-              <span className="text-sm text-slate-500">개 (0 = 제한 없음)</span>
-            </span>
-          </label>
         </div>
       </Card>
 

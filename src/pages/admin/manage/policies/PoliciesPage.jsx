@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { SearchField } from '../components.jsx';
+import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
+import AiStoreConfirmModal from '../../../user/aistore/components/AiStoreConfirmModal.jsx';
 import RegistrationAccessPanel from './tabs/RegistrationAccessPanel.jsx';
 import SubmissionRequirementsPanel from './tabs/SubmissionRequirementsPanel.jsx';
 import SecurityReviewPanel from './tabs/SecurityReviewPanel.jsx';
@@ -31,10 +33,22 @@ const policyPanels = {
 export default function PoliciesPage() {
   const [query, setQuery] = useState('');
   const [activeTab, setActiveTab] = useState('registration-access');
+  const [hasPendingChanges, setHasPendingChanges] = useState(false);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
   const normalizedQuery = query.trim().toLowerCase();
   const visibleTabs = policyTabs.filter(tab => tab.title.toLowerCase().includes(normalizedQuery));
-  const ActivePanel = policyPanels[activeTab];
   const activeTabIsVisible = visibleTabs.some(tab => tab.id === activeTab);
+
+  const markAsChanged = () => {
+    setHasPendingChanges(true);
+    setSaved(false);
+  };
+
+  const handlePolicyClick = event => {
+    const button = event.target.closest('button');
+    if (button && button.getAttribute('aria-haspopup') !== 'listbox') markAsChanged();
+  };
 
   return (
     <div className="-mt-6">
@@ -71,11 +85,60 @@ export default function PoliciesPage() {
         </div>
       </nav>
 
-      {ActivePanel && activeTabIsVisible ? <ActivePanel /> : null}
+      {policyTabs.map(tab => {
+        const Panel = policyPanels[tab.id];
+        const isVisible = activeTabIsVisible && activeTab === tab.id;
+
+        return (
+          <div
+            key={tab.id}
+            hidden={!isVisible}
+            onChangeCapture={markAsChanged}
+            onClickCapture={handlePolicyClick}
+          >
+            <Panel />
+          </div>
+        );
+      })}
 
       {!visibleTabs.length ? (
         <p className="py-12 text-center text-sm text-slate-500">일치하는 정책 탭이 없습니다.</p>
       ) : null}
+
+      {activeTabIsVisible ? (
+        <div className="sticky bottom-0 z-10 mt-2 flex flex-wrap items-center gap-3 border-t border-slate-200 bg-white/95 py-4 backdrop-blur">
+          <p className="text-sm text-slate-500">변경한 설정은 저장 전까지 적용되지 않습니다.</p>
+          {saved ? (
+            <span role="status" className="text-sm font-semibold text-emerald-600">
+              저장되었습니다.
+            </span>
+          ) : null}
+          <AiStoreActionButton
+            size="large"
+            className="ml-auto"
+            disabled={!hasPendingChanges}
+            onClick={() => setIsSaveModalOpen(true)}
+          >
+            변경사항 저장
+          </AiStoreActionButton>
+        </div>
+      ) : null}
+
+      <AiStoreConfirmModal
+        open={isSaveModalOpen}
+        title="정책 변경사항을 저장하시겠습니까?"
+        confirmLabel="저장"
+        cancelLabel="취소"
+        confirmVariant="primary"
+        onClose={() => setIsSaveModalOpen(false)}
+        onConfirm={() => {
+          setIsSaveModalOpen(false);
+          setHasPendingChanges(false);
+          setSaved(true);
+        }}
+      >
+        변경한 등록·심사 정책이 저장되며 이후 등록 요청부터 적용됩니다.
+      </AiStoreConfirmModal>
     </div>
   );
 }
