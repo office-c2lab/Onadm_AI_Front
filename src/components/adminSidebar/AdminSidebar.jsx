@@ -73,7 +73,7 @@ const adminMenus = [
     icon: Boxes,
     children: [
       {
-        label: '앱·에이전트 관리',
+        label: '앱 · 에이전트 관리',
         to: '/admin/manage/apps',
       },
       {
@@ -99,7 +99,7 @@ const adminMenus = [
         to: '/admin/users',
       },
       {
-        label: '부서 관리',
+        label: '부서 · 관리',
         to: '/admin/departments',
       },
     ],

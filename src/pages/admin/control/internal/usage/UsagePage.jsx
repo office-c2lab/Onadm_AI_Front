@@ -213,7 +213,7 @@ export default function UsagePage() {
           endDate={dateRange.endDate}
           onChange={setDateRange}
           widthClass="w-full min-w-0 sm:w-[10.25rem]"
-          labelClassName="sr-only"
+          labelClassName="mb-1.5 block text-xs font-bold text-slate-700"
         />
       </section>
 

@@ -363,7 +363,7 @@ function PolicyRuleDetailContent({ policy, onBack }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex shrink-0 justify-start">
           <AppButton onClick={onBack} className={POLICY_SETTINGS_BACK_BUTTON_CLASS}>
             <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -371,23 +371,26 @@ function PolicyRuleDetailContent({ policy, onBack }) {
           </AppButton>
         </div>
 
-        <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-[38rem] lg:justify-end">
-          <AppSearchField
-            value={searchInput}
-            onChange={event => setSearchInput(event.target.value)}
-            placeholder="탐지 항목, 분류, 처리 방식 검색"
-          />
-          <AppButton onClick={() => setSearchQuery(searchInput)} className="h-12 min-w-[4.5rem]">
-            검색
-          </AppButton>
-          <MonitoringIconButtonTooltip label="초기화">
-            <MonitoringResetButton
-              onClick={handleReset}
-              heightClass="h-12"
-              widthClass="w-12 shrink-0"
-              aria-label="초기화"
+        <div className="w-full lg:w-[38rem]">
+          <span className="mb-1.5 block text-xs font-bold text-slate-700">탐지 항목 검색</span>
+          <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">
+            <AppSearchField
+              value={searchInput}
+              onChange={event => setSearchInput(event.target.value)}
+              placeholder="탐지 항목, 분류, 처리 방식 검색"
             />
-          </MonitoringIconButtonTooltip>
+            <AppButton onClick={() => setSearchQuery(searchInput)} className="h-12 min-w-[4.5rem]">
+              검색
+            </AppButton>
+            <MonitoringIconButtonTooltip label="초기화">
+              <MonitoringResetButton
+                onClick={handleReset}
+                heightClass="h-12"
+                widthClass="w-12 shrink-0"
+                aria-label="초기화"
+              />
+            </MonitoringIconButtonTooltip>
+          </div>
         </div>
       </div>
 

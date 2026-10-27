@@ -1,12 +1,18 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowUpRight, Check, Plus, Save, X } from 'lucide-react';
+import { Check, Plus, Save, X } from 'lucide-react';
 import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
+import { AdminDetailSection } from '../../../../../layouts/admin/AdminDetailLayout.jsx';
 import AppButton from '../../external/components/AppButton.jsx';
 import AppSearchField from '../../external/components/AppSearchField.jsx';
 import FixedPaginationBar from '../../external/components/FixedPaginationBar.jsx';
 import TableListHeader from '../../external/components/TableListHeader.jsx';
 import PageLayout from '../../components/PageLayout.jsx';
+import { useRegisteredClientsQuery } from '../../external/queries/userManagementQueries.js';
+import {
+  DateRangePicker,
+  MonitoringIconButtonTooltip,
+  MonitoringResetButton,
+} from '../../external/components/monitoring/MonitoringListComponents.jsx';
 import {
   monitoringTableCellClass,
   monitoringTableClass,
@@ -18,20 +24,18 @@ import {
 } from '../../external/components/monitoring/monitoringTableStyles.js';
 
 import { initialPolicies, initialTiers, initialTransactions, users } from '../data.js';
+import { createDefaultDateRange, isDateValueInRange } from '../dateRangeUtils.js';
 const inputClass =
   'h-[var(--app-control-lg)] w-full rounded-[var(--app-radius-lg)] border border-slate-200 bg-white px-[var(--app-pad-md)] text-[clamp(0.82rem,0.95vw,0.9rem)] text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8BC6FF] focus:ring-[clamp(0.2rem,0.32vw,0.25rem)] focus:ring-[#DEEEFF]';
 const fieldLabelClass = 'mb-1.5 block text-[0.8rem] font-semibold text-[#5C6784]';
-const panelClass =
-  'overflow-hidden rounded-[22px] border border-[#E2E8F4] bg-white shadow-[0_12px_34px_rgba(15,23,42,0.06)]';
 
-function PanelHeading({ title, action }) {
+function getTransactionUser(row, userMetadataByEmail) {
   return (
-    <header className="flex min-h-14 items-center justify-between gap-3 border-b border-[#E7EBF4] px-5 py-3">
-      <h2 className="text-[1.12rem] font-bold tracking-[-0.03em] text-[#11182E] xl:text-[1.18rem]">
-        {title}
-      </h2>
-      {action}
-    </header>
+    userMetadataByEmail[row.user] ?? {
+      name: row.userName ?? row.user,
+      department: '-',
+      position: '-',
+    }
   );
 }
 
@@ -133,75 +137,116 @@ function TierModal({ tier, onClose, onSave }) {
   );
 }
 
-function TransactionTable({ rows, typeFilter, userQuery, requestQuery }) {
+function TransactionTable({ rows, userMetadataByEmail, typeFilter, query, dateRange }) {
+  const normalizedQuery = query.toLowerCase();
   const filteredRows = useMemo(
     () =>
-      rows.filter(
-        row =>
+      rows.filter(row => {
+        const user = getTransactionUser(row, userMetadataByEmail);
+        const searchableText = [
+          row.id,
+          user.name,
+          row.user,
+          user.department,
+          user.position,
+          row.type,
+          row.delta,
+          row.balance,
+          row.createdAt,
+        ]
+          .join(' ')
+          .toLowerCase();
+
+        return (
           (typeFilter === '전체' || row.type === typeFilter) &&
-          row.user.toLowerCase().includes(userQuery.toLowerCase()) &&
-          row.requestId.toLowerCase().includes(requestQuery.toLowerCase())
-      ),
-    [rows, typeFilter, userQuery, requestQuery]
+          isDateValueInRange(row.createdAt, dateRange.startDate, dateRange.endDate) &&
+          searchableText.includes(normalizedQuery)
+        );
+      }),
+    [dateRange, normalizedQuery, rows, typeFilter, userMetadataByEmail]
   );
 
   return (
     <section className={monitoringTableSurfaceClass}>
       <TableListHeader title="변동 내역" count={filteredRows.length} />
-      <div className="overflow-x-auto">
-        <table aria-label="크레딧 변동 내역" className={`${monitoringTableClass} min-w-[68rem]`}>
+      <div className="w-full overflow-hidden">
+        <table aria-label="크레딧 변동 내역" className={monitoringTableClass}>
           <colgroup>
-            {['8%', '18%', '8%', '10%', '10%', '17%', '11%', '18%'].map((width, index) => (
+            {['7%', '12%', '11%', '9%', '14%', '25%', '22%'].map((width, index) => (
               <col key={index} style={{ width }} />
             ))}
           </colgroup>
           <thead className={monitoringTableHeadClass}>
             <tr className={monitoringTableHeaderRowClass}>
-              {[
-                '로그 ID',
-                '사용자',
-                '직급',
-                '유형',
-                '변동',
-                '잔액 변화',
-                '요청 ID',
-                '처리 주체',
-              ].map(column => (
-                <th key={column} scope="col" className={monitoringTableHeaderCellClass}>
-                  {column}
-                </th>
-              ))}
+              {['No.', '대상 사용자', '부서', '직책', '변동 크레딧', '잔액 변화', '처리 시각'].map(
+                column => (
+                  <th key={column} scope="col" className={monitoringTableHeaderCellClass}>
+                    {column}
+                  </th>
+                )
+              )}
             </tr>
           </thead>
           <tbody className="text-[clamp(0.82rem,0.95vw,0.94rem)] leading-[1.45] text-[#344054]">
-            {filteredRows.map((row, index) => (
-              <tr key={row.id} className={monitoringTableRowClass({ striped: index % 2 === 1 })}>
-                <td className={monitoringTableCellClass(index, 'text-slate-500')}>{row.id}</td>
-                <td className={monitoringTableCellClass(index, 'font-medium text-slate-700')}>
-                  {row.user}
-                </td>
-                <td className={monitoringTableCellClass(index, 'text-slate-500')}>{row.role}</td>
-                <td className={monitoringTableCellClass(index)}>
-                  <StatusPill tone={row.type === '지급' ? 'green' : 'red'}>{row.type}</StatusPill>
-                </td>
-                <td
-                  className={monitoringTableCellClass(
-                    index,
-                    `font-bold ${row.type === '지급' ? 'text-emerald-600' : 'text-rose-500'}`
-                  )}
-                >
-                  {row.delta}
-                </td>
-                <td className={monitoringTableCellClass(index, 'text-slate-500')}>{row.balance}</td>
-                <td className={monitoringTableCellClass(index, 'text-slate-500')}>
-                  {row.requestId}
-                </td>
-                <td className={monitoringTableCellClass(index, 'text-slate-400')}>{row.actor}</td>
-              </tr>
-            ))}
+            {filteredRows.map((row, index) => {
+              const user = getTransactionUser(row, userMetadataByEmail);
+
+              return (
+                <tr key={row.id} className={monitoringTableRowClass({ striped: index % 2 === 1 })}>
+                  <td className={monitoringTableCellClass(index, 'truncate text-slate-500')}>
+                    {row.id}
+                  </td>
+                  <td
+                    className={monitoringTableCellClass(
+                      index,
+                      'truncate font-medium text-slate-700'
+                    )}
+                    title={`${user.name} (${row.user})`}
+                  >
+                    {user.name}
+                  </td>
+                  <td
+                    className={monitoringTableCellClass(index, 'truncate text-slate-500')}
+                    title={user.department}
+                  >
+                    {user.department}
+                  </td>
+                  <td
+                    className={monitoringTableCellClass(index, 'truncate text-slate-500')}
+                    title={user.position}
+                  >
+                    {user.position}
+                  </td>
+                  <td
+                    className={monitoringTableCellClass(
+                      index,
+                      `truncate font-bold ${row.type === '지급' ? 'text-emerald-600' : 'text-rose-500'}`
+                    )}
+                    title={row.delta}
+                  >
+                    {row.delta}
+                  </td>
+                  <td
+                    className={monitoringTableCellClass(index, 'truncate text-slate-500')}
+                    title={row.balance}
+                  >
+                    {row.balance}
+                  </td>
+                  <td
+                    className={monitoringTableCellClass(
+                      index,
+                      'truncate font-medium text-slate-500'
+                    )}
+                    title={row.createdAt}
+                  >
+                    {row.createdAt}
+                  </td>
+                </tr>
+              );
+            })}
             {filteredRows.length === 0 ? (
               <tr>
-                <td colSpan={8} className="h-56 text-center text-slate-400">
+                <td colSpan={7} className="h-56 text-center text-slate-400">
                   조건에 맞는 변동 내역이 없습니다.
                 </td>
               </tr>
@@ -214,7 +259,6 @@ function TransactionTable({ rows, typeFilter, userQuery, requestQuery }) {
 }
 
 export default function LimitsPage() {
-  const navigate = useNavigate();
   const [policies, setPolicies] = useState(initialPolicies);
   const [policySaved, setPolicySaved] = useState(false);
   const [tiers, setTiers] = useState(initialTiers);
@@ -292,67 +336,100 @@ export default function LimitsPage() {
   ];
 
   return (
-    <PageLayout gapClassName="gap-4">
-      {notice ? (
-        <div
-          role="status"
-          className="flex items-center justify-between rounded-lg bg-blue-50 px-4 py-2.5 text-sm text-blue-700"
-        >
-          <span>{notice}</span>
-          <button type="button" onClick={() => setNotice('')} aria-label="알림 닫기">
-            <X size={16} />
-          </button>
-        </div>
-      ) : null}
-
-      <div className="grid gap-4 xl:grid-cols-2">
-        <section className={panelClass}>
-          <PanelHeading
-            title="크레딧 현황"
-            action={
-              <button
-                type="button"
-                onClick={() => navigate('/admin/control/internal/credit-history')}
-                aria-label="변동 내역 보기"
-                className="rounded-md p-1 text-slate-400 hover:bg-slate-100"
-              >
-                <ArrowUpRight size={17} />
-              </button>
-            }
-          />
-          <div className="px-5 py-4">
-            <p className="text-xs font-semibold text-slate-500">전체 크레딧 한도 사용</p>
-            <div className="mt-1 flex items-baseline gap-2">
-              <strong className="text-3xl font-bold tracking-tight">53%</strong>
-              <span className="text-sm font-bold text-blue-600">남음</span>
-            </div>
-            <div className="mt-3 h-2 rounded-full bg-slate-100">
-              <div className="h-full w-[53%] rounded-full bg-blue-600" />
-            </div>
-            <div className="mt-2.5 flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-500">
-              <span>
-                총 크레딧 <strong className="ml-1 text-slate-700">100,000,000</strong>
-              </span>
-              <span>
-                지급 가능 <strong className="ml-1 text-slate-700">52,788,890</strong>
-              </span>
-              <span>
-                사용자 보유 <strong className="ml-1 text-slate-700">47,211,110</strong>
-              </span>
-            </div>
+    <PageLayout gapClassName="gap-0" topPaddingClassName="pt-6">
+      <div className="mx-auto w-full max-w-4xl pb-10 text-slate-900">
+        {notice ? (
+          <div
+            role="status"
+            className="mb-1 flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700"
+          >
+            <span>{notice}</span>
+            <button
+              type="button"
+              onClick={() => setNotice('')}
+              aria-label="알림 닫기"
+              className="rounded-md p-1 hover:bg-blue-100"
+            >
+              <X size={16} />
+            </button>
           </div>
-        </section>
+        ) : null}
 
-        <section id="monthly-payout" className={panelClass}>
-          <PanelHeading title="월별 지급" />
+        <AdminDetailSection
+          title="크레딧 현황"
+          description="전체 발급 한도와 현재 사용자 보유량을 기준으로 가용 크레딧을 확인합니다."
+        >
+          <div className="flex items-end justify-between gap-5">
+            <div>
+              <p className="text-sm font-medium text-slate-500">가용 크레딧</p>
+              <div className="mt-1 flex items-baseline gap-2">
+                <strong className="text-4xl font-bold tracking-tight text-slate-950">53%</strong>
+                <span className="text-sm font-semibold text-blue-600">남음</span>
+              </div>
+            </div>
+            <span className="text-sm font-semibold text-slate-600">52,788,890 크레딧</span>
+          </div>
+          <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-full w-[53%] rounded-full bg-blue-600" />
+          </div>
+          <dl className="mt-7 grid border-y border-slate-200 text-sm sm:grid-cols-3 sm:divide-x sm:divide-slate-200">
+            {[
+              ['전체 발급 한도', '100,000,000'],
+              ['지급 가능', '52,788,890'],
+              ['사용자 보유', '47,211,110'],
+            ].map(([label, value]) => (
+              <div key={label} className="py-4 sm:px-5 sm:first:pl-0 sm:last:pr-0">
+                <dt className="text-slate-500">{label}</dt>
+                <dd className="mt-1.5 text-base font-semibold text-slate-900">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </AdminDetailSection>
+
+        <AdminDetailSection
+          title="운영 정책"
+          description="환율과 크레딧 단가, 요청 차감 기준 및 전체 발급 한도를 설정합니다."
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            {policyFields.map(([key, label, suffix]) => (
+              <CurrencyInput
+                key={key}
+                label={label}
+                value={policies[key]}
+                suffix={suffix}
+                onChange={event => updatePolicy(key, event.target.value)}
+              />
+            ))}
+          </div>
+          <div className="mt-5 flex justify-end">
+            <AppButton
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setPolicySaved(true);
+                setNotice('운영 정책을 저장했습니다.');
+              }}
+              className="h-11 gap-2 px-4"
+            >
+              {policySaved ? <Check size={15} /> : <Save size={15} />}
+              {policySaved ? '저장됨' : '변경 저장'}
+            </AppButton>
+          </div>
+        </AdminDetailSection>
+
+        <AdminDetailSection
+          title="월별 지급"
+          description="선택한 월의 직급별 지급 기준에 따라 사용자 크레딧을 일괄 지급합니다."
+        >
           <form
+            id="monthly-payout"
             onSubmit={event => {
               event.preventDefault();
               setNotice(`${targetMonth} 월별 크레딧 지급을 실행했습니다.`);
             }}
-            className="flex flex-wrap items-end gap-3 px-4 py-4"
+            className="flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-end"
           >
-            <label className="min-w-48 flex-1">
+            <label className="min-w-0 flex-1">
               <span className={fieldLabelClass}>대상 월</span>
               <input
                 type="month"
@@ -361,135 +438,103 @@ export default function LimitsPage() {
                 className={inputClass}
               />
             </label>
-            <AppButton type="submit" className="h-[var(--app-control-lg)] px-4">
+            <AppButton type="submit" className="h-[var(--app-control-lg)] shrink-0 px-4">
               월별 지급 실행
             </AppButton>
           </form>
-        </section>
-      </div>
+        </AdminDetailSection>
 
-      <section className={panelClass}>
-        <PanelHeading title="운영 정책" />
-        <div className="grid gap-x-4 gap-y-3 px-4 py-3 sm:grid-cols-4">
-          {policyFields.map(([key, label, suffix]) => (
-            <CurrencyInput
-              key={key}
-              label={label}
-              value={policies[key]}
-              suffix={suffix}
-              onChange={event => updatePolicy(key, event.target.value)}
-            />
-          ))}
-          <div className="flex justify-end sm:col-span-4">
+        <AdminDetailSection
+          title="직급별 지급 기준"
+          description="직급 또는 그룹별 월 지급 크레딧을 설정합니다. 행을 선택하면 기준을 수정할 수 있습니다."
+          action={
             <AppButton
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                setPolicySaved(true);
-                setNotice('운영 정책을 저장했습니다.');
-              }}
-              className="h-[var(--app-control-lg)] gap-2 px-4"
+              onClick={() => setTierModal({ tier: null })}
+              className="h-10 shrink-0 gap-2 px-3.5"
             >
-              {policySaved ? <Check size={14} /> : <Save size={14} />}
-              {policySaved ? '저장됨' : '변경 저장'}
+              <Plus className="h-4 w-4" /> 지급 기준 등록
             </AppButton>
+          }
+        >
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <label className="w-44">
+              <span className={fieldLabelClass}>직급</span>
+              <CustomDropdown
+                value={tierFilter}
+                onChange={setTierFilter}
+                options={['전체 직급', ...tiers.map(tier => tier.name)]}
+                ariaLabel="직급 필터"
+                className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)]"
+              />
+            </label>
+            <span className="pb-3 text-xs font-medium text-slate-500">
+              {visibleTiers.length.toLocaleString('ko-KR')}개 기준
+            </span>
           </div>
-        </div>
-      </section>
-
-      <section className={panelClass}>
-        <PanelHeading title="직급별 지급 기준" />
-        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#E7EBF4] px-4 py-3">
-          <label className="w-40">
-            <span className={fieldLabelClass}>직급</span>
-            <CustomDropdown
-              value={tierFilter}
-              onChange={setTierFilter}
-              options={['전체 직급', ...tiers.map(tier => tier.name)]}
-              ariaLabel="직급 필터"
-              className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)]"
-            />
-          </label>
-          <AppButton
-            onClick={() => setTierModal({ tier: null })}
-            className="h-[var(--app-control-lg)]"
-          >
-            <Plus className="h-4 w-4" /> 지급 기준 등록
-          </AppButton>
-        </div>
-        <TableListHeader title="지급 기준 목록" count={visibleTiers.length} />
-        <div className="overflow-x-auto">
-          <table className={`${monitoringTableClass} min-w-[58rem]`}>
-            <thead className={monitoringTableHeadClass}>
-              <tr className={monitoringTableHeaderRowClass}>
-                {[
-                  ['직급', '38%'],
-                  ['월 지급 크레딧', '27%'],
-                  ['지급 상태', '16%'],
-                  ['최근 변경', '19%'],
-                ].map(([title, width]) => (
-                  <th key={title} style={{ width }} className={monitoringTableHeaderCellClass}>
-                    {title}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="text-[clamp(0.82rem,0.95vw,0.94rem)] leading-[1.45] text-[#344054]">
-              {visibleTiers.map((tier, index) => (
-                <tr
-                  key={tier.id}
-                  tabIndex={0}
-                  aria-label={`${tier.name} 지급 기준 관리 열기`}
-                  onClick={() => setTierModal({ tier })}
-                  onKeyDown={event => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      setTierModal({ tier });
-                    }
-                  }}
-                  className={monitoringTableRowClass({
-                    striped: index % 2 === 1,
-                    interactive: true,
-                  })}
-                >
-                  <td className={monitoringTableCellClass(index)}>
-                    <span className="block font-semibold text-slate-800">{tier.name}</span>
-                    <span className="mt-0.5 block text-[0.76rem] text-slate-400">#{tier.id}</span>
-                  </td>
-                  <td className={monitoringTableCellClass(index, 'font-semibold text-slate-700')}>
-                    {tier.credits}
-                  </td>
-                  <td className={monitoringTableCellClass(index)}>
-                    <StatusPill>활성</StatusPill>
-                  </td>
-                  <td className={monitoringTableCellClass(index, 'text-slate-400')}>
-                    {tier.updatedAt}
-                  </td>
+          <div className="border-y border-slate-200">
+            <table className={monitoringTableClass}>
+              <thead className={monitoringTableHeadClass}>
+                <tr className={monitoringTableHeaderRowClass}>
+                  {[
+                    ['직급', '34%'],
+                    ['월 지급 크레딧', '27%'],
+                    ['지급 상태', '16%'],
+                    ['최근 변경', '23%'],
+                  ].map(([title, width]) => (
+                    <th key={title} style={{ width }} className={monitoringTableHeaderCellClass}>
+                      {title}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+              </thead>
+              <tbody className="text-sm leading-[1.45] text-[#344054]">
+                {visibleTiers.map((tier, index) => (
+                  <tr
+                    key={tier.id}
+                    tabIndex={0}
+                    aria-label={`${tier.name} 지급 기준 관리 열기`}
+                    onClick={() => setTierModal({ tier })}
+                    onKeyDown={event => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setTierModal({ tier });
+                      }
+                    }}
+                    className={monitoringTableRowClass({
+                      striped: index % 2 === 1,
+                      interactive: true,
+                    })}
+                  >
+                    <td className={monitoringTableCellClass(index, 'font-semibold text-slate-800')}>
+                      {tier.name}
+                    </td>
+                    <td className={monitoringTableCellClass(index, 'font-semibold text-slate-700')}>
+                      {tier.credits}
+                    </td>
+                    <td className={monitoringTableCellClass(index)}>
+                      <StatusPill>활성</StatusPill>
+                    </td>
+                    <td className={monitoringTableCellClass(index, 'text-slate-500')}>
+                      {tier.updatedAt}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </AdminDetailSection>
 
-      <section className={panelClass}>
-        <PanelHeading title="크레딧 지급·회수" />
-        <div className="p-3">
-          <form onSubmit={submitCredit} className="rounded-lg border border-slate-200">
-            <PanelHeading
-              title="수동 지급·회수"
-              action={
-                <span className="text-[11px] text-slate-500">
-                  지급 가능 <strong className="ml-1 text-slate-700">52,788,890</strong>
-                </span>
-              }
-            />
-            <div className="space-y-2.5 p-3">
+        <AdminDetailSection
+          title="수동 지급·회수"
+          description="특정 사용자의 크레딧을 즉시 지급하거나 회수합니다. 처리 결과는 변동 내역에 기록됩니다."
+        >
+          <form onSubmit={submitCredit} className="max-w-3xl space-y-5">
+            <div className="flex items-end justify-between gap-4">
               <fieldset>
                 <legend className={fieldLabelClass}>처리 유형</legend>
-                <div className="flex gap-4 text-xs text-slate-700">
+                <div className="flex h-[var(--app-control-lg)] items-center gap-5 text-sm text-slate-700">
                   {['지급', '회수'].map(value => (
-                    <label key={value} className="inline-flex items-center gap-1.5">
+                    <label key={value} className="inline-flex cursor-pointer items-center gap-2">
                       <input
                         type="radio"
                         name="operation"
@@ -502,51 +547,54 @@ export default function LimitsPage() {
                   ))}
                 </div>
               </fieldset>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label>
-                  <span className={fieldLabelClass}>사용자</span>
-                  <CustomDropdown
-                    value={selectedUser}
-                    onChange={setSelectedUser}
-                    options={users}
-                    ariaLabel="대상 사용자"
-                    className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)]"
+              <span className="pb-3 text-xs text-slate-500">
+                지급 가능 <strong className="ml-1 font-semibold text-slate-800">52,788,890</strong>
+              </span>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label>
+                <span className={fieldLabelClass}>사용자</span>
+                <CustomDropdown
+                  value={selectedUser}
+                  onChange={setSelectedUser}
+                  options={users}
+                  ariaLabel="대상 사용자"
+                  className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)]"
+                />
+              </label>
+              <label>
+                <span className={fieldLabelClass}>크레딧 수량</span>
+                <span className="relative block">
+                  <input
+                    value={amount}
+                    onChange={event => setAmount(event.target.value)}
+                    inputMode="numeric"
+                    placeholder="수량 입력"
+                    className={`${inputClass} pr-16`}
                   />
-                </label>
-                <label>
-                  <span className={fieldLabelClass}>크레딧 수량</span>
-                  <div className="relative">
-                    <input
-                      value={amount}
-                      onChange={event => setAmount(event.target.value)}
-                      inputMode="numeric"
-                      placeholder="수량 입력"
-                      className={`${inputClass} pr-14`}
-                    />
-                    <span className="absolute inset-y-0 right-3 flex items-center text-[11px] text-slate-400">
-                      크레딧
-                    </span>
-                  </div>
-                </label>
-              </div>
-              <label className="block">
-                <span className={fieldLabelClass}>처리 사유</span>
-                <div className="flex items-end gap-2">
-                  <textarea
-                    value={reason}
-                    onChange={event => setReason(event.target.value)}
-                    placeholder="처리 사유 입력..."
-                    className="min-h-12 flex-1 resize-y rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                  />
-                  <AppButton type="submit" className="h-[var(--app-control-lg)] shrink-0 px-4">
-                    지급 실행
-                  </AppButton>
-                </div>
+                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-slate-400">
+                    크레딧
+                  </span>
+                </span>
               </label>
             </div>
+            <label className="block">
+              <span className={fieldLabelClass}>처리 사유</span>
+              <textarea
+                value={reason}
+                onChange={event => setReason(event.target.value)}
+                placeholder="처리 사유를 입력해 주세요."
+                className="min-h-24 w-full resize-y rounded-[var(--app-radius-lg)] border border-slate-200 px-4 py-3 text-sm leading-6 outline-none transition placeholder:text-slate-400 focus:border-[#8BC6FF] focus:ring-4 focus:ring-[#DEEEFF]"
+              />
+            </label>
+            <div className="flex justify-end">
+              <AppButton type="submit" className="h-11 px-5">
+                {operation} 실행
+              </AppButton>
+            </div>
           </form>
-        </div>
-      </section>
+        </AdminDetailSection>
+      </div>
 
       {tierModal ? (
         <TierModal tier={tierModal.tier} onClose={() => setTierModal(null)} onSave={saveTier} />
@@ -556,23 +604,58 @@ export default function LimitsPage() {
 }
 
 export function CreditHistoryPage() {
+  const { data: clientsData } = useRegisteredClientsQuery();
+  const [defaultDateRange] = useState(() => createDefaultDateRange());
+  const [dateRange, setDateRange] = useState(defaultDateRange);
   const [typeFilter, setTypeFilter] = useState('전체');
-  const [userQuery, setUserQuery] = useState('');
-  const [requestQuery, setRequestQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [submittedFilters, setSubmittedFilters] = useState({
     typeFilter: '전체',
-    userQuery: '',
-    requestQuery: '',
+    query: '',
   });
   const [page, setPage] = useState(1);
+  const userMetadataByEmail = useMemo(
+    () =>
+      Object.fromEntries(
+        (clientsData?.clients ?? [])
+          .filter(client => client.email && client.user_name)
+          .map(client => [
+            client.email,
+            {
+              name: client.user_name,
+              department: client.department || '-',
+              position: client.position || '-',
+            },
+          ])
+      ),
+    [clientsData?.clients]
+  );
   const handleSearch = () => {
-    setSubmittedFilters({ typeFilter, userQuery, requestQuery });
+    setSubmittedFilters({ typeFilter, query: searchInput.trim() });
+    setPage(1);
+  };
+  const handleReset = () => {
+    setDateRange(defaultDateRange);
+    setTypeFilter('전체');
+    setSearchInput('');
+    setSubmittedFilters({ typeFilter: '전체', query: '' });
     setPage(1);
   };
 
   return (
     <PageLayout gapClassName="gap-4" bottomPaddingClassName="pb-0">
-      <section className="grid items-end gap-[var(--app-gap-sm)] md:grid-cols-2 xl:grid-cols-[9rem_minmax(0,1fr)_minmax(0,1fr)_5.25rem]">
+      <section className="grid items-end gap-[var(--app-gap-sm)] md:grid-cols-2 xl:grid-cols-[10.25rem_9rem_minmax(0,1fr)_5.25rem_3rem]">
+        <DateRangePicker
+          label="조회 기간"
+          labelClassName="mb-1.5 block text-xs font-bold text-slate-700"
+          startDate={dateRange.startDate}
+          endDate={dateRange.endDate}
+          onChange={range => {
+            setDateRange(range);
+            setPage(1);
+          }}
+          widthClass="w-full min-w-0"
+        />
         <label className="min-w-0">
           <span className="mb-1.5 block text-xs font-bold text-slate-700">유형</span>
           <CustomDropdown
@@ -584,26 +667,30 @@ export function CreditHistoryPage() {
           />
         </label>
         <label className="min-w-0">
-          <span className="mb-1.5 block text-xs font-bold text-slate-700">사용자 ID</span>
+          <span className="mb-1.5 block text-xs font-bold text-slate-700">통합 검색</span>
           <AppSearchField
-            value={userQuery}
-            onChange={event => setUserQuery(event.target.value)}
-            placeholder="사용자 ID 입력..."
-          />
-        </label>
-        <label className="min-w-0">
-          <span className="mb-1.5 block text-xs font-bold text-slate-700">요청 ID</span>
-          <AppSearchField
-            value={requestQuery}
-            onChange={event => setRequestQuery(event.target.value)}
-            placeholder="요청 ID 입력..."
+            value={searchInput}
+            onChange={event => setSearchInput(event.target.value)}
+            placeholder="사용자, 변동 ID, 잔액 또는 처리 시각 검색..."
           />
         </label>
         <AppButton onClick={handleSearch} className="h-[var(--app-control-lg)] w-full">
-          조회
+          검색
         </AppButton>
+        <MonitoringIconButtonTooltip label="초기화">
+          <MonitoringResetButton
+            onClick={handleReset}
+            widthClass="w-[var(--app-control-lg)] min-w-[var(--app-control-lg)]"
+            aria-label="초기화"
+          />
+        </MonitoringIconButtonTooltip>
       </section>
-      <TransactionTable rows={initialTransactions} {...submittedFilters} />
+      <TransactionTable
+        rows={initialTransactions}
+        userMetadataByEmail={userMetadataByEmail}
+        dateRange={dateRange}
+        {...submittedFilters}
+      />
       <FixedPaginationBar currentPage={page} totalPages={154} onPageChange={setPage} />
     </PageLayout>
   );

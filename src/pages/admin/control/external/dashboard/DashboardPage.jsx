@@ -678,10 +678,11 @@ function ChartFilterBar({
         endDate={dateRange.endDate}
         onChange={onDateRangeChange}
         widthClass="w-full min-w-0 sm:w-[10.25rem]"
-        labelClassName="sr-only"
+        labelClassName="mb-1.5 block text-xs font-bold text-slate-700"
       />
       {showFilter ? (
         <div className="flex min-w-0 flex-col">
+          <span className="mb-1.5 block text-xs font-bold text-slate-700">{filterLabel}</span>
           <DashboardChartFilter
             items={filterItems}
             hiddenLabels={hiddenFilterLabels}
@@ -689,7 +690,12 @@ function ChartFilterBar({
           />
         </div>
       ) : null}
-      {showUserViewControls ? <DashboardUserViewControls {...userViewProps} /> : null}
+      {showUserViewControls ? (
+        <div className="flex min-w-0 flex-col">
+          <span className="mb-1.5 block text-xs font-bold text-slate-700">사용자 기준</span>
+          <DashboardUserViewControls {...userViewProps} />
+        </div>
+      ) : null}
     </section>
   );
 }

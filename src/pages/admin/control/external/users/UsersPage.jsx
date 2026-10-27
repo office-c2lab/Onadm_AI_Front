@@ -498,41 +498,50 @@ export default function UserPage() {
     <PageLayout bottomPaddingClassName="pb-0">
       <div className="flex min-h-0 flex-1 flex-col gap-5">
         <div className="flex flex-col gap-4 pt-1">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex w-full flex-col gap-3 lg:flex-1 lg:flex-row">
-              <CustomDropdown
-                value={department}
-                onChange={handleChangeDepartment}
-                options={departmentFilterOptions}
-                ariaLabel="전체 부서"
-                className="w-full lg:w-[clamp(10rem,13vw,12rem)] lg:shrink-0 [&>button]:h-12 [&>button]:rounded-xl"
-              />
-
-              <CustomDropdown
-                value={position}
-                onChange={handleChangePosition}
-                options={positionFilterOptions}
-                ariaLabel="전체 직책"
-                className="w-full lg:w-[clamp(10rem,13vw,12rem)] lg:shrink-0 [&>button]:h-12 [&>button]:rounded-xl"
-              />
-
-              <div className="flex flex-1 flex-col gap-3 sm:min-w-[20rem] sm:flex-row lg:w-[clamp(18rem,30vw,24rem)] lg:min-w-0 lg:flex-none">
-                <AppSearchField
-                  value={searchInput}
-                  onChange={event => setSearchInput(event.target.value)}
-                  placeholder="사용자명, IP 검색"
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex w-full flex-col gap-3 lg:flex-1 lg:flex-row lg:items-end">
+              <label className="w-full lg:w-[clamp(10rem,13vw,12rem)] lg:shrink-0">
+                <span className="mb-1.5 block text-xs font-bold text-slate-700">부서</span>
+                <CustomDropdown
+                  value={department}
+                  onChange={handleChangeDepartment}
+                  options={departmentFilterOptions}
+                  ariaLabel="전체 부서"
+                  className="w-full [&>button]:h-12 [&>button]:rounded-xl"
                 />
-                <AppButton onClick={handleSearch} className="h-12 min-w-[4.5rem]">
-                  검색
-                </AppButton>
-                <MonitoringIconButtonTooltip label="초기화">
-                  <MonitoringResetButton
-                    onClick={handleResetFilters}
-                    heightClass="h-12"
-                    widthClass="w-12 shrink-0"
-                    aria-label="초기화"
+              </label>
+
+              <label className="w-full lg:w-[clamp(10rem,13vw,12rem)] lg:shrink-0">
+                <span className="mb-1.5 block text-xs font-bold text-slate-700">직책</span>
+                <CustomDropdown
+                  value={position}
+                  onChange={handleChangePosition}
+                  options={positionFilterOptions}
+                  ariaLabel="전체 직책"
+                  className="w-full [&>button]:h-12 [&>button]:rounded-xl"
+                />
+              </label>
+
+              <div className="flex-1 sm:min-w-[20rem] lg:w-[clamp(18rem,30vw,24rem)] lg:min-w-0 lg:flex-none">
+                <span className="mb-1.5 block text-xs font-bold text-slate-700">사용자 검색</span>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <AppSearchField
+                    value={searchInput}
+                    onChange={event => setSearchInput(event.target.value)}
+                    placeholder="사용자명, IP 검색"
                   />
-                </MonitoringIconButtonTooltip>
+                  <AppButton onClick={handleSearch} className="h-12 min-w-[4.5rem]">
+                    검색
+                  </AppButton>
+                  <MonitoringIconButtonTooltip label="초기화">
+                    <MonitoringResetButton
+                      onClick={handleResetFilters}
+                      heightClass="h-12"
+                      widthClass="w-12 shrink-0"
+                      aria-label="초기화"
+                    />
+                  </MonitoringIconButtonTooltip>
+                </div>
               </div>
             </div>
           </div>

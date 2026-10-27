@@ -6,8 +6,14 @@ import geminiIcon from '../../../../../assets/icons/gemini-color.svg';
 import openaiIcon from '../../../../../assets/icons/openai.svg';
 import AppButton from '../../external/components/AppButton.jsx';
 import AppSearchField from '../../external/components/AppSearchField.jsx';
+import AppToggle from '../../external/components/AppToggle.jsx';
+import FixedPaginationBar from '../../external/components/FixedPaginationBar.jsx';
 import TableListHeader from '../../external/components/TableListHeader.jsx';
 import PageLayout from '../../components/PageLayout.jsx';
+import {
+  MonitoringIconButtonTooltip,
+  MonitoringResetButton,
+} from '../../external/components/monitoring/MonitoringListComponents.jsx';
 import {
   monitoringTableCellClass,
   monitoringTableClass,
@@ -21,12 +27,26 @@ import {
 import '../../external/garim.css';
 
 import { providers, models, prompts } from '../data.js';
+const PAGE_SIZE = 5;
 const tabs = [
   { id: 'providers', label: '제공자 / API Key' },
   { id: 'models', label: '모델 · 단가' },
 ];
 
 const providerIcons = { openai: openaiIcon, google: geminiIcon, deepseek: null };
+
+function formatDateTime24(value) {
+  const match = String(value ?? '').match(
+    /^(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(오전|오후)\s*(\d{1,2}):(\d{2})$/
+  );
+  if (!match) return value;
+
+  const [, year, month, day, period, rawHour, minute] = match;
+  const hour = (Number(rawHour) % 12) + (period === '오후' ? 12 : 0);
+  const pad = number => String(number).padStart(2, '0');
+
+  return `${year}-${pad(month)}-${pad(day)} ${pad(hour)}:${minute}`;
+}
 
 function Badge({ children, tone = 'green' }) {
   const tones = {
@@ -41,18 +61,13 @@ function Badge({ children, tone = 'green' }) {
   );
 }
 
-function ProviderIdentity({ icon, name, code }) {
+function ProviderIdentity({ icon, name }) {
   return (
     <div className="flex items-center gap-3">
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-50">
         <ProviderIcon icon={icon} />
       </span>
-      <div className="min-w-0">
-        <p className="truncate font-bold text-slate-900">{name}</p>
-        <span className="mt-1 inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[0.72rem] font-bold text-slate-600">
-          {code}
-        </span>
-      </div>
+      <p className="min-w-0 truncate font-bold text-slate-900">{name}</p>
     </div>
   );
 }
@@ -88,7 +103,13 @@ function TableShell({ title, count, columns, widths, children }) {
           <thead className={monitoringTableHeadClass}>
             <tr className={monitoringTableHeaderRowClass}>
               {columns.map(column => (
-                <th key={column} scope="col" className={monitoringTableHeaderCellClass}>
+                <th
+                  key={column}
+                  scope="col"
+                  className={`${monitoringTableHeaderCellClass} whitespace-nowrap ${
+                    ['상태', '사용 설정'].includes(column) ? '!text-center' : ''
+                  }`}
+                >
                   {column}
                 </th>
               ))}
@@ -101,13 +122,13 @@ function TableShell({ title, count, columns, widths, children }) {
   );
 }
 
-function ProviderTable({ rows, onManage }) {
+function ProviderTable({ rows, totalCount, onManage, onToggleStatus }) {
   return (
     <TableShell
       title="제공자 목록"
-      count={rows.length}
-      columns={['제공자', 'ENDPOINT', 'API KEY', '상태', '수정일']}
-      widths={['24%', '38%', '16%', '9%', '13%']}
+      count={totalCount}
+      columns={['제공자', 'ENDPOINT', 'API KEY', '최초 등록일', '상태']}
+      widths={['25%', '35%', '15%', '16%', '9%']}
     >
       {rows.map((provider, rowIndex) => (
         <tr
@@ -119,29 +140,45 @@ function ProviderTable({ rows, onManage }) {
           className={monitoringTableRowClass({ striped: rowIndex % 2 === 1, interactive: true })}
         >
           <td className={monitoringTableCellClass(rowIndex)}>
-            <ProviderIdentity icon={provider.icon} name={provider.name} code={provider.code} />
+            <ProviderIdentity icon={provider.icon} name={provider.name} />
           </td>
-          <td className={monitoringTableCellClass(rowIndex)}>{provider.endpoint}</td>
+          <td className={monitoringTableCellClass(rowIndex, 'min-w-0')}>
+            <div className="truncate" title={provider.endpoint}>
+              {provider.endpoint}
+            </div>
+          </td>
           <td className={monitoringTableCellClass(rowIndex)}>
             <Badge>{provider.key}</Badge>
           </td>
           <td className={monitoringTableCellClass(rowIndex)}>
-            <Badge>{provider.status}</Badge>
+            <span className="whitespace-nowrap">{formatDateTime24(provider.modifiedAt)}</span>
           </td>
-          <td className={monitoringTableCellClass(rowIndex)}>{provider.modifiedAt}</td>
+          <td className={monitoringTableCellClass(rowIndex, 'text-center')}>
+            <span
+              className="inline-flex"
+              onClick={event => event.stopPropagation()}
+              onKeyDown={event => event.stopPropagation()}
+            >
+              <AppToggle
+                checked={provider.status === '활성'}
+                onChange={() => onToggleStatus(provider.id)}
+                ariaLabel={`${provider.name} 상태`}
+              />
+            </span>
+          </td>
         </tr>
       ))}
     </TableShell>
   );
 }
 
-function ModelTable({ rows, onManage }) {
+function ModelTable({ rows, totalCount, onManage, onToggleStatus }) {
   return (
     <TableShell
       title="모델 목록"
-      count={rows.length}
-      columns={['모델', '단가 (1K)', '점검 결과', '사용 설정', '수정일']}
-      widths={['27%', '30%', '17%', '11%', '15%']}
+      count={totalCount}
+      columns={['모델', '단가 (1K)', '점검 결과', '수정일', '사용 설정']}
+      widths={['27%', '30%', '17%', '15%', '11%']}
     >
       {rows.map((model, rowIndex) => (
         <tr
@@ -167,23 +204,35 @@ function ModelTable({ rows, onManage }) {
           <td className={monitoringTableCellClass(rowIndex)}>
             <Badge>{model[4]}</Badge>
           </td>
-          <td className={monitoringTableCellClass(rowIndex)}>
-            <Badge tone={model[5] === '사용' ? 'green' : 'gray'}>{model[5]}</Badge>
+          <td className={monitoringTableCellClass(rowIndex, 'whitespace-nowrap')}>
+            {formatDateTime24(model[6])}
           </td>
-          <td className={monitoringTableCellClass(rowIndex)}>{model[6]}</td>
+          <td className={monitoringTableCellClass(rowIndex, 'text-center')}>
+            <span
+              className="inline-flex"
+              onClick={event => event.stopPropagation()}
+              onKeyDown={event => event.stopPropagation()}
+            >
+              <AppToggle
+                checked={model[5] === '사용'}
+                onChange={() => onToggleStatus(model[0])}
+                ariaLabel={`${model[0]} 사용 설정`}
+              />
+            </span>
+          </td>
         </tr>
       ))}
     </TableShell>
   );
 }
 
-function PromptTable({ rows, onManage }) {
+function PromptTable({ rows, totalCount, onManage, onToggleStatus }) {
   return (
     <TableShell
       title="프롬프트 목록"
-      count={rows.length}
-      columns={['이름', '본문 미리보기', '상태', '수정일']}
-      widths={['25%', '50%', '10%', '15%']}
+      count={totalCount}
+      columns={['이름', '본문 미리보기', '수정일', '상태']}
+      widths={['25%', '50%', '15%', '10%']}
     >
       {rows.map((prompt, rowIndex) => (
         <tr
@@ -198,10 +247,22 @@ function PromptTable({ rows, onManage }) {
             {prompt[0]}
           </td>
           <td className={monitoringTableCellClass(rowIndex)}>{prompt[1]}</td>
-          <td className={monitoringTableCellClass(rowIndex)}>
-            <Badge tone={prompt[2] === '활성' ? 'green' : 'gray'}>{prompt[2]}</Badge>
+          <td className={monitoringTableCellClass(rowIndex, 'whitespace-nowrap')}>
+            {formatDateTime24(prompt[3])}
           </td>
-          <td className={monitoringTableCellClass(rowIndex)}>{prompt[3]}</td>
+          <td className={monitoringTableCellClass(rowIndex, 'text-center')}>
+            <span
+              className="inline-flex"
+              onClick={event => event.stopPropagation()}
+              onKeyDown={event => event.stopPropagation()}
+            >
+              <AppToggle
+                checked={prompt[2] === '활성'}
+                onChange={() => onToggleStatus(prompt[0])}
+                ariaLabel={`${prompt[0]} 상태`}
+              />
+            </span>
+          </td>
         </tr>
       ))}
     </TableShell>
@@ -364,16 +425,22 @@ function ManagementModal({ tab, item, mode, onClose }) {
 
 export default function ModelsPage({ initialTab = 'providers' }) {
   const isPromptPage = initialTab === 'prompts';
+  const [providerRows, setProviderRows] = useState(() =>
+    providers.map(provider => ({ ...provider }))
+  );
+  const [modelRows, setModelRows] = useState(() => models.map(model => [...model]));
+  const [promptRows, setPromptRows] = useState(() => prompts.map(prompt => [...prompt]));
   const [activeTab, setActiveTab] = useState(initialTab);
   const [status, setStatus] = useState('전체 상태');
   const [providerFilter, setProviderFilter] = useState('전체 제공자');
   const [queryInput, setQueryInput] = useState('');
   const [query, setQuery] = useState('');
   const [modal, setModal] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredProviders = useMemo(
     () =>
-      providers.filter(
+      providerRows.filter(
         provider =>
           (status === '전체 상태' || provider.status === status) &&
           (!query ||
@@ -381,27 +448,36 @@ export default function ModelsPage({ initialTab = 'providers' }) {
               .toLowerCase()
               .includes(query.toLowerCase()))
       ),
-    [query, status]
+    [providerRows, query, status]
   );
   const filteredModels = useMemo(
     () =>
-      models.filter(
+      modelRows.filter(
         model =>
           (status === '전체 설정' || model[5] === status) &&
           (providerFilter === '전체 제공자' || model[1] === providerFilter) &&
           (!query || `${model[0]} ${model[1]}`.toLowerCase().includes(query.toLowerCase()))
       ),
-    [providerFilter, query, status]
+    [modelRows, providerFilter, query, status]
   );
   const filteredPrompts = useMemo(
     () =>
-      prompts.filter(
+      promptRows.filter(
         prompt =>
           (status === '전체 상태' || prompt[2] === status) &&
           (!query || `${prompt[0]} ${prompt[1]}`.toLowerCase().includes(query.toLowerCase()))
       ),
-    [query, status]
+    [promptRows, query, status]
   );
+  const activeRows =
+    activeTab === 'providers'
+      ? filteredProviders
+      : activeTab === 'models'
+        ? filteredModels
+        : filteredPrompts;
+  const totalPages = Math.max(1, Math.ceil(activeRows.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const visibleRows = activeRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const changeTab = tab => {
     setActiveTab(tab);
@@ -409,9 +485,48 @@ export default function ModelsPage({ initialTab = 'providers' }) {
     setProviderFilter('전체 제공자');
     setQueryInput('');
     setQuery('');
+    setCurrentPage(1);
+  };
+  const handleReset = () => {
+    setStatus(activeTab === 'models' ? '전체 설정' : '전체 상태');
+    setProviderFilter('전체 제공자');
+    setQueryInput('');
+    setQuery('');
+    setCurrentPage(1);
   };
   const openCreate = () => setModal({ mode: 'create', item: null });
   const openManage = item => setModal({ mode: 'manage', item });
+  const handleToggleProviderStatus = providerId => {
+    setProviderRows(current =>
+      current.map(provider =>
+        provider.id === providerId
+          ? { ...provider, status: provider.status === '활성' ? '비활성' : '활성' }
+          : provider
+      )
+    );
+  };
+  const handleToggleModelStatus = modelId => {
+    setModelRows(current =>
+      current.map(model => {
+        if (model[0] !== modelId) return model;
+
+        const nextModel = [...model];
+        nextModel[5] = model[5] === '사용' ? '사용 안 함' : '사용';
+        return nextModel;
+      })
+    );
+  };
+  const handleTogglePromptStatus = promptId => {
+    setPromptRows(current =>
+      current.map(prompt => {
+        if (prompt[0] !== promptId) return prompt;
+
+        const nextPrompt = [...prompt];
+        nextPrompt[2] = prompt[2] === '활성' ? '비활성' : '활성';
+        return nextPrompt;
+      })
+    );
+  };
 
   return (
     <div className="garim-external-root min-h-full bg-white text-[#111827]">
@@ -440,7 +555,7 @@ export default function ModelsPage({ initialTab = 'providers' }) {
       </div>
       <PageLayout gapClassName="gap-[var(--app-gap-md)]">
         <section
-          className={`grid items-end gap-[var(--app-gap-sm)] md:grid-cols-2 ${activeTab === 'models' ? 'xl:grid-cols-[9rem_11rem_minmax(0,1fr)_5.25rem_9rem]' : 'xl:grid-cols-[9rem_minmax(0,1fr)_5.25rem_9rem]'}`}
+          className={`grid items-end gap-[var(--app-gap-sm)] md:grid-cols-2 ${activeTab === 'models' ? 'xl:grid-cols-[9rem_11rem_minmax(0,1fr)_5.25rem_3rem_9rem]' : 'xl:grid-cols-[9rem_minmax(0,1fr)_5.25rem_3rem_9rem]'}`}
         >
           <label>
             <span className="mb-1.5 block text-xs font-bold text-slate-700">
@@ -448,7 +563,10 @@ export default function ModelsPage({ initialTab = 'providers' }) {
             </span>
             <CustomDropdown
               value={status}
-              onChange={setStatus}
+              onChange={value => {
+                setStatus(value);
+                setCurrentPage(1);
+              }}
               options={
                 activeTab === 'models'
                   ? ['전체 설정', '사용', '사용 안 함']
@@ -463,7 +581,10 @@ export default function ModelsPage({ initialTab = 'providers' }) {
               <span className="mb-1.5 block text-xs font-bold text-slate-700">제공자</span>
               <CustomDropdown
                 value={providerFilter}
-                onChange={setProviderFilter}
+                onChange={value => {
+                  setProviderFilter(value);
+                  setCurrentPage(1);
+                }}
                 options={['전체 제공자', 'OpenAI', 'Google Gemini', 'DeepSeek']}
                 ariaLabel="제공자 선택"
                 className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-sm [&>button]:font-semibold"
@@ -491,11 +612,21 @@ export default function ModelsPage({ initialTab = 'providers' }) {
             />
           </label>
           <AppButton
-            onClick={() => setQuery(queryInput.trim())}
+            onClick={() => {
+              setQuery(queryInput.trim());
+              setCurrentPage(1);
+            }}
             className="h-[var(--app-control-lg)]"
           >
-            조회
+            검색
           </AppButton>
+          <MonitoringIconButtonTooltip label="초기화">
+            <MonitoringResetButton
+              onClick={handleReset}
+              widthClass="w-[var(--app-control-lg)] min-w-[var(--app-control-lg)]"
+              aria-label="초기화"
+            />
+          </MonitoringIconButtonTooltip>
           <AppButton onClick={openCreate} className="h-[var(--app-control-lg)] px-3">
             <Plus className="h-4 w-4" />
             <span>
@@ -508,13 +639,35 @@ export default function ModelsPage({ initialTab = 'providers' }) {
           </AppButton>
         </section>
         {activeTab === 'providers' ? (
-          <ProviderTable rows={filteredProviders} onManage={openManage} />
+          <ProviderTable
+            rows={visibleRows}
+            totalCount={filteredProviders.length}
+            onManage={openManage}
+            onToggleStatus={handleToggleProviderStatus}
+          />
         ) : null}
-        {activeTab === 'models' ? <ModelTable rows={filteredModels} onManage={openManage} /> : null}
+        {activeTab === 'models' ? (
+          <ModelTable
+            rows={visibleRows}
+            totalCount={filteredModels.length}
+            onManage={openManage}
+            onToggleStatus={handleToggleModelStatus}
+          />
+        ) : null}
         {activeTab === 'prompts' ? (
-          <PromptTable rows={filteredPrompts} onManage={openManage} />
+          <PromptTable
+            rows={visibleRows}
+            totalCount={filteredPrompts.length}
+            onManage={openManage}
+            onToggleStatus={handleTogglePromptStatus}
+          />
         ) : null}
       </PageLayout>
+      <FixedPaginationBar
+        currentPage={safePage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
       {modal ? (
         <ManagementModal
           tab={activeTab}

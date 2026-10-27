@@ -708,7 +708,9 @@ export function MonitoringDataTable({
                 />
               </th>
               <th className={`${monitoringCompactHeaderCellClass} px-0 text-center`}>No.</th>
-              <th className={`${monitoringCompactHeaderCellClass} px-[var(--app-pad-sm)]`}>
+              <th
+                className={`${monitoringCompactHeaderCellClass} pr-[var(--app-pad-sm)] pl-[calc(var(--app-pad-sm)+0.375rem)]`}
+              >
                 탐지 일시
               </th>
               <th
@@ -774,7 +776,7 @@ export function MonitoringDataTable({
                     <td
                       className={monitoringCompactTableCellClass(
                         index,
-                        'px-[var(--app-pad-sm)] text-[#475467]'
+                        'pr-[var(--app-pad-sm)] pl-[calc(var(--app-pad-sm)+0.375rem)] text-[#475467]'
                       )}
                     >
                       <div className="whitespace-nowrap">{row.detectedAt}</div>

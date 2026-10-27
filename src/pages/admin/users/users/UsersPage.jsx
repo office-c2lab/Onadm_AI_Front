@@ -44,14 +44,6 @@ const DEFAULT_USER_STATUSES = {
   5: '승인 대기',
   6: '활성',
 };
-const MOCK_USER_EMAILS = {
-  1: 'minjun.kim@example.com',
-  2: 'seoyeon.park@example.com',
-  3: 'doyun.lee@example.com',
-  4: 'yujin.choi@example.com',
-  5: 'haneul.jung@example.com',
-  6: 'jiho.kang@example.com',
-};
 function buildDropdownOptions(items, currentValue) {
   const optionNames = items.map(item => item.name);
   const trimmedCurrentValue = currentValue?.trim();
@@ -89,7 +81,7 @@ function normalizeClient(client) {
   return {
     id: String(client.id ?? client.client_id),
     name: client.user_name ?? '',
-    email: client.email ?? MOCK_USER_EMAILS[client.id] ?? '-',
+    email: client.email ?? '-',
     profileImageUrl:
       client.profile_image_url ??
       client.profileImageUrl ??

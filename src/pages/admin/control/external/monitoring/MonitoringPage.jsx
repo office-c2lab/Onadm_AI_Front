@@ -1677,7 +1677,7 @@ export function MonitoringLogView({
             <div className="grid max-w-full items-end gap-[var(--app-gap-sm)] sm:grid-cols-2 lg:grid-cols-[minmax(7.75rem,0.72fr)_minmax(10.25rem,1fr)_minmax(12.5rem,1.22fr)_minmax(21rem,2.05fr)]">
               <DateRangePicker
                 label="조회 기간"
-                labelClassName="sr-only"
+                labelClassName="mb-1.5 block text-xs font-bold text-slate-700"
                 startDate={startDate}
                 endDate={endDate}
                 onChange={range => {
@@ -1688,30 +1688,39 @@ export function MonitoringLogView({
                 widthClass="w-full min-w-0"
               />
 
-              <MonitoringMultiSelectDropdown
-                selectedValues={selectedPolicies}
-                options={policyOptions}
-                allOption={ALL_POLICIES_OPTION}
-                allLabel="전체 정책"
-                selectionLabel="정책"
-                ariaLabel="탐지된 정책"
-                onChange={handlePolicyFilterChange}
-              />
+              <div className="min-w-0">
+                <span className="mb-1.5 block text-xs font-bold text-slate-700">정책</span>
+                <MonitoringMultiSelectDropdown
+                  selectedValues={selectedPolicies}
+                  options={policyOptions}
+                  allOption={ALL_POLICIES_OPTION}
+                  allLabel="전체 정책"
+                  selectionLabel="정책"
+                  ariaLabel="탐지된 정책"
+                  onChange={handlePolicyFilterChange}
+                />
+              </div>
 
-              <UserScopeFilterDropdown
-                selectedDepartments={selectedDepartments}
-                selectedPositions={selectedPositions}
-                selectedUsers={selectedUsers}
-                boundaryRef={tableAreaRef}
-                departmentOptions={departmentOptions}
-                positionOptions={positionOptions}
-                userOptions={userOptions}
-                onDepartmentChange={handleDepartmentFilterChange}
-                onPositionChange={handlePositionFilterChange}
-                onUserChange={handleUserFilterChange}
-              />
+              <div className="min-w-0">
+                <span className="mb-1.5 block text-xs font-bold text-slate-700">
+                  사용자 및 조직
+                </span>
+                <UserScopeFilterDropdown
+                  selectedDepartments={selectedDepartments}
+                  selectedPositions={selectedPositions}
+                  selectedUsers={selectedUsers}
+                  boundaryRef={tableAreaRef}
+                  departmentOptions={departmentOptions}
+                  positionOptions={positionOptions}
+                  userOptions={userOptions}
+                  onDepartmentChange={handleDepartmentFilterChange}
+                  onPositionChange={handlePositionFilterChange}
+                  onUserChange={handleUserFilterChange}
+                />
+              </div>
 
               <div className="w-full min-w-0 sm:col-span-2 lg:col-span-1">
+                <span className="mb-1.5 block text-xs font-bold text-slate-700">통합 검색</span>
                 <div className="grid w-full grid-cols-1 gap-[var(--app-gap-sm)] sm:grid-cols-[minmax(0,1fr)_minmax(4.75rem,max-content)_auto_auto]">
                   <AppSearchField
                     value={searchInput}

@@ -1146,25 +1146,28 @@ export function DropdownSettingsContent() {
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[auto_auto] lg:items-center lg:justify-between">
-          <div className="flex min-w-0 flex-col gap-3 sm:w-[27rem] sm:flex-row">
-            <AppSearchField
-              value={searchInput}
-              onChange={event => setSearchInput(event.target.value)}
-              placeholder={activeMeta.placeholder}
-              className="w-full"
-            />
-            <AppButton onClick={handleSearch} className="h-12 min-w-[4.5rem]">
-              검색
-            </AppButton>
-            <MonitoringIconButtonTooltip label="초기화">
-              <MonitoringResetButton
-                onClick={handleResetSearch}
-                heightClass="h-12"
-                widthClass="w-12 shrink-0"
-                aria-label="초기화"
+        <div className="grid gap-4 lg:grid-cols-[auto_auto] lg:items-end lg:justify-between">
+          <div className="min-w-0 sm:w-[27rem]">
+            <span className="mb-1.5 block text-xs font-bold text-slate-700">항목 검색</span>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <AppSearchField
+                value={searchInput}
+                onChange={event => setSearchInput(event.target.value)}
+                placeholder={activeMeta.placeholder}
+                className="w-full"
               />
-            </MonitoringIconButtonTooltip>
+              <AppButton onClick={handleSearch} className="h-12 min-w-[4.5rem]">
+                검색
+              </AppButton>
+              <MonitoringIconButtonTooltip label="초기화">
+                <MonitoringResetButton
+                  onClick={handleResetSearch}
+                  heightClass="h-12"
+                  widthClass="w-12 shrink-0"
+                  aria-label="초기화"
+                />
+              </MonitoringIconButtonTooltip>
+            </div>
           </div>
 
           <div className="w-full rounded-xl">
@@ -1573,46 +1576,52 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
 
   return (
     <>
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         {toolbarAction ? <div className="flex shrink-0 justify-start">{toolbarAction}</div> : null}
 
-        <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:justify-end">
-          <CustomDropdown
-            value={selectedCategory}
-            options={categoryOptions}
-            onChange={handleChangeCategory}
-            ariaLabel={isPrivacyVariant ? '개인정보 키워드 분류 필터' : '파일 확장자 분류 필터'}
-            className="w-full lg:w-[12rem] lg:shrink-0 [&>button]:h-12 [&>button]:rounded-xl"
-          />
-
-          <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-[38rem]">
-            <AppSearchField
-              value={searchInput}
-              onChange={event => setSearchInput(event.target.value)}
-              placeholder={
-                isPrivacyVariant ? '분류, 키워드, 처리 방식 검색' : '확장자, 정보, MIME 타입 검색'
-              }
+        <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-end lg:justify-end">
+          <label className="w-full lg:w-[12rem] lg:shrink-0">
+            <span className="mb-1.5 block text-xs font-bold text-slate-700">분류</span>
+            <CustomDropdown
+              value={selectedCategory}
+              options={categoryOptions}
+              onChange={handleChangeCategory}
+              ariaLabel={isPrivacyVariant ? '개인정보 키워드 분류 필터' : '파일 확장자 분류 필터'}
+              className="w-full [&>button]:h-12 [&>button]:rounded-xl"
             />
-            <AppButton onClick={handleSearch} className="h-12 min-w-[4.5rem]">
-              검색
-            </AppButton>
-            <MonitoringIconButtonTooltip label="초기화">
-              <MonitoringResetButton
-                onClick={handleResetFilters}
-                heightClass="h-12"
-                widthClass="w-12 shrink-0"
-                aria-label="초기화"
+          </label>
+
+          <div className="w-full lg:w-[38rem]">
+            <span className="mb-1.5 block text-xs font-bold text-slate-700">설정 항목 검색</span>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <AppSearchField
+                value={searchInput}
+                onChange={event => setSearchInput(event.target.value)}
+                placeholder={
+                  isPrivacyVariant ? '분류, 키워드, 처리 방식 검색' : '확장자, 정보, MIME 타입 검색'
+                }
               />
-            </MonitoringIconButtonTooltip>
-            {isPrivacyVariant ? (
-              <AppButton
-                onClick={handleOpenPrivacyAddModal}
-                disabled={isSavingPiiCategory}
-                className="h-12 min-w-[5.25rem]"
-              >
-                <Plus className="h-4 w-4" aria-hidden="true" />새 분류 추가
+              <AppButton onClick={handleSearch} className="h-12 min-w-[4.5rem]">
+                검색
               </AppButton>
-            ) : null}
+              <MonitoringIconButtonTooltip label="초기화">
+                <MonitoringResetButton
+                  onClick={handleResetFilters}
+                  heightClass="h-12"
+                  widthClass="w-12 shrink-0"
+                  aria-label="초기화"
+                />
+              </MonitoringIconButtonTooltip>
+              {isPrivacyVariant ? (
+                <AppButton
+                  onClick={handleOpenPrivacyAddModal}
+                  disabled={isSavingPiiCategory}
+                  className="h-12 min-w-[5.25rem]"
+                >
+                  <Plus className="h-4 w-4" aria-hidden="true" />새 분류 추가
+                </AppButton>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
