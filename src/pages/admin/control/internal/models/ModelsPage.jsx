@@ -177,8 +177,8 @@ function ModelTable({ rows, totalCount, onManage, onToggleStatus }) {
     <TableShell
       title="모델 목록"
       count={totalCount}
-      columns={['모델', '단가 (1K)', '점검 결과', '수정일', '사용 설정']}
-      widths={['27%', '30%', '17%', '15%', '11%']}
+      columns={['모델', '제공자', '단가 (1K)', '점검 결과', '수정일', '사용 설정']}
+      widths={['22%', '18%', '22%', '14%', '14%', '10%']}
     >
       {rows.map((model, rowIndex) => (
         <tr
@@ -189,15 +189,15 @@ function ModelTable({ rows, totalCount, onManage, onToggleStatus }) {
           onKeyDown={event => activateOnRowKeyDown(event, () => onManage(model))}
           className={monitoringTableRowClass({ striped: rowIndex % 2 === 1, interactive: true })}
         >
+          <td className={monitoringTableCellClass(rowIndex, 'font-bold text-slate-900')}>
+            {model[0]}
+          </td>
           <td className={monitoringTableCellClass(rowIndex)}>
-            <div className="flex items-center gap-3">
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-slate-50">
+            <div className="flex items-center gap-2.5">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-slate-50">
                 <ProviderIcon icon={providerIcons[model[2]]} />
               </span>
-              <div>
-                <p className="font-bold text-slate-900">{model[0]}</p>
-                <p className="mt-1 text-xs text-slate-500">{model[1]}</p>
-              </div>
+              <span className="truncate font-semibold text-slate-700">{model[1]}</span>
             </div>
           </td>
           <td className={monitoringTableCellClass(rowIndex)}>{model[3]}</td>

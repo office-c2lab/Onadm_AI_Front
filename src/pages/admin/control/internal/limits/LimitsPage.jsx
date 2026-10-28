@@ -178,7 +178,7 @@ function TransactionTable({ rows, userMetadataByEmail, typeFilter, query, dateRa
           </colgroup>
           <thead className={monitoringTableHeadClass}>
             <tr className={monitoringTableHeaderRowClass}>
-              {['No.', '대상 사용자', '부서', '직책', '변동 크레딧', '잔액 변화', '처리 시각'].map(
+              {['No.', '사용자', '부서', '직책', '변동 크레딧', '잔액 변화', '처리 시각'].map(
                 column => (
                   <th key={column} scope="col" className={monitoringTableHeaderCellClass}>
                     {column}
@@ -390,7 +390,7 @@ export default function LimitsPage() {
           title="운영 정책"
           description="환율과 크레딧 단가, 요청 차감 기준 및 전체 발급 한도를 설정합니다."
         >
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4">
             {policyFields.map(([key, label, suffix]) => (
               <CurrencyInput
                 key={key}
@@ -551,14 +551,14 @@ export default function LimitsPage() {
                 지급 가능 <strong className="ml-1 font-semibold text-slate-800">52,788,890</strong>
               </span>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4">
               <label>
                 <span className={fieldLabelClass}>사용자</span>
                 <CustomDropdown
                   value={selectedUser}
                   onChange={setSelectedUser}
                   options={users}
-                  ariaLabel="대상 사용자"
+                  ariaLabel="사용자"
                   className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)]"
                 />
               </label>
