@@ -28,10 +28,6 @@ import '../../external/garim.css';
 
 import { providers, models, prompts } from '../data.js';
 const PAGE_SIZE = 5;
-const tabs = [
-  { id: 'providers', label: '제공자 / API Key' },
-  { id: 'models', label: '모델 · 단가' },
-];
 
 const providerIcons = { openai: openaiIcon, google: geminiIcon, deepseek: null };
 
@@ -48,17 +44,11 @@ function formatDateTime24(value) {
   return `${year}-${pad(month)}-${pad(day)} ${pad(hour)}:${minute}`;
 }
 
-function Badge({ children, tone = 'green' }) {
-  const tones = {
-    green: 'bg-emerald-50 text-emerald-600',
-    gray: 'bg-slate-100 text-slate-500',
-    blue: 'bg-blue-50 text-blue-600',
-  };
-  return (
-    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${tones[tone]}`}>
-      {children}
-    </span>
-  );
+function getCheckResultTextClass(result) {
+  if (result === '정상' || result === '성공') return 'text-emerald-600';
+  if (result === '주의' || result === '점검 중') return 'text-amber-600';
+  if (result === '오류' || result === '실패') return 'text-rose-600';
+  return 'text-slate-500';
 }
 
 function ProviderIdentity({ icon, name }) {
@@ -89,10 +79,10 @@ function activateOnRowKeyDown(event, onActivate) {
   }
 }
 
-function TableShell({ title, count, columns, widths, children }) {
+function TableShell({ title, count, columns, widths, action, children }) {
   return (
     <section className={monitoringTableSurfaceClass}>
-      <TableListHeader title={title} count={count} />
+      <TableListHeader title={title} count={count} action={action} />
       <div className="overflow-x-auto">
         <table aria-label={title} className={`${monitoringTableClass} min-w-[62rem]`}>
           <colgroup>
@@ -122,13 +112,19 @@ function TableShell({ title, count, columns, widths, children }) {
   );
 }
 
-function ProviderTable({ rows, totalCount, onManage, onToggleStatus }) {
+function ProviderTable({ rows, totalCount, onCreate, onManage, onToggleStatus }) {
   return (
     <TableShell
       title="제공자 목록"
       count={totalCount}
-      columns={['제공자', 'ENDPOINT', 'API KEY', '최초 등록일', '상태']}
-      widths={['25%', '35%', '15%', '16%', '9%']}
+      action={
+        <AppButton onClick={onCreate} className="h-9 px-3">
+          <Plus className="h-4 w-4" />
+          <span>제공자 등록</span>
+        </AppButton>
+      }
+      columns={['제공자', 'ENDPOINT', '최초 등록일', '상태']}
+      widths={['27%', '45%', '18%', '10%']}
     >
       {rows.map((provider, rowIndex) => (
         <tr
@@ -146,9 +142,6 @@ function ProviderTable({ rows, totalCount, onManage, onToggleStatus }) {
             <div className="truncate" title={provider.endpoint}>
               {provider.endpoint}
             </div>
-          </td>
-          <td className={monitoringTableCellClass(rowIndex)}>
-            <Badge>{provider.key}</Badge>
           </td>
           <td className={monitoringTableCellClass(rowIndex)}>
             <span className="whitespace-nowrap">{formatDateTime24(provider.modifiedAt)}</span>
@@ -172,11 +165,17 @@ function ProviderTable({ rows, totalCount, onManage, onToggleStatus }) {
   );
 }
 
-function ModelTable({ rows, totalCount, onManage, onToggleStatus }) {
+function ModelTable({ rows, totalCount, onCreate, onManage, onToggleStatus }) {
   return (
     <TableShell
       title="모델 목록"
       count={totalCount}
+      action={
+        <AppButton onClick={onCreate} className="h-9 px-3">
+          <Plus className="h-4 w-4" />
+          <span>모델 등록</span>
+        </AppButton>
+      }
       columns={['모델', '제공자', '단가 (1K)', '점검 결과', '수정일', '사용 설정']}
       widths={['22%', '18%', '22%', '14%', '14%', '10%']}
     >
@@ -202,7 +201,7 @@ function ModelTable({ rows, totalCount, onManage, onToggleStatus }) {
           </td>
           <td className={monitoringTableCellClass(rowIndex)}>{model[3]}</td>
           <td className={monitoringTableCellClass(rowIndex)}>
-            <Badge>{model[4]}</Badge>
+            <span className={`font-bold ${getCheckResultTextClass(model[4])}`}>{model[4]}</span>
           </td>
           <td className={monitoringTableCellClass(rowIndex, 'whitespace-nowrap')}>
             {formatDateTime24(model[6])}
@@ -296,7 +295,7 @@ function ManagementModal({ tab, item, mode, onClose }) {
   const [draft, setDraft] = useState(() => ({
     name: tab === 'providers' ? (item?.name ?? '') : Array.isArray(item) ? item[0] : '',
     endpoint: tab === 'providers' ? (item?.endpoint ?? '') : '',
-    apiKey: tab === 'providers' && !isCreate ? (item?.key ?? '') : '',
+    apiKey: '',
     inputPrice: '',
     outputPrice: '',
     body: tab === 'prompts' && Array.isArray(item) ? item[1] : '',
@@ -344,13 +343,13 @@ function ManagementModal({ tab, item, mode, onClose }) {
                   placeholder="https://api.example.com/v1"
                 />
               </Field>
-              <Field label="API Key">
+              <Field label={isCreate ? 'API Key' : 'API Key 변경'}>
                 <div className="relative">
                   <TextField
                     type={showKey ? 'text' : 'password'}
                     value={draft.apiKey}
                     onChange={event => updateDraft('apiKey', event.target.value)}
-                    placeholder="API Key 입력"
+                    placeholder={isCreate ? 'API Key 입력' : '변경할 경우에만 입력'}
                   />
                   <button
                     type="button"
@@ -430,8 +429,7 @@ export default function ModelsPage({ initialTab = 'providers' }) {
   );
   const [modelRows, setModelRows] = useState(() => models.map(model => [...model]));
   const [promptRows, setPromptRows] = useState(() => prompts.map(prompt => [...prompt]));
-  const [activeTab, setActiveTab] = useState(initialTab);
-  const [status, setStatus] = useState('전체 상태');
+  const [status, setStatus] = useState(isPromptPage ? '전체 상태' : '전체 설정');
   const [providerFilter, setProviderFilter] = useState('전체 제공자');
   const [queryInput, setQueryInput] = useState('');
   const [query, setQuery] = useState('');
@@ -442,13 +440,13 @@ export default function ModelsPage({ initialTab = 'providers' }) {
     () =>
       providerRows.filter(
         provider =>
-          (status === '전체 상태' || provider.status === status) &&
+          (providerFilter === '전체 제공자' || provider.name === providerFilter) &&
           (!query ||
             `${provider.name} ${provider.code} ${provider.endpoint}`
               .toLowerCase()
               .includes(query.toLowerCase()))
       ),
-    [providerRows, query, status]
+    [providerFilter, providerRows, query]
   );
   const filteredModels = useMemo(
     () =>
@@ -469,33 +467,22 @@ export default function ModelsPage({ initialTab = 'providers' }) {
       ),
     [promptRows, query, status]
   );
-  const activeRows =
-    activeTab === 'providers'
-      ? filteredProviders
-      : activeTab === 'models'
-        ? filteredModels
-        : filteredPrompts;
+  const activeRows = isPromptPage ? filteredPrompts : filteredModels;
   const totalPages = Math.max(1, Math.ceil(activeRows.length / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
-  const visibleRows = activeRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const visibleRows = isPromptPage
+    ? activeRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
+    : filteredModels;
 
-  const changeTab = tab => {
-    setActiveTab(tab);
-    setStatus(tab === 'models' ? '전체 설정' : '전체 상태');
-    setProviderFilter('전체 제공자');
-    setQueryInput('');
-    setQuery('');
-    setCurrentPage(1);
-  };
   const handleReset = () => {
-    setStatus(activeTab === 'models' ? '전체 설정' : '전체 상태');
+    setStatus(isPromptPage ? '전체 상태' : '전체 설정');
     setProviderFilter('전체 제공자');
     setQueryInput('');
     setQuery('');
     setCurrentPage(1);
   };
-  const openCreate = () => setModal({ mode: 'create', item: null });
-  const openManage = item => setModal({ mode: 'manage', item });
+  const openCreate = tab => setModal({ tab, mode: 'create', item: null });
+  const openManage = (tab, item) => setModal({ tab, mode: 'manage', item });
   const handleToggleProviderStatus = providerId => {
     setProviderRows(current =>
       current.map(provider =>
@@ -530,36 +517,13 @@ export default function ModelsPage({ initialTab = 'providers' }) {
 
   return (
     <div className="garim-external-root min-h-full bg-white text-[#111827]">
-      <div className="bg-white/95">
-        {!isPromptPage ? (
-          <nav
-            className="mx-auto flex w-full max-w-[88rem] items-center justify-center gap-4 overflow-x-auto border-b border-[#E2E8F0] px-[var(--app-page-x)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            aria-label="모델 설정 유형"
-          >
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => changeTab(tab.id)}
-                className={`relative flex h-12 shrink-0 items-center justify-center border-b-2 px-3 text-sm font-black transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-[#075DF6] text-[#075DF6]'
-                    : 'border-transparent text-slate-600 hover:text-[#075DF6]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        ) : null}
-      </div>
       <PageLayout gapClassName="gap-[var(--app-gap-md)]">
         <section
-          className={`grid items-end gap-[var(--app-gap-sm)] md:grid-cols-2 ${activeTab === 'models' ? 'xl:grid-cols-[9rem_11rem_minmax(0,1fr)_5.25rem_3rem_9rem]' : 'xl:grid-cols-[9rem_minmax(0,1fr)_5.25rem_3rem_9rem]'}`}
+          className={`grid items-end gap-[var(--app-gap-sm)] md:grid-cols-2 ${isPromptPage ? 'xl:grid-cols-[9rem_minmax(0,1fr)_5.25rem_3rem_9rem]' : 'xl:grid-cols-[9rem_11rem_minmax(0,1fr)_5.25rem_3rem]'}`}
         >
           <label>
             <span className="mb-1.5 block text-xs font-bold text-slate-700">
-              {activeTab === 'models' ? '사용 설정' : '상태'}
+              {isPromptPage ? '상태' : '모델 사용 설정'}
             </span>
             <CustomDropdown
               value={status}
@@ -568,15 +532,13 @@ export default function ModelsPage({ initialTab = 'providers' }) {
                 setCurrentPage(1);
               }}
               options={
-                activeTab === 'models'
-                  ? ['전체 설정', '사용', '사용 안 함']
-                  : ['전체 상태', '활성', '비활성']
+                isPromptPage ? ['전체 상태', '활성', '비활성'] : ['전체 설정', '사용', '사용 안 함']
               }
               ariaLabel="상태 선택"
               className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-sm [&>button]:font-semibold"
             />
           </label>
-          {activeTab === 'models' ? (
+          {!isPromptPage ? (
             <label>
               <span className="mb-1.5 block text-xs font-bold text-slate-700">제공자</span>
               <CustomDropdown
@@ -593,21 +555,13 @@ export default function ModelsPage({ initialTab = 'providers' }) {
           ) : null}
           <label className="min-w-0">
             <span className="mb-1.5 block text-xs font-bold text-slate-700">
-              {activeTab === 'providers'
-                ? '제공자 검색'
-                : activeTab === 'models'
-                  ? '모델 검색'
-                  : '프롬프트 검색'}
+              {isPromptPage ? '프롬프트 검색' : '통합 검색'}
             </span>
             <AppSearchField
               value={queryInput}
               onChange={event => setQueryInput(event.target.value)}
               placeholder={
-                activeTab === 'prompts'
-                  ? '이름 또는 본문 검색...'
-                  : activeTab === 'models'
-                    ? '모델명 검색...'
-                    : '이름 또는 유형 검색...'
+                isPromptPage ? '이름 또는 본문 검색...' : '제공자, 모델명 또는 Endpoint 검색...'
               }
             />
           </label>
@@ -627,50 +581,53 @@ export default function ModelsPage({ initialTab = 'providers' }) {
               aria-label="초기화"
             />
           </MonitoringIconButtonTooltip>
-          <AppButton onClick={openCreate} className="h-[var(--app-control-lg)] px-3">
-            <Plus className="h-4 w-4" />
-            <span>
-              {activeTab === 'providers'
-                ? '제공자 등록'
-                : activeTab === 'models'
-                  ? '모델 등록'
-                  : '프롬프트 등록'}
-            </span>
-          </AppButton>
+          {isPromptPage ? (
+            <AppButton
+              onClick={() => openCreate('prompts')}
+              className="h-[var(--app-control-lg)] px-3"
+            >
+              <Plus className="h-4 w-4" />
+              <span>프롬프트 등록</span>
+            </AppButton>
+          ) : null}
         </section>
-        {activeTab === 'providers' ? (
+        {!isPromptPage ? (
           <ProviderTable
-            rows={visibleRows}
+            rows={filteredProviders}
             totalCount={filteredProviders.length}
-            onManage={openManage}
+            onCreate={() => openCreate('providers')}
+            onManage={item => openManage('providers', item)}
             onToggleStatus={handleToggleProviderStatus}
           />
         ) : null}
-        {activeTab === 'models' ? (
+        {!isPromptPage ? (
           <ModelTable
             rows={visibleRows}
             totalCount={filteredModels.length}
-            onManage={openManage}
+            onCreate={() => openCreate('models')}
+            onManage={item => openManage('models', item)}
             onToggleStatus={handleToggleModelStatus}
           />
         ) : null}
-        {activeTab === 'prompts' ? (
+        {isPromptPage ? (
           <PromptTable
             rows={visibleRows}
             totalCount={filteredPrompts.length}
-            onManage={openManage}
+            onManage={item => openManage('prompts', item)}
             onToggleStatus={handleTogglePromptStatus}
           />
         ) : null}
       </PageLayout>
-      <FixedPaginationBar
-        currentPage={safePage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
+      {isPromptPage ? (
+        <FixedPaginationBar
+          currentPage={safePage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      ) : null}
       {modal ? (
         <ManagementModal
-          tab={activeTab}
+          tab={modal.tab}
           item={modal.item}
           mode={modal.mode}
           onClose={() => setModal(null)}

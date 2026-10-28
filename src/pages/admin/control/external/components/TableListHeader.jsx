@@ -1,4 +1,4 @@
-export default function TableListHeader({ title, count }) {
+export default function TableListHeader({ title, count, action = null }) {
   const normalizedCount = Number.isFinite(Number(count)) ? Number(count) : 0;
 
   return (
@@ -10,6 +10,7 @@ export default function TableListHeader({ title, count }) {
       <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
         {normalizedCount.toLocaleString()}건
       </span>
+      {action ? <div className="ml-auto">{action}</div> : null}
     </div>
   );
 }
