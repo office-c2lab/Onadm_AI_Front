@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { EmptyState, SearchField, StatusBadge, ToolAvatar } from '../components.jsx';
+import { EmptyState, SearchField, StatusText, ToolAvatar } from '../components.jsx';
 import { appRecords } from '../data.js';
 import { getDeletedAppIds } from '../../../user/aistore/data/manageStore.js';
 
@@ -108,7 +108,7 @@ export default function AppsPage() {
                       {(item.downloadCount ?? item.users ?? 0).toLocaleString('ko-KR')}회
                     </strong>
                   </span>
-                  <StatusBadge>{item.publication === '게시 중' ? '게시 중' : '숨김'}</StatusBadge>
+                  <StatusText>{item.publication === '게시 중' ? '게시 중' : '숨김'}</StatusText>
                 </div>
               </article>
             ))}

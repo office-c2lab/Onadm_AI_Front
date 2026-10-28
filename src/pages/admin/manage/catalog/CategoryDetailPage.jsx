@@ -5,7 +5,7 @@ import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import StoreToolIcon from '../../../user/aistore/components/StoreToolIcon.jsx';
 import AiStoreConfirmModal from '../../../user/aistore/components/AiStoreConfirmModal.jsx';
 import { getDeletedAppIds } from '../../../user/aistore/data/manageStore.js';
-import { StatusBadge } from '../components.jsx';
+import { StatusText } from '../components.jsx';
 import { catalogItems } from '../data.js';
 import { getCatalogCategories, saveCatalogCategories } from './catalogStore.js';
 
@@ -187,7 +187,7 @@ export default function CategoryDetailPage() {
                     <Download size={14} className="text-blue-600" />
                     {(tool.downloadCount ?? tool.users ?? 0).toLocaleString('ko-KR')}회
                   </span>
-                  <StatusBadge>{tool.publication === '게시 중' ? '게시 중' : '숨김'}</StatusBadge>
+                  <StatusText>{tool.publication === '게시 중' ? '게시 중' : '숨김'}</StatusText>
                 </div>
               </article>
             ))}

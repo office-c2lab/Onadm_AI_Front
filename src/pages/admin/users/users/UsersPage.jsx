@@ -134,17 +134,17 @@ function UserAvatar({ user }) {
   );
 }
 
-function UserStatusBadge({ status }) {
+function UserStatusText({ status }) {
   const statusClassName = {
-    '승인 대기': 'bg-[#fff2dc] text-[#c78819]',
-    활성: 'bg-[#e4f7ee] text-[#18a66b]',
-    비활성: 'bg-[#eef2f6] text-[#6b7a90]',
-    거절됨: 'bg-[#fff0f1] text-[#d92d45]',
+    '승인 대기': 'text-amber-600',
+    활성: 'text-emerald-600',
+    비활성: 'text-slate-500',
+    거절됨: 'text-rose-500',
   };
 
   return (
     <span
-      className={`inline-flex rounded-md px-2 py-1 text-xs font-medium ${
+      className={`inline-flex items-center text-[clamp(0.86rem,1vw,0.94rem)] font-semibold whitespace-nowrap ${
         statusClassName[status] ?? statusClassName['비활성']
       }`}
     >
@@ -731,7 +731,7 @@ export default function UserPage() {
                                   'whitespace-nowrap px-3 text-center'
                                 )}
                               >
-                                <UserStatusBadge status={user.status} />
+                                <UserStatusText status={user.status} />
                               </td>
                               <td
                                 className={monitoringTableCellClass(

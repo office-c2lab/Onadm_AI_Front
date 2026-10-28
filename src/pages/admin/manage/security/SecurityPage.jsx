@@ -25,18 +25,18 @@ function getReviewTab(item) {
 function ReviewStatus({ status }) {
   const color =
     status === '승인 완료'
-      ? 'bg-emerald-50 text-emerald-700'
+      ? 'text-emerald-600'
       : status === '반려'
-        ? 'bg-red-50 text-red-700'
+        ? 'text-red-600'
         : status === '관리자 검토'
-          ? 'bg-blue-50 text-blue-700'
+          ? 'text-blue-600'
           : status === '심사 진행중'
-            ? 'bg-blue-50 text-blue-700'
-            : 'bg-slate-100 text-slate-700';
+            ? 'text-blue-600'
+            : 'text-slate-500';
 
   return (
     <span
-      className={`inline-flex items-center rounded-md px-2.5 py-1 text-sm font-medium ${color}`}
+      className={`inline-flex items-center text-[clamp(0.86rem,1vw,0.94rem)] font-semibold whitespace-nowrap ${color}`}
     >
       {status}
     </span>

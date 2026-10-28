@@ -29,36 +29,36 @@ export function MetricCard({ label, value, helper, icon: Icon, tone = 'blue' }) 
   );
 }
 
-export function StatusBadge({ children }) {
+export function StatusText({ children }) {
   const tone = {
-    정상: 'bg-emerald-50 text-emerald-700',
-    승인: 'bg-emerald-50 text-emerald-700',
-    통과: 'bg-emerald-50 text-emerald-700',
-    완료: 'bg-emerald-50 text-emerald-700',
-    '게시 중': 'bg-blue-50 text-blue-700',
-    '게시 대기': 'bg-violet-50 text-violet-700',
-    '시행 중': 'bg-blue-50 text-blue-700',
-    '심사 중': 'bg-blue-50 text-blue-700',
-    '검토 중': 'bg-blue-50 text-blue-700',
-    '진행 중': 'bg-blue-50 text-blue-700',
-    대기: 'bg-amber-50 text-amber-700',
-    '대기 중': 'bg-amber-50 text-amber-700',
-    경고: 'bg-amber-50 text-amber-700',
-    '시행 예정': 'bg-violet-50 text-violet-700',
-    '보완 필요': 'bg-orange-50 text-orange-700',
-    '확인 필요': 'bg-orange-50 text-orange-700',
-    실패: 'bg-red-50 text-red-700',
-    반려: 'bg-red-50 text-red-700',
-    숨김: 'bg-slate-100 text-slate-600',
-    미게시: 'bg-slate-100 text-slate-600',
-    높음: 'bg-red-50 text-red-700',
-    중간: 'bg-amber-50 text-amber-700',
-    낮음: 'bg-emerald-50 text-emerald-700',
+    정상: 'text-emerald-600',
+    승인: 'text-emerald-600',
+    통과: 'text-emerald-600',
+    완료: 'text-emerald-600',
+    '게시 중': 'text-blue-600',
+    '게시 대기': 'text-violet-600',
+    '시행 중': 'text-blue-600',
+    '심사 중': 'text-blue-600',
+    '검토 중': 'text-blue-600',
+    '진행 중': 'text-blue-600',
+    대기: 'text-amber-600',
+    '대기 중': 'text-amber-600',
+    경고: 'text-amber-600',
+    '시행 예정': 'text-violet-600',
+    '보완 필요': 'text-orange-600',
+    '확인 필요': 'text-orange-600',
+    실패: 'text-red-600',
+    반려: 'text-red-600',
+    숨김: 'text-slate-500',
+    미게시: 'text-slate-500',
+    높음: 'text-red-600',
+    중간: 'text-amber-600',
+    낮음: 'text-emerald-600',
   }[children];
 
   return (
     <span
-      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${tone || 'bg-slate-100 text-slate-600'}`}
+      className={`inline-flex items-center text-[clamp(0.86rem,1vw,0.94rem)] font-semibold whitespace-nowrap ${tone || 'text-slate-500'}`}
     >
       {children}
     </span>
