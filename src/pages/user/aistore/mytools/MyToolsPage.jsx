@@ -1,15 +1,23 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
-import { useMyTools } from '../data/manageStore.js';
+import { storeCategories, useMyTools } from '../data/manageStore.js';
 import { getActiveToolUpdateReview, getToolUpdateReviews } from '../data/reviewRequests.js';
 
 export default function MyToolsPage() {
   const navigate = useNavigate();
+  const categoryScrollRef = useRef(null);
+  const categoryButtonRefs = useRef(new Map());
   const { myTools } = useMyTools();
   const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [categoryScrollState, setCategoryScrollState] = useState({
+    canScrollLeft: false,
+    canScrollRight: false,
+  });
+  const [fullyVisibleCategories, setFullyVisibleCategories] = useState(storeCategories);
   const updateReviews = useMemo(() => getToolUpdateReviews(), []);
   const approvedTools = useMemo(
     () => myTools.filter(tool => tool.status === '승인 완료'),
@@ -19,11 +27,74 @@ export default function MyToolsPage() {
   const filteredTools = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     return approvedTools.filter(tool => {
-      return `${tool.name} ${tool.summary} ${tool.category} ${tool.type}`
+      const matchesCategory =
+        selectedCategory === '전체' || tool.storeTags?.includes(selectedCategory);
+      const matchesSearch = `${tool.name} ${tool.summary} ${tool.category} ${tool.type}`
         .toLowerCase()
         .includes(keyword);
+
+      return matchesCategory && matchesSearch;
     });
-  }, [approvedTools, search]);
+  }, [approvedTools, search, selectedCategory]);
+
+  const updateCategoryScrollState = () => {
+    const container = categoryScrollRef.current;
+    if (!container) return;
+
+    const maxScrollLeft = Math.max(0, container.scrollWidth - container.clientWidth);
+    const canScrollLeft = container.scrollLeft > 2;
+    const canScrollRight = container.scrollLeft < maxScrollLeft - 2;
+    setCategoryScrollState({ canScrollLeft, canScrollRight });
+
+    const containerRect = container.getBoundingClientRect();
+    const leftEdge = containerRect.left + (canScrollLeft ? 48 : 0);
+    const rightEdge = containerRect.right - (canScrollRight ? 48 : 0);
+    const nextVisibleCategories = storeCategories.filter(category => {
+      const button = categoryButtonRefs.current.get(category);
+      if (!button) return false;
+      const buttonRect = button.getBoundingClientRect();
+      return buttonRect.left >= leftEdge - 1 && buttonRect.right <= rightEdge + 1;
+    });
+
+    setFullyVisibleCategories(current => {
+      if (
+        current.length === nextVisibleCategories.length &&
+        current.every((category, index) => category === nextVisibleCategories[index])
+      ) {
+        return current;
+      }
+      return nextVisibleCategories;
+    });
+  };
+
+  const scrollCategories = direction => {
+    const container = categoryScrollRef.current;
+    if (!container) return;
+    container.scrollBy({
+      left: direction * Math.max(240, container.clientWidth * 0.65),
+      behavior: 'smooth',
+    });
+  };
+
+  useEffect(() => {
+    const container = categoryScrollRef.current;
+    if (!container) return undefined;
+
+    updateCategoryScrollState();
+    const resizeObserver = new ResizeObserver(updateCategoryScrollState);
+    resizeObserver.observe(container);
+    if (container.firstElementChild) resizeObserver.observe(container.firstElementChild);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
+    categoryButtonRefs.current.get(selectedCategory)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  }, [selectedCategory]);
 
   return (
     <div className="w-full">
@@ -35,7 +106,66 @@ export default function MyToolsPage() {
         ariaLabel="내 도구 검색"
       />
 
-      <section className="mt-4" aria-label="승인된 도구 목록">
+      <div className="relative mt-2">
+        <nav
+          ref={categoryScrollRef}
+          aria-label="내 도구 카테고리"
+          onScroll={updateCategoryScrollState}
+          className="touch-pan-x overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <div
+            className={`flex w-max min-w-full justify-center gap-1 ${categoryScrollState.canScrollLeft || categoryScrollState.canScrollRight ? 'px-12' : ''}`}
+          >
+            {storeCategories.map(category => (
+              <button
+                key={category}
+                ref={node => {
+                  if (node) categoryButtonRefs.current.set(category, node);
+                  else categoryButtonRefs.current.delete(category);
+                }}
+                type="button"
+                onClick={() => setSelectedCategory(category)}
+                aria-pressed={selectedCategory === category}
+                tabIndex={fullyVisibleCategories.includes(category) ? undefined : -1}
+                className={`inline-flex h-8 shrink-0 cursor-pointer items-center whitespace-nowrap rounded-full px-4 text-sm transition-colors ${
+                  fullyVisibleCategories.includes(category)
+                    ? 'opacity-100'
+                    : 'pointer-events-none opacity-0'
+                } ${
+                  selectedCategory === category
+                    ? 'bg-[#ededed] font-medium text-[#333]'
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </nav>
+
+        {categoryScrollState.canScrollLeft ? (
+          <button
+            type="button"
+            onClick={() => scrollCategories(-1)}
+            aria-label="이전 카테고리 보기"
+            className="absolute left-1 top-4 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
+          >
+            <ChevronLeft size={17} aria-hidden="true" />
+          </button>
+        ) : null}
+        {categoryScrollState.canScrollRight ? (
+          <button
+            type="button"
+            onClick={() => scrollCategories(1)}
+            aria-label="다음 카테고리 보기"
+            className="absolute right-1 top-4 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
+          >
+            <ChevronRight size={17} aria-hidden="true" />
+          </button>
+        ) : null}
+      </div>
+
+      <section className="mt-2" aria-label="승인된 도구 목록">
         {filteredTools.length > 0 ? (
           <div className="grid gap-2">
             {filteredTools.map(tool => {
@@ -89,7 +219,9 @@ export default function MyToolsPage() {
           </div>
         ) : (
           <p className="py-16 text-center text-sm text-slate-500">
-            {search.trim() ? '조건에 맞는 승인 도구가 없습니다.' : '승인된 도구가 없습니다.'}
+            {search.trim() || selectedCategory !== '전체'
+              ? '조건에 맞는 승인 도구가 없습니다.'
+              : '승인된 도구가 없습니다.'}
           </p>
         )}
       </section>

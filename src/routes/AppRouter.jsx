@@ -20,7 +20,7 @@ import MyToolUpdatePage from '../pages/user/aistore/mytools/MyToolUpdatePage.jsx
 import RegisterPage from '../pages/user/aistore/register/RegisterPage.jsx';
 import NewToolRegistrationPage from '../pages/user/aistore/register/NewToolRegistrationPage.jsx';
 import GuidePage from '../pages/user/aistore/guide/GuidePage.jsx';
-import FavoritesPage from '../pages/user/aistore/library/favorites/FavoritesPage.jsx';
+import UserNoticesPage from '../pages/user/aistore/notices/NoticesPage.jsx';
 import DownloadsPage from '../pages/user/aistore/library/downloads/DownloadsPage.jsx';
 import OndamPage from '../pages/user/ondam/OndamPage.jsx';
 
@@ -117,24 +117,19 @@ export default function AppRouter() {
 
           {/* 라이브러리 */}
           <Route path="library">
-            <Route index element={<Navigate to="downloads" replace />} />
-            <Route path="downloads" element={<DownloadsPage />} />
-            <Route path="favorites" element={<FavoritesPage />} />
+            <Route index element={<DownloadsPage />} />
+            <Route path="downloads" element={<Navigate to="/user/aistore/library" replace />} />
+            <Route path="favorites" element={<Navigate to="/user/aistore/library" replace />} />
           </Route>
 
           {/* 이전 경로 호환 */}
-          <Route
-            path="downloads"
-            element={<Navigate to="/user/aistore/library/downloads" replace />}
-          />
+          <Route path="downloads" element={<Navigate to="/user/aistore/library" replace />} />
 
-          <Route
-            path="favorites"
-            element={<Navigate to="/user/aistore/library/favorites" replace />}
-          />
+          <Route path="favorites" element={<Navigate to="/user/aistore/library" replace />} />
 
           <Route path="register" element={<RegisterPage />} />
           <Route path="guide" element={<GuidePage />} />
+          <Route path="notices" element={<UserNoticesPage />} />
         </Route>
 
         {/* ===================================== */}

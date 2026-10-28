@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Download, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import { getCatalogBanners } from '../../../admin/manage/catalog/catalogStore.js';
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import ToolHoverPreview from '../components/ToolHoverPreview.jsx';
-import { getAvailablePublishedTools, storeCategories, useFavorites } from '../data/manageStore.js';
+import { getAvailablePublishedTools, storeCategories, useDownloads } from '../data/manageStore.js';
 
 const featuredBackgrounds = {
   report: 'from-rose-50 to-rose-100',
@@ -51,7 +51,50 @@ function SectionTitle({ children, onViewAll }) {
   );
 }
 
-function FeaturedCard({ tool, favorite, onFavorite, onDetail, previewAlign }) {
+function DownloadAction({
+  tool,
+  downloaded,
+  updateAvailable,
+  onDownload,
+  onUpdate,
+  className = '',
+}) {
+  const Icon = updateAvailable ? RefreshCw : Download;
+  const label = updateAvailable ? '업데이트' : downloaded ? '다운로드 됨' : '다운로드';
+  const isActionable = updateAvailable || !downloaded;
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (updateAvailable) onUpdate(tool);
+        else if (!downloaded) onDownload(tool.id);
+      }}
+      disabled={!isActionable}
+      aria-label={`${tool.name} ${label}`}
+      title={label}
+      className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+        updateAvailable
+          ? 'bg-blue-600 text-white opacity-100 shadow-sm hover:bg-blue-700'
+          : downloaded
+            ? 'cursor-default bg-slate-100 text-slate-500 opacity-100'
+            : 'bg-transparent text-blue-600 opacity-0 hover:bg-blue-50 focus:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100'
+      } ${className}`.trim()}
+    >
+      <Icon size={17} aria-hidden="true" />
+    </button>
+  );
+}
+
+function FeaturedCard({
+  tool,
+  downloaded,
+  updateAvailable,
+  onDownload,
+  onUpdate,
+  onDetail,
+  previewAlign,
+}) {
   return (
     <article className="group relative h-[224px] min-w-0 rounded-xl border border-slate-200 bg-white transition hover:z-20 hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-900/5 focus-within:z-20">
       <div
@@ -60,15 +103,14 @@ function FeaturedCard({ tool, favorite, onFavorite, onDetail, previewAlign }) {
         }`}
       >
         <StoreToolIcon tool={tool} featured />
-        <button
-          type="button"
-          onClick={() => onFavorite(tool.id)}
-          className={`absolute right-2 top-2 rounded-lg p-1.5 transition focus:opacity-100 group-hover:opacity-100 ${favorite ? 'bg-blue-600 text-white opacity-100 shadow-sm hover:bg-blue-700' : 'bg-transparent text-blue-600 opacity-0 hover:bg-blue-50'}`}
-          aria-label={`${tool.name} 즐겨찾기 ${favorite ? '해제' : '추가'}`}
-          aria-pressed={favorite}
-        >
-          <Bookmark size={17} fill={favorite ? 'currentColor' : 'none'} />
-        </button>
+        <DownloadAction
+          tool={tool}
+          downloaded={downloaded}
+          updateAvailable={updateAvailable}
+          onDownload={onDownload}
+          onUpdate={onUpdate}
+          className="absolute right-2 top-2 z-10"
+        />
       </div>
       <button
         type="button"
@@ -85,7 +127,15 @@ function FeaturedCard({ tool, favorite, onFavorite, onDetail, previewAlign }) {
   );
 }
 
-function CompactTool({ tool, favorite, onFavorite, onDetail, previewAlign }) {
+function CompactTool({
+  tool,
+  downloaded,
+  updateAvailable,
+  onDownload,
+  onUpdate,
+  onDetail,
+  previewAlign,
+}) {
   return (
     <article className="group relative flex min-h-[82px] min-w-0 items-center rounded-xl border border-transparent transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20">
       <button
@@ -101,15 +151,14 @@ function CompactTool({ tool, favorite, onFavorite, onDetail, previewAlign }) {
           </span>
         </span>
       </button>
-      <button
-        type="button"
-        onClick={() => onFavorite(tool.id)}
-        className={`mr-3 grid h-8 w-8 shrink-0 place-items-center rounded-lg transition focus:opacity-100 group-hover:opacity-100 ${favorite ? 'bg-blue-600 text-white opacity-100 shadow-sm hover:bg-blue-700' : 'bg-transparent text-blue-600 opacity-0 hover:bg-blue-50'}`}
-        aria-label={`${tool.name} 즐겨찾기 ${favorite ? '해제' : '추가'}`}
-        aria-pressed={favorite}
-      >
-        <Bookmark size={17} fill={favorite ? 'currentColor' : 'none'} aria-hidden="true" />
-      </button>
+      <DownloadAction
+        tool={tool}
+        downloaded={downloaded}
+        updateAvailable={updateAvailable}
+        onDownload={onDownload}
+        onUpdate={onUpdate}
+        className="mr-3"
+      />
       <ToolHoverPreview tool={tool} align={previewAlign} />
     </article>
   );
@@ -126,7 +175,7 @@ export default function StorePage() {
     canScrollRight: false,
   });
   const [fullyVisibleCategories, setFullyVisibleCategories] = useState(storeCategories);
-  const { favorites, toggleFavorite } = useFavorites();
+  const { downloads, installedVersions, addDownload, updateDownload } = useDownloads();
   const availableTools = useMemo(() => getAvailablePublishedTools(), []);
   const storeBanners = useMemo(
     () =>
@@ -378,8 +427,14 @@ export default function StorePage() {
               <FeaturedCard
                 key={tool.id}
                 tool={tool}
-                favorite={favorites.includes(tool.id)}
-                onFavorite={toggleFavorite}
+                downloaded={downloads.includes(tool.id)}
+                updateAvailable={Boolean(
+                  downloads.includes(tool.id) &&
+                  installedVersions[tool.id] &&
+                  installedVersions[tool.id] !== tool.version
+                )}
+                onDownload={addDownload}
+                onUpdate={updateDownload}
                 onDetail={openTool}
                 previewAlign={index >= 3 || index % 2 ? 'right' : 'left'}
               />
@@ -391,8 +446,14 @@ export default function StorePage() {
               <CompactTool
                 key={tool.id}
                 tool={tool}
-                favorite={favorites.includes(tool.id)}
-                onFavorite={toggleFavorite}
+                downloaded={downloads.includes(tool.id)}
+                updateAvailable={Boolean(
+                  downloads.includes(tool.id) &&
+                  installedVersions[tool.id] &&
+                  installedVersions[tool.id] !== tool.version
+                )}
+                onDownload={addDownload}
+                onUpdate={updateDownload}
                 onDetail={openTool}
                 previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
               />
@@ -416,8 +477,14 @@ export default function StorePage() {
                     <CompactTool
                       key={tool.id}
                       tool={tool}
-                      favorite={favorites.includes(tool.id)}
-                      onFavorite={toggleFavorite}
+                      downloaded={downloads.includes(tool.id)}
+                      updateAvailable={Boolean(
+                        downloads.includes(tool.id) &&
+                        installedVersions[tool.id] &&
+                        installedVersions[tool.id] !== tool.version
+                      )}
+                      onDownload={addDownload}
+                      onUpdate={updateDownload}
                       onDetail={openTool}
                       previewAlign={index % 3 === 2 || index % 2 ? 'right' : 'left'}
                     />

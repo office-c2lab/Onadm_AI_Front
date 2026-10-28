@@ -191,7 +191,10 @@ export default function LibraryToolRow({
         </div>
 
         {!menuOpen && (
-          <ToolHoverPreview tool={tool} label={isFavorite ? '즐겨찾기' : '다운로드됨'} />
+          <ToolHoverPreview
+            tool={tool}
+            label={updateAvailable ? '업데이트' : isFavorite ? '다운로드' : '다운로드 됨'}
+          />
         )}
       </article>
       {versionNotesOpen && (

@@ -1,17 +1,17 @@
-import { useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Outlet, useLocation } from 'react-router-dom';
 import AiStoreSidebar, {
   AiStoreSidebarRail,
 } from '../components/usersidebar/aistoresidebar/AiStoreSidebar.jsx';
 import SearchHeader from '../components/search/SearchHeader.jsx';
-import { useDownloads, useFavorites } from '../pages/user/aistore/data/manageStore.js';
+import {
+  storeCategories,
+  useDownloads,
+  useFavorites,
+} from '../pages/user/aistore/data/manageStore.js';
 import { ensureAiStoreStorageVersion } from '../pages/user/aistore/data/storageMigration.js';
 import useSidebarStore from '../stores/sidebarStore.js';
-
-const libraryTabs = [
-  { id: 'downloads', label: '다운로드한 도구', to: '/user/aistore/library/downloads' },
-  { id: 'favorites', label: '즐겨찾기', to: '/user/aistore/library/favorites' },
-];
 
 ensureAiStoreStorageVersion();
 
@@ -20,14 +20,80 @@ export default function AiStoreLayout() {
   const isStorePreview = new URLSearchParams(search).get('preview') === '1';
   const isSidebarOpen = useSidebarStore(state => state.aiStoreOpen);
   const setSidebarOpen = useSidebarStore(state => state.setAiStoreOpen);
+  const libraryCategoryScrollRef = useRef(null);
+  const libraryCategoryButtonRefs = useRef(new Map());
   const [libraryKeyword, setLibraryKeyword] = useState('');
+  const [selectedLibraryCategory, setSelectedLibraryCategory] = useState('전체');
+  const [libraryCategoryScrollState, setLibraryCategoryScrollState] = useState({
+    canScrollLeft: false,
+    canScrollRight: false,
+  });
+  const [fullyVisibleLibraryCategories, setFullyVisibleLibraryCategories] =
+    useState(storeCategories);
   const favoriteState = useFavorites();
   const downloadState = useDownloads();
   const isLibraryPage = pathname.startsWith('/user/aistore/library');
-  const libraryCounts = {
-    downloads: downloadState.downloads.length,
-    favorites: favoriteState.favorites.length,
+
+  const updateLibraryCategoryScrollState = () => {
+    const container = libraryCategoryScrollRef.current;
+    if (!container) return;
+
+    const maxScrollLeft = Math.max(0, container.scrollWidth - container.clientWidth);
+    const canScrollLeft = container.scrollLeft > 2;
+    const canScrollRight = container.scrollLeft < maxScrollLeft - 2;
+    setLibraryCategoryScrollState({ canScrollLeft, canScrollRight });
+
+    const containerRect = container.getBoundingClientRect();
+    const leftEdge = containerRect.left + (canScrollLeft ? 48 : 0);
+    const rightEdge = containerRect.right - (canScrollRight ? 48 : 0);
+    const nextVisibleCategories = storeCategories.filter(category => {
+      const button = libraryCategoryButtonRefs.current.get(category);
+      if (!button) return false;
+      const buttonRect = button.getBoundingClientRect();
+      return buttonRect.left >= leftEdge - 1 && buttonRect.right <= rightEdge + 1;
+    });
+
+    setFullyVisibleLibraryCategories(current => {
+      if (
+        current.length === nextVisibleCategories.length &&
+        current.every((category, index) => category === nextVisibleCategories[index])
+      ) {
+        return current;
+      }
+      return nextVisibleCategories;
+    });
   };
+
+  const scrollLibraryCategories = direction => {
+    const container = libraryCategoryScrollRef.current;
+    if (!container) return;
+    container.scrollBy({
+      left: direction * Math.max(240, container.clientWidth * 0.65),
+      behavior: 'smooth',
+    });
+  };
+
+  useEffect(() => {
+    if (!isLibraryPage) return undefined;
+    const container = libraryCategoryScrollRef.current;
+    if (!container) return undefined;
+
+    updateLibraryCategoryScrollState();
+    const resizeObserver = new ResizeObserver(updateLibraryCategoryScrollState);
+    resizeObserver.observe(container);
+    if (container.firstElementChild) resizeObserver.observe(container.firstElementChild);
+
+    return () => resizeObserver.disconnect();
+  }, [isLibraryPage]);
+
+  useEffect(() => {
+    if (!isLibraryPage) return;
+    libraryCategoryButtonRefs.current.get(selectedLibraryCategory)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  }, [isLibraryPage, selectedLibraryCategory]);
 
   return (
     <div className="flex min-h-screen bg-white text-[#0d0d0d]">
@@ -59,35 +125,71 @@ export default function AiStoreLayout() {
                   ariaLabel="라이브러리 도구 검색"
                 />
 
-                <nav
-                  className="mt-5 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                  aria-label="라이브러리 탭"
-                >
-                  <div className="flex w-max min-w-full justify-start gap-1">
-                    {libraryTabs.map(tab => (
-                      <NavLink
-                        key={tab.to}
-                        to={tab.to}
-                        className={({ isActive }) =>
-                          `inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-full px-4 text-base transition-colors ${
-                            isActive
+                <div className="relative mt-2">
+                  <nav
+                    ref={libraryCategoryScrollRef}
+                    aria-label="라이브러리 카테고리"
+                    onScroll={updateLibraryCategoryScrollState}
+                    className="touch-pan-x overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                  >
+                    <div
+                      className={`flex w-max min-w-full justify-center gap-1 ${libraryCategoryScrollState.canScrollLeft || libraryCategoryScrollState.canScrollRight ? 'px-12' : ''}`}
+                    >
+                      {storeCategories.map(category => (
+                        <button
+                          key={category}
+                          ref={node => {
+                            if (node) libraryCategoryButtonRefs.current.set(category, node);
+                            else libraryCategoryButtonRefs.current.delete(category);
+                          }}
+                          type="button"
+                          onClick={() => setSelectedLibraryCategory(category)}
+                          aria-pressed={selectedLibraryCategory === category}
+                          tabIndex={
+                            fullyVisibleLibraryCategories.includes(category) ? undefined : -1
+                          }
+                          className={`inline-flex h-8 shrink-0 cursor-pointer items-center whitespace-nowrap rounded-full px-4 text-sm transition-colors ${
+                            fullyVisibleLibraryCategories.includes(category)
+                              ? 'opacity-100'
+                              : 'pointer-events-none opacity-0'
+                          } ${
+                            selectedLibraryCategory === category
                               ? 'bg-[#ededed] font-medium text-[#333]'
                               : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
-                          }`
-                        }
-                      >
-                        {tab.label}
-                        <span className="ml-1.5 text-base tabular-nums text-slate-400">
-                          {libraryCounts[tab.id]}
-                        </span>
-                      </NavLink>
-                    ))}
-                  </div>
-                </nav>
+                          }`}
+                        >
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                  </nav>
+
+                  {libraryCategoryScrollState.canScrollLeft ? (
+                    <button
+                      type="button"
+                      onClick={() => scrollLibraryCategories(-1)}
+                      aria-label="이전 카테고리 보기"
+                      className="absolute left-1 top-4 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
+                    >
+                      <ChevronLeft size={17} aria-hidden="true" />
+                    </button>
+                  ) : null}
+                  {libraryCategoryScrollState.canScrollRight ? (
+                    <button
+                      type="button"
+                      onClick={() => scrollLibraryCategories(1)}
+                      aria-label="다음 카테고리 보기"
+                      className="absolute right-1 top-4 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
+                    >
+                      <ChevronRight size={17} aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </div>
 
                 <Outlet
                   context={{
                     keyword: libraryKeyword,
+                    selectedCategory: selectedLibraryCategory,
                     ...favoriteState,
                     ...downloadState,
                   }}

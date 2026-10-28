@@ -109,6 +109,10 @@ const adminMenus = [
     icon: Settings,
     children: [
       {
+        label: '감사 로그',
+        to: '/admin/system/audit',
+      },
+      {
         label: '엔진 및 모듈 상태',
         to: '/admin/system/settings',
       },
@@ -116,10 +120,7 @@ const adminMenus = [
         label: '공지 및 설정',
         to: '/admin/system/operations',
       },
-      {
-        label: '감사 로그',
-        to: '/admin/system/audit',
-      },
+      
     ],
   },
 ];

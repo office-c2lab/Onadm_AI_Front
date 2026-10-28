@@ -4,6 +4,7 @@ import {
   ClipboardCheck,
   Grid2X2,
   LibraryBig,
+  Newspaper,
   PanelLeft,
   Store,
 } from 'lucide-react';
@@ -21,7 +22,10 @@ const storeItems = [
   { label: '라이브러리', to: '/user/aistore/library', icon: LibraryBig },
 ];
 
-const supportItems = [{ label: '이용 가이드', to: '/user/aistore/guide', icon: CircleHelp }];
+const supportItems = [
+  { label: '공지사항', to: '/user/aistore/notices', icon: Newspaper },
+  { label: '이용 가이드', to: '/user/aistore/guide', icon: CircleHelp },
+];
 
 function SidebarLink({ item, onNavigate }) {
   const Icon = item.icon;
