@@ -119,22 +119,17 @@ const llmProjects = {
   3268: '모델 평가',
 };
 
+const llmToolCallRequestIds = new Set(['3276', '3274', '3270', '3269', '3268']);
+
+function getLinkedAgentRow(llmRow) {
+  return agentRows.find(item => String(item[3]).includes(`LLM#${llmRow[0]}`));
+}
+
 const tableConfig = {
   llm: {
     title: '요청 목록',
-    columns: [
-      'No.',
-      '사용자',
-      '부서',
-      '직급',
-      '프로젝트',
-      '모델 / 제공자',
-      '상태',
-      '입/출력 토큰',
-      '응답 시간',
-      '요청 시각',
-    ],
-    widths: ['5%', '9%', '8%', '7%', '10%', '19%', '7%', '10%', '8%', '13%'],
+    columns: ['No.', '사용자', '프로젝트', '모델 / 제공자', '프롬프트', '상태', '요청 시각'],
+    widths: ['6%', '10%', '11%', '18%', '27%', '8%', '16%'],
     rows: llmRows,
   },
   tool: {
@@ -144,7 +139,7 @@ const tableConfig = {
       '도구 / 제공자',
       '사용자',
       '부서',
-      '직급',
+      '직책',
       '위치',
       '이벤트',
       '상태',
@@ -190,13 +185,10 @@ function getHistoryDisplayRow(tab, row) {
     return [
       row[0],
       user.name,
-      user.department,
-      user.position,
       llmProjects[row[0]] ?? '-',
       `${row[3]} / ${row[4]}`,
+      llmConversations[row[0]]?.prompt ?? '-',
       row[5],
-      row[6],
-      row[7],
       formatHistoryDateTime24(row[8]),
     ];
   }
@@ -224,7 +216,7 @@ function getHistoryDetailEntries(tab, row) {
       ['No.', row[0]],
       ['사용자', user.name],
       ['부서', user.department],
-      ['직급', user.position],
+      ['직책', user.position],
       ['프로젝트', llmProjects[row[0]] ?? '-'],
       ['모델 / 제공자', `${row[3]} / ${row[4]}`],
       ['상태', row[5]],
@@ -240,7 +232,7 @@ function getHistoryDetailEntries(tab, row) {
     ['도구 / 제공자', `${row[1]} / ${row[2]}`],
     ['사용자', user.name],
     ['부서', user.department],
-    ['직급', user.position],
+    ['직책', user.position],
     ['위치', row[5]],
     ['이벤트', row[6]],
     ['상태', row[7]],
@@ -251,19 +243,27 @@ function getHistoryDetailEntries(tab, row) {
   ];
 }
 
-function filterHistoryRows(tab, query, status, dateRange) {
+function filterHistoryRows(tab, query, status, dateRange, callRecordFilter) {
   const queryTerms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   const dateIndex = { llm: 8, tool: 12 }[tab];
 
   return tableConfig[tab].rows.filter(row => {
     const user = getHistoryUserProfile(tab, row);
+    const hasAgentCall = tab === 'llm' && Boolean(getLinkedAgentRow(row));
+    const hasToolCall = tab === 'llm' && llmToolCallRequestIds.has(String(row[0]));
     const searchableText = `${row.join(' ')} ${user.name} ${user.department} ${user.position} ${
       tab === 'llm' ? (llmProjects[row[0]] ?? '') : ''
-    }`.toLowerCase();
+    } ${tab === 'llm' ? (llmConversations[row[0]]?.prompt ?? '') : ''}`.toLowerCase();
     const matchesQuery = queryTerms.every(term => searchableText.includes(term));
     const matchesStatus = status === '전체 상태' || row.includes(status);
     const matchesDate = isDateValueInRange(row[dateIndex], dateRange.startDate, dateRange.endDate);
-    return matchesQuery && matchesStatus && matchesDate;
+    const matchesCallRecord =
+      callRecordFilter === '에이전트'
+        ? hasAgentCall
+        : callRecordFilter === '도구'
+          ? hasToolCall
+          : true;
+    return matchesQuery && matchesStatus && matchesDate && matchesCallRecord;
   });
 }
 
@@ -297,6 +297,16 @@ function StatusBadge({ value }) {
       {value}
     </span>
   );
+}
+
+function StatusText({ value }) {
+  const tone = ['성공', '승인'].includes(value)
+    ? 'text-emerald-600'
+    : value === '실패'
+      ? 'text-rose-500'
+      : 'text-amber-600';
+
+  return <span className={`font-bold ${tone}`}>{value}</span>;
 }
 
 function StackedValue({ primary, secondary }) {
@@ -355,7 +365,7 @@ function AgentDetailSection({ title, count, status, children }) {
       <header className="flex items-center gap-2 border-b border-[#E2E8F0] px-4 py-3.5">
         <h5 className="text-sm font-bold text-[#303746]">{title}</h5>
         {status ? (
-          <StatusBadge value={status} />
+          <StatusText value={status} />
         ) : (
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-500">
             {count}건
@@ -369,7 +379,7 @@ function AgentDetailSection({ title, count, status, children }) {
 
 function AgentExecutionDetail({ llmRow }) {
   const [activeDetailTab, setActiveDetailTab] = useState('agent');
-  const agent = agentRows.find(item => String(item[3]).includes(`LLM#${llmRow[0]}`));
+  const agent = getLinkedAgentRow(llmRow);
   if (!agent) return null;
 
   const user = getHistoryUserProfile('llm', llmRow);
@@ -467,7 +477,7 @@ function AgentExecutionDetail({ llmRow }) {
                     <td className="px-4 py-3">{invocationId}</td>
                     <td className="px-4 py-3">web_search</td>
                     <td className="px-4 py-3">
-                      <StatusBadge value={toolStatus} />
+                      <StatusText value={toolStatus} />
                     </td>
                     <td className="px-4 py-3">{toolError}</td>
                   </tr>
@@ -476,7 +486,7 @@ function AgentExecutionDetail({ llmRow }) {
                     <td className="px-4 py-3">{approvalId}</td>
                     <td className="px-4 py-3">web_search</td>
                     <td className="px-4 py-3">
-                      <StatusBadge value="승인" />
+                      <StatusText value="승인" />
                     </td>
                     <td className="px-4 py-3">-</td>
                   </tr>
@@ -502,7 +512,7 @@ function AgentExecutionDetail({ llmRow }) {
                     <tr className="text-slate-700">
                       <td className="px-4 py-3 font-semibold">web_search #1</td>
                       <td className="px-4 py-3">
-                        <StatusBadge value={toolStatus} />
+                        <StatusText value={toolStatus} />
                       </td>
                       <td className="px-4 py-3">Invocation #{invocationId} / approval APPROVED</td>
                       <td className="px-4 py-3 text-rose-500">{toolError}</td>
@@ -536,7 +546,7 @@ function AgentExecutionDetail({ llmRow }) {
                   <tr className="text-slate-700">
                     <td className="px-4 py-3 font-semibold">web_search #1</td>
                     <td className="px-4 py-3">
-                      <StatusBadge value={toolStatus} />
+                      <StatusText value={toolStatus} />
                     </td>
                     <td className="px-4 py-3">
                       Invocation #{invocationId} / LOCAL / approval APPROVED
@@ -584,7 +594,7 @@ function AgentExecutionDetail({ llmRow }) {
                     <td className="px-4 py-3">web_search / LOCAL · {llmRow[4]}</td>
                     <td className="px-4 py-3">0 / user_daily_tool - / -</td>
                     <td className="px-4 py-3">
-                      <StatusBadge value="승인" />
+                      <StatusText value="승인" />
                     </td>
                     <td className="px-4 py-3">-</td>
                   </tr>
@@ -598,58 +608,96 @@ function AgentExecutionDetail({ llmRow }) {
   );
 }
 
+function RequestSummaryItem({ label, value, valueNode = null }) {
+  return (
+    <div className="min-w-0 border-b border-[#E7EBF5] px-4 py-4 xl:border-r xl:last:border-r-0">
+      <p className="text-[11px] font-bold text-[#7A869F]">{label}</p>
+      <div className="mt-1.5 min-w-0 truncate text-[13px] font-semibold text-[#303746]">
+        {valueNode ?? value}
+      </div>
+    </div>
+  );
+}
+
 function LlmConversationDetail({ row }) {
   const user = getHistoryUserProfile('llm', row);
+  const agent = agentRows.find(item => String(item[3]).includes(`LLM#${row[0]}`));
   const conversation = llmConversations[row[0]] ?? {
     prompt: '요청 프롬프트 정보가 없습니다.',
     answer: row[9] === '-' ? '응답 정보가 없습니다.' : `응답 실패: ${row[9]}`,
   };
   const isFailed = row[5] === '실패';
 
+  const summaryItems = [
+    ['요청 시각', formatHistoryDateTime24(row[8])],
+    ['모델 / 제공자', `${row[3]} / ${row[4]}`],
+    ['처리 상태', row[5]],
+    ['프로젝트', llmProjects[row[0]] ?? '-'],
+    ['사용자명', user.name],
+    ['부서 / 직책', `${user.department} / ${user.position}`],
+    ['입/출력 토큰', row[6]],
+    ['응답 시간', row[7]],
+  ];
+
   return (
-    <section className="border-t border-[#E7EBF5] bg-white px-4 py-4">
-      <h3 className="mb-4 text-sm font-bold text-[#23304A]">입력 프롬프트 및 답변</h3>
-      <div className="max-h-[min(44vh,22rem)] overflow-y-auto rounded-[10px] border border-[#E2E8F0] bg-[#F8FBFF] px-4 py-4">
-        <div className="flex min-w-0 flex-col gap-4">
-          <div className="flex min-w-0 items-start justify-end gap-3">
-            <div className="flex min-w-0 max-w-[min(44rem,86%)] flex-col items-end gap-1">
-              <span className="px-1 text-[11px] font-bold text-[#64728C]">{user.name}</span>
-              <div className="min-w-0 rounded-[14px] rounded-tr-[4px] bg-[#075DF6] px-4 py-3 text-[clamp(0.74rem,0.87vw,0.78rem)] leading-[1.7] whitespace-pre-wrap text-white shadow-[0_8px_20px_rgba(15,23,42,0.06)] break-words [overflow-wrap:anywhere]">
-                {conversation.prompt}
+    <div className="border-t border-[#E7EBF5] bg-white">
+      <section className="bg-white">
+        <div className="grid md:grid-cols-2 xl:grid-cols-4">
+          {summaryItems.map(([label, value]) => (
+            <RequestSummaryItem
+              key={label}
+              label={label}
+              value={value}
+              valueNode={label === '처리 상태' ? <StatusText value={value} /> : undefined}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="border-t border-[#E7EBF5] px-4 py-4">
+        <h3 className="mb-4 text-sm font-bold text-[#23304A]">입력 프롬프트 및 답변</h3>
+        <div className="max-h-[min(44vh,22rem)] overflow-y-auto rounded-[10px] border border-[#E2E8F0] bg-[#F8FBFF] px-4 py-4">
+          <div className="flex min-w-0 flex-col gap-4">
+            <div className="flex min-w-0 items-start justify-end gap-3">
+              <div className="flex min-w-0 max-w-[min(44rem,86%)] flex-col items-end gap-1">
+                <span className="px-1 text-[11px] font-bold text-[#64728C]">{user.name}</span>
+                <div className="min-w-0 rounded-[14px] rounded-tr-[4px] bg-[#075DF6] px-4 py-3 text-[clamp(0.74rem,0.87vw,0.78rem)] leading-[1.7] whitespace-pre-wrap text-white shadow-[0_8px_20px_rgba(15,23,42,0.06)] break-words [overflow-wrap:anywhere]">
+                  {conversation.prompt}
+                </div>
+              </div>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#075DF6] text-white">
+                <UserRound className="h-4 w-4" aria-hidden="true" />
               </div>
             </div>
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#075DF6] text-white">
-              <UserRound className="h-4 w-4" aria-hidden="true" />
-            </div>
-          </div>
 
-          <div className="flex min-w-0 items-start gap-3">
-            <img
-              src="/simbol.png"
-              alt=""
-              className="h-8 w-8 shrink-0 object-contain"
-              aria-hidden="true"
-            />
-            <div className="flex min-w-0 max-w-[min(44rem,86%)] flex-col items-start gap-1">
-              <span className="px-1 text-[11px] font-bold text-[#64728C]">
-                {row[3]} · {row[4]}
-              </span>
-              <div
-                className={`min-w-0 rounded-[14px] rounded-tl-[4px] border px-4 py-3 text-[clamp(0.74rem,0.87vw,0.78rem)] leading-[1.7] whitespace-pre-wrap shadow-[0_8px_20px_rgba(15,23,42,0.06)] break-words [overflow-wrap:anywhere] ${
-                  isFailed
-                    ? 'border-rose-200 bg-rose-50 text-rose-700'
-                    : 'border-[#D6E9FF] bg-white text-[#2F3A56]'
-                }`}
-              >
-                {conversation.answer}
+            <div className="flex min-w-0 items-start gap-3">
+              <img
+                src="/simbol.png"
+                alt=""
+                className="h-8 w-8 shrink-0 object-contain"
+                aria-hidden="true"
+              />
+              <div className="flex min-w-0 max-w-[min(44rem,86%)] flex-col items-start gap-1">
+                <span className="px-1 text-[11px] font-bold text-[#64728C]">
+                  {row[3]} · {row[4]}
+                </span>
+                <div
+                  className={`min-w-0 rounded-[14px] rounded-tl-[4px] border px-4 py-3 text-[clamp(0.74rem,0.87vw,0.78rem)] leading-[1.7] whitespace-pre-wrap shadow-[0_8px_20px_rgba(15,23,42,0.06)] break-words [overflow-wrap:anywhere] ${
+                    isFailed
+                      ? 'border-rose-200 bg-rose-50 text-rose-700'
+                      : 'border-[#D6E9FF] bg-white text-[#2F3A56]'
+                  }`}
+                >
+                  {conversation.answer}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      {isFailed ? <LlmErrorLog row={row} /> : null}
-      <AgentExecutionDetail llmRow={row} />
-    </section>
+        {isFailed ? <LlmErrorLog row={row} /> : null}
+        {agent ? <AgentExecutionDetail llmRow={row} /> : null}
+      </section>
+    </div>
   );
 }
 
@@ -657,25 +705,24 @@ function renderCells(tab, row) {
   const user = getHistoryUserProfile(tab, row);
 
   if (tab === 'llm') {
-    const [id, , , model, provider, status, tokens, duration, createdAt] = row;
+    const [id, , , model, provider, status, , , createdAt] = row;
     return [
       id,
       <span key="user" className="font-semibold text-slate-900">
         {user.name}
       </span>,
-      <span key="department" className="text-slate-600">
-        {user.department}
-      </span>,
-      <span key="position" className="text-slate-600">
-        {user.position}
-      </span>,
       <span key="project" className="font-medium text-slate-700">
         {llmProjects[row[0]] ?? '-'}
       </span>,
       <StackedValue key="model" primary={model} secondary={provider} />,
-      <StatusBadge key="status" value={status} />,
-      tokens,
-      duration,
+      <span
+        key="prompt"
+        className="block truncate font-medium text-slate-600"
+        title={llmConversations[row[0]]?.prompt ?? '-'}
+      >
+        {llmConversations[row[0]]?.prompt ?? '-'}
+      </span>,
+      <StatusText key="status" value={status} />,
       formatHistoryDateTime24(createdAt),
     ];
   }
@@ -712,6 +759,7 @@ function LogTable({
   query,
   status,
   dateRange,
+  callRecordFilter,
   selectedRowIds,
   expandedRowId,
   onToggleRowSelection,
@@ -720,8 +768,8 @@ function LogTable({
 }) {
   const config = tableConfig[tab];
   const filteredRows = useMemo(
-    () => filterHistoryRows(tab, query, status, dateRange),
-    [dateRange, query, status, tab]
+    () => filterHistoryRows(tab, query, status, dateRange, callRecordFilter),
+    [callRecordFilter, dateRange, query, status, tab]
   );
   const allRowsSelected =
     filteredRows.length > 0 && filteredRows.every(row => selectedRowIds.includes(row[0]));
@@ -879,14 +927,15 @@ export default function HistoryPage() {
   const [dateRange, setDateRange] = useState(defaultDateRange);
   const activeTab = 'llm';
   const [status, setStatus] = useState('전체 상태');
+  const [callRecordFilter, setCallRecordFilter] = useState('전체');
   const [searchInput, setSearchInput] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [detailRow, setDetailRow] = useState(null);
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const filteredRows = useMemo(
-    () => filterHistoryRows(activeTab, submittedQuery, status, dateRange),
-    [activeTab, dateRange, status, submittedQuery]
+    () => filterHistoryRows(activeTab, submittedQuery, status, dateRange, callRecordFilter),
+    [activeTab, callRecordFilter, dateRange, status, submittedQuery]
   );
   const downloadRows = useMemo(
     () => filteredRows.filter(row => selectedRowIds.includes(row[0])),
@@ -902,6 +951,7 @@ export default function HistoryPage() {
   const handleReset = () => {
     setDateRange(defaultDateRange);
     setStatus('전체 상태');
+    setCallRecordFilter('전체');
     setSearchInput('');
     setSubmittedQuery('');
     setCurrentPage(1);
@@ -938,7 +988,7 @@ export default function HistoryPage() {
     link.remove();
     URL.revokeObjectURL(downloadUrl);
   };
-  const filterGridClass = 'xl:grid-cols-[10.25rem_9rem_minmax(0,1fr)_5.25rem_3rem_3rem]';
+  const filterGridClass = 'xl:grid-cols-[10.25rem_9rem_9rem_minmax(0,1fr)_5.25rem_3rem_3rem]';
 
   return (
     <div className="garim-external-root min-h-full bg-white text-[#111827]">
@@ -975,6 +1025,21 @@ export default function HistoryPage() {
                   : ['전체 상태', '성공', '실패']
               }
               ariaLabel="상태 선택"
+              className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)] [&>button]:font-semibold"
+            />
+          </label>
+          <label className="min-w-0">
+            <span className="mb-1.5 block text-xs font-bold text-slate-700">호출 기록</span>
+            <CustomDropdown
+              value={callRecordFilter}
+              onChange={value => {
+                setCallRecordFilter(value);
+                setCurrentPage(1);
+                setDetailRow(null);
+                setSelectedRowIds([]);
+              }}
+              options={['전체', '에이전트', '도구']}
+              ariaLabel="호출 기록 유형"
               className="[&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:text-[clamp(0.82rem,0.95vw,0.9rem)] [&>button]:font-semibold"
             />
           </label>
@@ -1021,6 +1086,7 @@ export default function HistoryPage() {
           query={submittedQuery}
           status={status}
           dateRange={dateRange}
+          callRecordFilter={callRecordFilter}
           selectedRowIds={selectedRowIds}
           expandedRowId={activeTab === 'llm' ? detailRow?.[0] : null}
           onToggleRowSelection={handleToggleRowSelection}
