@@ -40,6 +40,10 @@ const ALL_USERS_OPTION = '사용자';
 const ALL_DEPARTMENTS_OPTION = '부서';
 const ALL_POSITIONS_OPTION = '직급';
 const ALL_POLICIES_OPTION = '정책';
+const ALL_RESULTS_OPTION = '탐지 결과';
+const DETECTION_RESULT_OPTIONS = [ALL_RESULTS_OPTION, '정상', '마스킹', '차단'];
+// 사용자 및 조직 필터는 현재 모니터링 목록에서 일시적으로 숨긴다.
+const SHOW_USER_SCOPE_FILTER = false;
 const MAX_ROWS_PER_PAGE = 10;
 const MONITORING_FILTER_STORAGE_KEY = 'garim:monitoring-filters:v1';
 
@@ -1270,6 +1274,9 @@ export function MonitoringLogView({
   const [selectedPolicies, setSelectedPolicies] = useState(() =>
     getStoredFilterValues(storedFilters.policies)
   );
+  const [selectedResults, setSelectedResults] = useState(() =>
+    getStoredFilterValues(storedFilters.results)
+  );
   const [selectedDepartments, setSelectedDepartments] = useState(() =>
     getStoredFilterValues(storedFilters.departments)
   );
@@ -1295,6 +1302,7 @@ export function MonitoringLogView({
   const lastPersistedFilterStateRef = useRef(
     JSON.stringify({
       policies: selectedPolicies,
+      results: selectedResults,
       departments: selectedDepartments,
       positions: selectedPositions,
       users: selectedUsers,
@@ -1388,10 +1396,18 @@ export function MonitoringLogView({
         (!startBoundary || logDate >= startBoundary) && (!endBoundary || logDate <= endBoundary);
       const matchesPolicy =
         !selectedPolicies.length || selectedPolicies.includes(getDetectedPolicyName(log));
+      const matchesResult =
+        !selectedResults.length || selectedResults.includes(getStatusLabel(log));
       const matchesDepartment =
-        !selectedDepartments.length || selectedDepartments.includes(log.department);
-      const matchesPosition = !selectedPositions.length || selectedPositions.includes(log.position);
-      const matchesUser = !selectedUsers.length || selectedUsers.includes(log.userId);
+        !SHOW_USER_SCOPE_FILTER ||
+        !selectedDepartments.length ||
+        selectedDepartments.includes(log.department);
+      const matchesPosition =
+        !SHOW_USER_SCOPE_FILTER ||
+        !selectedPositions.length ||
+        selectedPositions.includes(log.position);
+      const matchesUser =
+        !SHOW_USER_SCOPE_FILTER || !selectedUsers.length || selectedUsers.includes(log.userId);
       const normalizedSearchQuery = searchQuery.trim().toLowerCase();
       const matchesSearch = normalizedSearchQuery
         ? [
@@ -1428,6 +1444,7 @@ export function MonitoringLogView({
       return (
         matchesDateRange &&
         matchesPolicy &&
+        matchesResult &&
         matchesDepartment &&
         matchesPosition &&
         matchesUser &&
@@ -1441,6 +1458,7 @@ export function MonitoringLogView({
     selectedDepartments,
     selectedPolicies,
     selectedPositions,
+    selectedResults,
     selectedUsers,
     searchQuery,
     startDate,
@@ -1519,6 +1537,7 @@ export function MonitoringLogView({
   useEffect(() => {
     const serializedFilters = JSON.stringify({
       policies: selectedPolicies,
+      results: selectedResults,
       departments: selectedDepartments,
       positions: selectedPositions,
       users: selectedUsers,
@@ -1532,7 +1551,14 @@ export function MonitoringLogView({
     } catch {
       // 필터 저장을 사용할 수 없는 환경에서도 조회 기능은 그대로 동작한다.
     }
-  }, [searchQuery, selectedDepartments, selectedPolicies, selectedPositions, selectedUsers]);
+  }, [
+    searchQuery,
+    selectedDepartments,
+    selectedPolicies,
+    selectedPositions,
+    selectedResults,
+    selectedUsers,
+  ]);
 
   const handleToggleRowSelection = rowId => {
     setSelectedRowIds(current =>
@@ -1598,6 +1624,7 @@ export function MonitoringLogView({
   const handleResetFilters = () => {
     lastPersistedFilterStateRef.current = JSON.stringify({
       policies: [],
+      results: [],
       departments: [],
       positions: [],
       users: [],
@@ -1612,6 +1639,7 @@ export function MonitoringLogView({
     setStartDate(defaultDateRange.startDate);
     setEndDate(defaultDateRange.endDate);
     setSelectedPolicies([]);
+    setSelectedResults([]);
     setSelectedDepartments([]);
     setSelectedPositions([]);
     setSelectedUsers([]);
@@ -1623,6 +1651,12 @@ export function MonitoringLogView({
   };
   const handlePolicyFilterChange = value => {
     setSelectedPolicies(value);
+    setCurrentPage(1);
+    setSelectedLogId(null);
+    setSelectedRowIds([]);
+  };
+  const handleResultFilterChange = value => {
+    setSelectedResults(value);
     setCurrentPage(1);
     setSelectedLogId(null);
     setSelectedRowIds([]);
@@ -1674,7 +1708,7 @@ export function MonitoringLogView({
       >
         <div className="mt-[calc(var(--app-gap-xs)*-0.35)] w-full">
           <div className="mt-[calc(var(--app-gap-xs)/2)]">
-            <div className="grid max-w-full items-end gap-[var(--app-gap-sm)] sm:grid-cols-2 lg:grid-cols-[minmax(7.75rem,0.72fr)_minmax(10.25rem,1fr)_minmax(12.5rem,1.22fr)_minmax(21rem,2.05fr)]">
+            <div className="grid max-w-full items-end gap-[var(--app-gap-sm)] sm:grid-cols-2 lg:grid-cols-[10.5rem_8.5rem_11rem_minmax(21rem,1fr)]">
               <DateRangePicker
                 label="조회 기간"
                 labelClassName="mb-1.5 block text-xs font-bold text-slate-700"
@@ -1688,6 +1722,39 @@ export function MonitoringLogView({
                 widthClass="w-full min-w-0"
               />
 
+              {SHOW_USER_SCOPE_FILTER ? (
+                <div className="min-w-0">
+                  <span className="mb-1.5 block text-xs font-bold text-slate-700">
+                    사용자 및 조직
+                  </span>
+                  <UserScopeFilterDropdown
+                    selectedDepartments={selectedDepartments}
+                    selectedPositions={selectedPositions}
+                    selectedUsers={selectedUsers}
+                    boundaryRef={tableAreaRef}
+                    departmentOptions={departmentOptions}
+                    positionOptions={positionOptions}
+                    userOptions={userOptions}
+                    onDepartmentChange={handleDepartmentFilterChange}
+                    onPositionChange={handlePositionFilterChange}
+                    onUserChange={handleUserFilterChange}
+                  />
+                </div>
+              ) : (
+                <div className="min-w-0">
+                  <span className="mb-1.5 block text-xs font-bold text-slate-700">탐지 결과</span>
+                  <MonitoringMultiSelectDropdown
+                    selectedValues={selectedResults}
+                    options={DETECTION_RESULT_OPTIONS}
+                    allOption={ALL_RESULTS_OPTION}
+                    allLabel="전체 결과"
+                    selectionLabel="결과"
+                    ariaLabel="탐지 결과"
+                    onChange={handleResultFilterChange}
+                  />
+                </div>
+              )}
+
               <div className="min-w-0">
                 <span className="mb-1.5 block text-xs font-bold text-slate-700">정책</span>
                 <MonitoringMultiSelectDropdown
@@ -1698,24 +1765,6 @@ export function MonitoringLogView({
                   selectionLabel="정책"
                   ariaLabel="탐지된 정책"
                   onChange={handlePolicyFilterChange}
-                />
-              </div>
-
-              <div className="min-w-0">
-                <span className="mb-1.5 block text-xs font-bold text-slate-700">
-                  사용자 및 조직
-                </span>
-                <UserScopeFilterDropdown
-                  selectedDepartments={selectedDepartments}
-                  selectedPositions={selectedPositions}
-                  selectedUsers={selectedUsers}
-                  boundaryRef={tableAreaRef}
-                  departmentOptions={departmentOptions}
-                  positionOptions={positionOptions}
-                  userOptions={userOptions}
-                  onDepartmentChange={handleDepartmentFilterChange}
-                  onPositionChange={handlePositionFilterChange}
-                  onUserChange={handleUserFilterChange}
                 />
               </div>
 

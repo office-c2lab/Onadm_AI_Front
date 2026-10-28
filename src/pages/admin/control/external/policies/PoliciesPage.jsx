@@ -371,7 +371,7 @@ function PolicyRuleDetailContent({ policy, onBack }) {
           </AppButton>
         </div>
 
-        <div className="w-full lg:w-[38rem]">
+        <div className="min-w-0 w-full lg:flex-1">
           <span className="mb-1.5 block text-xs font-bold text-slate-700">탐지 항목 검색</span>
           <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">
             <AppSearchField

@@ -522,7 +522,7 @@ export default function UserPage() {
                 />
               </label>
 
-              <div className="flex-1 sm:min-w-[20rem] lg:w-[clamp(18rem,30vw,24rem)] lg:min-w-0 lg:flex-none">
+              <div className="min-w-0 flex-1 sm:min-w-[20rem]">
                 <span className="mb-1.5 block text-xs font-bold text-slate-700">사용자 검색</span>
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <AppSearchField

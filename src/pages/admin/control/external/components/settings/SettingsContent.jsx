@@ -1146,8 +1146,8 @@ export function DropdownSettingsContent() {
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[auto_auto] lg:items-end lg:justify-between">
-          <div className="min-w-0 sm:w-[27rem]">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="min-w-0 w-full">
             <span className="mb-1.5 block text-xs font-bold text-slate-700">항목 검색</span>
             <div className="flex flex-col gap-3 sm:flex-row">
               <AppSearchField
@@ -1579,7 +1579,7 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         {toolbarAction ? <div className="flex shrink-0 justify-start">{toolbarAction}</div> : null}
 
-        <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-end lg:justify-end">
+        <div className="flex min-w-0 w-full flex-col gap-3 lg:flex-1 lg:flex-row lg:items-end">
           <label className="w-full lg:w-[12rem] lg:shrink-0">
             <span className="mb-1.5 block text-xs font-bold text-slate-700">분류</span>
             <CustomDropdown
@@ -1591,7 +1591,7 @@ export function FileUploadProtectionContent({ toolbarAction = null, variant = 'f
             />
           </label>
 
-          <div className="w-full lg:w-[38rem]">
+          <div className="min-w-0 w-full lg:flex-1">
             <span className="mb-1.5 block text-xs font-bold text-slate-700">설정 항목 검색</span>
             <div className="flex flex-col gap-3 sm:flex-row">
               <AppSearchField
