@@ -9,6 +9,9 @@ export default function AiStoreConfirmModal({
   confirmLabel,
   cancelLabel = '돌아가기',
   confirmVariant = 'danger',
+  footerStart,
+  allowOverflow = false,
+  rootClassName = '',
   error,
   onClose,
   onConfirm,
@@ -35,7 +38,7 @@ export default function AiStoreConfirmModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/40 p-4"
+      className={`${rootClassName} fixed inset-0 z-[200] flex items-center justify-center !bg-slate-950/40 p-4`.trim()}
       role="presentation"
       onMouseDown={event => {
         if (event.target === event.currentTarget) onClose();
@@ -45,7 +48,7 @@ export default function AiStoreConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl"
+        className={`w-full max-w-md rounded-xl bg-white shadow-2xl ${allowOverflow ? 'overflow-visible' : 'overflow-hidden'}`}
       >
         <div className="px-6 py-6 sm:px-7">
           <h2 id={titleId} className="text-lg font-bold text-slate-900">
@@ -58,13 +61,20 @@ export default function AiStoreConfirmModal({
             </p>
           )}
         </div>
-        <div className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:px-7">
-          <AiStoreActionButton variant="secondary" onClick={onClose} autoFocus>
-            {cancelLabel}
-          </AiStoreActionButton>
-          <AiStoreActionButton variant={confirmVariant} onClick={onConfirm}>
-            {confirmLabel}
-          </AiStoreActionButton>
+        <div
+          className={`flex items-center gap-2 rounded-b-xl border-t border-slate-200 bg-slate-50 px-6 py-4 sm:px-7 ${
+            footerStart ? 'justify-between' : 'justify-end'
+          }`}
+        >
+          {footerStart ? <div className="flex items-center">{footerStart}</div> : null}
+          <div className="flex items-center gap-2">
+            <AiStoreActionButton variant="secondary" onClick={onClose} autoFocus>
+              {cancelLabel}
+            </AiStoreActionButton>
+            <AiStoreActionButton variant={confirmVariant} onClick={onConfirm}>
+              {confirmLabel}
+            </AiStoreActionButton>
+          </div>
         </div>
       </section>
     </div>,

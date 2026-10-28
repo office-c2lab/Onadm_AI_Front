@@ -54,6 +54,10 @@ function formatDateLabel(value) {
   return `${month}-${day}`;
 }
 
+function formatFullDateLabel(value) {
+  return value ? String(value).replaceAll('-', '.') : '';
+}
+
 function createCalendarDays(viewDate) {
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -210,6 +214,8 @@ export function DateRangePicker({
   startDate,
   endDate,
   onChange,
+  singleDate = false,
+  popoverPlacement = 'bottom',
   widthClass = 'min-w-[clamp(8rem,9vw,8.625rem)]',
   labelClassName = 'text-[clamp(0.76rem,0.9vw,0.82rem)] font-semibold tracking-[-0.01em] text-[#5C6784]',
   triggerHeightClass = 'h-[var(--app-control-lg)]',
@@ -221,7 +227,9 @@ export function DateRangePicker({
   const selectedStartDate = parseDateString(startDate);
   const selectedEndDate = parseDateString(endDate || startDate);
   const calendarDays = useMemo(() => createCalendarDays(viewDate), [viewDate]);
-  const dateLabel = `${formatDateLabel(startDate)} ~ ${formatDateLabel(endDate)}`;
+  const dateLabel = singleDate
+    ? formatFullDateLabel(startDate)
+    : `${formatDateLabel(startDate)} ~ ${formatDateLabel(endDate)}`;
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -249,6 +257,13 @@ export function DateRangePicker({
 
   const handleSelectDate = date => {
     const value = formatDateValue(date);
+
+    if (singleDate) {
+      onChange({ startDate: value, endDate: value });
+      setSelectionStep('start');
+      setIsOpen(false);
+      return;
+    }
 
     if (selectionStep === 'start') {
       onChange({ startDate: value, endDate: value });
@@ -313,9 +328,19 @@ export function DateRangePicker({
       </div>
 
       {isOpen ? (
-        <div className="absolute top-[calc(100%+var(--app-gap-xs))] left-0 z-40 w-[min(20rem,calc(100vw-(var(--app-page-x)*2)))] rounded-[var(--app-radius-lg)] border border-[#E3E7F0] bg-white p-[var(--app-pad-sm)] shadow-[0_1rem_2.25rem_rgba(15,23,42,0.12)]">
+        <div
+          className={`absolute left-0 z-40 w-[min(20rem,calc(100vw-(var(--app-page-x)*2)))] rounded-[var(--app-radius-lg)] border border-[#E3E7F0] bg-white p-[var(--app-pad-sm)] shadow-[0_1rem_2.25rem_rgba(15,23,42,0.12)] ${
+            popoverPlacement === 'top'
+              ? 'bottom-[calc(100%+var(--app-gap-xs))]'
+              : 'top-[calc(100%+var(--app-gap-xs))]'
+          }`}
+        >
           <div className="mb-[var(--app-gap-sm)] rounded-[var(--app-radius-md)] bg-[#F7F8FC] px-[var(--app-pad-sm)] py-[var(--app-pad-xs)] text-[clamp(0.7rem,0.85vw,0.75rem)] font-semibold text-[#657086]">
-            {selectionStep === 'start' ? '시작일을 선택하세요' : '종료일을 선택하세요'}
+            {singleDate
+              ? '날짜를 선택하세요'
+              : selectionStep === 'start'
+                ? '시작일을 선택하세요'
+                : '종료일을 선택하세요'}
           </div>
           <div className="mb-[var(--app-gap-sm)] flex items-center justify-between">
             <button

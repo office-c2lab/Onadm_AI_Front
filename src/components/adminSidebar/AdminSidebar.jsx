@@ -113,16 +113,12 @@ const adminMenus = [
         to: '/admin/system/settings',
       },
       {
-        label: '환경 설정',
-        to: '/admin/system/environment',
+        label: '공지 및 설정',
+        to: '/admin/system/operations',
       },
       {
         label: '감사 로그',
         to: '/admin/system/audit',
-      },
-      {
-        label: '운영 공지',
-        to: '/admin/system/notices',
       },
     ],
   },

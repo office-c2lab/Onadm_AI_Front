@@ -81,8 +81,7 @@ import DepartmentsPage from '../pages/admin/users/departments/DepartmentsPage.js
 // ================================
 import AuditPage from '../pages/admin/system/audit/AuditPage.jsx';
 import SettingsPage from '../pages/admin/system/settings/SettingsPage.jsx';
-import EnvironmentPage from '../pages/admin/system/environment/EnvironmentPage.jsx';
-import NoticesPage from '../pages/admin/system/notices/NoticesPage.jsx';
+import OperationsPage from '../pages/admin/system/operations/OperationsPage.jsx';
 
 export default function AppRouter() {
   return (
@@ -232,9 +231,13 @@ export default function AppRouter() {
           <Route path="system">
             <Route index element={<Navigate to="settings" replace />} />
             <Route path="settings" element={<SettingsPage />} />
-            <Route path="environment" element={<EnvironmentPage />} />
+            <Route path="operations" element={<OperationsPage />} />
+            <Route
+              path="environment"
+              element={<Navigate to="/admin/system/operations" replace />}
+            />
             <Route path="audit" element={<AuditPage />} />
-            <Route path="notices" element={<NoticesPage />} />
+            <Route path="notices" element={<Navigate to="/admin/system/operations" replace />} />
             <Route path="modules" element={<Navigate to="/admin/system/settings" replace />} />
             <Route path="jobs" element={<Navigate to="/admin/system/settings" replace />} />
           </Route>
