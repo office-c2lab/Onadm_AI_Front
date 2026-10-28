@@ -58,21 +58,6 @@ function CurrencyInput({ label, value, suffix, onChange }) {
   );
 }
 
-function StatusPill({ children, tone = 'green' }) {
-  const tones = {
-    green: 'bg-emerald-50 text-emerald-600',
-    red: 'bg-rose-50 text-rose-600',
-    gray: 'bg-slate-100 text-slate-500',
-  };
-  return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-1 text-[0.78rem] font-bold ${tones[tone]}`}
-    >
-      {children}
-    </span>
-  );
-}
-
 function TierModal({ tier, onClose, onSave }) {
   const [name, setName] = useState(tier?.name ?? '');
   const [credits, setCredits] = useState(tier?.credits ?? '');
@@ -512,7 +497,7 @@ export default function LimitsPage() {
                       {tier.credits}
                     </td>
                     <td className={monitoringTableCellClass(index)}>
-                      <StatusPill>활성</StatusPill>
+                      <span className="font-bold text-emerald-600">활성</span>
                     </td>
                     <td className={monitoringTableCellClass(index, 'text-slate-500')}>
                       {tier.updatedAt}
