@@ -109,20 +109,20 @@ const adminMenus = [
     icon: Settings,
     children: [
       {
-        label: '모듈 관리',
-        to: '/admin/system/modules',
+        label: '엔진 및 모듈 상태',
+        to: '/admin/system/settings',
       },
       {
-        label: '작업 현황',
-        to: '/admin/system/jobs',
+        label: '환경 설정',
+        to: '/admin/system/environment',
       },
       {
         label: '감사 로그',
         to: '/admin/system/audit',
       },
       {
-        label: '시스템 설정 및 상태',
-        to: '/admin/system/settings',
+        label: '운영 공지',
+        to: '/admin/system/notices',
       },
     ],
   },

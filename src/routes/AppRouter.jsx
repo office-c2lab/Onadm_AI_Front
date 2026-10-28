@@ -79,10 +79,10 @@ import DepartmentsPage from '../pages/admin/users/departments/DepartmentsPage.js
 // ================================
 // 관리자 - 시스템 운영
 // ================================
-import ModulesPage from '../pages/admin/system/modules/ModulesPage.jsx';
-import JobsPage from '../pages/admin/system/jobs/JobsPage.jsx';
 import AuditPage from '../pages/admin/system/audit/AuditPage.jsx';
 import SettingsPage from '../pages/admin/system/settings/SettingsPage.jsx';
+import EnvironmentPage from '../pages/admin/system/environment/EnvironmentPage.jsx';
+import NoticesPage from '../pages/admin/system/notices/NoticesPage.jsx';
 
 export default function AppRouter() {
   return (
@@ -230,11 +230,13 @@ export default function AppRouter() {
 
           {/* 시스템 운영 */}
           <Route path="system">
-            <Route index element={<Navigate to="modules" replace />} />
-            <Route path="modules" element={<ModulesPage />} />
-            <Route path="jobs" element={<JobsPage />} />
-            <Route path="audit" element={<AuditPage />} />
+            <Route index element={<Navigate to="settings" replace />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="environment" element={<EnvironmentPage />} />
+            <Route path="audit" element={<AuditPage />} />
+            <Route path="notices" element={<NoticesPage />} />
+            <Route path="modules" element={<Navigate to="/admin/system/settings" replace />} />
+            <Route path="jobs" element={<Navigate to="/admin/system/settings" replace />} />
           </Route>
 
           {/* 존재하지 않는 관리자 경로 */}
