@@ -41,7 +41,6 @@ import IntelligencePage from '../pages/admin/discover/intelligence/IntelligenceP
 import UsagePage from '../pages/admin/control/internal/usage/UsagePage.jsx';
 import ModelsPage from '../pages/admin/control/internal/models/ModelsPage.jsx';
 import ClassificationPage from '../pages/admin/control/internal/classification/ClassificationPage.jsx';
-import ControlPoliciesPage from '../pages/admin/control/internal/policies/PoliciesPage.jsx';
 import LimitsPage, {
   CreditHistoryPage,
 } from '../pages/admin/control/internal/limits/LimitsPage.jsx';
@@ -152,7 +151,6 @@ export default function AppRouter() {
           <Route path="control">
             <Route index element={<Navigate to="internal/usage" replace />} />
             <Route path="internal/classification" element={<ClassificationPage />} />
-            <Route path="internal/policies" element={<ControlPoliciesPage />} />
             <Route path="internal" element={<InternalControlLayout />}>
               <Route index element={<Navigate to="usage" replace />} />
               <Route path="usage" element={<UsagePage />} />

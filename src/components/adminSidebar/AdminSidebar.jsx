@@ -42,12 +42,8 @@ const adminMenus = [
     icon: ShieldCheck,
     children: [
       {
-        label: 'CSO 분류 관리',
+        label: 'CSO 분류 및 정책',
         to: '/admin/control/internal/classification',
-      },
-      {
-        label: 'AI 사용 정책 및 라우팅',
-        to: '/admin/control/internal/policies',
       },
       {
         label: 'Control 내부',
