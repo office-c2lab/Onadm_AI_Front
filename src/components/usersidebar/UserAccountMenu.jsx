@@ -26,6 +26,14 @@ export default function UserAccountMenu({ user = { name: 'rex307', plan: 'Plus' 
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
   const initials = user.name.slice(0, 2).toUpperCase();
+  const remainingCredits =
+    typeof user.remainingCredits === 'number'
+      ? user.remainingCredits.toLocaleString('ko-KR')
+      : user.remainingCredits;
+  const creditPercentage =
+    typeof user.remainingCredits === 'number' && typeof user.totalCredits === 'number'
+      ? Math.min(100, Math.max(0, (user.remainingCredits / user.totalCredits) * 100))
+      : null;
 
   useEffect(() => {
     if (!open) return undefined;
@@ -112,6 +120,35 @@ export default function UserAccountMenu({ user = { name: 'rex307', plan: 'Plus' 
         </div>
       )}
 
+      {remainingCredits && creditPercentage !== null && (
+        <div className="mb-2 px-2 pt-1" aria-label="남은 크레딧 정보">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[12px] font-medium text-[#555]">남은 크레딧</span>
+            <span className="text-[13px] font-semibold tabular-nums text-[#171717]">
+              {remainingCredits}
+            </span>
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <div
+              className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-[#e8e8e8]"
+              role="progressbar"
+              aria-label="잔여 크레딧 비율"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow={Math.round(creditPercentage)}
+            >
+              <div
+                className="h-full rounded-full bg-[#3c7cf6] transition-[width] duration-300"
+                style={{ width: `${creditPercentage}%` }}
+              />
+            </div>
+            <span className="w-10 text-right text-[11px] font-medium tabular-nums text-[#3c7cf6]">
+              {creditPercentage.toFixed(1)}%
+            </span>
+          </div>
+        </div>
+      )}
+
       <button
         type="button"
         onClick={() => setOpen(value => !value)}
@@ -124,7 +161,9 @@ export default function UserAccountMenu({ user = { name: 'rex307', plan: 'Plus' 
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-medium leading-[18px]">{user.name}</span>
-          <span className="block truncate text-[11px] leading-4 text-[#777]">{user.plan}</span>
+          <span className="block truncate text-[11px] leading-4 text-[#777]">
+            {user.email ?? user.plan}
+          </span>
         </span>
       </button>
     </div>

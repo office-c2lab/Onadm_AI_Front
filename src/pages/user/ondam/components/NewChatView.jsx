@@ -121,7 +121,7 @@ export default function NewChatView({ onSubmit }) {
           <button
             type={prompt.trim() ? 'submit' : 'button'}
             onClick={!prompt.trim() ? () => setIsListening(value => !value) : undefined}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#3c7cf6] text-white transition hover:bg-[#2f6fe8] disabled:opacity-50"
+            className="ml-1.5 grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#3c7cf6] text-white transition hover:bg-[#2f6fe8] disabled:opacity-50"
             aria-label={prompt.trim() ? '메시지 보내기' : '음성 대화 시작'}
             title={prompt.trim() ? '메시지 보내기' : '음성 대화 시작'}
           >

@@ -289,6 +289,8 @@ export function GarimReferenceOrb({
 }) {
   const isDark = themeMode === 'dark';
   const floatDuration = `${(Math.PI * 2) / (0.55 * Math.max(speed, 0.01))}s`;
+  const numericSize = typeof size === 'number' ? size : 460;
+  const cameraZoom = 120 * (numericSize / 460);
 
   return (
     <div
@@ -307,7 +309,7 @@ export function GarimReferenceOrb({
     >
       <Canvas
         orthographic
-        camera={{ zoom: 120, position: [0, 0, 5] }}
+        camera={{ zoom: cameraZoom, position: [0, 0, 5] }}
         gl={{
           alpha: true,
           antialias: true,
