@@ -1,29 +1,22 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
-  Blocks,
-  CalendarClock,
   Check,
   ChevronRight,
-  Compass,
   Ellipsis,
   Folder,
-  LibraryBig,
   PanelLeft,
+  Pencil,
   Plus,
   Search,
   SquarePen,
+  Trash2,
   X,
 } from 'lucide-react';
 import UserAccountMenu from '../UserAccountMenu.jsx';
 import UserServiceSwitcher from '../UserServiceSwitcher.jsx';
 
-const primaryItems = [
-  { id: 'schedule', label: '예약', icon: CalendarClock },
-  { id: 'library', label: '라이브러리', icon: LibraryBig },
-  { id: 'plugins', label: '플러그인', icon: Blocks },
-  { id: 'explore', label: '탐색', icon: Compass },
-];
-
+// 목업 데이터: 실제 API 연동 시 부모 컴포넌트에서 전달할 수 있습니다.
 const defaultProjects = [
   { id: 'brand-renewal', title: '브랜드 리뉴얼' },
   { id: 'product-planning', title: '신규 서비스 기획' },
@@ -62,6 +55,26 @@ const defaultChats = [
   { id: 'landing-copy', title: '랜딩 페이지 문구 정리' },
 ];
 
+const CHAT_STORAGE_KEY = 'ondam-chat-changes';
+const PROJECT_STORAGE_KEY = 'ondam-projects';
+const EMPTY_CHAT_CHANGES = { renamed: {}, deletedIds: [] };
+
+// 채팅 ID가 같은 항목이 최근/프로젝트 양쪽에 나타날 수 있으므로 편집 위치를 구분합니다.
+const getChatRowKey = (chatId, projectId = null) => `${projectId ?? 'recent'}:${chatId}`;
+
+function getMenuPosition(event, menuHeight = 100) {
+  const rect = event.currentTarget.getBoundingClientRect();
+  const menuWidth = 192;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const preferredTop =
+    spaceBelow >= menuHeight + 12 ? rect.bottom + 4 : rect.top - menuHeight - 4;
+
+  return {
+    top: Math.max(8, Math.min(preferredTop, window.innerHeight - menuHeight - 8)),
+    left: Math.max(8, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8)),
+  };
+}
+
 function MenuButton({ icon: Icon, label, isActive = false, onClick }) {
   return (
     <button
@@ -77,34 +90,92 @@ function MenuButton({ icon: Icon, label, isActive = false, onClick }) {
   );
 }
 
-function ConversationButton({ chat, isActive, onSelect, onOpenMenu }) {
+// 최근 대화와 프로젝트 내부 대화에서 공통 사용
+function ConversationButton({
+  chat,
+  isActive,
+  isMenuOpen,
+  isEditing,
+  editingTitle,
+  onEditingTitleChange,
+  onSaveRename,
+  onCancelRename,
+  onSelect,
+  onOpenMenu,
+  compact = false,
+}) {
   return (
-    <div className="group relative">
-      <button
-        type="button"
-        onClick={() => onSelect?.(chat)}
-        className={`flex h-9 w-full items-center rounded-lg px-2.5 pr-10 text-left text-[14px] transition-colors ${
-          isActive ? 'bg-[#e8e8e8] text-[#0d0d0d]' : 'text-[#202020] hover:bg-[#ececec]'
-        }`}
-        aria-current={isActive ? 'page' : undefined}
-        title={chat.title}
-      >
-        <span className="truncate">{chat.title}</span>
-      </button>
+    <div
+      className={`group relative flex h-9 items-center rounded-lg transition-colors ${
+        isMenuOpen ? 'bg-[#e8e8e8]' : 'hover:bg-[#ececec]'
+      }`}
+    >
+      {isEditing ? (
+        <div className="flex h-full min-w-0 flex-1 items-center gap-1 px-1.5">
+          <input
+            autoFocus
+            value={editingTitle}
+            onChange={event => onEditingTitleChange(event.target.value)}
+            onKeyDown={event => {
+              if (event.key === 'Enter') onSaveRename();
+              if (event.key === 'Escape') onCancelRename();
+            }}
+            className="h-7 min-w-0 flex-1 rounded-md border border-[#bdd0f7] bg-white px-2 text-[13px] text-[#222] outline-none"
+            aria-label="대화 이름 변경"
+          />
+          <button
+            type="button"
+            onClick={onSaveRename}
+            disabled={!editingTitle.trim()}
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[#3c7cf6] hover:bg-[#dde9ff] disabled:opacity-40"
+            aria-label="대화 이름 저장"
+          >
+            <Check className="h-4 w-4" strokeWidth={2} />
+          </button>
+          <button
+            type="button"
+            onClick={onCancelRename}
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[#777] hover:bg-[#ddd]"
+            aria-label="대화 이름 변경 취소"
+          >
+            <X className="h-4 w-4" strokeWidth={1.8} />
+          </button>
+        </div>
+      ) : (
+        <>
+          <button
+            type="button"
+            onClick={() => onSelect?.(chat)}
+            className={`flex h-9 min-w-0 flex-1 items-center rounded-lg px-2.5 pr-9 text-left transition-colors ${
+              compact ? 'text-[13px]' : 'text-[14px]'
+            } ${
+              isActive ? 'bg-[#e8e8e8] text-[#0d0d0d]' : 'text-[#303030]'
+            }`}
+            aria-current={isActive ? 'page' : undefined}
+            title={chat.title}
+          >
+            <span className="min-w-0 truncate">{chat.title}</span>
+          </button>
 
-      <button
-        type="button"
-        onClick={event => {
-          event.stopPropagation();
-          onOpenMenu?.(chat);
-        }}
-        className={`absolute right-1.5 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-md text-[#555] transition hover:bg-[#dcdcdc] focus:opacity-100 ${
-          isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-        }`}
-        aria-label={`${chat.title} 옵션`}
-      >
-        <Ellipsis className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
-      </button>
+          <button
+            type="button"
+            data-chat-menu-trigger
+            onClick={event => onOpenMenu(event, chat)}
+            className={`absolute right-1.5 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-md text-[#555] transition-opacity hover:bg-[#dcdcdc] focus-visible:opacity-100 ${
+              isMenuOpen
+                ? 'bg-[#dedede] opacity-100'
+                : isActive
+                  ? 'opacity-100'
+                  : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
+            }`}
+            aria-label={`${chat.title} 메뉴`}
+            aria-expanded={isMenuOpen}
+            title="대화 메뉴"
+          >
+            <Ellipsis className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
+          </button>
+        </>
+      )}
     </div>
   );
 }
@@ -127,7 +198,7 @@ export function OndamSidebarRail({ onOpen, onNewChat }) {
         </button>
         <button
           type="button"
-          onClick={onNewChat}
+          onClick={() => onNewChat?.(null)}
           className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#ececec]"
           aria-label="새 채팅"
           title="새 채팅"
@@ -148,6 +219,8 @@ export function OndamSidebarRail({ onOpen, onNewChat }) {
 export default function OndamSidebar({
   chats = defaultChats,
   projects = defaultProjects,
+  // 프로젝트별 채팅 목록을 외부에서도 주입할 수 있도록 확장
+  projectChats = defaultProjectChats,
   activeChatId = 'admin-sidebar',
   user = {
     name: 'rex307',
@@ -159,7 +232,8 @@ export default function OndamSidebar({
   onNewChat,
   onSelectChat,
   onSelectMenu,
-  onOpenChatMenu,
+  onRenameChat, // (chatId, newTitle, projectId) => void
+  onDeleteChat, // (chatId, projectId) => void
   onClose,
 }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -169,27 +243,165 @@ export default function OndamSidebar({
   const [showAllProjectChats, setShowAllProjectChats] = useState(false);
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [projectName, setProjectName] = useState('');
+  const [query, setQuery] = useState('');
+
   const [projectItems, setProjectItems] = useState(() => {
     try {
-      const savedProjects = window.localStorage.getItem('ondam-projects');
+      const savedProjects = window.localStorage.getItem(PROJECT_STORAGE_KEY);
       const parsedProjects = savedProjects ? JSON.parse(savedProjects) : null;
       return Array.isArray(parsedProjects) ? parsedProjects : projects;
     } catch {
       return projects;
     }
   });
-  const [query, setQuery] = useState('');
+
+  // 최근 대화와 프로젝트 대화에 공통으로 적용되는 이름 변경 / 삭제 기록
+  const [chatChanges, setChatChanges] = useState(() => {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(CHAT_STORAGE_KEY) || 'null');
+      return {
+        renamed:
+          saved?.renamed && typeof saved.renamed === 'object' && !Array.isArray(saved.renamed)
+            ? saved.renamed
+            : {},
+        deletedIds: Array.isArray(saved?.deletedIds) ? saved.deletedIds : [],
+      };
+    } catch {
+      return EMPTY_CHAT_CHANGES;
+    }
+  });
+
+  const [openProjectMenuId, setOpenProjectMenuId] = useState(null);
+  const [projectMenuPosition, setProjectMenuPosition] = useState({ top: 0, left: 0 });
+  const [editingProjectId, setEditingProjectId] = useState(null);
+  const [editingProjectName, setEditingProjectName] = useState('');
+  const projectMenuRef = useRef(null);
+
+  const [openChatMenu, setOpenChatMenu] = useState(null); // { id, projectId }
+  const [chatMenuPosition, setChatMenuPosition] = useState({ top: 0, left: 0 });
+  const [editingChat, setEditingChat] = useState(null); // { id, projectId }
+  const [editingChatTitle, setEditingChatTitle] = useState('');
+  const chatMenuRef = useRef(null);
+
+  useEffect(() => {
+    window.localStorage.setItem(PROJECT_STORAGE_KEY, JSON.stringify(projectItems));
+  }, [projectItems]);
+
+  useEffect(() => {
+    window.localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chatChanges));
+  }, [chatChanges]);
+
+  // 프로젝트 메뉴 및 대화 메뉴 공통: 바깥 클릭 / ESC / 스크롤 시 닫기
+  useEffect(() => {
+    if (!openProjectMenuId && !openChatMenu) return undefined;
+
+    const closeOnOutsideClick = event => {
+      const isTrigger = event.target.closest?.(
+        '[data-project-menu-trigger], [data-chat-menu-trigger]'
+      );
+      if (isTrigger) return;
+
+      if (
+        !projectMenuRef.current?.contains(event.target) &&
+        !chatMenuRef.current?.contains(event.target)
+      ) {
+        setOpenProjectMenuId(null);
+        setOpenChatMenu(null);
+      }
+    };
+    const closeOnEscape = event => {
+      if (event.key === 'Escape') {
+        setOpenProjectMenuId(null);
+        setOpenChatMenu(null);
+      }
+    };
+    const closeOnScroll = () => {
+      setOpenProjectMenuId(null);
+      setOpenChatMenu(null);
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    window.addEventListener('keydown', closeOnEscape);
+    window.addEventListener('scroll', closeOnScroll, true);
+
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      window.removeEventListener('keydown', closeOnEscape);
+      window.removeEventListener('scroll', closeOnScroll, true);
+    };
+  }, [openProjectMenuId, openChatMenu]);
 
   const filteredChats = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('ko-KR');
-    if (!normalizedQuery) return chats;
-    return chats.filter(chat => chat.title.toLocaleLowerCase('ko-KR').includes(normalizedQuery));
-  }, [chats, query]);
+    return chats
+      .filter(chat => !chatChanges.deletedIds.includes(chat.id))
+      .map(chat => ({ ...chat, title: chatChanges.renamed[chat.id] ?? chat.title }))
+      .filter(chat =>
+        normalizedQuery
+          ? chat.title.toLocaleLowerCase('ko-KR').includes(normalizedQuery)
+          : true
+      );
+  }, [chats, chatChanges, query]);
 
-  const handleNewChat = () => {
+  const handleNewChat = (projectId = null) => {
     setQuery('');
     setIsSearchOpen(false);
-    onNewChat?.();
+    setOpenProjectMenuId(null);
+    setOpenChatMenu(null);
+
+    if (projectId) {
+      setIsProjectsOpen(true);
+      setExpandedProjectId(projectId);
+      setShowAllProjectChats(false);
+    }
+
+    onNewChat?.(projectId);
+  };
+
+  // ----- 프로젝트 이름 변경 / 삭제 -----
+  const openProjectMenu = (event, projectId) => {
+    event.stopPropagation();
+    setOpenChatMenu(null);
+
+    if (openProjectMenuId === projectId) {
+      setOpenProjectMenuId(null);
+      return;
+    }
+
+    setProjectMenuPosition(getMenuPosition(event));
+    setOpenProjectMenuId(projectId);
+  };
+
+  const startRenameProject = project => {
+    setEditingProjectId(project.id);
+    setEditingProjectName(project.title);
+    setOpenProjectMenuId(null);
+  };
+
+  const cancelRenameProject = () => {
+    setEditingProjectId(null);
+    setEditingProjectName('');
+  };
+
+  const saveRenameProject = () => {
+    const title = editingProjectName.trim();
+    if (!title || !editingProjectId) return;
+
+    setProjectItems(current =>
+      current.map(project =>
+        project.id === editingProjectId ? { ...project, title } : project
+      )
+    );
+    cancelRenameProject();
+  };
+
+  const deleteProject = project => {
+    setOpenProjectMenuId(null);
+    if (!window.confirm(`'${project.title}' 프로젝트를 삭제할까요?`)) return;
+
+    setProjectItems(current => current.filter(item => item.id !== project.id));
+    if (expandedProjectId === project.id) setExpandedProjectId(null);
+    if (editingProjectId === project.id) cancelRenameProject();
   };
 
   const addProject = () => {
@@ -197,11 +409,7 @@ export default function OndamSidebar({
     if (!trimmedName) return;
 
     const newProject = { id: `project-${Date.now()}`, title: trimmedName };
-    setProjectItems(currentProjects => {
-      const nextProjects = [...currentProjects, newProject];
-      window.localStorage.setItem('ondam-projects', JSON.stringify(nextProjects));
-      return nextProjects;
-    });
+    setProjectItems(current => [...current, newProject]);
     setProjectName('');
     setIsAddingProject(false);
     setIsProjectsOpen(true);
@@ -213,6 +421,85 @@ export default function OndamSidebar({
   const cancelAddProject = () => {
     setProjectName('');
     setIsAddingProject(false);
+  };
+
+  // ----- 최근 대화 / 프로젝트 대화 공통 이름 변경 / 삭제 -----
+  const openConversationMenu = (event, chat, projectId = null) => {
+    event.stopPropagation();
+    setOpenProjectMenuId(null);
+
+    const sameMenu =
+      openChatMenu?.id === chat.id && openChatMenu?.projectId === projectId;
+    if (sameMenu) {
+      setOpenChatMenu(null);
+      return;
+    }
+
+    setChatMenuPosition(getMenuPosition(event));
+    setOpenChatMenu({ id: chat.id, projectId });
+  };
+
+  const startRenameChat = (chat, projectId) => {
+    setEditingChat({ id: chat.id, projectId });
+    setEditingChatTitle(chat.title);
+    setOpenChatMenu(null);
+  };
+
+  const cancelRenameChat = () => {
+    setEditingChat(null);
+    setEditingChatTitle('');
+  };
+
+  const saveRenameChat = () => {
+    const title = editingChatTitle.trim();
+    if (!title || !editingChat) return;
+
+    const { id, projectId } = editingChat;
+    setChatChanges(current => ({
+      ...current,
+      renamed: { ...current.renamed, [id]: title },
+    }));
+    onRenameChat?.(id, title, projectId);
+    cancelRenameChat();
+  };
+
+  const deleteChat = (chat, projectId = null) => {
+    setOpenChatMenu(null);
+    if (!window.confirm(`'${chat.title}' 대화를 삭제할까요?`)) return;
+
+    setChatChanges(current => ({
+      renamed: Object.fromEntries(
+        Object.entries(current.renamed).filter(([id]) => id !== String(chat.id))
+      ),
+      deletedIds: current.deletedIds.includes(chat.id)
+        ? current.deletedIds
+        : [...current.deletedIds, chat.id],
+    }));
+
+    if (editingChat?.id === chat.id) cancelRenameChat();
+    onDeleteChat?.(chat.id, projectId);
+
+    // 현재 보고 있던 대화를 삭제했다면 새 채팅 화면으로 이동
+    if (activeChatId === chat.id) handleNewChat(projectId);
+  };
+
+  // 같은 대화가 최근 목록에도 보이는 경우 편집 상태는 해당 위치에서만 적용
+  const isEditingRow = (chatId, projectId = null) =>
+    editingChat &&
+    getChatRowKey(editingChat.id, editingChat.projectId) ===
+      getChatRowKey(chatId, projectId);
+
+  const isChatMenuOpen = (chatId, projectId = null) =>
+    openChatMenu?.id === chatId && openChatMenu?.projectId === projectId;
+
+  const activeMenuChat = openChatMenu
+    ? [...chats, ...(projectChats[openChatMenu.projectId] ?? [])].find(
+        chat => chat.id === openChatMenu.id
+      )
+    : null;
+  const menuChat = activeMenuChat && {
+    ...activeMenuChat,
+    title: chatChanges.renamed[activeMenuChat.id] ?? activeMenuChat.title,
   };
 
   return (
@@ -278,21 +565,12 @@ export default function OndamSidebar({
           icon={SquarePen}
           label="새 채팅"
           isActive={!activeChatId}
-          onClick={handleNewChat}
+          onClick={() => handleNewChat()}
         />
-        {/* <div className="mt-1 space-y-0.5">
-          {primaryItems.map(item => (
-            <MenuButton
-              key={item.id}
-              icon={item.icon}
-              label={item.label}
-              onClick={() => onSelectMenu?.(item.id)}
-            />
-          ))}
-        </div> */}
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3 [scrollbar-color:#d8d8d8_transparent] [scrollbar-width:thin]">
+        {/* 프로젝트 */}
         <section className="pt-3" aria-labelledby="ondam-projects-heading">
           <div className="group flex h-8 items-center rounded-lg px-1 hover:bg-[#ececec]">
             <button
@@ -326,11 +604,7 @@ export default function OndamSidebar({
             <div className="mt-0.5 space-y-0.5">
               {isAddingProject && (
                 <div className="flex h-9 items-center gap-1 rounded-lg bg-white px-1.5 ring-1 ring-inset ring-[#c9d8fb]">
-                  <Folder
-                    className="ml-1 h-4 w-4 shrink-0 text-[#667085]"
-                    strokeWidth={1.7}
-                    aria-hidden="true"
-                  />
+                  <Folder className="ml-1 h-4 w-4 shrink-0 text-[#667085]" strokeWidth={1.7} aria-hidden="true" />
                   <input
                     autoFocus
                     value={projectName}
@@ -350,7 +624,7 @@ export default function OndamSidebar({
                     className="grid h-6 w-6 place-items-center rounded-md text-[#3c7cf6] hover:bg-[#eef4ff] disabled:text-[#bbb]"
                     aria-label="프로젝트 저장"
                   >
-                    <Check className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
+                    <Check className="h-3.5 w-3.5" strokeWidth={2} />
                   </button>
                   <button
                     type="button"
@@ -358,66 +632,147 @@ export default function OndamSidebar({
                     className="grid h-6 w-6 place-items-center rounded-md text-[#777] hover:bg-[#eee]"
                     aria-label="프로젝트 추가 취소"
                   >
-                    <X className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden="true" />
+                    <X className="h-3.5 w-3.5" strokeWidth={1.8} />
                   </button>
                 </div>
               )}
+
               {projectItems.map(project => {
                 const isExpanded = expandedProjectId === project.id;
-                const projectChats = defaultProjectChats[project.id] ?? [];
+                const projectChatItems = (projectChats[project.id] ?? [])
+                  .filter(chat => !chatChanges.deletedIds.includes(chat.id))
+                  .map(chat => ({
+                    ...chat,
+                    title: chatChanges.renamed[chat.id] ?? chat.title,
+                  }));
                 const visibleProjectChats = showAllProjectChats
-                  ? projectChats
-                  : projectChats.slice(0, 5);
+                  ? projectChatItems
+                  : projectChatItems.slice(0, 5);
 
                 return (
                   <div key={project.id}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setExpandedProjectId(currentId =>
-                          currentId === project.id ? null : project.id
-                        );
-                        setShowAllProjectChats(false);
-                        onSelectMenu?.(`project:${project.id}`);
-                      }}
-                      className="flex h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-[13px] text-[#303030] hover:bg-[#ececec]"
-                      aria-expanded={isExpanded}
+                    <div
+                      className={`group relative flex h-9 items-center rounded-lg transition-colors ${
+                        openProjectMenuId === project.id ? 'bg-[#ececec]' : 'hover:bg-[#ececec]'
+                      }`}
                     >
-                      <Folder className="h-4 w-4 shrink-0" strokeWidth={1.7} aria-hidden="true" />
-                      <span className="min-w-0 flex-1 truncate">{project.title}</span>
-                     
-                    </button>
+                      {editingProjectId === project.id ? (
+                        <div className="flex min-w-0 flex-1 items-center gap-1 px-2">
+                          <Folder className="h-4 w-4 shrink-0 text-[#555]" strokeWidth={1.7} />
+                          <input
+                            autoFocus
+                            value={editingProjectName}
+                            onChange={event => setEditingProjectName(event.target.value)}
+                            onKeyDown={event => {
+                              if (event.key === 'Enter') saveRenameProject();
+                              if (event.key === 'Escape') cancelRenameProject();
+                            }}
+                            className="h-7 min-w-0 flex-1 rounded border border-[#bdd0f7] bg-white px-1.5 text-[13px] outline-none"
+                            aria-label="프로젝트 이름 변경"
+                          />
+                          <button
+                            type="button"
+                            onClick={saveRenameProject}
+                            disabled={!editingProjectName.trim()}
+                            className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[#3c7cf6] hover:bg-[#dde9ff] disabled:opacity-40"
+                            aria-label="프로젝트 이름 저장"
+                          >
+                            <Check className="h-4 w-4" strokeWidth={2} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={cancelRenameProject}
+                            className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[#777] hover:bg-[#ddd]"
+                            aria-label="프로젝트 이름 변경 취소"
+                          >
+                            <X className="h-4 w-4" strokeWidth={1.8} />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setExpandedProjectId(currentId =>
+                                currentId === project.id ? null : project.id
+                              );
+                              setShowAllProjectChats(false);
+                              setOpenProjectMenuId(null);
+                              setOpenChatMenu(null);
+                              onSelectMenu?.(`project:${project.id}`);
+                            }}
+                            className="flex h-full min-w-0 flex-1 items-center gap-2 rounded-lg pl-2.5 pr-1 text-left text-[13px] text-[#303030]"
+                            aria-expanded={isExpanded}
+                            title={project.title}
+                          >
+                            <Folder className="h-4 w-4 shrink-0" strokeWidth={1.7} aria-hidden="true" />
+                            <span className="min-w-0 flex-1 truncate">{project.title}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            data-project-menu-trigger
+                            onClick={event => openProjectMenu(event, project.id)}
+                            className={`grid h-7 w-7 shrink-0 place-items-center rounded-md text-[#666] transition-opacity hover:bg-[#dcdcdc] focus-visible:opacity-100 ${
+                              openProjectMenuId === project.id
+                                ? 'bg-[#e0e0e0] opacity-100'
+                                : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
+                            }`}
+                            aria-label={`${project.title} 메뉴`}
+                            aria-expanded={openProjectMenuId === project.id}
+                            title="프로젝트 메뉴"
+                          >
+                            <Ellipsis className="h-4 w-4" strokeWidth={1.8} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={event => {
+                              event.stopPropagation();
+                              handleNewChat(project.id);
+                            }}
+                            className="mr-1.5 grid h-7 w-7 shrink-0 place-items-center rounded-md text-[#666] opacity-0 transition-opacity hover:bg-[#dcdcdc] focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
+                            aria-label={`${project.title}에서 새 채팅`}
+                            title="프로젝트에서 새 채팅"
+                          >
+                            <SquarePen className="h-4 w-4" strokeWidth={1.8} />
+                          </button>
+                        </>
+                      )}
+                    </div>
 
                     {isExpanded && (
                       <div className="mb-1 ml-7 mt-0.5 space-y-0.5 border-l border-[#e5e5e5] pl-2">
                         {visibleProjectChats.map(chat => (
-                          <button
+                          <ConversationButton
                             key={chat.id}
-                            type="button"
-                            onClick={() => onSelectChat?.(chat)}
-                            className={`flex h-9 w-full items-center rounded-lg px-2.5 text-left text-[13px] transition-colors ${
-                              activeChatId === chat.id
-                                ? 'bg-[#e8e8e8] text-[#0d0d0d]'
-                                : 'text-[#303030] hover:bg-[#ececec]'
-                            }`}
-                            aria-current={activeChatId === chat.id ? 'page' : undefined}
-                            title={chat.title}
-                          >
-                            <span className="truncate">{chat.title}</span>
-                          </button>
+                            chat={chat}
+                            compact
+                            isActive={chat.id === activeChatId}
+                            isMenuOpen={isChatMenuOpen(chat.id, project.id)}
+                            isEditing={isEditingRow(chat.id, project.id)}
+                            editingTitle={editingChatTitle}
+                            onEditingTitleChange={setEditingChatTitle}
+                            onSaveRename={saveRenameChat}
+                            onCancelRename={cancelRenameChat}
+                            onSelect={onSelectChat}
+                            onOpenMenu={(event, item) =>
+                              openConversationMenu(event, item, project.id)
+                            }
+                          />
                         ))}
 
-                        {projectChats.length === 0 && (
+                        {projectChatItems.length === 0 && (
                           <p className="px-2.5 py-2 text-[12px] text-[#999]">
                             아직 채팅 내역이 없습니다.
                           </p>
                         )}
 
-                        {projectChats.length > 5 && (
+                        {projectChatItems.length > 5 && (
                           <button
                             type="button"
                             onClick={() => setShowAllProjectChats(value => !value)}
-                            className="w-full h-8 rounded-lg px-2.5 text-left text-[12px] text-[#777] hover:bg-[#ececec] hover:text-[#333]"
+                            className="h-8 w-full rounded-lg px-2.5 text-left text-[12px] text-[#777] hover:bg-[#ececec] hover:text-[#333]"
                           >
                             {showAllProjectChats ? '접기' : '더 보기'}
                           </button>
@@ -431,6 +786,7 @@ export default function OndamSidebar({
           )}
         </section>
 
+        {/* 최근 대화 */}
         <section className="pt-5" aria-labelledby="ondam-recent-heading">
           <button
             type="button"
@@ -445,6 +801,7 @@ export default function OndamSidebar({
               aria-hidden="true"
             />
           </button>
+
           {isRecentOpen && (
             <div className="space-y-0.5">
               {filteredChats.map(chat => (
@@ -452,8 +809,14 @@ export default function OndamSidebar({
                   key={chat.id}
                   chat={chat}
                   isActive={chat.id === activeChatId}
+                  isMenuOpen={isChatMenuOpen(chat.id)}
+                  isEditing={isEditingRow(chat.id)}
+                  editingTitle={editingChatTitle}
+                  onEditingTitleChange={setEditingChatTitle}
+                  onSaveRename={saveRenameChat}
+                  onCancelRename={cancelRenameChat}
                   onSelect={onSelectChat}
-                  onOpenMenu={onOpenChatMenu}
+                  onOpenMenu={openConversationMenu}
                 />
               ))}
               {filteredChats.length === 0 && (
@@ -469,6 +832,76 @@ export default function OndamSidebar({
       <div className="shrink-0 border-t border-black/5 p-2">
         <UserAccountMenu user={user} onAction={onSelectMenu} />
       </div>
+
+      {/* 프로젝트 메뉴: 스크롤 영역 밖 Portal로 표시 */}
+      {openProjectMenuId && typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            ref={projectMenuRef}
+            className="fixed z-[100] w-48 rounded-xl border border-[#e5e5e5] bg-white p-1.5 shadow-[0_8px_26px_rgba(0,0,0,0.14)]"
+            style={{ top: projectMenuPosition.top, left: projectMenuPosition.left }}
+            role="menu"
+            aria-label="프로젝트 메뉴"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                const project = projectItems.find(item => item.id === openProjectMenuId);
+                if (project) startRenameProject(project);
+              }}
+              className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] text-[#333] hover:bg-[#f3f3f3]"
+            >
+              <Pencil className="h-4 w-4" strokeWidth={1.75} />
+              이름 변경
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                const project = projectItems.find(item => item.id === openProjectMenuId);
+                if (project) deleteProject(project);
+              }}
+              className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] text-[#d93025] hover:bg-[#fff1f0]"
+            >
+              <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+              프로젝트 삭제
+            </button>
+          </div>,
+          document.body
+        )}
+
+      {/* 최근/프로젝트 대화 메뉴: 동일한 이름 변경·삭제 기능 */}
+      {openChatMenu && menuChat && typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            ref={chatMenuRef}
+            className="fixed z-[100] w-48 rounded-xl border border-[#e5e5e5] bg-white p-1.5 shadow-[0_8px_26px_rgba(0,0,0,0.14)]"
+            style={{ top: chatMenuPosition.top, left: chatMenuPosition.left }}
+            role="menu"
+            aria-label={`${menuChat.title} 메뉴`}
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => startRenameChat(menuChat, openChatMenu.projectId)}
+              className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] text-[#333] hover:bg-[#f3f3f3]"
+            >
+              <Pencil className="h-4 w-4" strokeWidth={1.75} />
+              이름 변경
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => deleteChat(menuChat, openChatMenu.projectId)}
+              className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] text-[#d93025] hover:bg-[#fff1f0]"
+            >
+              <Trash2 className="h-4 w-4" strokeWidth={1.75} />
+              대화 삭제
+            </button>
+          </div>,
+          document.body
+        )}
     </aside>
   );
 }

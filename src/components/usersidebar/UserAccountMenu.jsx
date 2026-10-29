@@ -79,7 +79,7 @@ export default function UserAccountMenu({ user = { name: 'rex307', plan: 'Plus' 
               <span className="block truncate text-[13px] font-medium leading-[18px] text-[#222]">
                 {user.name}
               </span>
-              <span className="block truncate text-[11px] leading-4 text-[#777]">{user.plan}</span>
+              <span className="block truncate text-[11px] leading-4 text-[#777]">{user.email}</span>
             </span>
             <ChevronRight className="h-4 w-4 shrink-0 text-[#777]" aria-hidden="true" />
           </button>
@@ -162,7 +162,7 @@ export default function UserAccountMenu({ user = { name: 'rex307', plan: 'Plus' 
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-medium leading-[18px]">{user.name}</span>
           <span className="block truncate text-[11px] leading-4 text-[#777]">
-            {user.email ?? user.plan}
+            {user.email}
           </span>
         </span>
       </button>
