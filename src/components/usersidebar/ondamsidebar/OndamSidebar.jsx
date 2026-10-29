@@ -280,7 +280,7 @@ export default function OndamSidebar({
           isActive={!activeChatId}
           onClick={handleNewChat}
         />
-        <div className="mt-1 space-y-0.5">
+        {/* <div className="mt-1 space-y-0.5">
           {primaryItems.map(item => (
             <MenuButton
               key={item.id}
@@ -289,7 +289,7 @@ export default function OndamSidebar({
               onClick={() => onSelectMenu?.(item.id)}
             />
           ))}
-        </div>
+        </div> */}
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3 [scrollbar-color:#d8d8d8_transparent] [scrollbar-width:thin]">
@@ -385,13 +385,7 @@ export default function OndamSidebar({
                     >
                       <Folder className="h-4 w-4 shrink-0" strokeWidth={1.7} aria-hidden="true" />
                       <span className="min-w-0 flex-1 truncate">{project.title}</span>
-                      <ChevronRight
-                        className={`h-3.5 w-3.5 shrink-0 text-[#888] transition-transform ${
-                          isExpanded ? 'rotate-90' : ''
-                        }`}
-                        strokeWidth={1.8}
-                        aria-hidden="true"
-                      />
+                     
                     </button>
 
                     {isExpanded && (
@@ -423,7 +417,7 @@ export default function OndamSidebar({
                           <button
                             type="button"
                             onClick={() => setShowAllProjectChats(value => !value)}
-                            className="h-8 rounded-lg px-2.5 text-left text-[12px] text-[#777] hover:bg-[#ececec] hover:text-[#333]"
+                            className="w-full h-8 rounded-lg px-2.5 text-left text-[12px] text-[#777] hover:bg-[#ececec] hover:text-[#333]"
                           >
                             {showAllProjectChats ? '접기' : '더 보기'}
                           </button>
