@@ -44,8 +44,13 @@ export default function IntelligenceDetailPage() {
   }
 
   const registeredAt = service.registeredAt ?? service.lastAnalyzed;
-  const sourceAnalysisId =
-    service.sourceAnalysisId ?? service.analysisId ?? `analysis-${service.id}`;
+  const sourceAnalysisId = service.sourceAnalysisId ?? service.analysisId ?? '—';
+  let protocol;
+  try {
+    protocol = new URL(service.url).protocol.replace(':', '').toUpperCase();
+  } catch {
+    protocol = '—';
+  }
   const decisionHistoryItems = policyHistory.length
     ? [...policyHistory]
         .reverse()
@@ -84,9 +89,6 @@ export default function IntelligenceDetailPage() {
                 {service.domain}
               </h1>
               <p className="mt-2 truncate text-sm text-slate-500">{service.url}</p>
-              <p className="mt-1 text-xs font-medium text-slate-400">
-                Intelligence URL 레코드 · {service.id}
-              </p>
             </div>
           </div>
           <span
@@ -97,16 +99,15 @@ export default function IntelligenceDetailPage() {
         </div>
       </header>
 
-      <div className="grid border-b border-slate-200 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid border-b border-slate-200 sm:grid-cols-3">
         {[
           ['서비스 유형', service.type],
-          ['위험도', service.risk],
           ['식별 신뢰도', service.confidence ? `${service.confidence}%` : '—'],
           ['최근 분석', service.lastAnalyzed],
         ].map(([label, value]) => (
           <div
             key={label}
-            className="border-b border-slate-100 px-1 py-5 last:border-0 sm:px-5 lg:border-r lg:border-b-0 lg:first:pl-1"
+            className="border-b border-slate-100 px-1 py-5 sm:border-r sm:border-b-0 sm:px-5 sm:last:border-r-0 sm:first:pl-1"
           >
             <p className="text-xs font-medium text-slate-400">{label}</p>
             <p className="mt-1.5 text-base font-bold text-slate-900">{value}</p>
@@ -146,10 +147,9 @@ export default function IntelligenceDetailPage() {
         <dl className="mt-5 divide-y divide-slate-200 border-y border-slate-200">
           {[
             ['요청 URL', service.url],
-            ['프로토콜', 'HTTPS'],
+            ['프로토콜', protocol],
             ['확인된 접속 IP', `${service.ips.length}개`],
             ['DNS 상태', service.ips.length ? '정상 확인' : '확인 필요'],
-            ['마지막 조회', service.lastAnalyzed],
           ].map(([label, value]) => (
             <div
               key={label}
@@ -301,7 +301,7 @@ export default function IntelligenceDetailPage() {
         {pendingAction === '삭제' ? (
           <>
             <strong className="font-semibold text-slate-900">{service.domain}</strong>과 관련된 운영
-            정보와 운영 결정 이력이 Intelligence DB에서 제거됩니다.
+            등록 정보와 운영 결정 이력이 Intelligence DB에서 제거됩니다.
           </>
         ) : (
           <div>

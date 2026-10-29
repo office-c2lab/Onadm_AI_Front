@@ -34,6 +34,14 @@ export default function UrlAnalysisDetailPage() {
         service => service.domain.toLowerCase() === analysis.domain.toLowerCase()
       )
     : null;
+  const comparisonResult = !isAi
+    ? '비교 대상 아님'
+    : analysis.db === '등록됨'
+      ? '기존 등록'
+      : analysis.db === '신규 후보'
+        ? '신규 서비스'
+        : '비교 확인 필요';
+  const databaseStatus = intelligenceService ? '등록 완료' : isAi ? '미등록' : '등록 대상 아님';
   let parsedUrl;
   try {
     parsedUrl = new URL(analysis.url);
@@ -102,17 +110,13 @@ export default function UrlAnalysisDetailPage() {
             </h3>
             <p className="mt-1 text-sm leading-6 text-slate-600">
               공개 웹페이지의 서비스 설명, 기능 문구, 메타데이터를 종합해 판정했습니다.
-              {analysis.confidence ? ` 식별 신뢰도는 ${analysis.confidence}%입니다.` : ''}
             </p>
           </div>
         </div>
 
         <dl className="mt-7 grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            ['분석 상태', analysis.analysisStatus],
-            ['AI 서비스 여부', analysis.ai],
             ['서비스 유형', analysis.kind],
-            ['DB 등록 상태', analysis.db],
             ['식별 신뢰도', analysis.confidence ? `${analysis.confidence}%` : '—'],
             ['검사 시작 일시', analysis.time],
           ].map(([label, value]) => (
@@ -143,11 +147,10 @@ export default function UrlAnalysisDetailPage() {
       </section>
 
       <section className="border-t border-slate-200 py-9 sm:py-10">
-        <h2 className="text-lg font-bold tracking-tight text-slate-900">URL 및 네트워크 정보</h2>
+        <h2 className="text-lg font-bold tracking-tight text-slate-900">URL 및 IP 정보</h2>
         <dl className="mt-5 divide-y divide-slate-200 border-y border-slate-200">
           {[
             ['요청 URL', analysis.url],
-            ['도메인', analysis.domain],
             ['프로토콜', parsedUrl?.protocol.replace(':', '').toUpperCase() ?? '—'],
             ['확인된 접속 IP', `${ips.length}개`],
           ].map(([label, value]) => (
@@ -163,17 +166,21 @@ export default function UrlAnalysisDetailPage() {
         <div className="mt-7 rounded-xl bg-slate-50 px-5 py-4">
           <h3 className="text-sm font-semibold text-slate-900">접속 IP 목록</h3>
           <div className="mt-3 grid gap-2">
-            {ips.map(ip => (
-              <div
-                key={ip}
-                className="flex items-center justify-between gap-4 rounded-lg bg-white px-3 py-2"
-              >
-                <code className="min-w-0 truncate text-xs text-slate-700">{ip}</code>
-                <span className="shrink-0 text-xs font-medium text-slate-400">
-                  {ip.includes(':') ? 'IPv6' : 'IPv4'}
-                </span>
-              </div>
-            ))}
+            {ips.length ? (
+              ips.map(ip => (
+                <div
+                  key={ip}
+                  className="flex items-center justify-between gap-4 rounded-lg bg-white px-3 py-2"
+                >
+                  <code className="min-w-0 truncate text-xs text-slate-700">{ip}</code>
+                  <span className="shrink-0 text-xs font-medium text-slate-400">
+                    {ip.includes(':') ? 'IPv6' : 'IPv4'}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-slate-500">확인된 접속 IP가 없습니다.</p>
+            )}
           </div>
         </div>
       </section>
@@ -182,22 +189,31 @@ export default function UrlAnalysisDetailPage() {
         <h2 className="mb-5 text-lg font-bold tracking-tight text-slate-900">
           Intelligence DB 비교
         </h2>
-        <div className="grid gap-4 border-y border-slate-200 py-5 sm:grid-cols-[1fr_auto] sm:items-center">
+        <div className="grid gap-5 border-y border-slate-200 py-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
           <div>
             <p className="text-sm font-semibold text-slate-900">
               {analysis.db === '등록됨'
                 ? '기존 등록 서비스와 일치합니다.'
                 : analysis.db === '신규 후보'
                   ? '기존 DB에서 일치하는 서비스를 찾지 못했습니다.'
-                  : 'DB 등록 여부를 추가로 검토해야 합니다.'}
+                  : isAi
+                    ? 'DB 등록 여부를 추가로 검토해야 합니다.'
+                    : 'AI 서비스가 아니므로 Intelligence DB 등록 대상이 아닙니다.'}
             </p>
             <p className="mt-1 text-sm leading-6 text-slate-500">
               도메인과 공개 서비스 정보를 기준으로 Intelligence DB의 기존 항목과 비교했습니다.
             </p>
           </div>
-          <span className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">
-            {analysis.db}
-          </span>
+          <dl className="grid min-w-52 grid-cols-2 gap-5 sm:grid-cols-1">
+            <div>
+              <dt className="text-xs text-slate-400">DB 비교 결과</dt>
+              <dd className="mt-1 text-sm font-semibold text-slate-900">{comparisonResult}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-400">DB 반영 상태</dt>
+              <dd className="mt-1 text-sm font-semibold text-slate-900">{databaseStatus}</dd>
+            </div>
+          </dl>
         </div>
       </section>
 
