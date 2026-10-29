@@ -40,6 +40,7 @@ export function StatusText({ children }) {
     '시행 중': 'text-blue-600',
     '심사 중': 'text-blue-600',
     '검토 중': 'text-blue-600',
+    '관리자 검토': 'text-blue-600',
     '진행 중': 'text-blue-600',
     대기: 'text-amber-600',
     '대기 중': 'text-amber-600',

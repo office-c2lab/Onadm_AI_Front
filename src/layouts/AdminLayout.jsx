@@ -17,6 +17,7 @@ export default function AdminLayout() {
   const usesOwnPageLayout =
     isExternalControl ||
     isInternalTabbedPage ||
+    location.pathname === '/admin/dashboard' ||
     location.pathname.startsWith('/admin/system') ||
     location.pathname === '/admin/control/internal/classification' ||
     location.pathname === '/admin/users';

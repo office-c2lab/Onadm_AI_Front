@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import '../../control/external/garim.css';
 import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
 import { AdminInlineDetailSection as DetailSection } from '../../../../layouts/admin/AdminDetailLayout.jsx';
@@ -426,9 +427,11 @@ function DeleteUserModal({ user, isDeleting = false, errorMessage = '', onClose,
 }
 
 export default function UserPage() {
+  const [searchParams] = useSearchParams();
+  const userFilter = searchParams.get('user') ?? '';
   const [selectedId, setSelectedId] = useState(null);
-  const [searchInput, setSearchInput] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState(userFilter);
+  const [searchQuery, setSearchQuery] = useState(userFilter);
   const [department, setDepartment] = useState(DEFAULT_DEPARTMENT_OPTION);
   const [position, setPosition] = useState(DEFAULT_POSITION_OPTION);
   const [statusFilter, setStatusFilter] = useState(DEFAULT_STATUS_OPTION);

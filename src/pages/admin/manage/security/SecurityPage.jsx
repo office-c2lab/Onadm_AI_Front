@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ChevronDown, ClipboardList, Download, RefreshCw } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import zipFileImage from '../../../../assets/images/zipfile.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import { appRecords, reviewRequests } from '../data.js';
@@ -44,8 +45,10 @@ function ReviewStatus({ status }) {
 }
 
 export default function SecurityPage() {
+  const [searchParams] = useSearchParams();
+  const requestFilter = searchParams.get('request') ?? '';
   const [activeTab, setActiveTab] = useState('전체');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(requestFilter);
   const [openRequestId, setOpenRequestId] = useState(null);
   const [requests] = useState(() => reviewRequests.map(applyReviewDecision));
   const keyword = search.trim().toLowerCase();
