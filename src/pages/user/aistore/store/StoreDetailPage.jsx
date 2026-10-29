@@ -4,7 +4,6 @@ import { UserDetailSection } from '../../../../layouts/user/UserDetailLayout.jsx
 import {
   ArrowLeft,
   ArrowRight,
-  Bookmark,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -17,7 +16,7 @@ import {
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import { StoreToolPreviewScreen, storePreviewTabs } from '../components/StoreToolPreviewScreen.jsx';
 import AiStoreActionButton from '../components/AiStoreActionButton.jsx';
-import { getAvailablePublishedTools, useDownloads, useFavorites } from '../data/manageStore.js';
+import { getAvailablePublishedTools, useDownloads } from '../data/manageStore.js';
 import {
   detailContent,
   getToolDownloadSize,
@@ -28,7 +27,6 @@ import { getLatestVersionNotes } from '../data/versionNotes.js';
 export default function StoreDetailPage() {
   const { toolId } = useParams();
   const [activePreview, setActivePreview] = useState(0);
-  const { favorites, toggleFavorite } = useFavorites();
   const { downloads, addDownload } = useDownloads();
   const tool = getAvailablePublishedTools().find(item => item.id === toolId);
 
@@ -46,7 +44,6 @@ export default function StoreDetailPage() {
     );
   }
 
-  const isFavorite = favorites.includes(tool.id);
   const isAdded = downloads.includes(tool.id);
   const content = detailContent[tool.id] ?? {
     description: [tool.description || tool.summary],
@@ -105,15 +102,6 @@ export default function StoreDetailPage() {
             </div>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
-            <button
-              type="button"
-              onClick={() => toggleFavorite(tool.id)}
-              aria-label={`${tool.name} 즐겨찾기 ${isFavorite ? '해제' : '추가'}`}
-              aria-pressed={isFavorite}
-              className={`grid h-11 w-11 place-items-center rounded-lg bg-white shadow-sm transition-colors hover:bg-slate-50 ${isFavorite ? 'text-blue-600' : 'text-slate-500'}`}
-            >
-              <Bookmark size={18} fill={isFavorite ? 'currentColor' : 'none'} />
-            </button>
             <AiStoreActionButton
               onClick={() => addDownload(tool.id)}
               disabled={isAdded}
