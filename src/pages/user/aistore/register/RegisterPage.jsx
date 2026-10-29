@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronDown, ClipboardList, Plus, RefreshCw } from 'lucide-react';
+import { ChevronDown, ClipboardList, LoaderCircle, Plus, RefreshCw } from 'lucide-react';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import zipFileImage from '../../../../assets/images/zipfile.png';
 import {
@@ -136,8 +136,11 @@ function ReviewStatus({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center text-[clamp(0.86rem,1vw,0.94rem)] font-semibold whitespace-nowrap ${color}`}
+      className={`inline-flex items-center gap-1.5 text-[clamp(0.86rem,1vw,0.94rem)] font-semibold whitespace-nowrap ${color}`}
     >
+      {status === '심사 진행중' && (
+        <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
+      )}
       {status}
     </span>
   );

@@ -34,6 +34,7 @@ import DashboardPage from '../pages/admin/dashboard/DashboardPage.jsx';
 // 관리자 - Discover
 // ================================
 import UrlAnalysisPage from '../pages/admin/discover/url-analysis/UrlAnalysisPage.jsx';
+import NewUrlAnalysisPage from '../pages/admin/discover/url-analysis/NewUrlAnalysisPage.jsx';
 import IntelligencePage from '../pages/admin/discover/intelligence/IntelligencePage.jsx';
 
 // ================================
@@ -173,6 +174,9 @@ export default function AppRouter() {
             <Route index element={<Navigate to="search" replace />} />
             <Route path="url-analysis" element={<UrlAnalysisPage />} />
             <Route path="intelligence" element={<IntelligencePage />} />
+            <Route element={<AdminDetailLayout />}>
+              <Route path="url-analysis/new" element={<NewUrlAnalysisPage />} />
+            </Route>
           </Route>
 
           {/* Control */}

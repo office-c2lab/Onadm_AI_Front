@@ -22,7 +22,7 @@ export default function AdminLayout() {
     location.pathname === '/admin/control/internal/classification' ||
     location.pathname === '/admin/users';
   const isTopFlushPage =
-    location.pathname === '/admin/discover/intelligence' ||
+    location.pathname.startsWith('/admin/discover') ||
     location.pathname.startsWith('/admin/manage');
   const isSidebarOpen = useSidebarStore(state => state.adminOpen);
   const setSidebarOpen = useSidebarStore(state => state.setAdminOpen);

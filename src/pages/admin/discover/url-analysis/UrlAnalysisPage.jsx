@@ -1,27 +1,34 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AlertCircle,
-  ArrowUpRight,
   Check,
   CheckCircle2,
   ChevronDown,
+  ChevronRight,
   Clock3,
-  Download,
   FileSearch,
   Globe2,
-  Link2,
   LoaderCircle,
-  PanelLeft,
-  RotateCcw,
-  Search,
-  Sparkles,
+  Plus,
   X,
 } from 'lucide-react';
-import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
-import urlImage from '../../../../assets/images/url.png';
+import SearchHeader from '../../../../components/search/SearchHeader.jsx';
+import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
 
 const sampleHistory = [
+  {
+    id: 8,
+    domain: 'copilotstudio.ai',
+    ai: '판단 불가',
+    kind: '—',
+    db: '—',
+    time: '10.29 10:42',
+    confidence: null,
+    analysisStatus: '진행 중',
+    progress: 1,
+  },
   {
     id: 1,
     domain: 'writerflow.ai',
@@ -30,6 +37,7 @@ const sampleHistory = [
     db: '신규 후보',
     time: '10.20 11:21',
     confidence: 92,
+    analysisStatus: '분석 완료',
   },
   {
     id: 2,
@@ -39,6 +47,7 @@ const sampleHistory = [
     db: '등록됨',
     time: '10.20 10:48',
     confidence: 99,
+    analysisStatus: '분석 완료',
   },
   {
     id: 3,
@@ -48,6 +57,8 @@ const sampleHistory = [
     db: '검토 필요',
     time: '10.20 10:35',
     confidence: null,
+    analysisStatus: '검토 필요',
+    progress: 1,
   },
   {
     id: 4,
@@ -57,6 +68,7 @@ const sampleHistory = [
     db: '등록됨',
     time: '10.20 09:43',
     confidence: 98,
+    analysisStatus: '분석 완료',
   },
   {
     id: 5,
@@ -66,6 +78,8 @@ const sampleHistory = [
     db: '—',
     time: '10.19 17:12',
     confidence: 96,
+    analysisStatus: '대기',
+    progress: 0,
   },
   {
     id: 6,
@@ -75,6 +89,7 @@ const sampleHistory = [
     db: '등록됨',
     time: '10.19 16:03',
     confidence: 99,
+    analysisStatus: '분석 완료',
   },
   {
     id: 7,
@@ -84,36 +99,30 @@ const sampleHistory = [
     db: '등록됨',
     time: '10.19 14:37',
     confidence: 97,
+    analysisStatus: '분석 완료',
   },
 ];
 
-const aiFilterOptions = [
-  { value: 'all', label: 'AI 서비스 여부' },
-  { value: 'AI 서비스', label: 'AI 서비스' },
-  { value: '비AI 서비스', label: '비AI 서비스' },
-  { value: '판단 불가', label: '판단 불가' },
-];
-
-const dbFilterOptions = [
-  { value: 'all', label: '분석 상태' },
-  { value: '등록됨', label: '등록됨' },
-  { value: '신규 후보', label: '신규 후보' },
-  { value: '검토 필요', label: '검토 필요' },
-  { value: '—', label: '미등록' },
-];
+const analysisTabs = ['전체', '대기', '진행 중', '분석 완료', '검토 필요'];
 
 const analysisSteps = [
   {
     label: '웹사이트 정보 수집',
     description: 'URL에 접속해 공개 페이지와 메타데이터를 확인합니다.',
+    checks: ['URL 연결 상태 확인', '공개 페이지 수집', '메타데이터 추출'],
+    duration: '8s',
   },
   {
     label: 'AI 서비스 식별',
     description: '서비스 설명과 주요 기능을 기반으로 AI 서비스 여부를 판별합니다.',
+    checks: ['서비스 설명 분석', 'AI 기능 키워드 확인', '서비스 유형 분류'],
+    duration: '14s',
   },
   {
     label: 'Intelligence DB 확인',
     description: '기존 등록 정보와 비교해 신규 후보 또는 등록 상태를 확인합니다.',
+    checks: ['도메인 중복 조회', '기존 등록 정보 대조', '분석 결과 저장'],
+    duration: '5s',
   },
 ];
 
@@ -132,88 +141,206 @@ function Badge({ value }) {
   );
 }
 
+function getAnalysisStatus(item) {
+  if (item.analysisStatus) return item.analysisStatus;
+  if (item.progress === 0) return '대기';
+  if (item.progress > 0 && item.progress < analysisSteps.length) return '진행 중';
+  return item.db === '검토 필요' ? '검토 필요' : '분석 완료';
+}
+
+function AnalysisStatus({ item }) {
+  const status = getAnalysisStatus(item);
+  const color =
+    status === '대기'
+      ? 'text-slate-500'
+      : status === '진행 중'
+        ? 'text-blue-600'
+        : status === '검토 필요'
+          ? 'text-amber-600'
+          : 'text-emerald-600';
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 text-[clamp(0.86rem,1vw,0.94rem)] font-semibold whitespace-nowrap ${color}`}
+    >
+      {status === '진행 중' && <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />}
+      {status}
+    </span>
+  );
+}
+
 function AnalysisDetails({ item, onShowResult }) {
   const completedSteps = item.progress ?? analysisSteps.length;
-  const isRunning = completedSteps < analysisSteps.length;
+  const status = getAnalysisStatus(item);
+  const isRunning = status === '진행 중';
+  const isWaiting = status === '대기';
+  const needsReview = status === '검토 필요';
+  const activeStep = isRunning || needsReview ? completedSteps : -1;
+  const [selectedOpenStep, setSelectedOpenStep] = useState(null);
+  const [hasSelectedStep, setHasSelectedStep] = useState(false);
+  const openStep = hasSelectedStep ? selectedOpenStep : activeStep >= 0 ? activeStep : null;
+
+  const getStepState = index => {
+    if (index < completedSteps) return 'complete';
+    if (index === completedSteps && isRunning) return 'running';
+    if (index === completedSteps && needsReview) return 'failed';
+    return 'pending';
+  };
+
+  const stepVisuals = {
+    complete: { Icon: CheckCircle2, color: 'text-emerald-600', label: '완료' },
+    running: { Icon: LoaderCircle, color: 'text-blue-600', label: '진행 중' },
+    failed: { Icon: AlertCircle, color: 'text-amber-600', label: '확인 필요' },
+    pending: { Icon: null, color: 'text-slate-300', label: '대기' },
+  };
 
   return (
     <div
       id={`analysis-detail-${item.id}`}
       role="region"
       aria-label={`${item.domain} 분석 진행 내역`}
-      className="border-t border-slate-100 bg-white"
+      className="border-t border-slate-200 bg-transparent"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
+      <div className="flex flex-wrap items-end justify-between gap-2 px-4 py-4 sm:px-6">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-slate-900">분석 진행 내역</h3>
-            <span
-              className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${isRunning ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'}`}
-            >
-              {isRunning ? '분석 중' : '모든 작업 완료'}
-            </span>
-          </div>
-          <p className="mt-1 text-xs text-slate-500">
+          <h3 className="text-base font-semibold text-slate-950">분석 진행 내역</h3>
+          <p className="mt-1 text-sm text-slate-600">
             {item.domain} · {item.time}
           </p>
         </div>
-        <span className="text-xs font-medium text-blue-600">
-          {completedSteps}/{analysisSteps.length}단계 완료
-        </span>
-      </div>
-      <div
-        role="progressbar"
-        aria-label={`${item.domain} 분석 완료 단계`}
-        aria-valuemin={0}
-        aria-valuemax={analysisSteps.length}
-        aria-valuenow={completedSteps}
-        className="h-1 bg-slate-100"
-      >
-        <div
-          className="h-full bg-blue-600 transition-[width] duration-500"
-          style={{ width: `${(completedSteps / analysisSteps.length) * 100}%` }}
-        />
+        <div className="grid shrink-0 grid-cols-[5rem_6.5rem] items-center gap-3 text-sm">
+          <span className="text-right text-slate-500">
+            {status === '분석 완료' ? '소요 27s' : isWaiting ? '경과 0s' : '경과 12s'}
+          </span>
+          <span className="text-right font-semibold whitespace-nowrap text-blue-600">
+            {completedSteps}/{analysisSteps.length}단계 완료
+          </span>
+        </div>
       </div>
       <ol className="divide-y divide-slate-100">
         {analysisSteps.map((step, index) => {
-          const complete = index < completedSteps;
-          const running = index === completedSteps && isRunning;
+          const stepState = getStepState(index);
+          const { Icon, color, label } = stepVisuals[stepState];
+          const isOpen = openStep === index;
+          const stepDuration =
+            stepState === 'complete'
+              ? step.duration
+              : stepState === 'running'
+                ? '진행 중'
+                : stepState === 'failed'
+                  ? '중단'
+                  : '—';
 
           return (
-            <li key={step.label} className="flex min-h-[72px] items-start gap-3 px-4 py-4 sm:px-6">
-              {complete ? (
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-              ) : running ? (
-                <LoaderCircle className="mt-0.5 h-5 w-5 shrink-0 animate-spin text-blue-600" />
-              ) : (
-                <span className="mt-0.5 h-5 w-5 shrink-0 rounded-full border-2 border-slate-200" />
-              )}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-3">
-                  <h4 className="text-sm font-medium text-slate-900">{step.label}</h4>
+            <li key={step.label}>
+              <button
+                type="button"
+                onClick={() => {
+                  setHasSelectedStep(true);
+                  setSelectedOpenStep(current => (current === index ? null : index));
+                }}
+                aria-expanded={isOpen}
+                className="flex min-h-14 w-full items-center gap-2.5 px-4 text-left transition-colors hover:bg-blue-50/40 sm:px-6"
+              >
+                {isOpen ? (
+                  <ChevronDown size={16} className="shrink-0 text-slate-400" aria-hidden="true" />
+                ) : (
+                  <ChevronRight size={16} className="shrink-0 text-slate-400" aria-hidden="true" />
+                )}
+                {Icon ? (
+                  <Icon
+                    size={18}
+                    strokeWidth={2.1}
+                    className={`shrink-0 ${color} ${stepState === 'running' ? 'animate-spin' : ''}`}
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <span className="h-[18px] w-[18px] shrink-0 rounded-full border-2 border-slate-200" />
+                )}
+                <span className="min-w-0 flex-1 truncate text-[15px] font-semibold text-slate-900">
+                  {step.label}
+                </span>
+                <span className="grid shrink-0 grid-cols-[3.5rem] items-center gap-3 sm:grid-cols-[5rem_6.5rem]">
+                  <span className="text-right text-sm text-slate-500">{stepDuration}</span>
                   <span
-                    className={`shrink-0 text-xs ${complete ? 'text-emerald-600' : running ? 'text-blue-600' : 'text-slate-400'}`}
+                    className={`hidden text-right text-sm font-medium whitespace-nowrap sm:inline ${color}`}
                   >
-                    {complete ? '완료' : running ? '진행 중' : '대기'}
+                    {label}
                   </span>
+                </span>
+              </button>
+              {isOpen && (
+                <div className="border-t border-slate-100 bg-slate-50/80 px-4 py-3 font-mono text-xs leading-6 text-slate-700 sm:px-14 sm:text-[13px]">
+                  <p className="mb-2 font-sans text-sm text-slate-600">{step.description}</p>
+                  {step.checks.map((check, checkIndex) => {
+                    const checkState =
+                      stepState === 'complete' ||
+                      (['running', 'failed'].includes(stepState) && checkIndex === 0)
+                        ? 'complete'
+                        : stepState === 'running' && checkIndex === 1
+                          ? 'running'
+                          : stepState === 'failed' && checkIndex === 1
+                            ? 'failed'
+                            : 'pending';
+                    return (
+                      <p key={check} className="flex gap-3">
+                        <span className="shrink-0 select-none text-slate-400">
+                          00:00:{String(checkIndex * 3 + 1).padStart(2, '0')}
+                        </span>
+                        <span
+                          className={
+                            checkState === 'complete'
+                              ? 'text-emerald-600'
+                              : checkState === 'running'
+                                ? 'text-blue-600'
+                                : checkState === 'failed'
+                                  ? 'text-amber-600'
+                                  : 'text-slate-400'
+                          }
+                        >
+                          {checkState === 'complete'
+                            ? '✓'
+                            : checkState === 'running'
+                              ? '●'
+                              : checkState === 'failed'
+                                ? '!'
+                                : '○'}{' '}
+                          {check} —{' '}
+                          {checkState === 'complete'
+                            ? '확인 완료'
+                            : checkState === 'running'
+                              ? '확인 중'
+                              : checkState === 'failed'
+                                ? '확인 실패'
+                                : '대기'}
+                        </span>
+                      </p>
+                    );
+                  })}
                 </div>
-                <p className="mt-1 text-xs leading-5 text-slate-500">{step.description}</p>
-              </div>
+              )}
             </li>
           );
         })}
       </ol>
-      {!isRunning && (
-        <div className="flex justify-end border-t border-slate-100 bg-slate-50/50 px-4 py-4 sm:px-6">
-          <button
-            type="button"
-            onClick={onShowResult}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            분석 결과 확인 <ArrowUpRight className="h-4 w-4" />
-          </button>
-        </div>
-      )}
+      <div
+        className={`flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-sm leading-6 sm:px-6 ${needsReview ? 'border-amber-100 bg-amber-50/70 text-amber-700' : status === '분석 완료' ? 'border-emerald-100 bg-emerald-50/60 text-emerald-700' : isWaiting ? 'border-slate-100 bg-slate-50/60 text-slate-600' : 'border-blue-100 bg-blue-50/60 text-blue-700'}`}
+      >
+        <p className="min-w-0 flex-1">
+          {needsReview
+            ? '웹사이트 정보를 충분히 수집하지 못해 검사가 중단되었습니다. 접근 상태와 공개 정보를 확인한 후 다시 검사해 주세요.'
+            : status === '분석 완료'
+              ? '모든 검사가 완료되었습니다. 분석 결과에서 AI 서비스 식별 내용을 확인해 주세요.'
+              : isWaiting
+                ? '분석 요청이 접수되었습니다. 잠시 후 웹사이트 검사를 시작합니다.'
+                : '웹사이트 공개 정보와 Intelligence DB를 순서대로 검사하고 있습니다.'}
+        </p>
+        {status === '분석 완료' && (
+          <AiStoreActionButton size="small" variant="success" onClick={onShowResult}>
+            분석 결과 확인
+          </AiStoreActionButton>
+        )}
+      </div>
     </div>
   );
 }
@@ -397,52 +524,63 @@ function DetailModal({ item, onClose }) {
   );
 }
 
-function exportCsv(rows) {
-  const lines = [
-    ['URL / 도메인', 'AI 서비스 여부', '서비스 유형', 'DB 등록', '분석 일시'],
-    ...rows.map(row => [row.domain, row.ai, row.kind, row.db, row.time]),
-  ];
-  const csv = lines
-    .map(columns => columns.map(value => `"${String(value).replaceAll('"', '""')}"`).join(','))
-    .join('\n');
-  const href = URL.createObjectURL(new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' }));
-  const link = document.createElement('a');
-  link.href = href;
-  link.download = 'url-analysis-results.csv';
-  link.click();
-  URL.revokeObjectURL(href);
-}
-
 export default function UrlAnalysisPage() {
-  const [history, setHistory] = useState(sampleHistory);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const submittedAnalysis = location.state?.submittedAnalysis;
+  const [history, setHistory] = useState(() =>
+    submittedAnalysis
+      ? [
+          submittedAnalysis,
+          ...sampleHistory.filter(item => item.domain !== submittedAnalysis.domain),
+        ]
+      : sampleHistory
+  );
   const [selectedId, setSelectedId] = useState(null);
-  const [urlInput, setUrlInput] = useState('');
-  const [openHistoryId, setOpenHistoryId] = useState(null);
+  const [openHistoryId, setOpenHistoryId] = useState(submittedAnalysis?.id ?? null);
   const [searchInput, setSearchInput] = useState('');
-  const [aiFilter, setAiFilter] = useState('all');
-  const [dbFilter, setDbFilter] = useState('all');
-  const [error, setError] = useState('');
-  const historyRef = useRef(null);
+  const [activeTab, setActiveTab] = useState('전체');
   const selected = history.find(item => item.id === selectedId);
   const hasRunningAnalysis = history.some(
-    item => item.progress !== undefined && item.progress < analysisSteps.length
+    item => item.autoProgress && ['대기', '진행 중'].includes(getAnalysisStatus(item))
   );
+
+  useEffect(() => {
+    if (!location.state) return;
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate]);
 
   useEffect(() => {
     if (!hasRunningAnalysis) return undefined;
 
     const timer = window.setInterval(() => {
       setHistory(items =>
-        items.map(item =>
-          item.progress !== undefined && item.progress < analysisSteps.length
-            ? { ...item, progress: item.progress + 1 }
-            : item
-        )
+        items.map(item => {
+          if (!item.autoProgress) return item;
+          const status = getAnalysisStatus(item);
+          if (status === '대기') return { ...item, analysisStatus: '진행 중', progress: 0 };
+          if (status !== '진행 중') return item;
+
+          const nextProgress = Math.min((item.progress ?? 0) + 1, analysisSteps.length);
+          return {
+            ...item,
+            progress: nextProgress,
+            analysisStatus: nextProgress === analysisSteps.length ? '분석 완료' : '진행 중',
+          };
+        })
       );
     }, 900);
 
     return () => window.clearInterval(timer);
   }, [hasRunningAnalysis]);
+  const tabCounts = Object.fromEntries(
+    analysisTabs.map(tab => [
+      tab,
+      tab === '전체'
+        ? history.length
+        : history.filter(item => getAnalysisStatus(item) === tab).length,
+    ])
+  );
   const visible = useMemo(
     () =>
       history.filter(
@@ -450,133 +588,57 @@ export default function UrlAnalysisPage() {
           `${item.domain} ${item.ai} ${item.kind} ${item.db} ${item.time}`
             .toLowerCase()
             .includes(searchInput.trim().toLowerCase()) &&
-          (aiFilter === 'all' || item.ai === aiFilter) &&
-          (dbFilter === 'all' || item.db === dbFilter)
+          (activeTab === '전체' || getAnalysisStatus(item) === activeTab)
       ),
-    [history, searchInput, aiFilter, dbFilter]
+    [history, searchInput, activeTab]
   );
 
-  const analyze = event => {
-    event.preventDefault();
-    let parsed;
-    try {
-      parsed = new URL(urlInput.trim());
-      if (!['http:', 'https:'].includes(parsed.protocol) || !parsed.hostname.includes('.'))
-        throw new Error('invalid URL');
-    } catch {
-      setError('http:// 또는 https://로 시작하는 올바른 URL을 입력해 주세요.');
-      return;
-    }
-    const domain = parsed.hostname.replace(/^www\./, '');
-    const now = new Date();
-    const time = `${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const existing = history.find(item => item.domain === domain);
-    if (existing) {
-      setHistory(items => [
-        { ...existing, time, progress: 0 },
-        ...items.filter(item => item.id !== existing.id),
-      ]);
-      setOpenHistoryId(existing.id);
-    } else {
-      const next = {
-        id: Date.now(),
-        domain,
-        ai: '판단 불가',
-        kind: '—',
-        db: '검토 필요',
-        time,
-        confidence: null,
-        progress: 0,
-      };
-      setHistory(items => [next, ...items]);
-      setOpenHistoryId(next.id);
-    }
-    setSelectedId(null);
-    setUrlInput('');
-    setSearchInput('');
-    setAiFilter('all');
-    setDbFilter('all');
-    setError('');
-    window.requestAnimationFrame(() =>
-      historyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    );
-  };
-
   return (
-    <div className="w-full space-y-6 text-slate-900">
-      <div className="sticky top-0 z-30 -mx-5 -mt-[clamp(1.1rem,2vw,1.8rem)] bg-white/95 px-5 py-3 backdrop-blur md:-mx-8 md:px-8">
-        <label className="mx-auto flex h-11 w-full max-w-xl items-center gap-3 rounded-lg bg-[#edf2f7] px-4 text-slate-500 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20">
-          <Search size={19} strokeWidth={2} aria-hidden="true" />
-          <input
-            type="search"
-            value={searchInput}
-            onChange={event => setSearchInput(event.target.value)}
-            placeholder="URL 분석 이력 검색"
-            aria-label="URL 분석 이력 검색"
-            className="h-full min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-600"
-          />
-        </label>
-      </div>
-      <section aria-labelledby="url-analysis-title">
-        <div className="flex min-h-[330px] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-10 text-center">
-          <img src={urlImage} alt="" className="h-40 w-40 object-contain" aria-hidden="true" />
-          <h2 className="mt-6 text-lg font-semibold text-slate-900">
-            새로운 웹사이트를 분석해 보세요.
-          </h2>
-          <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-            URL을 입력하면 AI 서비스 여부와 유형을 확인하고
-            <br className="hidden sm:block" /> 분석 이력에서 결과를 다시 살펴볼 수 있습니다.
-          </p>
-          <form onSubmit={analyze} className="mt-6 w-full max-w-xl">
-            <label htmlFor="analysis-url" className="sr-only">
-              분석할 URL
-            </label>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <div className="flex h-12 min-w-0 flex-1 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-left transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
-                <Link2 className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
-                <input
-                  id="analysis-url"
-                  type="text"
-                  inputMode="url"
-                  value={urlInput}
-                  onChange={event => {
-                    setUrlInput(event.target.value);
-                    setError('');
-                  }}
-                  placeholder="https://example.com"
-                  className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
-                />
-              </div>
-              <button
-                type="submit"
-                className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700"
-              >
-                <FileSearch size={17} aria-hidden="true" /> URL 분석 시작
-              </button>
-            </div>
-            {error ? (
-              <p role="alert" className="mt-2 text-center text-xs text-red-600">
-                {error}
-              </p>
-            ) : (
-              <p className="mt-2 text-center text-xs text-slate-500">
-                http:// 또는 https://로 시작하는 주소를 입력해 주세요.
-              </p>
-            )}
-          </form>
-        </div>
-      </section>
+    <div className="w-full text-slate-900">
+      <SearchHeader
+        value={searchInput}
+        onSearchChange={setSearchInput}
+        placeholder="URL, 서비스 유형 또는 분석 상태 검색"
+        ariaLabel="URL 분석 목록 검색"
+      />
 
-      <section ref={historyRef} className="min-w-0 scroll-mt-6" aria-label="URL 분석 이력">
+      <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <nav className="flex flex-wrap items-center gap-1" aria-label="URL 분석 상태">
+          {analysisTabs.map(tab => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => {
+                setActiveTab(tab);
+                setOpenHistoryId(null);
+              }}
+              aria-pressed={activeTab === tab}
+              className={`inline-flex h-8 items-center rounded-full px-4 text-sm transition-colors ${activeTab === tab ? 'bg-[#ededed] font-medium text-[#333]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+            >
+              {tab}
+              <span className="ml-1.5 text-xs tabular-nums text-slate-400">{tabCounts[tab]}</span>
+            </button>
+          ))}
+        </nav>
+        <AiStoreActionButton
+          onClick={() => navigate('/admin/discover/url-analysis/new')}
+          icon={Plus}
+          className="self-start sm:self-auto"
+        >
+          새 URL 분석
+        </AiStoreActionButton>
+      </div>
+
+      <section className="mt-5 min-w-0" aria-label="URL 분석 이력">
         <div className="grid gap-2">
           {visible.map(item => {
             const isOpen = openHistoryId === item.id;
-            const isRunning = item.progress !== undefined && item.progress < analysisSteps.length;
+            const status = getAnalysisStatus(item);
 
             return (
               <article
                 key={item.id}
-                className={`group min-w-0 overflow-hidden rounded-xl border transition hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm ${isOpen ? 'border-slate-100 bg-[#f5f5f5] shadow-sm' : 'border-transparent'}`}
+                className={`group relative min-w-0 overflow-hidden rounded-xl border transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20 ${isOpen ? 'border-slate-200 bg-[#f5f5f5] shadow-sm' : 'border-transparent'}`}
               >
                 <button
                   type="button"
@@ -585,33 +647,40 @@ export default function UrlAnalysisPage() {
                   }
                   aria-expanded={isOpen}
                   aria-controls={`analysis-detail-${item.id}`}
-                  className="flex min-h-[82px] w-full items-center gap-4 rounded-xl px-3 py-3 text-left"
+                  className="flex min-h-[82px] w-full cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left"
                 >
-                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
-                    <Globe2 size={24} strokeWidth={1.8} aria-hidden="true" />
+                  <span className="flex min-w-0 flex-1 items-center gap-4">
+                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
+                      <Globe2 size={24} strokeWidth={1.8} aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span
+                        className="block truncate text-base font-semibold text-slate-900"
+                        title={item.domain}
+                      >
+                        {item.domain}
+                      </span>
+                      <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
+                        <span className="truncate">
+                          {status === '대기'
+                            ? '검사 대기'
+                            : status === '진행 중'
+                              ? '웹사이트 검사 진행 중'
+                              : status === '검토 필요'
+                                ? '진행 중 문제 발생'
+                                : item.kind}
+                        </span>
+                        <span className="shrink-0 text-slate-300">·</span>
+                        <span className="shrink-0">{item.db}</span>
+                      </span>
+                    </span>
                   </span>
-                  <span className="min-w-0 flex-1">
-                    <span
-                      className="block truncate text-base font-semibold text-slate-900"
-                      title={item.domain}
-                    >
-                      {item.domain}
-                    </span>
-                    <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
-                      {isRunning ? '웹사이트 검사 진행 중' : `${item.kind} · ${item.db}`}
-                      <span className="text-slate-300">·</span>
-                      {item.time}
-                    </span>
+                  <span className="hidden shrink-0 text-sm text-slate-500 md:inline">
+                    <span className="sr-only">분석 일시 </span>
+                    {item.time}
                   </span>
                   <span className="flex shrink-0 items-center gap-3">
-                    {isRunning ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
-                        <LoaderCircle className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />{' '}
-                        분석 중
-                      </span>
-                    ) : (
-                      <Badge value={item.ai} />
-                    )}
+                    <AnalysisStatus item={item} />
                     <ChevronDown
                       size={19}
                       className={`shrink-0 text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, ClipboardList, Download, RefreshCw } from 'lucide-react';
+import { ChevronDown, ClipboardList, Download, LoaderCircle, RefreshCw } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import zipFileImage from '../../../../assets/images/zipfile.png';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
@@ -37,8 +37,11 @@ function ReviewStatus({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center text-[clamp(0.86rem,1vw,0.94rem)] font-semibold whitespace-nowrap ${color}`}
+      className={`inline-flex items-center gap-1.5 text-[clamp(0.86rem,1vw,0.94rem)] font-semibold whitespace-nowrap ${color}`}
     >
+      {status === '심사 진행중' && (
+        <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
+      )}
       {status}
     </span>
   );
