@@ -124,7 +124,7 @@ const sampleHistory = [
   },
 ];
 
-const analysisTabs = ['전체', '대기', '진행 중', '분석 완료', '검토 필요', '중지됨'];
+const analysisTabs = ['전체', '진행 중', '분석 완료', '검토 필요', '중지됨'];
 
 const analysisSteps = [
   {
@@ -169,6 +169,11 @@ function getAnalysisStatus(item) {
   return item.db === '검토 필요' ? '검토 필요' : '분석 완료';
 }
 
+function getAnalysisTab(item) {
+  const status = getAnalysisStatus(item);
+  return ['대기', '진행 중'].includes(status) ? '진행 중' : status;
+}
+
 function getIpSummary(item) {
   const ips = item.ips?.length ? item.ips : item.ip && !item.ip.includes(' ') ? [item.ip] : [];
   if (!ips.length) return item.ip ?? '확인 전';
@@ -198,7 +203,13 @@ function AnalysisStatus({ item }) {
   );
 }
 
-function AnalysisDetails({ item, onShowResult, onStop }) {
+export function AnalysisDetails({
+  item,
+  onShowResult,
+  onStop,
+  standalone = false,
+  showActions = true,
+}) {
   const completedSteps = item.progress ?? analysisSteps.length;
   const status = getAnalysisStatus(item);
   const isRunning = status === '진행 중';
@@ -231,7 +242,7 @@ function AnalysisDetails({ item, onShowResult, onStop }) {
       id={`analysis-detail-${item.id}`}
       role="region"
       aria-label={`${item.domain} 분석 진행 내역`}
-      className="border-t border-slate-200 bg-transparent"
+      className={standalone ? 'bg-transparent' : 'border-t border-slate-200 bg-transparent'}
     >
       <div className="flex flex-wrap items-end justify-between gap-2 px-4 py-4 sm:px-6">
         <div>
@@ -378,18 +389,73 @@ function AnalysisDetails({ item, onShowResult, onStop }) {
                   ? '분석 요청이 접수되었습니다. 잠시 후 웹사이트 검사를 시작합니다.'
                   : '웹사이트 공개 정보와 Intelligence DB를 순서대로 검사하고 있습니다.'}
         </p>
-        {status === '분석 완료' && (
+        {showActions && status === '분석 완료' && (
           <AiStoreActionButton size="small" variant="success" onClick={onShowResult}>
             분석 결과 확인
           </AiStoreActionButton>
         )}
-        {(isWaiting || isRunning) && (
+        {showActions && (isWaiting || isRunning) && (
           <AiStoreActionButton size="small" variant="danger" onClick={onStop}>
             분석 중지
           </AiStoreActionButton>
         )}
       </div>
     </div>
+  );
+}
+
+export function AnalysisCard({ item, open, onToggle, onShowResult, onStop }) {
+  return (
+    <article
+      className={`group relative min-w-0 overflow-hidden rounded-xl border transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20 ${open ? 'border-slate-200 bg-[#f5f5f5] shadow-sm' : 'border-transparent'}`}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls={`analysis-detail-${item.id}`}
+        className="flex min-h-[82px] w-full cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left"
+      >
+        <span className="flex min-w-0 flex-1 items-center gap-4">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
+            <Globe2 size={24} strokeWidth={1.8} aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span
+              className="block truncate text-base font-semibold text-slate-900"
+              title={item.domain}
+            >
+              {item.domain}
+            </span>
+            <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
+              <span className="truncate" title={item.url ?? `https://${item.domain}/`}>
+                {item.url ?? `https://${item.domain}/`}
+              </span>
+              <span className="shrink-0 text-slate-300">·</span>
+              <span
+                className="shrink-0 font-mono text-[13px] text-slate-500"
+                title={item.ips?.length ? item.ips.join(', ') : item.ip}
+              >
+                접속 IP {getIpSummary(item)}
+              </span>
+            </span>
+          </span>
+        </span>
+        <span className="mr-4 hidden w-44 shrink-0 text-right text-sm text-slate-500 md:inline">
+          <span className="sr-only">검사 시작 일시 </span>
+          {item.time}
+        </span>
+        <span className="flex w-32 shrink-0 items-center justify-end gap-3">
+          <AnalysisStatus item={item} />
+          <ChevronDown
+            size={19}
+            className={`shrink-0 text-slate-500 transition-transform ${open ? 'rotate-180' : ''}`}
+            aria-hidden="true"
+          />
+        </span>
+      </button>
+      {open && <AnalysisDetails item={item} onShowResult={onShowResult} onStop={onStop} />}
+    </article>
   );
 }
 
@@ -627,9 +693,7 @@ export default function UrlAnalysisPage() {
   const tabCounts = Object.fromEntries(
     analysisTabs.map(tab => [
       tab,
-      tab === '전체'
-        ? history.length
-        : history.filter(item => getAnalysisStatus(item) === tab).length,
+      tab === '전체' ? history.length : history.filter(item => getAnalysisTab(item) === tab).length,
     ])
   );
   const visible = useMemo(
@@ -639,7 +703,7 @@ export default function UrlAnalysisPage() {
           `${item.domain} ${item.url} ${item.ip} ${item.ai} ${item.kind} ${item.db} ${item.time}`
             .toLowerCase()
             .includes(searchInput.trim().toLowerCase()) &&
-          (activeTab === '전체' || getAnalysisStatus(item) === activeTab)
+          (activeTab === '전체' || getAnalysisTab(item) === activeTab)
       ),
     [history, searchInput, activeTab]
   );
@@ -716,65 +780,14 @@ export default function UrlAnalysisPage() {
             const isOpen = openHistoryId === item.id;
 
             return (
-              <article
+              <AnalysisCard
                 key={item.id}
-                className={`group relative min-w-0 overflow-hidden rounded-xl border transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20 ${isOpen ? 'border-slate-200 bg-[#f5f5f5] shadow-sm' : 'border-transparent'}`}
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOpenHistoryId(current => (current === item.id ? null : item.id))
-                  }
-                  aria-expanded={isOpen}
-                  aria-controls={`analysis-detail-${item.id}`}
-                  className="flex min-h-[82px] w-full cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left"
-                >
-                  <span className="flex min-w-0 flex-1 items-center gap-4">
-                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
-                      <Globe2 size={24} strokeWidth={1.8} aria-hidden="true" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span
-                        className="block truncate text-base font-semibold text-slate-900"
-                        title={item.domain}
-                      >
-                        {item.domain}
-                      </span>
-                      <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
-                        <span className="truncate" title={item.url ?? `https://${item.domain}/`}>
-                          {item.url ?? `https://${item.domain}/`}
-                        </span>
-                        <span className="shrink-0 text-slate-300">·</span>
-                        <span
-                          className="shrink-0 font-mono text-[13px] text-slate-500"
-                          title={item.ips?.length ? item.ips.join(', ') : item.ip}
-                        >
-                          접속 IP {getIpSummary(item)}
-                        </span>
-                      </span>
-                    </span>
-                  </span>
-                  <span className="mr-4 hidden w-44 shrink-0 text-right text-sm text-slate-500 md:inline">
-                    <span className="sr-only">검사 시작 일시 </span>
-                    {item.time}
-                  </span>
-                  <span className="flex w-32 shrink-0 items-center justify-end gap-3">
-                    <AnalysisStatus item={item} />
-                    <ChevronDown
-                      size={19}
-                      className={`shrink-0 text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                      aria-hidden="true"
-                    />
-                  </span>
-                </button>
-                {isOpen && (
-                  <AnalysisDetails
-                    item={item}
-                    onShowResult={() => setSelectedId(item.id)}
-                    onStop={() => requestStopAnalysis(item)}
-                  />
-                )}
-              </article>
+                item={item}
+                open={isOpen}
+                onToggle={() => setOpenHistoryId(current => (current === item.id ? null : item.id))}
+                onShowResult={() => setSelectedId(item.id)}
+                onStop={() => requestStopAnalysis(item)}
+              />
             );
           })}
           {visible.length === 0 && (
