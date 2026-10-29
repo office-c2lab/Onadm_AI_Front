@@ -599,7 +599,10 @@ export default function UserPage() {
 
   return (
     <div className="garim-external-root flex h-dvh min-h-0 flex-col overflow-hidden text-[#111827]">
-      <section className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <section
+        data-route-scroll-container
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      >
         <PageLayout bottomPaddingClassName="pb-0">
           <div className="flex min-h-0 flex-1 flex-col gap-5">
             <div className="flex flex-col gap-4 pt-1">

@@ -37,7 +37,11 @@ export default function OndamPage() {
         )}
       </div>
 
-      <main className="min-w-0 flex-1 overflow-y-auto bg-white" aria-label="AI 채팅 영역">
+      <main
+        data-route-scroll-container
+        className="min-w-0 flex-1 overflow-y-auto bg-white"
+        aria-label="AI 채팅 영역"
+      >
         {!activeChatId && <NewChatView />}
       </main>
     </div>

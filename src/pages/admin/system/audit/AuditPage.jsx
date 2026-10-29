@@ -31,7 +31,7 @@ const AUDIT_TABS = [
   'Manage',
   '사용자 및 권한',
   '시스템 운영',
-  '기타'
+  '기타',
 ];
 const PAGE_SIZE = 8;
 
@@ -168,7 +168,7 @@ const AUDIT_LOGS = [
     '10.20.11.18',
     '2026-10-28 14:47',
   ],
-   [
+  [
     1933,
     '장지훈',
     'jihoon.jang@example.com',
@@ -179,7 +179,7 @@ const AUDIT_LOGS = [
     '10.20.11.18',
     '2026-10-28 14:47',
   ],
-    [
+  [
     1934,
     '장지훈',
     'jihoon.jang@example.com',
@@ -312,7 +312,10 @@ export default function AuditPage() {
         </div>
       </div>
 
-      <section className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <section
+        data-route-scroll-container
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      >
         <PageLayout>
           <section className="flex items-end gap-[var(--app-gap-sm)]">
             <label className="min-w-0 flex-1">

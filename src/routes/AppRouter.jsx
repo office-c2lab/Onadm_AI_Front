@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 // 캐릭터
 import GamgikModalDemo from '../components/character/GamgikModalDemo.jsx';
@@ -82,9 +83,36 @@ import AuditPage from '../pages/admin/system/audit/AuditPage.jsx';
 import SettingsPage from '../pages/admin/system/settings/SettingsPage.jsx';
 import OperationsPage from '../pages/admin/system/operations/OperationsPage.jsx';
 
+function ScrollToTop() {
+  const { pathname, search } = useLocation();
+
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
+    const resetScrollPosition = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      document.querySelectorAll('[data-route-scroll-container]').forEach(container => {
+        container.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      });
+    };
+
+    resetScrollPosition();
+    const animationFrame = window.requestAnimationFrame(resetScrollPosition);
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [pathname, search]);
+
+  return null;
+}
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* 기본 경로 */}
         <Route path="/" element={<Navigate to="/user/aistore/store" replace />} />

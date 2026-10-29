@@ -10,7 +10,10 @@ export default function ControlShell({ type }) {
           <ControlTabNav type={type} />
         </div>
       </div>
-      <section className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <section
+        data-route-scroll-container
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      >
         <Outlet />
       </section>
     </div>
