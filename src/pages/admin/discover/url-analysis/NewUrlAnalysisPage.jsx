@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Link2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import urlImage from '../../../../assets/images/url.png';
 import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
 import AiStoreConfirmModal from '../../../user/aistore/components/AiStoreConfirmModal.jsx';
 import { AnalysisDetails } from './UrlAnalysisPage.jsx';
+import { services as intelligenceServices } from '../intelligence/IntelligencePage.jsx';
+import {
+  loadIntelligenceServices,
+  saveAnalysisToIntelligence,
+} from '../intelligence/intelligenceStore.js';
+import { saveUrlAnalysis } from './urlAnalysisStore.js';
 
 const ANALYSIS_STEP_COUNT = 3;
 
@@ -13,8 +19,9 @@ function formatAnalysisTime(date) {
 }
 
 export default function NewUrlAnalysisPage() {
+  const location = useLocation();
   const navigate = useNavigate();
-  const [urlInput, setUrlInput] = useState('');
+  const [urlInput, setUrlInput] = useState(location.state?.prefillUrl ?? '');
   const [error, setError] = useState('');
   const [analysis, setAnalysis] = useState(null);
   const [stopConfirmationOpen, setStopConfirmationOpen] = useState(false);
@@ -23,7 +30,7 @@ export default function NewUrlAnalysisPage() {
     if (
       !analysis ||
       stopConfirmationOpen ||
-      ['분석 완료', '검토 필요', '중지됨'].includes(analysis.analysisStatus)
+      ['분석 완료', '분석 실패', '중지됨'].includes(analysis.analysisStatus)
     ) {
       return undefined;
     }
@@ -36,6 +43,9 @@ export default function NewUrlAnalysisPage() {
         }
 
         const nextProgress = Math.min(current.progress + 1, ANALYSIS_STEP_COUNT);
+        const existingService = loadIntelligenceServices(intelligenceServices).some(
+          service => service.domain.toLowerCase() === current.domain.toLowerCase()
+        );
         return {
           ...current,
           progress: nextProgress,
@@ -44,7 +54,12 @@ export default function NewUrlAnalysisPage() {
           ips: nextProgress > 0 ? ['203.0.113.80', '2001:db8::80'] : current.ips,
           ai: nextProgress === ANALYSIS_STEP_COUNT ? 'AI 서비스' : current.ai,
           kind: nextProgress === ANALYSIS_STEP_COUNT ? '생성형 AI' : current.kind,
-          db: nextProgress === ANALYSIS_STEP_COUNT ? '신규 후보' : current.db,
+          db:
+            nextProgress === ANALYSIS_STEP_COUNT
+              ? existingService
+                ? '등록됨'
+                : '신규 후보'
+              : current.db,
           confidence: nextProgress === ANALYSIS_STEP_COUNT ? 91 : current.confidence,
         };
       });
@@ -52,6 +67,14 @@ export default function NewUrlAnalysisPage() {
 
     return () => window.clearTimeout(timer);
   }, [analysis, stopConfirmationOpen]);
+
+  useEffect(() => {
+    if (!analysis) return;
+    saveUrlAnalysis(analysis);
+    if (analysis.analysisStatus === '분석 완료') {
+      saveAnalysisToIntelligence(analysis, intelligenceServices);
+    }
+  }, [analysis]);
 
   const submit = event => {
     event.preventDefault();

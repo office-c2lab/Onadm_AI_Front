@@ -37,6 +37,7 @@ import UrlAnalysisPage from '../pages/admin/discover/url-analysis/UrlAnalysisPag
 import NewUrlAnalysisPage from '../pages/admin/discover/url-analysis/NewUrlAnalysisPage.jsx';
 import UrlAnalysisDetailPage from '../pages/admin/discover/url-analysis/UrlAnalysisDetailPage.jsx';
 import IntelligencePage from '../pages/admin/discover/intelligence/IntelligencePage.jsx';
+import IntelligenceDetailPage from '../pages/admin/discover/intelligence/IntelligenceDetailPage.jsx';
 
 // ================================
 // 관리자 - Control
@@ -178,6 +179,7 @@ export default function AppRouter() {
             <Route element={<AdminDetailLayout />}>
               <Route path="url-analysis/new" element={<NewUrlAnalysisPage />} />
               <Route path="url-analysis/:analysisId" element={<UrlAnalysisDetailPage />} />
+              <Route path="intelligence/:serviceId" element={<IntelligenceDetailPage />} />
             </Route>
           </Route>
 

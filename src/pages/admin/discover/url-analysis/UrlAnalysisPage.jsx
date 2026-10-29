@@ -17,8 +17,11 @@ import {
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
 import AiStoreConfirmModal from '../../../user/aistore/components/AiStoreConfirmModal.jsx';
+import { loadUrlAnalyses, saveUrlAnalyses } from './urlAnalysisStore.js';
 
-const sampleHistory = [
+// Shared mock records let detail routes recover after a direct visit or refresh.
+// eslint-disable-next-line react-refresh/only-export-components
+export const sampleHistory = [
   {
     id: 8,
     domain: 'copilotstudio.ai',
@@ -69,7 +72,7 @@ const sampleHistory = [
     db: '검토 필요',
     time: '2026. 10. 20. 10:35',
     confidence: null,
-    analysisStatus: '검토 필요',
+    analysisStatus: '분석 실패',
     progress: 1,
   },
   {
@@ -95,8 +98,7 @@ const sampleHistory = [
     db: '—',
     time: '2026. 10. 19. 17:12',
     confidence: 96,
-    analysisStatus: '대기',
-    progress: 0,
+    analysisStatus: '분석 완료',
   },
   {
     id: 6,
@@ -124,7 +126,7 @@ const sampleHistory = [
   },
 ];
 
-const analysisTabs = ['전체', '진행 중', '분석 완료', '검토 필요', '중지됨'];
+const analysisTabs = ['전체', '진행 중', '분석 완료', '분석 실패', '중지됨'];
 
 const analysisSteps = [
   {
@@ -166,7 +168,7 @@ function getAnalysisStatus(item) {
   if (item.analysisStatus) return item.analysisStatus;
   if (item.progress === 0) return '대기';
   if (item.progress > 0 && item.progress < analysisSteps.length) return '진행 중';
-  return item.db === '검토 필요' ? '검토 필요' : '분석 완료';
+  return item.db === '검토 필요' ? '분석 실패' : '분석 완료';
 }
 
 function getAnalysisTab(item) {
@@ -187,8 +189,8 @@ function AnalysisStatus({ item }) {
       ? 'text-slate-500'
       : status === '진행 중'
         ? 'text-blue-600'
-        : status === '검토 필요'
-          ? 'text-amber-600'
+        : status === '분석 실패'
+          ? 'text-red-600'
           : status === '중지됨'
             ? 'text-red-600'
             : 'text-emerald-600';
@@ -207,6 +209,7 @@ export function AnalysisDetails({
   item,
   onShowResult,
   onStop,
+  onRetry,
   standalone = false,
   showActions = true,
 }) {
@@ -214,9 +217,9 @@ export function AnalysisDetails({
   const status = getAnalysisStatus(item);
   const isRunning = status === '진행 중';
   const isWaiting = status === '대기';
-  const needsReview = status === '검토 필요';
+  const isFailed = status === '분석 실패';
   const isStopped = status === '중지됨';
-  const activeStep = isRunning || needsReview || isStopped ? completedSteps : -1;
+  const activeStep = isRunning || isFailed || isStopped ? completedSteps : -1;
   const [selectedOpenStep, setSelectedOpenStep] = useState(null);
   const [hasSelectedStep, setHasSelectedStep] = useState(false);
   const openStep = hasSelectedStep ? selectedOpenStep : activeStep >= 0 ? activeStep : null;
@@ -224,7 +227,7 @@ export function AnalysisDetails({
   const getStepState = index => {
     if (index < completedSteps) return 'complete';
     if (index === completedSteps && isRunning) return 'running';
-    if (index === completedSteps && needsReview) return 'failed';
+    if (index === completedSteps && isFailed) return 'failed';
     if (index === completedSteps && isStopped) return 'stopped';
     return 'pending';
   };
@@ -232,7 +235,7 @@ export function AnalysisDetails({
   const stepVisuals = {
     complete: { Icon: CheckCircle2, color: 'text-emerald-600', label: '완료' },
     running: { Icon: LoaderCircle, color: 'text-blue-600', label: '진행 중' },
-    failed: { Icon: AlertCircle, color: 'text-amber-600', label: '확인 필요' },
+    failed: { Icon: AlertCircle, color: 'text-red-600', label: '분석 오류' },
     stopped: { Icon: X, color: 'text-red-600', label: '중지됨' },
     pending: { Icon: null, color: 'text-slate-300', label: '대기' },
   };
@@ -340,7 +343,7 @@ export function AnalysisDetails({
                               : checkState === 'running'
                                 ? 'text-blue-600'
                                 : checkState === 'failed'
-                                  ? 'text-amber-600'
+                                  ? 'text-red-600'
                                   : checkState === 'stopped'
                                     ? 'text-red-600'
                                     : 'text-slate-400'
@@ -376,11 +379,11 @@ export function AnalysisDetails({
         })}
       </ol>
       <div
-        className={`flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-sm leading-6 sm:px-6 ${needsReview ? 'border-amber-100 bg-amber-50/70 text-amber-700' : isStopped ? 'border-red-100 bg-red-50/70 text-red-700' : status === '분석 완료' ? 'border-emerald-100 bg-emerald-50/60 text-emerald-700' : isWaiting ? 'border-slate-100 bg-slate-50/60 text-slate-600' : 'border-blue-100 bg-blue-50/60 text-blue-700'}`}
+        className={`flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-sm leading-6 sm:px-6 ${isFailed ? 'border-red-100 bg-red-50/70 text-red-700' : isStopped ? 'border-red-100 bg-red-50/70 text-red-700' : status === '분석 완료' ? 'border-emerald-100 bg-emerald-50/60 text-emerald-700' : isWaiting ? 'border-slate-100 bg-slate-50/60 text-slate-600' : 'border-blue-100 bg-blue-50/60 text-blue-700'}`}
       >
         <p className="min-w-0 flex-1">
-          {needsReview
-            ? '웹사이트 정보를 충분히 수집하지 못해 검사가 중단되었습니다. 접근 상태와 공개 정보를 확인한 후 다시 검사해 주세요.'
+          {isFailed
+            ? '웹사이트 정보 수집 중 오류가 발생해 분석에 실패했습니다. 접근 상태를 확인한 후 다시 분석해 주세요.'
             : isStopped
               ? '사용자가 분석을 중지했습니다. 완료된 단계의 검사 기록은 이력에 보관됩니다.'
               : status === '분석 완료'
@@ -399,12 +402,25 @@ export function AnalysisDetails({
             분석 중지
           </AiStoreActionButton>
         )}
+        {showActions && (isFailed || isStopped) && (
+          <AiStoreActionButton size="small" variant="secondary" onClick={onRetry}>
+            다시 분석
+          </AiStoreActionButton>
+        )}
       </div>
     </div>
   );
 }
 
-export function AnalysisCard({ item, open, onToggle, onOpenDetail, onShowResult, onStop }) {
+export function AnalysisCard({
+  item,
+  open,
+  onToggle,
+  onOpenDetail,
+  onShowResult,
+  onStop,
+  onRetry,
+}) {
   const canOpenDetail = getAnalysisStatus(item) === '분석 완료';
 
   return (
@@ -426,11 +442,20 @@ export function AnalysisCard({ item, open, onToggle, onOpenDetail, onShowResult,
             <Globe2 size={24} strokeWidth={1.8} aria-hidden="true" />
           </span>
           <span className="min-w-0 flex-1">
-            <span
-              className="block truncate text-base font-semibold text-slate-900"
-              title={item.domain}
-            >
-              {item.domain}
+            <span className="flex min-w-0 items-center gap-2">
+              <span
+                className="min-w-0 truncate text-base font-semibold text-slate-900"
+                title={item.domain}
+              >
+                {item.domain}
+              </span>
+              {canOpenDetail && (
+                <span
+                  className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${item.ai === 'AI 서비스' ? 'border-blue-600 bg-blue-600 text-white' : item.ai === '비AI 서비스' ? 'border-slate-500 bg-slate-500 text-white' : 'border-amber-200 bg-amber-50 text-amber-600'}`}
+                >
+                  {item.ai}
+                </span>
+              )}
             </span>
             <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
               <span className="truncate" title={item.url ?? `https://${item.domain}/`}>
@@ -468,7 +493,14 @@ export function AnalysisCard({ item, open, onToggle, onOpenDetail, onShowResult,
           </button>
         </span>
       </div>
-      {open && <AnalysisDetails item={item} onShowResult={onShowResult} onStop={onStop} />}
+      {open && (
+        <AnalysisDetails
+          item={item}
+          onShowResult={onShowResult}
+          onStop={onStop}
+          onRetry={onRetry}
+        />
+      )}
     </article>
   );
 }
@@ -656,14 +688,15 @@ export default function UrlAnalysisPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const submittedAnalysis = location.state?.submittedAnalysis;
-  const [history, setHistory] = useState(() =>
-    submittedAnalysis
+  const [history, setHistory] = useState(() => {
+    const storedHistory = loadUrlAnalyses(sampleHistory);
+    return submittedAnalysis
       ? [
           submittedAnalysis,
-          ...sampleHistory.filter(item => item.domain !== submittedAnalysis.domain),
+          ...storedHistory.filter(item => String(item.id) !== String(submittedAnalysis.id)),
         ]
-      : sampleHistory
-  );
+      : storedHistory;
+  });
   const [openHistoryId, setOpenHistoryId] = useState(submittedAnalysis?.id ?? null);
   const [searchInput, setSearchInput] = useState('');
   const [activeTab, setActiveTab] = useState('전체');
@@ -676,6 +709,10 @@ export default function UrlAnalysisPage() {
     if (!location.state) return;
     navigate(location.pathname, { replace: true, state: null });
   }, [location.pathname, location.state, navigate]);
+
+  useEffect(() => {
+    saveUrlAnalyses(history);
+  }, [history]);
 
   useEffect(() => {
     if (!hasRunningAnalysis) return undefined;
@@ -804,6 +841,11 @@ export default function UrlAnalysisPage() {
                   navigate(`/admin/discover/url-analysis/${item.id}`, { state: { analysis: item } })
                 }
                 onStop={() => requestStopAnalysis(item)}
+                onRetry={() =>
+                  navigate('/admin/discover/url-analysis/new', {
+                    state: { prefillUrl: item.url },
+                  })
+                }
               />
             );
           })}

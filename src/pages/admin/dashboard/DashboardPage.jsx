@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Download,
   Globe2,
+  LoaderCircle,
   RefreshCw,
   Search,
   ShieldCheck,
@@ -68,10 +69,26 @@ const externalSeries = [
 ];
 
 const discoverItems = [
-  { domain: 'writerflow.ai', status: '신규 후보', time: '10.20 11:21' },
-  { domain: 'newai.example', status: '검토 필요', time: '10.20 10:35' },
-  { domain: 'claude.ai', status: '등록됨', time: '10.20 10:48' },
-  { domain: 'perplexity.ai', status: '등록됨', time: '10.20 09:43' },
+  {
+    domain: 'copilotstudio.ai',
+    status: '진행 중',
+    time: '10.29 10:42',
+  },
+  {
+    domain: 'newai.example',
+    status: '분석 실패',
+    time: '10.20 10:35',
+  },
+  {
+    domain: 'writerflow.ai',
+    status: '분석 완료',
+    time: '10.20 11:21',
+  },
+  {
+    domain: 'portal.example',
+    status: '분석 완료',
+    time: '10.19 17:12',
+  },
 ];
 
 const engines = [
@@ -281,12 +298,21 @@ function UserAvatar({ user }) {
 
 function DiscoverStatus({ status }) {
   const tone =
-    status === '등록됨'
+    status === '분석 완료'
       ? 'text-emerald-600'
-      : status === '검토 필요'
-        ? 'text-orange-600'
-        : 'text-amber-600';
-  return <span className={`text-[0.82rem] font-bold whitespace-nowrap ${tone}`}>{status}</span>;
+      : ['차단', '분석 실패'].includes(status)
+        ? 'text-red-600'
+        : status === '진행 중'
+          ? 'text-blue-600'
+          : 'text-amber-600';
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 text-[0.82rem] font-bold whitespace-nowrap ${tone}`}
+    >
+      {status === '진행 중' && <LoaderCircle size={14} className="animate-spin" />}
+      {status}
+    </span>
+  );
 }
 
 export default function DashboardPage() {
@@ -332,10 +358,10 @@ export default function DashboardPage() {
 
   const summaryCards = [
     {
-      title: 'AI 서비스 탐색',
+      title: 'AI Service Analysis',
       value: '2',
-      status: '확인 필요',
-      helper: '신규 후보 1 · 검토 필요 1',
+      status: '진행 중 1건',
+      helper: '분석 실패 1 · 최근 완료 2',
       tone: 'text-[#FF9F1C]',
       to: '/admin/discover/url-analysis',
     },
@@ -401,10 +427,10 @@ export default function DashboardPage() {
 
         <Panel
           title="Discover"
-          description="최근 AI 서비스 분석 결과"
+          description="최근 AI Service Analysis 상태"
           action={
             <TextAction onClick={() => navigate('/admin/discover/url-analysis')}>
-              분석 결과 보기
+              분석 목록 보기
             </TextAction>
           }
         >

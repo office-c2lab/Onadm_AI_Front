@@ -1,10 +1,16 @@
-import { AlertCircle, ArrowLeft, CheckCircle2, Database, Globe2, Network } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
-import { AnalysisDetails } from './UrlAnalysisPage.jsx';
+import { AlertCircle, ArrowLeft, CheckCircle2, Globe2 } from 'lucide-react';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { loadIntelligenceServices } from '../intelligence/intelligenceStore.js';
+import { services as intelligenceServices } from '../intelligence/IntelligencePage.jsx';
+import { AnalysisDetails, sampleHistory } from './UrlAnalysisPage.jsx';
+import { loadUrlAnalyses } from './urlAnalysisStore.js';
 
 export default function UrlAnalysisDetailPage() {
   const location = useLocation();
-  const analysis = location.state?.analysis;
+  const { analysisId } = useParams();
+  const analysis =
+    location.state?.analysis ??
+    loadUrlAnalyses(sampleHistory).find(item => String(item.id) === String(analysisId));
 
   if (!analysis) {
     return (
@@ -23,6 +29,11 @@ export default function UrlAnalysisDetailPage() {
 
   const ips = analysis.ips?.length ? analysis.ips : analysis.ip ? [analysis.ip] : [];
   const isAi = analysis.ai === 'AI 서비스';
+  const intelligenceService = isAi
+    ? loadIntelligenceServices(intelligenceServices).find(
+        service => service.domain.toLowerCase() === analysis.domain.toLowerCase()
+      )
+    : null;
   let parsedUrl;
   try {
     parsedUrl = new URL(analysis.url);
@@ -51,16 +62,23 @@ export default function UrlAnalysisDetailPage() {
       </Link>
 
       <header className="py-8 sm:py-10">
-        <div className="flex items-center gap-4">
-          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
-            <Globe2 size={26} strokeWidth={1.8} aria-hidden="true" />
-          </span>
-          <div className="min-w-0">
-            <h1 className="truncate text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
-              {analysis.domain}
-            </h1>
-            <p className="mt-2 truncate text-sm text-slate-500">{analysis.url}</p>
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+          <div className="flex min-w-0 items-center gap-4">
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
+              <Globe2 size={26} strokeWidth={1.8} aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <h1 className="truncate text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
+                {analysis.domain}
+              </h1>
+              <p className="mt-2 truncate text-sm text-slate-500">{analysis.url}</p>
+            </div>
           </div>
+          <span
+            className={`inline-flex h-9 shrink-0 items-center rounded-full px-4 text-sm font-semibold ${analysis.ai === 'AI 서비스' ? 'bg-blue-600 text-white' : analysis.ai === '비AI 서비스' ? 'bg-slate-500 text-white' : 'bg-amber-50 text-amber-600'}`}
+          >
+            {analysis.ai}
+          </span>
         </div>
       </header>
 
@@ -125,22 +143,20 @@ export default function UrlAnalysisDetailPage() {
       </section>
 
       <section className="border-t border-slate-200 py-9 sm:py-10">
-        <div className="flex items-center gap-2">
-          <Network className="h-5 w-5 text-blue-600" aria-hidden="true" />
-          <h2 className="text-lg font-bold tracking-tight text-slate-900">URL 및 네트워크 정보</h2>
-        </div>
-        <dl className="mt-5 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+        <h2 className="text-lg font-bold tracking-tight text-slate-900">URL 및 네트워크 정보</h2>
+        <dl className="mt-5 divide-y divide-slate-200 border-y border-slate-200">
           {[
             ['요청 URL', analysis.url],
             ['도메인', analysis.domain],
             ['프로토콜', parsedUrl?.protocol.replace(':', '').toUpperCase() ?? '—'],
             ['확인된 접속 IP', `${ips.length}개`],
           ].map(([label, value]) => (
-            <div key={label} className="min-w-0">
-              <dt className="text-sm text-slate-500">{label}</dt>
-              <dd className="mt-1 truncate text-[15px] font-semibold text-slate-900" title={value}>
-                {value}
-              </dd>
+            <div
+              key={label}
+              className="grid gap-1 px-5 py-4 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-6"
+            >
+              <dt className="text-sm font-medium text-slate-500">{label}</dt>
+              <dd className="break-all text-[15px] font-semibold text-slate-900">{value}</dd>
             </div>
           ))}
         </dl>
@@ -163,11 +179,10 @@ export default function UrlAnalysisDetailPage() {
       </section>
 
       <section className="border-t border-slate-200 py-9 sm:py-10">
-        <div className="mb-5 flex items-center gap-2">
-          <Database className="h-5 w-5 text-blue-600" aria-hidden="true" />
-          <h2 className="text-lg font-bold tracking-tight text-slate-900">Intelligence DB 비교</h2>
-        </div>
-        <div className="grid gap-4 rounded-xl border border-slate-200 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
+        <h2 className="mb-5 text-lg font-bold tracking-tight text-slate-900">
+          Intelligence DB 비교
+        </h2>
+        <div className="grid gap-4 border-y border-slate-200 py-5 sm:grid-cols-[1fr_auto] sm:items-center">
           <div>
             <p className="text-sm font-semibold text-slate-900">
               {analysis.db === '등록됨'
@@ -189,6 +204,25 @@ export default function UrlAnalysisDetailPage() {
       <section className="border-t border-slate-200 py-9 sm:py-10">
         <AnalysisDetails standalone showActions={false} item={analysis} />
       </section>
+
+      <div className="sticky bottom-0 z-20 flex min-h-[72px] flex-wrap items-center justify-end gap-2 border-t border-slate-200 bg-white/95 py-4 backdrop-blur">
+        <Link
+          to="/admin/discover/url-analysis/new"
+          state={{ prefillUrl: analysis.url }}
+          className="inline-flex h-10 items-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+        >
+          다시 분석
+        </Link>
+        {intelligenceService && (
+          <Link
+            to={`/admin/discover/intelligence/${intelligenceService.id}`}
+            state={{ service: intelligenceService }}
+            className="inline-flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+          >
+            Intelligence DB 정보 보기
+          </Link>
+        )}
+      </div>
     </>
   );
 }

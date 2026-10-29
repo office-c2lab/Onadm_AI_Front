@@ -1,364 +1,218 @@
 import { useMemo, useState } from 'react';
-import {
-  CheckCircle2,
-  Database,
-  FileSearch,
-  FileText,
-  Globe2,
-  MoreVertical,
-  Newspaper,
-  Search,
-  ShieldAlert,
-  Ban,
-  X,
-} from 'lucide-react';
+import { ChevronRight, Globe2, ShieldAlert } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import SearchHeader from '../../../../components/search/SearchHeader.jsx';
+import { loadIntelligenceServices } from './intelligenceStore.js';
 
-const intelligenceItems = [
+// Shared mock records let detail routes recover after a direct visit or refresh.
+// eslint-disable-next-line react-refresh/only-export-components
+export const services = [
   {
     id: 'intel-001',
-    title: 'writerflow.ai',
-    category: 'AI 보안',
-    type: '위협 인텔리전스',
-    source: 'KISA 보안 공지',
-    summary: '프롬프트 인젝션과 데이터 유출 공격 사례 및 대응 권고안을 정리했습니다.',
-    updatedAt: '2026.10.20',
-    status: '분석 완료',
-    icon: ShieldAlert,
-    color: 'bg-rose-50 text-rose-500',
+    domain: 'writerflow.ai',
+    url: 'https://writerflow.ai/',
+    ips: ['203.0.113.24', '2001:db8::24'],
+    ai: 'AI 서비스',
+    type: '생성형 AI',
+    status: '차단',
+    risk: '높음',
+    confidence: 92,
+    lastAnalyzed: '2026. 10. 20. 11:21',
+    summary: 'AI 기반 문서 작성과 콘텐츠 생성을 제공하는 외부 서비스입니다.',
+    risks: [
+      '입력 데이터 외부 전송',
+      '생성 결과의 저작권 검토 필요',
+      '계정별 데이터 보관 정책 확인 필요',
+    ],
   },
   {
     id: 'intel-002',
-    title: 'claude.ai',
-    category: '정책·규제',
-    type: '규제 브리핑',
-    source: 'EU AI Office',
-    summary: 'EU AI Act 시행 일정과 고위험 AI 시스템의 최근 준수 요건을 제공합니다.',
-    updatedAt: '2026.10.19',
-    status: '분석 완료',
-    icon: Globe2,
-    color: 'bg-blue-50 text-blue-500',
+    domain: 'claude.ai',
+    url: 'https://claude.ai/',
+    ips: ['198.51.100.42', '198.51.100.43'],
+    ai: 'AI 서비스',
+    type: '생성형 AI',
+    status: '허용',
+    risk: '보통',
+    confidence: 99,
+    lastAnalyzed: '2026. 10. 20. 10:48',
+    summary: '대화형 텍스트 생성과 문서 분석 기능을 제공하는 AI 서비스입니다.',
+    risks: ['민감정보 입력 주의', '외부 파일 업로드 정책 확인'],
   },
   {
     id: 'intel-003',
-    title: 'newai.example',
-    category: '시장 분석',
-    type: '산업 리포트',
-    source: 'AI 산업 연구원',
-    summary: '국내 기업용 LLM 도입률과 주요 서비스별 활용 분야를 비교 분석합니다.',
-    updatedAt: '2026.10.18',
-    status: '최신',
-    icon: Newspaper,
-    color: 'bg-violet-50 text-violet-500',
+    domain: 'newai.example',
+    url: 'https://newai.example/',
+    ips: [],
+    ai: '판단 불가',
+    type: '—',
+    status: '검토 필요',
+    risk: '미확인',
+    confidence: null,
+    lastAnalyzed: '2026. 10. 20. 10:35',
+    summary: '공개 정보와 접속 결과가 충분하지 않아 추가 검토가 필요한 서비스입니다.',
+    risks: ['웹사이트 접속 실패', '서비스 운영 주체 확인 필요'],
   },
   {
     id: 'intel-004',
-    title: 'perplexity.ai',
-    category: '기술 자료',
-    type: '백서',
-    source: 'ON:담 Research',
-    summary: '멀티 에이전트 오케스트레이션 구조와 도구 승인 설계 원칙을 설명합니다.',
-    updatedAt: '2026.10.17',
-    status: '검토 중',
-    icon: FileText,
-    color: 'bg-amber-50 text-amber-500',
+    domain: 'perplexity.ai',
+    url: 'https://perplexity.ai/',
+    ips: ['198.51.100.57', '2001:db8::57'],
+    ai: 'AI 서비스',
+    type: 'AI 검색',
+    status: '허용',
+    risk: '보통',
+    confidence: 98,
+    lastAnalyzed: '2026. 10. 20. 09:43',
+    summary: '웹 검색 결과를 기반으로 답변과 출처를 제공하는 AI 검색 서비스입니다.',
+    risks: ['검색 질의 외부 전송', '답변 출처 검증 필요'],
+  },
+  {
+    id: 'intel-006',
+    domain: 'midjourney.com',
+    url: 'https://midjourney.com/',
+    ips: ['192.0.2.81'],
+    ai: 'AI 서비스',
+    type: '이미지 생성',
+    status: '결정 대기',
+    risk: '미확인',
+    confidence: 99,
+    lastAnalyzed: '2026. 10. 19. 16:03',
+    summary: '텍스트 프롬프트를 기반으로 이미지를 생성하는 AI 서비스입니다.',
+    risks: ['생성 이미지 저작권 정책 검토', '프롬프트 외부 전송 여부 확인'],
   },
   {
     id: 'intel-005',
-    title: 'portal.example',
-    category: '취약점',
-    type: '구조화 데이터',
-    source: 'CVE Intelligence',
-    summary: 'AI 런타임과 모델 공급망에서 발견된 주요 취약점과 영향 범위를 제공합니다.',
-    updatedAt: '2026.10.16',
-    status: '분석 완료',
-    icon: Database,
-    color: 'bg-cyan-50 text-cyan-600',
+    domain: 'portal.example',
+    url: 'https://portal.example/',
+    ips: ['192.0.2.18'],
+    ai: '비AI 서비스',
+    type: '일반 웹사이트',
+    status: '허용',
+    risk: '낮음',
+    confidence: 96,
+    lastAnalyzed: '2026. 10. 19. 17:12',
+    summary: '일반적인 정보 조회 기능을 제공하며 핵심 AI 기능은 확인되지 않았습니다.',
+    risks: ['일반 외부 웹사이트 접근 정책 적용'],
   },
 ];
 
-const tabs = [
-  { id: 'all', label: '전체 서비스' },
-  { id: 'allowed', label: '허용된 서비스' },
-  { id: 'blocked', label: '차단된 서비스' },
-];
+const tabs = ['전체', '결정 대기', '허용', '차단'];
 
-function IntelligenceRow({ item, blocked, onToggleBlocked, onOpen }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const Icon = item.icon;
+function ServiceStatus({ status }) {
+  const color =
+    status === '허용' ? 'text-emerald-600' : status === '차단' ? 'text-red-600' : 'text-amber-600';
+  return <span className={`text-sm font-semibold whitespace-nowrap ${color}`}>{status}</span>;
+}
 
+function ServiceCard({ service, onOpen }) {
   return (
-    <article
-      className={`group relative flex min-h-[82px] min-w-0 flex-wrap items-center gap-4 rounded-xl border px-3 py-3 transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20 ${
-        menuOpen ? 'z-30 border-slate-100 bg-[#f5f5f5] shadow-sm' : 'border-transparent'
-      }`}
-    >
+    <article className="group relative min-w-0 rounded-xl border border-transparent transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20">
       <button
         type="button"
-        onClick={() => onOpen(item)}
-        className="flex min-w-[190px] flex-1 items-center gap-4 text-left"
-        aria-label={`${item.title} 상세 보기`}
+        onClick={() => onOpen(service)}
+        className="flex min-h-[82px] w-full cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left"
+        aria-label={`${service.domain} Intelligence 상세 보기`}
       >
-        <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ${item.color}`}>
-          <Icon size={22} strokeWidth={1.8} aria-hidden="true" />
+        <span className="flex min-w-0 flex-1 items-center gap-4">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
+            {service.status === '결정 대기' ? (
+              <ShieldAlert size={23} strokeWidth={1.8} />
+            ) : (
+              <Globe2 size={23} strokeWidth={1.8} />
+            )}
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="flex min-w-0 items-center gap-2">
+              <strong className="min-w-0 truncate text-base font-semibold text-slate-900">
+                {service.domain}
+              </strong>
+            </span>
+            <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
+              <span className="truncate">{service.url}</span>
+              <span className="shrink-0 text-slate-300">·</span>
+              <span className="shrink-0">{service.type}</span>
+            </span>
+          </span>
         </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-base font-semibold text-slate-900">
-            {item.title}
-          </span>
-          <span className="mt-1 flex items-center gap-2 text-sm text-slate-500">
-            <span className="truncate">{item.category}</span>
-            <span className="h-0.5 w-0.5 shrink-0 rounded-full bg-slate-300" />
-            <span className="truncate">{item.source}</span>
-          </span>
+        <span className="mr-4 hidden w-44 shrink-0 text-right text-sm text-slate-500 md:inline">
+          <span className="sr-only">DB 등록일 </span>
+          {service.registeredAt ?? service.lastAnalyzed}
+        </span>
+        <span className="flex w-28 shrink-0 items-center justify-end gap-3">
+          <ServiceStatus status={service.status} />
+          <ChevronRight size={19} className="shrink-0 text-slate-500" />
         </span>
       </button>
-
-      <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
-        <span
-          className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-semibold ${
-            blocked ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
-          }`}
-        >
-          {blocked ? (
-            <Ban size={14} aria-hidden="true" />
-          ) : (
-            <CheckCircle2 size={14} aria-hidden="true" />
-          )}
-          {blocked ? '차단됨' : '허용됨'}
-        </span>
-        <div
-          className="relative"
-          onBlur={event => {
-            if (!event.currentTarget.contains(event.relatedTarget)) setMenuOpen(false);
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setMenuOpen(open => !open)}
-            className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-            aria-label={`${item.title} 더보기`}
-            aria-expanded={menuOpen}
-          >
-            <MoreVertical size={17} aria-hidden="true" />
-          </button>
-          {menuOpen ? (
-            <div className="absolute right-0 top-full z-30 mt-1 w-40 rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onOpen(item);
-                }}
-                className="w-full rounded-md px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
-              >
-                상세 보기
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onToggleBlocked(item.id);
-                }}
-                className="w-full rounded-md px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
-              >
-                {blocked ? '차단 해제' : '서비스 차단'}
-              </button>
-            </div>
-          ) : null}
-        </div>
-      </div>
     </article>
   );
 }
 
-function DetailModal({ item, blocked, onToggleBlocked, onClose }) {
-  if (!item) return null;
-  const Icon = item.icon;
-
-  return (
-    <div className="fixed inset-0 z-[100] grid place-items-center p-4">
-      <button
-        type="button"
-        aria-label="상세 닫기"
-        onClick={onClose}
-        className="absolute inset-0 bg-slate-950/45 backdrop-blur-sm"
-      />
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="intelligence-detail-title"
-        className="relative z-10 w-full max-w-2xl overflow-hidden rounded-2xl border border-white/70 bg-white shadow-2xl"
-      >
-        <header className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
-          <div className="flex min-w-0 items-center gap-4">
-            <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ${item.color}`}>
-              <Icon size={23} strokeWidth={1.8} />
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-blue-600">{item.category}</p>
-              <h2
-                id="intelligence-detail-title"
-                className="mt-1 truncate text-xl font-bold text-slate-900"
-              >
-                {item.title}
-              </h2>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="닫기"
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"
-          >
-            <X size={20} />
-          </button>
-        </header>
-        <div className="px-6 py-6">
-          <p className="text-sm leading-7 text-slate-600">{item.summary}</p>
-          <dl className="mt-6 grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2">
-            {[
-              ['자료 유형', item.type],
-              ['출처', item.source],
-              ['서비스 상태', blocked ? '차단됨' : '허용됨'],
-              ['업데이트', item.updatedAt],
-            ].map(([label, value]) => (
-              <div key={label}>
-                <dt className="text-xs font-semibold text-slate-400">{label}</dt>
-                <dd className="mt-1 text-sm font-semibold text-slate-700">{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-        <footer className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
-          <button
-            type="button"
-            onClick={() => onToggleBlocked(item.id)}
-            className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition ${
-              blocked
-                ? 'bg-emerald-50 text-emerald-600'
-                : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
-            }`}
-          >
-            {blocked ? <CheckCircle2 size={16} /> : <Ban size={16} />}
-            {blocked ? '차단 해제' : '서비스 차단'}
-          </button>
-          <button
-            type="button"
-            className="h-10 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            원문 보기
-          </button>
-        </footer>
-      </section>
-    </div>
-  );
-}
-
 export default function IntelligencePage() {
-  const [keyword, setKeyword] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
-  const [blockedServices, setBlockedServices] = useState(['intel-001', 'intel-003']);
-  const [selectedItem, setSelectedItem] = useState(null);
-
-  const toggleBlocked = id => {
-    setBlockedServices(current =>
-      current.includes(id) ? current.filter(itemId => itemId !== id) : [...current, id]
-    );
-  };
-
-  const visibleItems = useMemo(() => {
-    const query = keyword.trim().toLowerCase();
-    return intelligenceItems.filter(item => {
-      const isBlocked = blockedServices.includes(item.id);
-      const matchesTab = activeTab === 'all' || (activeTab === 'blocked' ? isBlocked : !isBlocked);
-      const matchesQuery =
-        `${item.title} ${item.category} ${item.type} ${item.source} ${item.summary}`
-          .toLowerCase()
-          .includes(query);
-      return matchesTab && matchesQuery;
-    });
-  }, [activeTab, blockedServices, keyword]);
+  const navigate = useNavigate();
+  const [allServices] = useState(() => loadIntelligenceServices(services));
+  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState('전체');
+  const keyword = search.trim().toLowerCase();
+  const tabCounts = Object.fromEntries(
+    tabs.map(tab => [
+      tab,
+      tab === '전체'
+        ? allServices.length
+        : allServices.filter(service => service.status === tab).length,
+    ])
+  );
+  const visibleServices = useMemo(
+    () =>
+      allServices.filter(
+        service =>
+          (activeTab === '전체' || service.status === activeTab) &&
+          `${service.domain} ${service.url} ${service.ai} ${service.type} ${service.status}`
+            .toLowerCase()
+            .includes(keyword)
+      ),
+    [activeTab, allServices, keyword]
+  );
 
   return (
     <div className="w-full">
-      <div className="sticky top-0 z-30 -mx-5 bg-white/95 px-5 py-3 backdrop-blur md:-mx-8 md:px-8">
-        <label className="mx-auto flex h-11 w-full max-w-xl items-center gap-3 rounded-lg bg-[#edf2f7] px-4 text-slate-500 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500/20">
-          <Search size={19} strokeWidth={2} aria-hidden="true" />
-          <input
-            type="search"
-            value={keyword}
-            onChange={event => setKeyword(event.target.value)}
-            placeholder="Intelligence DB 검색"
-            aria-label="Intelligence DB 검색"
-            className="h-full min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-600"
-          />
-        </label>
-      </div>
-
-      <div className="mt-5 flex items-center justify-between gap-4">
-        <nav className="flex items-center gap-1" aria-label="Intelligence DB 탭">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`rounded-full px-4 py-1 text-sm transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-[#ededed] font-medium text-[#333]'
-                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-        <p className="hidden text-sm text-slate-400 sm:block">총 {visibleItems.length}개 서비스</p>
-      </div>
-
-      <section className="mt-7">
-        {visibleItems.length ? (
-          <div className="grid gap-2 md:grid-cols-2">
-            {visibleItems.map(item => (
-              <IntelligenceRow
-                key={item.id}
-                item={item}
-                blocked={blockedServices.includes(item.id)}
-                onToggleBlocked={toggleBlocked}
-                onOpen={setSelectedItem}
+      <SearchHeader
+        value={search}
+        onSearchChange={setSearch}
+        placeholder="도메인, URL, 서비스 유형 또는 상태 검색"
+        ariaLabel="Intelligence DB 검색"
+      />
+      <nav className="mt-5 flex flex-wrap items-center gap-1" aria-label="Intelligence DB 상태">
+        {tabs.map(tab => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab)}
+            aria-pressed={activeTab === tab}
+            className={`inline-flex h-8 items-center rounded-full px-4 text-sm transition-colors ${activeTab === tab ? 'bg-[#ededed] font-medium text-[#333]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'}`}
+          >
+            {tab}
+            <span className="ml-1.5 text-xs tabular-nums text-slate-400">{tabCounts[tab]}</span>
+          </button>
+        ))}
+      </nav>
+      <section className="mt-5" aria-label="Intelligence 서비스 목록">
+        {visibleServices.length ? (
+          <div className="grid gap-2">
+            {visibleServices.map(service => (
+              <ServiceCard
+                key={service.id}
+                service={service}
+                onOpen={item =>
+                  navigate(`/admin/discover/intelligence/${item.id}`, { state: { service: item } })
+                }
               />
             ))}
           </div>
         ) : (
-          <div className="px-4 py-16 text-center">
-            {activeTab === 'blocked' ? (
-              <Ban className="mx-auto text-slate-300" size={30} />
-            ) : (
-              <CheckCircle2 className="mx-auto text-slate-300" size={30} />
-            )}
-            <p className="mt-4 font-medium text-slate-900">
-              {keyword
-                ? '검색 결과가 없습니다.'
-                : activeTab === 'blocked'
-                  ? '차단된 서비스가 없습니다.'
-                  : activeTab === 'allowed'
-                    ? '허용된 서비스가 없습니다.'
-                    : '등록된 서비스가 없습니다.'}
-            </p>
-            <p className="mt-2 text-sm text-slate-500">
-              {keyword
-                ? '다른 검색어로 다시 찾아보세요.'
-                : '서비스를 등록하거나 상태를 변경해 보세요.'}
-            </p>
-          </div>
+          <p className="py-12 text-center text-sm text-slate-500">조건에 맞는 서비스가 없습니다.</p>
         )}
       </section>
-
-      <DetailModal
-        item={selectedItem}
-        blocked={selectedItem ? blockedServices.includes(selectedItem.id) : false}
-        onToggleBlocked={toggleBlocked}
-        onClose={() => setSelectedItem(null)}
-      />
     </div>
   );
 }
