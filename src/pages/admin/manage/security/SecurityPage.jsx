@@ -182,10 +182,10 @@ export default function SecurityPage() {
                         </span>
                       </span>
                     </span>
-                    <span className="pointer-events-none relative z-10 hidden shrink-0 text-sm text-slate-500 lg:inline">
+                    <span className="pointer-events-none relative z-10 mr-4 hidden w-44 shrink-0 text-right text-sm text-slate-500 lg:inline">
                       {item.submittedAt}
                     </span>
-                    <span className="pointer-events-none relative z-10 flex shrink-0 items-center gap-2">
+                    <span className="pointer-events-none relative z-10 flex w-32 shrink-0 items-center justify-end gap-3">
                       <ReviewStatus status={status} />
                       <ChevronDown
                         size={19}

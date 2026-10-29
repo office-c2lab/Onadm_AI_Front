@@ -310,11 +310,11 @@ export default function RegisterPage() {
                       </span>
                     </span>
                   </span>
-                  <span className="hidden shrink-0 text-sm text-slate-500 md:inline">
+                  <span className="mr-4 hidden w-44 shrink-0 text-right text-sm text-slate-500 md:inline">
                     <span className="sr-only">목록 추가 </span>
                     {upload.createdAt}
                   </span>
-                  <span className="flex shrink-0 items-center gap-3">
+                  <span className="flex w-32 shrink-0 items-center justify-end gap-3">
                     <ReviewStatus status={upload.status} />
                     <ChevronDown
                       size={19}

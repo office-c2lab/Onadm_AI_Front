@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import urlImage from '../../../../assets/images/url.png';
 
 function formatAnalysisTime(date) {
-  return `${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  return `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(2, '0')}. ${String(date.getDate()).padStart(2, '0')}. ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
 export default function NewUrlAnalysisPage() {
@@ -30,6 +30,9 @@ export default function NewUrlAnalysisPage() {
     const analysis = {
       id: `analysis-${now.getTime()}`,
       domain: parsed.hostname.replace(/^www\./, ''),
+      url: parsed.href,
+      ip: '조회 대기',
+      ips: [],
       ai: '판단 불가',
       kind: '—',
       db: '검토 필요',

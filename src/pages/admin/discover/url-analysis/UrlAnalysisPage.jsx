@@ -16,15 +16,19 @@ import {
 } from 'lucide-react';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
+import AiStoreConfirmModal from '../../../user/aistore/components/AiStoreConfirmModal.jsx';
 
 const sampleHistory = [
   {
     id: 8,
     domain: 'copilotstudio.ai',
+    url: 'https://copilotstudio.ai/',
+    ip: '203.0.113.18',
+    ips: ['203.0.113.18', '203.0.113.19', '2001:db8::18'],
     ai: '판단 불가',
     kind: '—',
     db: '—',
-    time: '10.29 10:42',
+    time: '2026. 10. 29. 10:42',
     confidence: null,
     analysisStatus: '진행 중',
     progress: 1,
@@ -32,30 +36,38 @@ const sampleHistory = [
   {
     id: 1,
     domain: 'writerflow.ai',
+    url: 'https://writerflow.ai/',
+    ip: '203.0.113.24',
+    ips: ['203.0.113.24', '2001:db8::24'],
     ai: 'AI 서비스',
     kind: '생성형 AI',
     db: '신규 후보',
-    time: '10.20 11:21',
+    time: '2026. 10. 20. 11:21',
     confidence: 92,
     analysisStatus: '분석 완료',
   },
   {
     id: 2,
     domain: 'claude.ai',
+    url: 'https://claude.ai/',
+    ip: '198.51.100.42',
+    ips: ['198.51.100.42', '198.51.100.43'],
     ai: 'AI 서비스',
     kind: '생성형 AI',
     db: '등록됨',
-    time: '10.20 10:48',
+    time: '2026. 10. 20. 10:48',
     confidence: 99,
     analysisStatus: '분석 완료',
   },
   {
     id: 3,
     domain: 'newai.example',
+    url: 'https://newai.example/',
+    ip: '확인 실패',
     ai: '판단 불가',
     kind: '—',
     db: '검토 필요',
-    time: '10.20 10:35',
+    time: '2026. 10. 20. 10:35',
     confidence: null,
     analysisStatus: '검토 필요',
     progress: 1,
@@ -63,20 +75,25 @@ const sampleHistory = [
   {
     id: 4,
     domain: 'perplexity.ai',
+    url: 'https://perplexity.ai/',
+    ip: '198.51.100.57',
+    ips: ['198.51.100.57', '2001:db8::57'],
     ai: 'AI 서비스',
     kind: 'AI 검색',
     db: '등록됨',
-    time: '10.20 09:43',
+    time: '2026. 10. 20. 09:43',
     confidence: 98,
     analysisStatus: '분석 완료',
   },
   {
     id: 5,
     domain: 'portal.example',
+    url: 'https://portal.example/',
+    ip: '조회 대기',
     ai: '비AI 서비스',
     kind: '일반 웹사이트',
     db: '—',
-    time: '10.19 17:12',
+    time: '2026. 10. 19. 17:12',
     confidence: 96,
     analysisStatus: '대기',
     progress: 0,
@@ -84,26 +101,30 @@ const sampleHistory = [
   {
     id: 6,
     domain: 'midjourney.com',
+    url: 'https://midjourney.com/',
+    ip: '192.0.2.81',
     ai: 'AI 서비스',
     kind: '이미지 생성',
     db: '등록됨',
-    time: '10.19 16:03',
+    time: '2026. 10. 19. 16:03',
     confidence: 99,
     analysisStatus: '분석 완료',
   },
   {
     id: 7,
     domain: 'cursor.com',
+    url: 'https://cursor.com/',
+    ip: '192.0.2.96',
     ai: 'AI 서비스',
     kind: 'AI 코딩',
     db: '등록됨',
-    time: '10.19 14:37',
+    time: '2026. 10. 19. 14:37',
     confidence: 97,
     analysisStatus: '분석 완료',
   },
 ];
 
-const analysisTabs = ['전체', '대기', '진행 중', '분석 완료', '검토 필요'];
+const analysisTabs = ['전체', '대기', '진행 중', '분석 완료', '검토 필요', '중지됨'];
 
 const analysisSteps = [
   {
@@ -148,6 +169,12 @@ function getAnalysisStatus(item) {
   return item.db === '검토 필요' ? '검토 필요' : '분석 완료';
 }
 
+function getIpSummary(item) {
+  const ips = item.ips?.length ? item.ips : item.ip && !item.ip.includes(' ') ? [item.ip] : [];
+  if (!ips.length) return item.ip ?? '확인 전';
+  return ips.length > 1 ? `${ips[0]} 외 ${ips.length - 1}개` : ips[0];
+}
+
 function AnalysisStatus({ item }) {
   const status = getAnalysisStatus(item);
   const color =
@@ -157,7 +184,9 @@ function AnalysisStatus({ item }) {
         ? 'text-blue-600'
         : status === '검토 필요'
           ? 'text-amber-600'
-          : 'text-emerald-600';
+          : status === '중지됨'
+            ? 'text-red-600'
+            : 'text-emerald-600';
 
   return (
     <span
@@ -169,13 +198,14 @@ function AnalysisStatus({ item }) {
   );
 }
 
-function AnalysisDetails({ item, onShowResult }) {
+function AnalysisDetails({ item, onShowResult, onStop }) {
   const completedSteps = item.progress ?? analysisSteps.length;
   const status = getAnalysisStatus(item);
   const isRunning = status === '진행 중';
   const isWaiting = status === '대기';
   const needsReview = status === '검토 필요';
-  const activeStep = isRunning || needsReview ? completedSteps : -1;
+  const isStopped = status === '중지됨';
+  const activeStep = isRunning || needsReview || isStopped ? completedSteps : -1;
   const [selectedOpenStep, setSelectedOpenStep] = useState(null);
   const [hasSelectedStep, setHasSelectedStep] = useState(false);
   const openStep = hasSelectedStep ? selectedOpenStep : activeStep >= 0 ? activeStep : null;
@@ -184,6 +214,7 @@ function AnalysisDetails({ item, onShowResult }) {
     if (index < completedSteps) return 'complete';
     if (index === completedSteps && isRunning) return 'running';
     if (index === completedSteps && needsReview) return 'failed';
+    if (index === completedSteps && isStopped) return 'stopped';
     return 'pending';
   };
 
@@ -191,6 +222,7 @@ function AnalysisDetails({ item, onShowResult }) {
     complete: { Icon: CheckCircle2, color: 'text-emerald-600', label: '완료' },
     running: { Icon: LoaderCircle, color: 'text-blue-600', label: '진행 중' },
     failed: { Icon: AlertCircle, color: 'text-amber-600', label: '확인 필요' },
+    stopped: { Icon: X, color: 'text-red-600', label: '중지됨' },
     pending: { Icon: null, color: 'text-slate-300', label: '대기' },
   };
 
@@ -204,9 +236,6 @@ function AnalysisDetails({ item, onShowResult }) {
       <div className="flex flex-wrap items-end justify-between gap-2 px-4 py-4 sm:px-6">
         <div>
           <h3 className="text-base font-semibold text-slate-950">분석 진행 내역</h3>
-          <p className="mt-1 text-sm text-slate-600">
-            {item.domain} · {item.time}
-          </p>
         </div>
         <div className="grid shrink-0 grid-cols-[5rem_6.5rem] items-center gap-3 text-sm">
           <span className="text-right text-slate-500">
@@ -229,7 +258,9 @@ function AnalysisDetails({ item, onShowResult }) {
                 ? '진행 중'
                 : stepState === 'failed'
                   ? '중단'
-                  : '—';
+                  : stepState === 'stopped'
+                    ? '중지'
+                    : '—';
 
           return (
             <li key={step.label}>
@@ -277,11 +308,15 @@ function AnalysisDetails({ item, onShowResult }) {
                       stepState === 'complete' ||
                       (['running', 'failed'].includes(stepState) && checkIndex === 0)
                         ? 'complete'
-                        : stepState === 'running' && checkIndex === 1
-                          ? 'running'
-                          : stepState === 'failed' && checkIndex === 1
-                            ? 'failed'
-                            : 'pending';
+                        : stepState === 'stopped' && checkIndex === 0
+                          ? 'stopped'
+                          : stepState === 'running' && checkIndex === 1
+                            ? 'running'
+                            : stepState === 'failed' && checkIndex === 1
+                              ? 'failed'
+                              : stepState === 'stopped' && checkIndex === 1
+                                ? 'stopped'
+                                : 'pending';
                     return (
                       <p key={check} className="flex gap-3">
                         <span className="shrink-0 select-none text-slate-400">
@@ -295,7 +330,9 @@ function AnalysisDetails({ item, onShowResult }) {
                                 ? 'text-blue-600'
                                 : checkState === 'failed'
                                   ? 'text-amber-600'
-                                  : 'text-slate-400'
+                                  : checkState === 'stopped'
+                                    ? 'text-red-600'
+                                    : 'text-slate-400'
                           }
                         >
                           {checkState === 'complete'
@@ -304,7 +341,9 @@ function AnalysisDetails({ item, onShowResult }) {
                               ? '●'
                               : checkState === 'failed'
                                 ? '!'
-                                : '○'}{' '}
+                                : checkState === 'stopped'
+                                  ? '×'
+                                  : '○'}{' '}
                           {check} —{' '}
                           {checkState === 'complete'
                             ? '확인 완료'
@@ -312,7 +351,9 @@ function AnalysisDetails({ item, onShowResult }) {
                               ? '확인 중'
                               : checkState === 'failed'
                                 ? '확인 실패'
-                                : '대기'}
+                                : checkState === 'stopped'
+                                  ? '검사 중지'
+                                  : '대기'}
                         </span>
                       </p>
                     );
@@ -324,20 +365,27 @@ function AnalysisDetails({ item, onShowResult }) {
         })}
       </ol>
       <div
-        className={`flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-sm leading-6 sm:px-6 ${needsReview ? 'border-amber-100 bg-amber-50/70 text-amber-700' : status === '분석 완료' ? 'border-emerald-100 bg-emerald-50/60 text-emerald-700' : isWaiting ? 'border-slate-100 bg-slate-50/60 text-slate-600' : 'border-blue-100 bg-blue-50/60 text-blue-700'}`}
+        className={`flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-sm leading-6 sm:px-6 ${needsReview ? 'border-amber-100 bg-amber-50/70 text-amber-700' : isStopped ? 'border-red-100 bg-red-50/70 text-red-700' : status === '분석 완료' ? 'border-emerald-100 bg-emerald-50/60 text-emerald-700' : isWaiting ? 'border-slate-100 bg-slate-50/60 text-slate-600' : 'border-blue-100 bg-blue-50/60 text-blue-700'}`}
       >
         <p className="min-w-0 flex-1">
           {needsReview
             ? '웹사이트 정보를 충분히 수집하지 못해 검사가 중단되었습니다. 접근 상태와 공개 정보를 확인한 후 다시 검사해 주세요.'
-            : status === '분석 완료'
-              ? '모든 검사가 완료되었습니다. 분석 결과에서 AI 서비스 식별 내용을 확인해 주세요.'
-              : isWaiting
-                ? '분석 요청이 접수되었습니다. 잠시 후 웹사이트 검사를 시작합니다.'
-                : '웹사이트 공개 정보와 Intelligence DB를 순서대로 검사하고 있습니다.'}
+            : isStopped
+              ? '사용자가 분석을 중지했습니다. 완료된 단계의 검사 기록은 이력에 보관됩니다.'
+              : status === '분석 완료'
+                ? '모든 검사가 완료되었습니다. 분석 결과에서 AI 서비스 식별 내용을 확인해 주세요.'
+                : isWaiting
+                  ? '분석 요청이 접수되었습니다. 잠시 후 웹사이트 검사를 시작합니다.'
+                  : '웹사이트 공개 정보와 Intelligence DB를 순서대로 검사하고 있습니다.'}
         </p>
         {status === '분석 완료' && (
           <AiStoreActionButton size="small" variant="success" onClick={onShowResult}>
             분석 결과 확인
+          </AiStoreActionButton>
+        )}
+        {(isWaiting || isRunning) && (
+          <AiStoreActionButton size="small" variant="danger" onClick={onStop}>
+            분석 중지
           </AiStoreActionButton>
         )}
       </div>
@@ -540,6 +588,7 @@ export default function UrlAnalysisPage() {
   const [openHistoryId, setOpenHistoryId] = useState(submittedAnalysis?.id ?? null);
   const [searchInput, setSearchInput] = useState('');
   const [activeTab, setActiveTab] = useState('전체');
+  const [stopTarget, setStopTarget] = useState(null);
   const selected = history.find(item => item.id === selectedId);
   const hasRunningAnalysis = history.some(
     item => item.autoProgress && ['대기', '진행 중'].includes(getAnalysisStatus(item))
@@ -566,6 +615,8 @@ export default function UrlAnalysisPage() {
             ...item,
             progress: nextProgress,
             analysisStatus: nextProgress === analysisSteps.length ? '분석 완료' : '진행 중',
+            ip: item.ip === '조회 대기' ? '203.0.113.80' : item.ip,
+            ips: item.ip === '조회 대기' ? ['203.0.113.80', '2001:db8::80'] : item.ips,
           };
         })
       );
@@ -585,13 +636,43 @@ export default function UrlAnalysisPage() {
     () =>
       history.filter(
         item =>
-          `${item.domain} ${item.ai} ${item.kind} ${item.db} ${item.time}`
+          `${item.domain} ${item.url} ${item.ip} ${item.ai} ${item.kind} ${item.db} ${item.time}`
             .toLowerCase()
             .includes(searchInput.trim().toLowerCase()) &&
           (activeTab === '전체' || getAnalysisStatus(item) === activeTab)
       ),
     [history, searchInput, activeTab]
   );
+
+  const requestStopAnalysis = item => {
+    setHistory(items =>
+      items.map(historyItem =>
+        historyItem.id === item.id ? { ...historyItem, autoProgress: false } : historyItem
+      )
+    );
+    setStopTarget({ ...item, resumeAutoProgress: item.autoProgress });
+  };
+
+  const closeStopConfirmation = () => {
+    if (stopTarget?.resumeAutoProgress) {
+      setHistory(items =>
+        items.map(item => (item.id === stopTarget.id ? { ...item, autoProgress: true } : item))
+      );
+    }
+    setStopTarget(null);
+  };
+
+  const confirmStopAnalysis = () => {
+    if (!stopTarget) return;
+    setHistory(items =>
+      items.map(item =>
+        item.id === stopTarget.id
+          ? { ...item, analysisStatus: '중지됨', autoProgress: false }
+          : item
+      )
+    );
+    setStopTarget(null);
+  };
 
   return (
     <div className="w-full text-slate-900">
@@ -633,7 +714,6 @@ export default function UrlAnalysisPage() {
         <div className="grid gap-2">
           {visible.map(item => {
             const isOpen = openHistoryId === item.id;
-            const status = getAnalysisStatus(item);
 
             return (
               <article
@@ -661,25 +741,24 @@ export default function UrlAnalysisPage() {
                         {item.domain}
                       </span>
                       <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
-                        <span className="truncate">
-                          {status === '대기'
-                            ? '검사 대기'
-                            : status === '진행 중'
-                              ? '웹사이트 검사 진행 중'
-                              : status === '검토 필요'
-                                ? '진행 중 문제 발생'
-                                : item.kind}
+                        <span className="truncate" title={item.url ?? `https://${item.domain}/`}>
+                          {item.url ?? `https://${item.domain}/`}
                         </span>
                         <span className="shrink-0 text-slate-300">·</span>
-                        <span className="shrink-0">{item.db}</span>
+                        <span
+                          className="shrink-0 font-mono text-[13px] text-slate-500"
+                          title={item.ips?.length ? item.ips.join(', ') : item.ip}
+                        >
+                          접속 IP {getIpSummary(item)}
+                        </span>
                       </span>
                     </span>
                   </span>
-                  <span className="hidden shrink-0 text-sm text-slate-500 md:inline">
-                    <span className="sr-only">분석 일시 </span>
+                  <span className="mr-4 hidden w-44 shrink-0 text-right text-sm text-slate-500 md:inline">
+                    <span className="sr-only">검사 시작 일시 </span>
                     {item.time}
                   </span>
-                  <span className="flex shrink-0 items-center gap-3">
+                  <span className="flex w-32 shrink-0 items-center justify-end gap-3">
                     <AnalysisStatus item={item} />
                     <ChevronDown
                       size={19}
@@ -689,7 +768,11 @@ export default function UrlAnalysisPage() {
                   </span>
                 </button>
                 {isOpen && (
-                  <AnalysisDetails item={item} onShowResult={() => setSelectedId(item.id)} />
+                  <AnalysisDetails
+                    item={item}
+                    onShowResult={() => setSelectedId(item.id)}
+                    onStop={() => requestStopAnalysis(item)}
+                  />
                 )}
               </article>
             );
@@ -704,6 +787,17 @@ export default function UrlAnalysisPage() {
       {selected && (
         <DetailModal key={selected.id} item={selected} onClose={() => setSelectedId(null)} />
       )}
+      <AiStoreConfirmModal
+        open={Boolean(stopTarget)}
+        title="분석을 중지할까요?"
+        confirmLabel="분석 중지"
+        cancelLabel="계속 분석"
+        onClose={closeStopConfirmation}
+        onConfirm={confirmStopAnalysis}
+      >
+        <strong className="font-semibold text-slate-900">{stopTarget?.domain}</strong> 분석을
+        중지합니다. 완료된 단계의 검사 기록은 이력에 보관됩니다.
+      </AiStoreConfirmModal>
     </div>
   );
 }
