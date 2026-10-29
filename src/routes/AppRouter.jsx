@@ -35,6 +35,7 @@ import DashboardPage from '../pages/admin/dashboard/DashboardPage.jsx';
 // ================================
 import UrlAnalysisPage from '../pages/admin/discover/url-analysis/UrlAnalysisPage.jsx';
 import NewUrlAnalysisPage from '../pages/admin/discover/url-analysis/NewUrlAnalysisPage.jsx';
+import UrlAnalysisDetailPage from '../pages/admin/discover/url-analysis/UrlAnalysisDetailPage.jsx';
 import IntelligencePage from '../pages/admin/discover/intelligence/IntelligencePage.jsx';
 
 // ================================
@@ -176,6 +177,7 @@ export default function AppRouter() {
             <Route path="intelligence" element={<IntelligencePage />} />
             <Route element={<AdminDetailLayout />}>
               <Route path="url-analysis/new" element={<NewUrlAnalysisPage />} />
+              <Route path="url-analysis/:analysisId" element={<UrlAnalysisDetailPage />} />
             </Route>
           </Route>
 

@@ -42,6 +42,10 @@ export default function NewUrlAnalysisPage() {
           analysisStatus: nextProgress === ANALYSIS_STEP_COUNT ? '분석 완료' : '진행 중',
           ip: nextProgress > 0 ? '203.0.113.80' : current.ip,
           ips: nextProgress > 0 ? ['203.0.113.80', '2001:db8::80'] : current.ips,
+          ai: nextProgress === ANALYSIS_STEP_COUNT ? 'AI 서비스' : current.ai,
+          kind: nextProgress === ANALYSIS_STEP_COUNT ? '생성형 AI' : current.kind,
+          db: nextProgress === ANALYSIS_STEP_COUNT ? '신규 후보' : current.db,
+          confidence: nextProgress === ANALYSIS_STEP_COUNT ? 91 : current.confidence,
         };
       });
     }, 900);
@@ -189,8 +193,8 @@ export default function NewUrlAnalysisPage() {
             <AiStoreActionButton
               variant="success"
               onClick={() =>
-                navigate('/admin/discover/url-analysis', {
-                  state: { submittedAnalysis: analysis },
+                navigate(`/admin/discover/url-analysis/${analysis.id}`, {
+                  state: { analysis },
                 })
               }
             >

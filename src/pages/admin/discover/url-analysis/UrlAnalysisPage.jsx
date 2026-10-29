@@ -404,19 +404,24 @@ export function AnalysisDetails({
   );
 }
 
-export function AnalysisCard({ item, open, onToggle, onShowResult, onStop }) {
+export function AnalysisCard({ item, open, onToggle, onOpenDetail, onShowResult, onStop }) {
+  const canOpenDetail = getAnalysisStatus(item) === '분석 완료';
+
   return (
     <article
       className={`group relative min-w-0 overflow-hidden rounded-xl border transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20 ${open ? 'border-slate-200 bg-[#f5f5f5] shadow-sm' : 'border-transparent'}`}
     >
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        aria-controls={`analysis-detail-${item.id}`}
-        className="flex min-h-[82px] w-full cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left"
-      >
-        <span className="flex min-w-0 flex-1 items-center gap-4">
+      <div className="flex min-h-[82px] w-full items-center gap-4 rounded-xl px-3 py-3 text-left">
+        <button
+          type="button"
+          onClick={canOpenDetail ? onOpenDetail : onToggle}
+          className="flex min-w-0 flex-1 items-center gap-4 text-left"
+          aria-label={
+            canOpenDetail
+              ? `${item.domain} 분석 상세 보기`
+              : `${item.domain} 분석 진행 내역 ${open ? '접기' : '펼치기'}`
+          }
+        >
           <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
             <Globe2 size={24} strokeWidth={1.8} aria-hidden="true" />
           </span>
@@ -440,20 +445,29 @@ export function AnalysisCard({ item, open, onToggle, onShowResult, onStop }) {
               </span>
             </span>
           </span>
-        </span>
+        </button>
         <span className="mr-4 hidden w-44 shrink-0 text-right text-sm text-slate-500 md:inline">
           <span className="sr-only">검사 시작 일시 </span>
           {item.time}
         </span>
         <span className="flex w-32 shrink-0 items-center justify-end gap-3">
           <AnalysisStatus item={item} />
-          <ChevronDown
-            size={19}
-            className={`shrink-0 text-slate-500 transition-transform ${open ? 'rotate-180' : ''}`}
-            aria-hidden="true"
-          />
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-expanded={open}
+            aria-controls={`analysis-detail-${item.id}`}
+            aria-label={`${item.domain} 분석 진행 내역 ${open ? '접기' : '펼치기'}`}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-500 hover:bg-slate-100"
+          >
+            <ChevronDown
+              size={19}
+              className={`transition-transform ${open ? 'rotate-180' : ''}`}
+              aria-hidden="true"
+            />
+          </button>
         </span>
-      </button>
+      </div>
       {open && <AnalysisDetails item={item} onShowResult={onShowResult} onStop={onStop} />}
     </article>
   );
@@ -650,12 +664,10 @@ export default function UrlAnalysisPage() {
         ]
       : sampleHistory
   );
-  const [selectedId, setSelectedId] = useState(null);
   const [openHistoryId, setOpenHistoryId] = useState(submittedAnalysis?.id ?? null);
   const [searchInput, setSearchInput] = useState('');
   const [activeTab, setActiveTab] = useState('전체');
   const [stopTarget, setStopTarget] = useState(null);
-  const selected = history.find(item => item.id === selectedId);
   const hasRunningAnalysis = history.some(
     item => item.autoProgress && ['대기', '진행 중'].includes(getAnalysisStatus(item))
   );
@@ -785,7 +797,12 @@ export default function UrlAnalysisPage() {
                 item={item}
                 open={isOpen}
                 onToggle={() => setOpenHistoryId(current => (current === item.id ? null : item.id))}
-                onShowResult={() => setSelectedId(item.id)}
+                onOpenDetail={() =>
+                  navigate(`/admin/discover/url-analysis/${item.id}`, { state: { analysis: item } })
+                }
+                onShowResult={() =>
+                  navigate(`/admin/discover/url-analysis/${item.id}`, { state: { analysis: item } })
+                }
                 onStop={() => requestStopAnalysis(item)}
               />
             );
@@ -797,9 +814,6 @@ export default function UrlAnalysisPage() {
           )}
         </div>
       </section>
-      {selected && (
-        <DetailModal key={selected.id} item={selected} onClose={() => setSelectedId(null)} />
-      )}
       <AiStoreConfirmModal
         open={Boolean(stopTarget)}
         title="분석을 중지할까요?"
