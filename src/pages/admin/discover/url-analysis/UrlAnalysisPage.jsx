@@ -412,15 +412,7 @@ export function AnalysisDetails({
   );
 }
 
-export function AnalysisCard({
-  item,
-  open,
-  onToggle,
-  onOpenDetail,
-  onShowResult,
-  onStop,
-  onRetry,
-}) {
+export function AnalysisCard({ item, open, onToggle, onShowResult, onStop, onRetry }) {
   const canOpenDetail = getAnalysisStatus(item) === '분석 완료';
 
   return (
@@ -430,13 +422,11 @@ export function AnalysisCard({
       <div className="flex min-h-[82px] w-full items-center gap-4 rounded-xl px-3 py-3 text-left">
         <button
           type="button"
-          onClick={canOpenDetail ? onOpenDetail : onToggle}
+          onClick={onToggle}
           className="flex min-w-0 flex-1 items-center gap-4 text-left"
-          aria-label={
-            canOpenDetail
-              ? `${item.domain} 분석 상세 보기`
-              : `${item.domain} 분석 진행 내역 ${open ? '접기' : '펼치기'}`
-          }
+          aria-expanded={open}
+          aria-controls={`analysis-detail-${item.id}`}
+          aria-label={`${item.domain} 분석 진행 내역 ${open ? '접기' : '펼치기'}`}
         >
           <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
             <Globe2 size={24} strokeWidth={1.8} aria-hidden="true" />
@@ -834,9 +824,6 @@ export default function UrlAnalysisPage() {
                 item={item}
                 open={isOpen}
                 onToggle={() => setOpenHistoryId(current => (current === item.id ? null : item.id))}
-                onOpenDetail={() =>
-                  navigate(`/admin/discover/url-analysis/${item.id}`, { state: { analysis: item } })
-                }
                 onShowResult={() =>
                   navigate(`/admin/discover/url-analysis/${item.id}`, { state: { analysis: item } })
                 }

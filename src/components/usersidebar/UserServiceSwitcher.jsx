@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown } from 'lucide-react';
+import { Bot, Check, ChevronDown, Store } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const services = [
@@ -18,11 +18,9 @@ const services = [
 ];
 
 function ServiceIcon({ serviceId }) {
-  if (serviceId === 'ondam') {
-    return <img src="/simbol.png" alt="" className="h-6 w-6 object-contain" />;
-  }
+  const Icon = serviceId === 'ondam' ? Bot : Store;
 
-  return <img src="/store.png" alt="" className="h-6 w-6 object-contain" />;
+  return <Icon className="h-5 w-5 shrink-0 text-[#303030]" strokeWidth={1.75} aria-hidden="true" />;
 }
 
 export default function UserServiceSwitcher({ className = '' }) {
