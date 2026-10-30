@@ -5,6 +5,8 @@ import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import zipFileImage from '../../../../assets/images/zipfile.png';
 import {
   cancelReviewRequest,
+  isReviewRunning,
+  isReviewWaiting,
   MOCK_TOOL_UPDATE_REVIEW,
   normalizeReviewStatus,
   REVIEW_REQUESTS_KEY,
@@ -17,6 +19,37 @@ import ReviewProgress from '../components/ReviewProgress.jsx';
 const reviewTabs = ['전체', '심사 중', '승인 완료', '반려'];
 const MOCK_UPLOADS = [
   MOCK_TOOL_UPDATE_REVIEW,
+  {
+    id: 'mock-data-export-rereview',
+    previousRequestId: 'mock-data-export',
+    name: '고객 데이터 내보내기',
+    fileName: 'customer_data_export_v0.9.1.zip',
+    size: '1.3 MB',
+    createdAt: '2026. 10. 30. 10:25',
+    summary: '고객 데이터를 권한과 마스킹 정책에 따라 안전하게 내보내는 도구',
+    type: '자동화 도구',
+    category: '데이터·분석',
+    description:
+      '고객 데이터를 선택한 조건과 권한 범위에 따라 조회하고 개인정보를 마스킹해 내보냅니다.',
+    features:
+      '개인정보 자동 마스킹, 다운로드 권한 확인, 기간과 고객 유형별 데이터 조회를 지원합니다.',
+    instructions:
+      '조회 조건을 선택한 뒤 권한 확인과 마스킹 미리보기를 거쳐 결과 파일을 저장합니다.',
+    version: '0.9.1',
+    supportEnvironment: {
+      audience: 'PC (사내망)',
+      operatingSystem: 'Windows 10 이상, macOS 13 이상',
+      browser: 'Chrome, Edge 최신 버전',
+      other: '고객 데이터 다운로드 권한 필요',
+    },
+    requestType: '재심사',
+    originalRequestType: '신규 등록',
+    status: '재심사 진행중',
+    isResubmission: true,
+    resubmissionCount: 1,
+    rereviewStage: 'admin',
+    reviewStartedAt: '2026-10-30T01:25:00.000Z',
+  },
   {
     id: 'mock-contract-review',
     name: '계약서 검토 도우미',
@@ -64,6 +97,7 @@ const MOCK_UPLOADS = [
       other: '사내 네트워크 연결 필요',
     },
     status: '반려',
+    rereviewStage: 'admin',
     rejectionReason:
       '고객 개인정보가 포함된 원본 데이터를 외부 파일로 저장할 수 있습니다. 개인정보 마스킹과 다운로드 권한 제한을 적용한 후 다시 요청해 주세요.',
   },
@@ -112,11 +146,14 @@ const updateReviewSteps = [
 ];
 
 function ReviewDetails({ upload, onCancel, onRetry }) {
-  const steps = upload.requestType === '업데이트' ? updateReviewSteps : reviewSteps;
+  const originalRequestType = upload.originalRequestType ?? upload.requestType;
+  const steps = originalRequestType === '업데이트' ? updateReviewSteps : reviewSteps;
   const progressUpload = {
     ...upload,
     displayLabel:
-      upload.requestType === '업데이트' ? `업데이트 요청 · v${upload.version}` : upload.fileName,
+      originalRequestType === '업데이트'
+        ? `${upload.requestType === '재심사' ? '업데이트 재심사' : '업데이트 요청'} · v${upload.version}`
+        : upload.fileName,
   };
   return (
     <ReviewProgress upload={progressUpload} steps={steps} onCancel={onCancel} onRetry={onRetry} />
@@ -130,7 +167,7 @@ function ReviewStatus({ status }) {
     ? 'text-emerald-600'
     : isRejected
       ? 'text-red-600'
-      : status === '심사 진행중'
+      : isReviewRunning(status)
         ? 'text-blue-600'
         : 'text-slate-500';
 
@@ -138,7 +175,7 @@ function ReviewStatus({ status }) {
     <span
       className={`inline-flex items-center gap-1.5 text-[clamp(0.86rem,1vw,0.94rem)] font-semibold whitespace-nowrap ${color}`}
     >
-      {status === '심사 진행중' && (
+      {isReviewRunning(status) && (
         <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
       )}
       {status}
@@ -147,7 +184,7 @@ function ReviewStatus({ status }) {
 }
 
 function reviewStatusTab(status) {
-  if (['심사 대기', '심사 진행중'].includes(status)) return '심사 중';
+  if (isReviewWaiting(status) || isReviewRunning(status)) return '심사 중';
   return status;
 }
 
@@ -239,105 +276,113 @@ export default function RegisterPage() {
       <section className="mt-5">
         {filteredUploads.length ? (
           <div className="grid gap-2">
-            {filteredUploads.map(upload => (
-              <article
-                key={upload.id}
-                className={`group relative min-w-0 rounded-xl border transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20 ${openUploadId === upload.id ? 'border-slate-200 bg-[#f5f5f5] shadow-sm' : 'border-transparent'}`}
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOpenUploadId(current => (current === upload.id ? null : upload.id))
-                  }
-                  aria-expanded={openUploadId === upload.id}
-                  aria-controls={`review-detail-${upload.id}`}
-                  className="flex min-h-[82px] w-full cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left"
+            {filteredUploads.map(upload => {
+              const originalRequestType = upload.originalRequestType ?? upload.requestType;
+              const isUpdateRequest = originalRequestType === '업데이트';
+              const isResubmission = upload.isResubmission || upload.requestType === '재심사';
+
+              return (
+                <article
+                  key={upload.id}
+                  className={`group relative min-w-0 rounded-xl border transition hover:z-20 hover:border-slate-100 hover:bg-[#f5f5f5] hover:shadow-sm focus-within:z-20 ${openUploadId === upload.id ? 'border-slate-200 bg-[#f5f5f5] shadow-sm' : 'border-transparent'}`}
                 >
-                  <span className="flex min-w-0 flex-1 items-center gap-4">
-                    {upload.iconData ? (
-                      <img
-                        src={upload.iconData}
-                        alt=""
-                        className="h-12 w-12 shrink-0 rounded-xl border border-slate-200 bg-white object-cover"
-                        aria-hidden="true"
-                      />
-                    ) : upload.requestType === '업데이트' ? (
-                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
-                        <RefreshCw size={24} strokeWidth={1.8} aria-hidden="true" />
-                      </span>
-                    ) : (
-                      <img
-                        src={zipFileImage}
-                        alt=""
-                        className="h-12 w-12 shrink-0 object-contain"
-                        aria-hidden="true"
-                      />
-                    )}
-                    <span className="min-w-0 flex-1">
-                      <span className="flex min-w-0 items-center gap-2">
-                        <span
-                          className="min-w-0 truncate text-base font-semibold text-slate-900"
-                          title={upload.name}
-                        >
-                          {upload.name}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenUploadId(current => (current === upload.id ? null : upload.id))
+                    }
+                    aria-expanded={openUploadId === upload.id}
+                    aria-controls={`review-detail-${upload.id}`}
+                    className="flex min-h-[82px] w-full cursor-pointer items-center gap-4 rounded-xl px-3 py-3 text-left"
+                  >
+                    <span className="flex min-w-0 flex-1 items-center gap-4">
+                      {upload.iconData ? (
+                        <img
+                          src={upload.iconData}
+                          alt=""
+                          className="h-12 w-12 shrink-0 rounded-xl border border-slate-200 bg-white object-cover"
+                          aria-hidden="true"
+                        />
+                      ) : isUpdateRequest || isResubmission ? (
+                        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
+                          <RefreshCw size={24} strokeWidth={1.8} aria-hidden="true" />
                         </span>
-                        <span
-                          className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${
-                            upload.requestType === '업데이트'
-                              ? 'border-blue-600 bg-blue-600 text-white'
-                              : 'border-slate-200 bg-white text-slate-600'
-                          }`}
-                        >
-                          {upload.requestType === '업데이트' ? '업데이트' : '신규 등록'}
+                      ) : (
+                        <img
+                          src={zipFileImage}
+                          alt=""
+                          className="h-12 w-12 shrink-0 object-contain"
+                          aria-hidden="true"
+                        />
+                      )}
+                      <span className="min-w-0 flex-1">
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span
+                            className="min-w-0 truncate text-base font-semibold text-slate-900"
+                            title={upload.name}
+                          >
+                            {upload.name}
+                          </span>
+                          <span
+                            className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${
+                              isResubmission
+                                ? 'border-violet-200 bg-violet-50 text-violet-700'
+                                : isUpdateRequest
+                                  ? 'border-blue-600 bg-blue-600 text-white'
+                                  : 'border-slate-200 bg-white text-slate-600'
+                            }`}
+                          >
+                            {isResubmission ? '재심사' : isUpdateRequest ? '업데이트' : '신규 등록'}
+                          </span>
                         </span>
-                      </span>
-                      <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
-                        <span className="truncate" title={upload.fileName || 'ZIP 파일 미첨부'}>
-                          {upload.fileName || 'ZIP 파일 미첨부'}
+                        <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
+                          <span className="truncate" title={upload.fileName || 'ZIP 파일 미첨부'}>
+                            {upload.fileName || 'ZIP 파일 미첨부'}
+                          </span>
+                          <span className="shrink-0 text-slate-300">·</span>
+                          <span className="shrink-0">{upload.size || '미첨부'}</span>
+                          {isUpdateRequest && upload.version && (
+                            <>
+                              <span className="shrink-0 text-slate-300">·</span>
+                              <span className="shrink-0 font-medium text-blue-600">
+                                {upload.previousVersion
+                                  ? `v${upload.previousVersion} → v${upload.version}`
+                                  : `v${upload.version}`}
+                              </span>
+                            </>
+                          )}
                         </span>
-                        <span className="shrink-0 text-slate-300">·</span>
-                        <span className="shrink-0">{upload.size || '미첨부'}</span>
-                        {upload.requestType === '업데이트' && upload.version && (
-                          <>
-                            <span className="shrink-0 text-slate-300">·</span>
-                            <span className="shrink-0 font-medium text-blue-600">
-                              {upload.previousVersion
-                                ? `v${upload.previousVersion} → v${upload.version}`
-                                : `v${upload.version}`}
-                            </span>
-                          </>
-                        )}
                       </span>
                     </span>
-                  </span>
-                  <span className="mr-4 hidden w-44 shrink-0 text-right text-sm text-slate-500 md:inline">
-                    <span className="sr-only">목록 추가 </span>
-                    {upload.createdAt}
-                  </span>
-                  <span className="flex w-32 shrink-0 items-center justify-end gap-3">
-                    <ReviewStatus status={upload.status} />
-                    <ChevronDown
-                      size={19}
-                      className={`shrink-0 text-slate-500 transition-transform ${openUploadId === upload.id ? 'rotate-180' : ''}`}
-                      aria-hidden="true"
+                    <span className="mr-4 hidden w-44 shrink-0 text-right text-sm text-slate-500 md:inline">
+                      <span className="sr-only">목록 추가 </span>
+                      {upload.createdAt}
+                    </span>
+                    <span className="flex w-32 shrink-0 items-center justify-end gap-3">
+                      <ReviewStatus status={upload.status} />
+                      <ChevronDown
+                        size={19}
+                        className={`shrink-0 text-slate-500 transition-transform ${openUploadId === upload.id ? 'rotate-180' : ''}`}
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </button>
+                  {openUploadId === upload.id && (
+                    <ReviewDetails
+                      upload={upload}
+                      onCancel={() => {
+                        setCancelError('');
+                        setReviewAction({ action: 'cancel', upload });
+                      }}
+                      onRetry={() => {
+                        setCancelError('');
+                        setReviewAction({ action: 'retry', upload });
+                      }}
                     />
-                  </span>
-                </button>
-                {openUploadId === upload.id && (
-                  <ReviewDetails
-                    upload={upload}
-                    onCancel={() => {
-                      setCancelError('');
-                      setReviewAction({ action: 'cancel', upload });
-                    }}
-                    onRetry={() => {
-                      setCancelError('');
-                      setReviewAction({ action: 'retry', upload });
-                    }}
-                  />
-                )}
-              </article>
-            ))}
+                  )}
+                </article>
+              );
+            })}
           </div>
         ) : keyword ? (
           <p className="py-12 text-center text-sm text-slate-500">
@@ -363,9 +408,9 @@ export default function RegisterPage() {
           title={
             reviewAction.action === 'cancel'
               ? '심사를 취소하시겠습니까?'
-              : '수정 후 다시 요청하시겠습니까?'
+              : '수정 후 재심사를 요청하시겠습니까?'
           }
-          confirmLabel={reviewAction.action === 'cancel' ? '심사 취소' : '수정 후 다시 요청'}
+          confirmLabel={reviewAction.action === 'cancel' ? '심사 취소' : '재심사 요청'}
           error={cancelError}
           onClose={() => {
             setReviewAction(null);
@@ -389,7 +434,8 @@ export default function RegisterPage() {
           ) : (
             <>
               <strong className="font-semibold text-slate-900">{reviewAction.upload.name}</strong>의
-              기존 정보를 불러옵니다. 반려 사유를 보완하고 ZIP 파일을 다시 첨부해 주세요.
+              기존 정보를 불러옵니다. 반려 사유를 보완하고 ZIP 파일을 다시 첨부한 후 재심사를 요청해
+              주세요.
             </>
           )}
         </AiStoreConfirmModal>

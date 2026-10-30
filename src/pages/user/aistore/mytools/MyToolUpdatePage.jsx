@@ -14,6 +14,7 @@ import {
   CURRENT_TOOL_MAKER,
   formatReviewDate,
   getActiveToolUpdateReview,
+  isReviewRunning,
 } from '../data/reviewRequests.js';
 
 function formatSize(bytes) {
@@ -80,7 +81,7 @@ export default function MyToolUpdatePage() {
     return (
       <div className="mx-auto w-full max-w-4xl py-20 text-center">
         <span
-          className={`inline-flex rounded-md px-2.5 py-1 text-xs font-medium ${activeUpdate.status === '심사 진행중' ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600'}`}
+          className={`inline-flex rounded-md px-2.5 py-1 text-xs font-medium ${isReviewRunning(activeUpdate.status) ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600'}`}
         >
           업데이트 {activeUpdate.status}
         </span>
@@ -96,7 +97,7 @@ export default function MyToolUpdatePage() {
           </AiStoreActionButton>
           <AiStoreActionButton
             to="/user/aistore/register"
-            state={{ openReviewId: activeUpdate.id, activeTab: activeUpdate.status }}
+            state={{ openReviewId: activeUpdate.id, activeTab: '심사 중' }}
           >
             심사 진행 내역 보기
           </AiStoreActionButton>

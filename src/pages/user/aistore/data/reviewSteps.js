@@ -1,6 +1,10 @@
 export const ZIP_PREPARATION_DURATION_MS = 2_000;
 export const AUTOMATED_REVIEW_DURATION_MS = 20_000;
 
+export function normalizeRereviewStage(stage) {
+  return ['zip', 'security', 'admin'].includes(stage) ? stage : 'zip';
+}
+
 export const reviewSteps = [
   {
     label: 'ZIP 정보 준비',

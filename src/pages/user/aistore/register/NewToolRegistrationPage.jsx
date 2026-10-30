@@ -8,6 +8,7 @@ import {
   EMPTY_SUPPORT_ENVIRONMENT,
   MAX_SCREENSHOTS,
 } from '../components/toolRegistrationConfig.js';
+import { normalizeRereviewStage } from '../data/reviewSteps.js';
 import { addReviewRequest, CURRENT_TOOL_MAKER, formatReviewDate } from '../data/reviewRequests.js';
 
 const initialForm = {
@@ -178,7 +179,9 @@ export default function NewToolRegistrationPage() {
       ...form,
       ...CURRENT_TOOL_MAKER,
       id: `upload-${now.getTime()}-${Math.random().toString(36).slice(2)}`,
-      requestType: resubmissionDraft?.requestType ?? '신규 등록',
+      requestType: resubmissionDraft ? '재심사' : '신규 등록',
+      originalRequestType:
+        resubmissionDraft?.originalRequestType ?? resubmissionDraft?.requestType ?? '신규 등록',
       previousRequestId: resubmissionDraft?.id,
       fileName: selectedFile.name,
       name: form.name.trim(),
@@ -194,7 +197,10 @@ export default function NewToolRegistrationPage() {
       createdAt: submittedAt,
       updatedAt: submittedAt,
       versionHistory: [{ version: form.version.trim(), updatedAt: submittedAt }],
-      status: '심사 진행중',
+      status: resubmissionDraft ? '재심사 진행중' : '심사 진행중',
+      isResubmission: Boolean(resubmissionDraft),
+      resubmissionCount: (resubmissionDraft?.resubmissionCount ?? 0) + (resubmissionDraft ? 1 : 0),
+      rereviewStage: normalizeRereviewStage(resubmissionDraft?.rereviewStage),
       reviewStartedAt: now.toISOString(),
     };
 
@@ -220,11 +226,11 @@ export default function NewToolRegistrationPage() {
       <form onSubmit={submit} noValidate className="mt-2">
         <header className="py-8 sm:py-10">
           <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
-            {resubmissionDraft ? '도구 수정 후 다시 요청' : '새 도구 등록'}
+            {resubmissionDraft ? '도구 수정 후 재심사 요청' : '새 도구 등록'}
           </h1>
           <p className="mt-4 max-w-3xl text-[15px] leading-7 text-slate-600">
             {resubmissionDraft
-              ? '반려 사유를 확인하고 필요한 정보를 수정한 후 다시 요청하세요.'
+              ? '반려 사유를 확인하고 필요한 정보를 수정한 후 재심사를 요청하세요.'
               : 'ZIP 파일과 도구 정보를 입력한 후 승인을 요청하세요.'}
           </p>
         </header>
@@ -330,7 +336,7 @@ export default function NewToolRegistrationPage() {
             취소
           </AiStoreActionButton>
           <AiStoreActionButton type="submit">
-            {resubmissionDraft ? '다시 승인 요청' : '승인 요청'}
+            {resubmissionDraft ? '재심사 요청' : '승인 요청'}
           </AiStoreActionButton>
         </div>
       </form>

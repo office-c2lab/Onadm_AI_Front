@@ -121,6 +121,8 @@ export default function SecurityPage() {
               const status = getReviewStatus(item);
               const isOpen = openRequestId === item.id;
               const canDownload = canDownloadReviewFile(item);
+              const isResubmission = item.requestType === '재심사';
+              const isChangedRequest = item.requestType === '업데이트' || isResubmission;
 
               return (
                 <article
@@ -139,8 +141,10 @@ export default function SecurityPage() {
                       className="absolute inset-0 z-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
                     />
                     <span className="pointer-events-none relative z-10 flex min-w-0 flex-1 items-center gap-4">
-                      {item.requestType === '업데이트' ? (
-                        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
+                      {isChangedRequest ? (
+                        <span
+                          className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ${isResubmission ? 'bg-violet-50 text-violet-600' : 'bg-blue-50 text-blue-600'}`}
+                        >
                           <RefreshCw size={24} strokeWidth={1.8} aria-hidden="true" />
                         </span>
                       ) : (
@@ -157,7 +161,7 @@ export default function SecurityPage() {
                             {item.name}
                           </strong>
                           <span
-                            className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${item.requestType === '업데이트' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-600'}`}
+                            className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${isResubmission ? 'border-violet-200 bg-violet-50 text-violet-700' : item.requestType === '업데이트' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-600'}`}
                           >
                             {item.requestType}
                           </span>
@@ -186,7 +190,7 @@ export default function SecurityPage() {
                           )}
                           <span className="shrink-0 text-slate-300">·</span>
                           <span className="shrink-0">{item.size}</span>
-                          {item.requestType === '업데이트' && item.version && (
+                          {isChangedRequest && item.version && (
                             <>
                               <span className="shrink-0 text-slate-300">·</span>
                               <span className="shrink-0 font-medium text-blue-600">

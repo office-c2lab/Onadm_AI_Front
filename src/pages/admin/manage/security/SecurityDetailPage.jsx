@@ -25,6 +25,7 @@ import {
   detailContent,
   supportedEnvironment,
 } from '../../../user/aistore/data/storeDetailContent.js';
+import { normalizeRereviewStage, reviewSteps } from '../../../user/aistore/data/reviewSteps.js';
 import { applyReviewDecision, saveReviewDecision } from './reviewDecisionStore.js';
 import {
   canDownloadReviewFile,
@@ -34,6 +35,29 @@ import {
 function formatProcessedAt(date = new Date()) {
   const pad = value => String(value).padStart(2, '0');
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+const rereviewStageOptions = [
+  {
+    value: 'zip',
+    step: reviewSteps[0],
+    description: 'ZIP 정보 준비 단계부터 재심사를 진행합니다.',
+  },
+  {
+    value: 'security',
+    step: reviewSteps[1],
+    description: 'ZIP 정보는 유지하고 파일 제출·보안 심사부터 진행합니다.',
+  },
+  {
+    value: 'admin',
+    step: reviewSteps[2],
+    description: '자동검사 결과는 유지하고 관리자 검토부터 진행합니다.',
+  },
+];
+
+function getRereviewStageLabel(stage) {
+  return rereviewStageOptions.find(option => option.value === normalizeRereviewStage(stage))?.step
+    .label;
 }
 
 export default function SecurityDetailPage() {
@@ -47,6 +71,9 @@ export default function SecurityDetailPage() {
   const [rejectionOpen, setRejectionOpen] = useState(false);
   const [rejectionConfirmOpen, setRejectionConfirmOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState(review?.rejectionReason ?? '');
+  const [rereviewStage, setRereviewStage] = useState(() =>
+    normalizeRereviewStage(review?.rereviewStage)
+  );
   const [rejectionError, setRejectionError] = useState('');
   const decisionHistory =
     !review || review.approval === '대기'
@@ -55,6 +82,7 @@ export default function SecurityDetailPage() {
           result: review.approval === '승인' ? '승인 완료' : '반려',
           processedAt: review.processedAt ?? '처리 일시 정보 없음',
           reason: review.rejectionReason ?? '',
+          rereviewStage: normalizeRereviewStage(review.rereviewStage),
         };
 
   if (!review || !app) {
@@ -109,11 +137,12 @@ export default function SecurityDetailPage() {
         : review.scan === '심사 중'
           ? '자동 심사 진행중'
           : '자동 심사 확인 필요';
-  const completeReview = (result, reason = '') => {
+  const completeReview = (result, reason = '', nextRereviewStage = null) => {
     saveReviewDecision(review.id, {
       approval: result === '승인 완료' ? '승인' : '반려',
       processedAt: formatProcessedAt(),
       rejectionReason: reason,
+      rereviewStage: result === '반려' ? nextRereviewStage : null,
     });
     navigate('/admin/manage/security');
   };
@@ -346,7 +375,10 @@ export default function SecurityDetailPage() {
               ['처리 결과', decisionHistory?.result ?? '처리 전'],
               ['처리 일시', decisionHistory?.processedAt ?? '—'],
               ...(decisionHistory?.result === '반려'
-                ? [['반려 사유', decisionHistory.reason || '반려 사유 정보 없음']]
+                ? [
+                    ['반려 사유', decisionHistory.reason || '반려 사유 정보 없음'],
+                    ['재심사 시작 단계', getRereviewStageLabel(decisionHistory.rereviewStage)],
+                  ]
                 : []),
             ].map(([label, value]) => (
               <div key={label} className="grid gap-1 py-4 sm:grid-cols-[14rem_1fr] sm:gap-4">
@@ -390,6 +422,36 @@ export default function SecurityDetailPage() {
                 placeholder="반려 사유와 필요한 보완 내용을 입력하세요."
                 autoFocus
               />
+              <fieldset className="mt-5">
+                <legend className="text-sm font-semibold text-slate-800">재심사 시작 단계</legend>
+                <div className="mt-2 grid gap-2">
+                  {rereviewStageOptions.map(option => (
+                    <label
+                      key={option.value}
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition ${rereviewStage === option.value ? 'border-blue-400 bg-blue-50/70' : 'border-slate-200 hover:border-slate-300'}`}
+                    >
+                      <input
+                        type="radio"
+                        name="rejection-follow-up"
+                        checked={rereviewStage === option.value}
+                        onChange={() => setRereviewStage(option.value)}
+                        className="mt-0.5 h-4 w-4 accent-blue-600"
+                      />
+                      <span>
+                        <strong className="block text-sm font-semibold text-slate-900">
+                          {option.step.label}
+                        </strong>
+                        <span className="mt-0.5 block text-xs font-semibold text-blue-600">
+                          {option.step.duration}
+                        </span>
+                        <span className="mt-1 block text-xs leading-5 text-slate-500">
+                          {option.description}
+                        </span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
               {rejectionError && (
                 <p role="alert" className="mt-2 text-sm text-red-600">
                   {rejectionError}
@@ -402,6 +464,7 @@ export default function SecurityDetailPage() {
                   onClick={() => {
                     setRejectionOpen(false);
                     setRejectionReason('');
+                    setRereviewStage('zip');
                     setRejectionError('');
                   }}
                 >
@@ -479,12 +542,15 @@ export default function SecurityDetailPage() {
         onClose={() => setRejectionConfirmOpen(false)}
         onConfirm={() => {
           setRejectionConfirmOpen(false);
-          completeReview('반려', rejectionReason);
+          completeReview('반려', rejectionReason, rereviewStage);
         }}
       >
         <strong className="font-semibold text-slate-900">{review.name}</strong>의 심사 요청이
         반려되며 등록자에게 아래 사유가 전달됩니다.
         <p className="mt-3 rounded-lg bg-slate-100 px-3 py-2.5 text-slate-700">{rejectionReason}</p>
+        <p className="mt-2 text-sm font-semibold text-slate-700">
+          재심사 시작 단계: {getRereviewStageLabel(rereviewStage)}
+        </p>
       </AiStoreConfirmModal>
     </>
   );

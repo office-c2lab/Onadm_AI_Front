@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
 import {
   CATEGORY_OPTIONS,
+  CUSTOM_SUPPORT_ENVIRONMENT_OPTION,
   MAX_SCREENSHOTS,
   SUPPORT_ENVIRONMENT_FIELDS,
   TOOL_TYPE_OPTIONS,
@@ -29,6 +31,30 @@ export default function ToolRegistrationFields({
 }) {
   const typeOptions = [...new Set([form.type, ...TOOL_TYPE_OPTIONS])];
   const categoryOptions = [...new Set([form.category, ...CATEGORY_OPTIONS])];
+  const [environmentChoices, setEnvironmentChoices] = useState(() =>
+    Object.fromEntries(
+      SUPPORT_ENVIRONMENT_FIELDS.filter(field => field.options).map(field => {
+        const currentValue = form.supportEnvironment[field.key];
+        const choice = field.options.includes(currentValue)
+          ? currentValue
+          : currentValue
+            ? CUSTOM_SUPPORT_ENVIRONMENT_OPTION
+            : '';
+        return [field.key, choice];
+      })
+    )
+  );
+
+  const selectEnvironmentChoice = (field, value) => {
+    setEnvironmentChoices(current => ({ ...current, [field.key]: value }));
+    if (value !== CUSTOM_SUPPORT_ENVIRONMENT_OPTION) {
+      updateEnvironment(field.key, value);
+      return;
+    }
+    if (field.options.includes(form.supportEnvironment[field.key])) {
+      updateEnvironment(field.key, '');
+    }
+  };
 
   return (
     <>
@@ -176,21 +202,46 @@ export default function ToolRegistrationFields({
       <FormSection title="지원 환경">
         <div className="grid max-w-4xl gap-5 sm:grid-cols-2">
           {SUPPORT_ENVIRONMENT_FIELDS.map(field => (
-            <label
+            <div
               key={field.key}
               className={`text-sm font-medium text-slate-700 ${
                 field.key === 'other' ? 'sm:col-span-2' : ''
               }`}
             >
-              {field.label} {field.required && <span className="text-red-500">*</span>}
-              <input
-                value={form.supportEnvironment[field.key]}
-                onChange={event => updateEnvironment(field.key, event.target.value)}
-                placeholder={field.placeholder}
-                required={field.required}
-                className={inputClass}
-              />
-            </label>
+              <span>
+                {field.label} {field.required && <span className="text-red-500">*</span>}
+              </span>
+              {field.options ? (
+                <>
+                  <CustomDropdown
+                    value={environmentChoices[field.key]}
+                    options={[...field.options, CUSTOM_SUPPORT_ENVIRONMENT_OPTION]}
+                    onChange={value => selectEnvironmentChoice(field, value)}
+                    ariaLabel={`${field.label} 선택`}
+                    placeholder={field.placeholder}
+                    className="mt-2"
+                  />
+                  {environmentChoices[field.key] === CUSTOM_SUPPORT_ENVIRONMENT_OPTION && (
+                    <input
+                      value={form.supportEnvironment[field.key]}
+                      onChange={event => updateEnvironment(field.key, event.target.value)}
+                      placeholder={field.customPlaceholder}
+                      aria-label={`${field.label} 직접 입력`}
+                      required={field.required}
+                      className={inputClass}
+                    />
+                  )}
+                </>
+              ) : (
+                <input
+                  value={form.supportEnvironment[field.key]}
+                  onChange={event => updateEnvironment(field.key, event.target.value)}
+                  placeholder={field.placeholder}
+                  required={field.required}
+                  className={inputClass}
+                />
+              )}
+            </div>
           ))}
         </div>
       </FormSection>

@@ -139,14 +139,17 @@ export default function AppDownloadHistoryPage() {
         <ArrowLeft size={16} /> 앱·에이전트 관리로 돌아가기
       </Link>
 
-      <header className="flex flex-col gap-5 py-8 sm:flex-row sm:items-start sm:justify-between sm:py-10">
-        <div className="flex min-w-0 items-start gap-5">
+      <header className="py-8 sm:py-10">
+        <h1 className="text-sm font-semibold text-blue-600">다운로드 이력</h1>
+        <div className="mt-7 flex min-w-0 items-start gap-5">
           <StoreToolIcon tool={tool} featured />
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-blue-600">다운로드 이력</p>
-            <h1 className="mt-1 text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
+            <h2 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
               {app.name}
-            </h1>
+            </h2>
+            <p className="mt-1.5 text-sm font-semibold text-blue-600">
+              {app.type} · {app.storeCategory || app.category}
+            </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
               이 도구를 다운로드한 사용자와 다운로드 버전 및 일시를 확인합니다.
             </p>

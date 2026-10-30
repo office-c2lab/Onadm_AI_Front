@@ -11,17 +11,18 @@ import {
 import AiStoreActionButton from './AiStoreActionButton.jsx';
 import {
   AUTOMATED_REVIEW_DURATION_MS,
+  normalizeRereviewStage,
   reviewSteps,
   ZIP_PREPARATION_DURATION_MS,
 } from '../data/reviewSteps.js';
-import { CURRENT_TOOL_MAKER } from '../data/reviewRequests.js';
+import { CURRENT_TOOL_MAKER, isReviewRunning, isReviewWaiting } from '../data/reviewRequests.js';
 
 function getStepState(status, index) {
   if (status === '승인 완료') return 'complete';
-  if (status === '심사 대기') return 'pending';
+  if (isReviewWaiting(status)) return 'pending';
   if (index < 2) return 'complete';
   if (index !== 2) return 'pending';
-  if (status === '심사 진행중') return 'running';
+  if (isReviewRunning(status)) return 'running';
   if (status === '반려') return 'failed';
   return 'pending';
 }
@@ -61,6 +62,29 @@ function getAutomatedReviewStates(elapsed, stepCount) {
   return states;
 }
 
+function getRereviewStates(elapsed, stepCount, rereviewStage) {
+  if (rereviewStage === 'zip') return getAutomatedReviewStates(elapsed, stepCount);
+
+  const states = Array.from({ length: stepCount }, () => 'pending');
+  states[0] = 'complete';
+
+  if (rereviewStage === 'admin') {
+    if (states.length > 1) states[1] = 'complete';
+    if (states.length > 2) states[2] = 'running';
+    return states;
+  }
+
+  const securityDuration = AUTOMATED_REVIEW_DURATION_MS - ZIP_PREPARATION_DURATION_MS;
+  if (elapsed < securityDuration) {
+    if (states.length > 1) states[1] = 'running';
+    return states;
+  }
+
+  if (states.length > 1) states[1] = 'complete';
+  if (states.length > 2) states[2] = 'running';
+  return states;
+}
+
 export default function ReviewProgress({
   upload,
   stageStates,
@@ -69,23 +93,30 @@ export default function ReviewProgress({
   onCancel,
   onRetry,
 }) {
+  const isResubmission = upload.isResubmission || upload.status.startsWith('재심사');
+  const rereviewStage = normalizeRereviewStage(upload.rereviewStage);
+  const isAdminReviewOnly = isResubmission && rereviewStage === 'admin';
   const reviewStartedAt = Date.parse(upload.reviewStartedAt ?? '');
   const isAutomatedReviewRunning =
-    upload.status === '심사 진행중' && Number.isFinite(reviewStartedAt);
+    !isAdminReviewOnly && isReviewRunning(upload.status) && Number.isFinite(reviewStartedAt);
   const [clock, setClock] = useState(() => Date.now());
   const elapsed = isAutomatedReviewRunning ? Math.max(0, clock - reviewStartedAt) : 0;
   const states =
     stageStates ??
     (isAutomatedReviewRunning
-      ? getAutomatedReviewStates(elapsed, steps.length)
-      : steps.map((_, index) => getStepState(upload.status, index)));
+      ? isResubmission
+        ? getRereviewStates(elapsed, steps.length, rereviewStage)
+        : getAutomatedReviewStates(elapsed, steps.length)
+      : isAdminReviewOnly
+        ? getRereviewStates(elapsed, steps.length, rereviewStage)
+        : steps.map((_, index) => getStepState(upload.status, index)));
   const completedCount = states.filter(state => state === 'complete').length;
   const runningStep = states.findIndex(state => state === 'running');
   const [selectedOpenStep, setSelectedOpenStep] = useState(null);
   const [hasSelectedStep, setHasSelectedStep] = useState(false);
   const openStep = hasSelectedStep ? selectedOpenStep : runningStep >= 0 ? runningStep : null;
   const isComplete = states.every(state => state === 'complete');
-  const isWaiting = upload.status === '심사 대기';
+  const isWaiting = isReviewWaiting(upload.status);
   const isRejected = upload.status === '반려';
   const registrantLabel = [
     upload.maker || CURRENT_TOOL_MAKER.maker,
@@ -103,13 +134,15 @@ export default function ReviewProgress({
     <div
       id={`review-detail-${upload.id}`}
       role="region"
-      aria-label={`${upload.name} 심사 진행 내역`}
+      aria-label={`${upload.name} ${isResubmission ? '재심사' : '심사'} 진행 내역`}
       className="border-t border-slate-200 bg-transparent"
     >
       <div className="flex flex-wrap items-end justify-between gap-2 px-4 py-4 sm:px-6">
         <div>
           <div className="flex items-center gap-2">
-            <h4 className="text-base font-semibold text-slate-950">심사 진행 내역</h4>
+            <h4 className="text-base font-semibold text-slate-950">
+              {isResubmission ? '재심사 진행 내역' : '심사 진행 내역'}
+            </h4>
           </div>
           <p className="mt-1 text-sm text-slate-600">{registrantLabel}</p>
         </div>
@@ -212,13 +245,21 @@ export default function ReviewProgress({
               {upload.rejectionReason ??
                 '심사 기준을 충족하지 못했습니다. 필요한 내용을 수정한 후 다시 요청해 주세요.'}
             </p>
+            <p className="mt-1 font-medium">
+              재심사 범위:{' '}
+              {rereviewStage === 'admin'
+                ? '관리자 검토부터'
+                : rereviewStage === 'security'
+                  ? '파일 제출·보안 심사부터'
+                  : 'ZIP 정보 준비부터'}
+            </p>
           </div>
         ) : (
           <p className="min-w-0 flex-1">
             {isComplete
               ? '모든 심사를 통과해 도구 등록이 승인되었습니다.'
               : isWaiting
-                ? '요청이 접수되었습니다. 자동 심사가 시작되면 심사 진행중으로 변경됩니다.'
+                ? `${isResubmission ? '재심사' : '심사'} 요청이 접수되었습니다. 자동 심사가 시작되면 ${isResubmission ? '재심사 진행중' : '심사 진행중'}으로 변경됩니다.`
                 : '자동 심사 결과를 바탕으로 관리자가 도구의 운영 적합성을 검토하고 있습니다.'}
           </p>
         )}
@@ -237,7 +278,7 @@ export default function ReviewProgress({
                 : undefined
             }
           >
-            수정 후 다시 요청
+            수정 후 재심사 요청
           </AiStoreActionButton>
         ) : isComplete ? (
           <AiStoreActionButton to="/user/aistore/mytools" variant="success" size="small">

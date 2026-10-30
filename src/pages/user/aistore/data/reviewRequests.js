@@ -27,10 +27,25 @@ const reviewStatusAliases = {
   '제출 준비': '심사 대기',
   '승인 대기': '심사 대기',
   '심사 중': '심사 진행중',
+  '재검사 대기': '재심사 대기',
+  '재검사 중': '재심사 진행중',
+  '재심사 중': '재심사 진행중',
   '검토 중': '심사 진행중',
   '보완 필요': '반려',
   '등록 완료': '승인 완료',
 };
+
+export function isReviewWaiting(status) {
+  return ['심사 대기', '재심사 대기'].includes(status);
+}
+
+export function isReviewRunning(status) {
+  return ['심사 진행중', '재심사 진행중'].includes(status);
+}
+
+export function isReviewActive(status) {
+  return isReviewWaiting(status) || isReviewRunning(status);
+}
 
 export function normalizeReviewStatus(status) {
   return reviewStatusAliases[status] ?? status;
@@ -68,9 +83,7 @@ function isReviewForTool(review, tool) {
 }
 
 export function getActiveToolUpdateReview(tool, reviews = getToolUpdateReviews()) {
-  return reviews.find(
-    review => isReviewForTool(review, tool) && ['심사 대기', '심사 진행중'].includes(review.status)
-  );
+  return reviews.find(review => isReviewForTool(review, tool) && isReviewActive(review.status));
 }
 
 export function getApprovedToolUpdateReview(tool, reviews = getToolUpdateReviews()) {

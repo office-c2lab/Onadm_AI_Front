@@ -180,6 +180,33 @@ export const appRecords = [
 
 export const reviewRequests = [
   {
+    id: 'REV-1084',
+    previousRequestId: 'REV-1081',
+    appId: 'APP-0239',
+    name: '사내 지식 검색',
+    requestType: '재심사',
+    originalRequestType: '업데이트',
+    fileName: 'internal_knowledge_search_v0.5.1.zip',
+    size: '5.4 MB',
+    previousVersion: '0.5.0',
+    version: '0.5.1',
+    updateNotes:
+      '문서 접근 권한 검증 범위를 확대하고 검색 결과에 원문 출처가 항상 표시되도록 보완했습니다.',
+    requester: '이정우 · IT전략팀',
+    registrant: { department: 'IT전략팀', position: '책임', name: '이정우' },
+    submittedAt: '2026.10.30 10:25',
+    elapsed: '22분',
+    priority: '보통',
+    risk: '낮음',
+    scan: '통과',
+    approval: '대기',
+    assignee: '미배정',
+    findings: 0,
+    isResubmission: true,
+    resubmissionCount: 1,
+    rereviewStage: 'admin',
+  },
+  {
     id: 'REV-1083',
     appId: 'APP-0237',
     name: '정산 파일 일괄 취합',
