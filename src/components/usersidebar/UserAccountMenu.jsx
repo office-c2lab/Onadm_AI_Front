@@ -26,14 +26,33 @@ export default function UserAccountMenu({ user = { name: 'rex307', plan: 'Plus' 
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
   const initials = user.name.slice(0, 2).toUpperCase();
-  const remainingCredits =
-    typeof user.remainingCredits === 'number'
-      ? user.remainingCredits.toLocaleString('ko-KR')
-      : user.remainingCredits;
-  const creditPercentage =
-    typeof user.remainingCredits === 'number' && typeof user.totalCredits === 'number'
-      ? Math.min(100, Math.max(0, (user.remainingCredits / user.totalCredits) * 100))
-      : null;
+  const hasCreditInfo =
+    Number.isFinite(user.remainingCredits) &&
+    Number.isFinite(user.totalCredits) &&
+    user.totalCredits > 0;
+  const normalizedRemainingCredits = hasCreditInfo ? Math.max(0, user.remainingCredits) : null;
+  const remainingCredits = normalizedRemainingCredits?.toLocaleString('ko-KR');
+  const creditPercentage = hasCreditInfo
+    ? Math.min(100, (normalizedRemainingCredits / user.totalCredits) * 100)
+    : null;
+  const creditStatus =
+    creditPercentage !== null && creditPercentage <= 10
+      ? {
+          bar: 'bg-[#e5484d]',
+          text: 'text-[#c62a2f]',
+          label: '크레딧이 거의 소진되었습니다',
+        }
+      : creditPercentage !== null && creditPercentage <= 30
+        ? {
+            bar: 'bg-[#f59e0b]',
+            text: 'text-[#b76e00]',
+            label: '크레딧이 얼마 남지 않았습니다',
+          }
+        : {
+            bar: 'bg-[#3c7cf6]',
+            text: 'text-[#3c7cf6]',
+            label: '크레딧이 충분합니다',
+          };
 
   useEffect(() => {
     if (!open) return undefined;
@@ -120,7 +139,7 @@ export default function UserAccountMenu({ user = { name: 'rex307', plan: 'Plus' 
         </div>
       )}
 
-      {remainingCredits && creditPercentage !== null && (
+      {hasCreditInfo && (
         <div className="mb-2 px-2 pt-1" aria-label="남은 크레딧 정보">
           <div className="flex items-center justify-between gap-3">
             <span className="text-[12px] font-medium text-[#555]">남은 크레딧</span>
@@ -136,13 +155,17 @@ export default function UserAccountMenu({ user = { name: 'rex307', plan: 'Plus' 
               aria-valuemin="0"
               aria-valuemax="100"
               aria-valuenow={Math.round(creditPercentage)}
+              aria-valuetext={`${remainingCredits} 크레딧 남음, ${creditPercentage.toFixed(1)}%`}
+              title={creditStatus.label}
             >
               <div
-                className="h-full rounded-full bg-[#3c7cf6] transition-[width] duration-300"
+                className={`h-full rounded-full transition-[width,background-color] duration-300 ${creditStatus.bar}`}
                 style={{ width: `${creditPercentage}%` }}
               />
             </div>
-            <span className="w-10 text-right text-[11px] font-medium tabular-nums text-[#3c7cf6]">
+            <span
+              className={`w-10 text-right text-[11px] font-medium tabular-nums ${creditStatus.text}`}
+            >
               {creditPercentage.toFixed(1)}%
             </span>
           </div>
@@ -161,9 +184,7 @@ export default function UserAccountMenu({ user = { name: 'rex307', plan: 'Plus' 
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-medium leading-[18px]">{user.name}</span>
-          <span className="block truncate text-[11px] leading-4 text-[#777]">
-            {user.email}
-          </span>
+          <span className="block truncate text-[11px] leading-4 text-[#777]">{user.email}</span>
         </span>
       </button>
     </div>

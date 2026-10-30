@@ -5,6 +5,8 @@ import {
   ChevronRight,
   Ellipsis,
   Folder,
+  House,
+  Lightbulb,
   PanelLeft,
   Pencil,
   Plus,
@@ -13,6 +15,8 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
+import CustomDropdown from '../../dropdown/CustomDropdown.jsx';
+import AiStoreConfirmModal from '../../../pages/user/aistore/components/AiStoreConfirmModal.jsx';
 import UserAccountMenu from '../UserAccountMenu.jsx';
 import UserServiceSwitcher from '../UserServiceSwitcher.jsx';
 
@@ -58,6 +62,10 @@ const defaultChats = [
 const CHAT_STORAGE_KEY = 'ondam-chat-changes';
 const PROJECT_STORAGE_KEY = 'ondam-projects';
 const EMPTY_CHAT_CHANGES = { renamed: {}, deletedIds: [] };
+const PROJECT_MEMORY_OPTIONS = [
+  { value: 'default', label: '기본 메모리' },
+  { value: 'project-only', label: '프로젝트 전용 메모리' },
+];
 
 // 채팅 ID가 같은 항목이 최근/프로젝트 양쪽에 나타날 수 있으므로 편집 위치를 구분합니다.
 const getChatRowKey = (chatId, projectId = null) => `${projectId ?? 'recent'}:${chatId}`;
@@ -66,8 +74,7 @@ function getMenuPosition(event, menuHeight = 100) {
   const rect = event.currentTarget.getBoundingClientRect();
   const menuWidth = 192;
   const spaceBelow = window.innerHeight - rect.bottom;
-  const preferredTop =
-    spaceBelow >= menuHeight + 12 ? rect.bottom + 4 : rect.top - menuHeight - 4;
+  const preferredTop = spaceBelow >= menuHeight + 12 ? rect.bottom + 4 : rect.top - menuHeight - 4;
 
   return {
     top: Math.max(8, Math.min(preferredTop, window.innerHeight - menuHeight - 8)),
@@ -87,6 +94,107 @@ function MenuButton({ icon: Icon, label, isActive = false, onClick }) {
       <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} aria-hidden="true" />
       <span className="min-w-0 flex-1 truncate">{label}</span>
     </button>
+  );
+}
+
+function ProjectCreateModal({ projectName, onProjectNameChange, onClose, onCreate }) {
+  const [memoryMode, setMemoryMode] = useState('default');
+
+  useEffect(() => {
+    const closeOnEscape = event => {
+      if (event.key === 'Escape' && !event.defaultPrevented) onClose();
+    };
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', closeOnEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [onClose]);
+
+  const submitProject = event => {
+    event.preventDefault();
+    onCreate(memoryMode);
+  };
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[200] grid place-items-center bg-black/20 px-4 py-8 backdrop-blur-[1px]"
+      onMouseDown={event => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <form
+        onSubmit={submitProject}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="project-create-title"
+        className="w-full max-w-[514px] rounded-2xl bg-white p-4 shadow-[0_18px_60px_rgba(0,0,0,0.2)] sm:p-[18px]"
+      >
+        <header className="flex items-center justify-between gap-4">
+          <h2 id="project-create-title" className="text-[19px] font-semibold text-[#202020]">
+            프로젝트 만들기
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid h-8 w-8 place-items-center rounded-lg text-[#444] hover:bg-[#f1f1f1]"
+            aria-label="프로젝트 만들기 닫기"
+          >
+            <X className="h-[18px] w-[18px]" strokeWidth={1.8} />
+          </button>
+        </header>
+
+        <label
+          htmlFor="new-project-name"
+          className="mt-5 block text-[13px] font-medium text-[#333]"
+        >
+          프로젝트 이름
+        </label>
+        <div className="mt-2 flex h-10 items-center gap-2.5 rounded-lg border border-[#dedede] px-3 focus-within:border-[#9db9f4] focus-within:ring-2 focus-within:ring-[#eaf1ff]">
+          <Folder className="h-[18px] w-[18px] shrink-0 text-[#333]" strokeWidth={1.7} />
+          <input
+            id="new-project-name"
+            autoFocus
+            value={projectName}
+            onChange={event => onProjectNameChange(event.target.value)}
+            placeholder="예:  온담 프로젝트"
+            className="min-w-0 flex-1 bg-transparent text-[14px] text-[#222] outline-none placeholder:text-[#999]"
+          />
+        </div>
+
+        <div className="mt-4 flex gap-3 rounded-xl bg-[#f1f1f1] px-3 py-3 text-[#555]">
+          <Lightbulb className="mt-0.5 h-[18px] w-[18px] shrink-0" strokeWidth={1.6} />
+          <p className="text-[12px] leading-[17px]">
+            프로젝트는 채팅, 파일, 사용자 지정 지침을 한 자리에 모아 둡니다. 이러한 자료를 진행 중인
+            작업에 사용하거나 깔끔하게 정리하는 용도로 활용하세요.
+          </p>
+        </div>
+
+        <div className="mt-4 flex items-end justify-between gap-4">
+          <CustomDropdown
+            value={memoryMode}
+            options={PROJECT_MEMORY_OPTIONS}
+            onChange={setMemoryMode}
+            ariaLabel="프로젝트 메모리 설정"
+            className="w-[190px] [&>button]:min-h-10 [&>button]:border-0 [&>button]:bg-transparent [&>button]:px-3 [&>button]:text-[14px] [&>button]:shadow-none [&>button]:hover:bg-[#f3f3f3] [&>button]:focus:ring-0"
+            menuClassName="bottom-[calc(100%+4px)] mt-0"
+          />
+
+          <button
+            type="submit"
+            disabled={!projectName.trim()}
+            className="h-10 shrink-0 rounded-full bg-[#202020] px-5 text-[14px] font-semibold text-white transition hover:bg-[#343434] disabled:bg-[#a7a7a7] disabled:text-[#f1f1f1]"
+          >
+            프로젝트 만들기
+          </button>
+        </div>
+      </form>
+    </div>,
+    document.body
   );
 }
 
@@ -148,9 +256,7 @@ function ConversationButton({
             onClick={() => onSelect?.(chat)}
             className={`flex h-9 min-w-0 flex-1 items-center rounded-lg px-2.5 pr-9 text-left transition-colors ${
               compact ? 'text-[13px]' : 'text-[14px]'
-            } ${
-              isActive ? 'bg-[#e8e8e8] text-[#0d0d0d]' : 'text-[#303030]'
-            }`}
+            } ${isActive ? 'bg-[#e8e8e8] text-[#0d0d0d]' : 'text-[#303030]'}`}
             aria-current={isActive ? 'page' : undefined}
             title={chat.title}
           >
@@ -226,11 +332,12 @@ export default function OndamSidebar({
     name: 'rex307',
     email: 'rex307@ondam.ai',
     plan: 'Plus',
-    remainingCredits: 994100,
+    remainingCredits: 50000,
     totalCredits: 1000000,
   },
   onNewChat,
   onSelectChat,
+  onSelectProject,
   onSelectMenu,
   onRenameChat, // (chatId, newTitle, projectId) => void
   onDeleteChat, // (chatId, projectId) => void
@@ -281,6 +388,7 @@ export default function OndamSidebar({
   const [chatMenuPosition, setChatMenuPosition] = useState({ top: 0, left: 0 });
   const [editingChat, setEditingChat] = useState(null); // { id, projectId }
   const [editingChatTitle, setEditingChatTitle] = useState('');
+  const [pendingDeletion, setPendingDeletion] = useState(null); // { type, item, projectId? }
   const chatMenuRef = useRef(null);
 
   useEffect(() => {
@@ -337,9 +445,7 @@ export default function OndamSidebar({
       .filter(chat => !chatChanges.deletedIds.includes(chat.id))
       .map(chat => ({ ...chat, title: chatChanges.renamed[chat.id] ?? chat.title }))
       .filter(chat =>
-        normalizedQuery
-          ? chat.title.toLocaleLowerCase('ko-KR').includes(normalizedQuery)
-          : true
+        normalizedQuery ? chat.title.toLocaleLowerCase('ko-KR').includes(normalizedQuery) : true
       );
   }, [chats, chatChanges, query]);
 
@@ -355,7 +461,33 @@ export default function OndamSidebar({
       setShowAllProjectChats(false);
     }
 
-    onNewChat?.(projectId);
+    const project = projectId ? (projectItems.find(item => item.id === projectId) ?? null) : null;
+    const chatsInProject = projectId
+      ? (projectChats[projectId] ?? [])
+          .filter(chat => !chatChanges.deletedIds.includes(chat.id))
+          .map(chat => ({
+            ...chat,
+            title: chatChanges.renamed[chat.id] ?? chat.title,
+          }))
+      : [];
+
+    onNewChat?.(projectId, project, chatsInProject);
+  };
+
+  const openProjectHome = project => {
+    const chatsInProject = (projectChats[project.id] ?? [])
+      .filter(chat => !chatChanges.deletedIds.includes(chat.id))
+      .map(chat => ({
+        ...chat,
+        title: chatChanges.renamed[chat.id] ?? chat.title,
+      }));
+
+    setIsProjectsOpen(true);
+    setExpandedProjectId(project.id);
+    setShowAllProjectChats(false);
+    setOpenProjectMenuId(null);
+    setOpenChatMenu(null);
+    onSelectProject?.(project, chatsInProject);
   };
 
   // ----- 프로젝트 이름 변경 / 삭제 -----
@@ -388,34 +520,39 @@ export default function OndamSidebar({
     if (!title || !editingProjectId) return;
 
     setProjectItems(current =>
-      current.map(project =>
-        project.id === editingProjectId ? { ...project, title } : project
-      )
+      current.map(project => (project.id === editingProjectId ? { ...project, title } : project))
     );
     cancelRenameProject();
   };
 
   const deleteProject = project => {
     setOpenProjectMenuId(null);
-    if (!window.confirm(`'${project.title}' 프로젝트를 삭제할까요?`)) return;
+    setPendingDeletion({ type: 'project', item: project });
+  };
+
+  const confirmProjectDeletion = project => {
+    const wasActiveProject = expandedProjectId === project.id;
 
     setProjectItems(current => current.filter(item => item.id !== project.id));
-    if (expandedProjectId === project.id) setExpandedProjectId(null);
+    if (wasActiveProject) {
+      setExpandedProjectId(null);
+      onNewChat?.(null, null, []);
+    }
     if (editingProjectId === project.id) cancelRenameProject();
   };
 
-  const addProject = () => {
+  const addProject = (memoryMode = 'default') => {
     const trimmedName = projectName.trim();
     if (!trimmedName) return;
 
-    const newProject = { id: `project-${Date.now()}`, title: trimmedName };
+    const newProject = { id: `project-${Date.now()}`, title: trimmedName, memoryMode };
     setProjectItems(current => [...current, newProject]);
     setProjectName('');
     setIsAddingProject(false);
     setIsProjectsOpen(true);
     setExpandedProjectId(newProject.id);
     setShowAllProjectChats(false);
-    onSelectMenu?.(`project:${newProject.id}`);
+    onSelectProject?.(newProject, []);
   };
 
   const cancelAddProject = () => {
@@ -428,8 +565,7 @@ export default function OndamSidebar({
     event.stopPropagation();
     setOpenProjectMenuId(null);
 
-    const sameMenu =
-      openChatMenu?.id === chat.id && openChatMenu?.projectId === projectId;
+    const sameMenu = openChatMenu?.id === chat.id && openChatMenu?.projectId === projectId;
     if (sameMenu) {
       setOpenChatMenu(null);
       return;
@@ -465,8 +601,10 @@ export default function OndamSidebar({
 
   const deleteChat = (chat, projectId = null) => {
     setOpenChatMenu(null);
-    if (!window.confirm(`'${chat.title}' 대화를 삭제할까요?`)) return;
+    setPendingDeletion({ type: 'chat', item: chat, projectId });
+  };
 
+  const confirmChatDeletion = (chat, projectId = null) => {
     setChatChanges(current => ({
       renamed: Object.fromEntries(
         Object.entries(current.renamed).filter(([id]) => id !== String(chat.id))
@@ -483,11 +621,22 @@ export default function OndamSidebar({
     if (activeChatId === chat.id) handleNewChat(projectId);
   };
 
+  const confirmDeletion = () => {
+    if (!pendingDeletion) return;
+
+    if (pendingDeletion.type === 'project') {
+      confirmProjectDeletion(pendingDeletion.item);
+    } else {
+      confirmChatDeletion(pendingDeletion.item, pendingDeletion.projectId);
+    }
+
+    setPendingDeletion(null);
+  };
+
   // 같은 대화가 최근 목록에도 보이는 경우 편집 상태는 해당 위치에서만 적용
   const isEditingRow = (chatId, projectId = null) =>
     editingChat &&
-    getChatRowKey(editingChat.id, editingChat.projectId) ===
-      getChatRowKey(chatId, projectId);
+    getChatRowKey(editingChat.id, editingChat.projectId) === getChatRowKey(chatId, projectId);
 
   const isChatMenuOpen = (chatId, projectId = null) =>
     openChatMenu?.id === chatId && openChatMenu?.projectId === projectId;
@@ -602,41 +751,6 @@ export default function OndamSidebar({
 
           {isProjectsOpen && (
             <div className="mt-0.5 space-y-0.5">
-              {isAddingProject && (
-                <div className="flex h-9 items-center gap-1 rounded-lg bg-white px-1.5 ring-1 ring-inset ring-[#c9d8fb]">
-                  <Folder className="ml-1 h-4 w-4 shrink-0 text-[#667085]" strokeWidth={1.7} aria-hidden="true" />
-                  <input
-                    autoFocus
-                    value={projectName}
-                    onChange={event => setProjectName(event.target.value)}
-                    onKeyDown={event => {
-                      if (event.key === 'Enter') addProject();
-                      if (event.key === 'Escape') cancelAddProject();
-                    }}
-                    placeholder="프로젝트 이름"
-                    className="min-w-0 flex-1 bg-transparent text-[13px] text-[#303030] outline-none placeholder:text-[#999]"
-                    aria-label="새 프로젝트 이름"
-                  />
-                  <button
-                    type="button"
-                    onClick={addProject}
-                    disabled={!projectName.trim()}
-                    className="grid h-6 w-6 place-items-center rounded-md text-[#3c7cf6] hover:bg-[#eef4ff] disabled:text-[#bbb]"
-                    aria-label="프로젝트 저장"
-                  >
-                    <Check className="h-3.5 w-3.5" strokeWidth={2} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={cancelAddProject}
-                    className="grid h-6 w-6 place-items-center rounded-md text-[#777] hover:bg-[#eee]"
-                    aria-label="프로젝트 추가 취소"
-                  >
-                    <X className="h-3.5 w-3.5" strokeWidth={1.8} />
-                  </button>
-                </div>
-              )}
-
               {projectItems.map(project => {
                 const isExpanded = expandedProjectId === project.id;
                 const projectChatItems = (projectChats[project.id] ?? [])
@@ -693,19 +807,17 @@ export default function OndamSidebar({
                           <button
                             type="button"
                             onClick={() => {
-                              setExpandedProjectId(currentId =>
-                                currentId === project.id ? null : project.id
-                              );
-                              setShowAllProjectChats(false);
-                              setOpenProjectMenuId(null);
-                              setOpenChatMenu(null);
-                              onSelectMenu?.(`project:${project.id}`);
+                              openProjectHome(project);
                             }}
                             className="flex h-full min-w-0 flex-1 items-center gap-2 rounded-lg pl-2.5 pr-1 text-left text-[13px] text-[#303030]"
-                            aria-expanded={isExpanded}
+                            aria-current={isExpanded ? 'page' : undefined}
                             title={project.title}
                           >
-                            <Folder className="h-4 w-4 shrink-0" strokeWidth={1.7} aria-hidden="true" />
+                            <Folder
+                              className="h-4 w-4 shrink-0"
+                              strokeWidth={1.7}
+                              aria-hidden="true"
+                            />
                             <span className="min-w-0 flex-1 truncate">{project.title}</span>
                           </button>
 
@@ -755,7 +867,7 @@ export default function OndamSidebar({
                             onEditingTitleChange={setEditingChatTitle}
                             onSaveRename={saveRenameChat}
                             onCancelRename={cancelRenameChat}
-                            onSelect={onSelectChat}
+                            onSelect={chat => onSelectChat?.(chat, project)}
                             onOpenMenu={(event, item) =>
                               openConversationMenu(event, item, project.id)
                             }
@@ -833,8 +945,34 @@ export default function OndamSidebar({
         <UserAccountMenu user={user} onAction={onSelectMenu} />
       </div>
 
+      {isAddingProject && (
+        <ProjectCreateModal
+          projectName={projectName}
+          onProjectNameChange={setProjectName}
+          onClose={cancelAddProject}
+          onCreate={addProject}
+        />
+      )}
+
+      <AiStoreConfirmModal
+        open={Boolean(pendingDeletion)}
+        title={pendingDeletion?.type === 'project' ? '프로젝트 삭제' : '대화 삭제'}
+        confirmLabel="삭제"
+        cancelLabel="취소"
+        onClose={() => setPendingDeletion(null)}
+        onConfirm={confirmDeletion}
+      >
+        <p>
+          <strong className="font-semibold text-slate-900">{pendingDeletion?.item.title}</strong>
+          {pendingDeletion?.type === 'project'
+            ? ' 프로젝트와 포함된 대화를 삭제할까요? 이 작업은 되돌릴 수 없습니다.'
+            : ' 대화를 삭제할까요? 이 작업은 되돌릴 수 없습니다.'}
+        </p>
+      </AiStoreConfirmModal>
+
       {/* 프로젝트 메뉴: 스크롤 영역 밖 Portal로 표시 */}
-      {openProjectMenuId && typeof document !== 'undefined' &&
+      {openProjectMenuId &&
+        typeof document !== 'undefined' &&
         createPortal(
           <div
             ref={projectMenuRef}
@@ -843,6 +981,18 @@ export default function OndamSidebar({
             role="menu"
             aria-label="프로젝트 메뉴"
           >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                const project = projectItems.find(item => item.id === openProjectMenuId);
+                if (project) openProjectHome(project);
+              }}
+              className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] text-[#333] hover:bg-[#f3f3f3]"
+            >
+              <House className="h-4 w-4" strokeWidth={1.75} />
+              프로젝트 홈
+            </button>
             <button
               type="button"
               role="menuitem"
@@ -872,7 +1022,9 @@ export default function OndamSidebar({
         )}
 
       {/* 최근/프로젝트 대화 메뉴: 동일한 이름 변경·삭제 기능 */}
-      {openChatMenu && menuChat && typeof document !== 'undefined' &&
+      {openChatMenu &&
+        menuChat &&
+        typeof document !== 'undefined' &&
         createPortal(
           <div
             ref={chatMenuRef}

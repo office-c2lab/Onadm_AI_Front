@@ -4,6 +4,7 @@ import OndamSidebar, {
 } from '../../../components/usersidebar/ondamsidebar/OndamSidebar.jsx';
 import NewChatView from './components/NewChatView.jsx';
 import ChatView from './components/ChatView.jsx';
+import ProjectHomeView from './components/ProjectHomeView.jsx';
 import { createMockAnswer } from './components/mockResponses.js';
 
 export default function OndamPage() {
@@ -11,6 +12,8 @@ export default function OndamPage() {
     return window.localStorage.getItem('ondam-sidebar-open') !== 'false';
   });
   const [activeChatId, setActiveChatId] = useState(null);
+  const [activeProject, setActiveProject] = useState(null);
+  const [projectViewKey, setProjectViewKey] = useState(0);
   const [messages, setMessages] = useState([]);
   const chatVersionRef = useRef(0);
 
@@ -19,10 +22,25 @@ export default function OndamPage() {
     window.localStorage.setItem('ondam-sidebar-open', String(isOpen));
   };
 
-  const startNewChat = () => {
+  const startNewChat = (projectId = null, project = null, projectChats = []) => {
     chatVersionRef.current += 1;
     setActiveChatId(null);
     setMessages([]);
+
+    if (projectId && project) {
+      setActiveProject({ ...project, chats: projectChats });
+      setProjectViewKey(current => current + 1);
+    } else {
+      setActiveProject(null);
+    }
+  };
+
+  const selectProject = (project, projectChats = []) => {
+    chatVersionRef.current += 1;
+    setActiveProject({ ...project, chats: projectChats });
+    setActiveChatId(null);
+    setMessages([]);
+    setProjectViewKey(current => current + 1);
   };
 
   const submitPrompt = prompt => {
@@ -45,8 +63,16 @@ export default function OndamPage() {
     }, 5000);
   };
 
-  const selectChat = chat => {
+  const selectChat = (chat, project = null) => {
     chatVersionRef.current += 1;
+    if (project) {
+      setActiveProject(current => ({
+        ...project,
+        chats: current?.id === project.id ? current.chats : [],
+      }));
+    } else {
+      setActiveProject(null);
+    }
     setActiveChatId(chat.id);
     setMessages([
       { id: `${chat.id}-user`, role: 'user', content: chat.title },
@@ -70,6 +96,7 @@ export default function OndamPage() {
             activeChatId={activeChatId}
             onNewChat={startNewChat}
             onSelectChat={selectChat}
+            onSelectProject={selectProject}
             onClose={() => setSidebarOpen(false)}
           />
         ) : (
@@ -82,7 +109,15 @@ export default function OndamPage() {
         className="min-w-0 flex-1 overflow-y-auto bg-white"
         aria-label="AI 채팅 영역"
       >
-        {!activeChatId ? (
+        {!activeChatId && activeProject ? (
+          <ProjectHomeView
+            key={`${activeProject.id}-${projectViewKey}`}
+            project={activeProject}
+            chats={activeProject.chats}
+            onSubmit={submitPrompt}
+            onSelectChat={selectChat}
+          />
+        ) : !activeChatId ? (
           <NewChatView onSubmit={submitPrompt} />
         ) : (
           <ChatView messages={messages} onSubmit={submitPrompt} />
