@@ -11,12 +11,14 @@ import {
   Pencil,
   Plus,
   Search,
+  Settings,
   SquarePen,
   Trash2,
   X,
 } from 'lucide-react';
 import CustomDropdown from '../../dropdown/CustomDropdown.jsx';
 import AiStoreConfirmModal from '../../../pages/user/aistore/components/AiStoreConfirmModal.jsx';
+import ProjectSettingsModal from '../../../pages/user/ondam/components/ProjectSettingsModal.jsx';
 import UserAccountMenu from '../UserAccountMenu.jsx';
 import UserServiceSwitcher from '../UserServiceSwitcher.jsx';
 
@@ -338,6 +340,9 @@ export default function OndamSidebar({
   onNewChat,
   onSelectChat,
   onSelectProject,
+  onProjectUpdated,
+  settingsRequest,
+  onSettingsRequestHandled,
   onSelectMenu,
   onRenameChat, // (chatId, newTitle, projectId) => void
   onDeleteChat, // (chatId, projectId) => void
@@ -382,6 +387,7 @@ export default function OndamSidebar({
   const [projectMenuPosition, setProjectMenuPosition] = useState({ top: 0, left: 0 });
   const [editingProjectId, setEditingProjectId] = useState(null);
   const [editingProjectName, setEditingProjectName] = useState('');
+  const [settingsProjectId, setSettingsProjectId] = useState(null);
   const projectMenuRef = useRef(null);
 
   const [openChatMenu, setOpenChatMenu] = useState(null); // { id, projectId }
@@ -490,6 +496,18 @@ export default function OndamSidebar({
     onSelectProject?.(project, chatsInProject);
   };
 
+  const openProjectSettings = project => {
+    setOpenProjectMenuId(null);
+    setOpenChatMenu(null);
+    onSettingsRequestHandled?.();
+    setSettingsProjectId(project.id);
+  };
+
+  const closeProjectSettings = () => {
+    setSettingsProjectId(null);
+    onSettingsRequestHandled?.();
+  };
+
   // ----- 프로젝트 이름 변경 / 삭제 -----
   const openProjectMenu = (event, projectId) => {
     event.stopPropagation();
@@ -527,7 +545,15 @@ export default function OndamSidebar({
 
   const deleteProject = project => {
     setOpenProjectMenuId(null);
+    closeProjectSettings();
     setPendingDeletion({ type: 'project', item: project });
+  };
+
+  const saveProjectSettings = updatedProject => {
+    setProjectItems(current =>
+      current.map(project => (project.id === updatedProject.id ? updatedProject : project))
+    );
+    onProjectUpdated?.(updatedProject);
   };
 
   const confirmProjectDeletion = project => {
@@ -650,6 +676,10 @@ export default function OndamSidebar({
     ...activeMenuChat,
     title: chatChanges.renamed[activeMenuChat.id] ?? activeMenuChat.title,
   };
+  const resolvedSettingsProjectId = settingsProjectId ?? settingsRequest?.projectId ?? null;
+  const settingsProject = resolvedSettingsProjectId
+    ? (projectItems.find(project => project.id === resolvedSettingsProjectId) ?? null)
+    : null;
 
   return (
     <aside
@@ -970,6 +1000,17 @@ export default function OndamSidebar({
         </p>
       </AiStoreConfirmModal>
 
+      {settingsProject && (
+        <ProjectSettingsModal
+          key={`${settingsProject.id}-${settingsRequest?.requestId ?? 'sidebar'}`}
+          open
+          project={settingsProject}
+          onClose={closeProjectSettings}
+          onSave={saveProjectSettings}
+          onDelete={deleteProject}
+        />
+      )}
+
       {/* 프로젝트 메뉴: 스크롤 영역 밖 Portal로 표시 */}
       {openProjectMenuId &&
         typeof document !== 'undefined' &&
@@ -981,6 +1022,18 @@ export default function OndamSidebar({
             role="menu"
             aria-label="프로젝트 메뉴"
           >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                const project = projectItems.find(item => item.id === openProjectMenuId);
+                if (project) openProjectSettings(project);
+              }}
+              className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] text-[#333] hover:bg-[#f3f3f3]"
+            >
+              <Settings className="h-4 w-4" strokeWidth={1.75} />
+              프로젝트 설정
+            </button>
             <button
               type="button"
               role="menuitem"

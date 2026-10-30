@@ -14,6 +14,7 @@ export default function OndamPage() {
   const [activeChatId, setActiveChatId] = useState(null);
   const [activeProject, setActiveProject] = useState(null);
   const [projectViewKey, setProjectViewKey] = useState(0);
+  const [projectSettingsRequest, setProjectSettingsRequest] = useState(null);
   const [messages, setMessages] = useState([]);
   const chatVersionRef = useRef(0);
 
@@ -41,6 +42,17 @@ export default function OndamPage() {
     setActiveChatId(null);
     setMessages([]);
     setProjectViewKey(current => current + 1);
+  };
+
+  const openProjectSettings = project => {
+    if (!isSidebarOpen) setSidebarOpen(true);
+    setProjectSettingsRequest({ projectId: project.id, requestId: Date.now() });
+  };
+
+  const updateProject = updatedProject => {
+    setActiveProject(current =>
+      current?.id === updatedProject.id ? { ...current, ...updatedProject } : current
+    );
   };
 
   const submitPrompt = prompt => {
@@ -97,6 +109,9 @@ export default function OndamPage() {
             onNewChat={startNewChat}
             onSelectChat={selectChat}
             onSelectProject={selectProject}
+            onProjectUpdated={updateProject}
+            settingsRequest={projectSettingsRequest}
+            onSettingsRequestHandled={() => setProjectSettingsRequest(null)}
             onClose={() => setSidebarOpen(false)}
           />
         ) : (
@@ -116,6 +131,7 @@ export default function OndamPage() {
             chats={activeProject.chats}
             onSubmit={submitPrompt}
             onSelectChat={selectChat}
+            onOpenSettings={openProjectSettings}
           />
         ) : !activeChatId ? (
           <NewChatView onSubmit={submitPrompt} />

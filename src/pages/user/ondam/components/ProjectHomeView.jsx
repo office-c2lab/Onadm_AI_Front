@@ -8,6 +8,7 @@ import {
   Folder,
   Mic,
   Plus,
+  Settings,
   Share2,
   Upload,
 } from 'lucide-react';
@@ -90,7 +91,13 @@ function ProjectComposer({ projectName, onSubmit }) {
   );
 }
 
-export default function ProjectHomeView({ project, chats = [], onSubmit, onSelectChat }) {
+export default function ProjectHomeView({
+  project,
+  chats = [],
+  onSubmit,
+  onSelectChat,
+  onOpenSettings,
+}) {
   const [activeTab, setActiveTab] = useState('chats');
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -139,11 +146,14 @@ export default function ProjectHomeView({ project, chats = [], onSubmit, onSelec
                 <div className="absolute right-0 top-12 z-20 w-48 rounded-xl border border-[#e7e7e7] bg-white p-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.13)]">
                   <button
                     type="button"
-                    onClick={() => setIsMoreOpen(false)}
+                    onClick={() => {
+                      setIsMoreOpen(false);
+                      onOpenSettings?.(project);
+                    }}
                     className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-[13px] text-[#333] hover:bg-[#f3f3f3]"
                   >
-                    <Folder className="h-4 w-4" strokeWidth={1.7} />
-                    프로젝트 세부정보
+                    <Settings className="h-4 w-4" strokeWidth={1.7} />
+                    프로젝트 설정
                   </button>
                 </div>
               )}
