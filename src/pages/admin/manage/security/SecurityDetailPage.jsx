@@ -441,9 +441,6 @@ export default function SecurityDetailPage() {
                         <strong className="block text-sm font-semibold text-slate-900">
                           {option.step.label}
                         </strong>
-                        <span className="mt-0.5 block text-xs font-semibold text-blue-600">
-                          {option.step.duration}
-                        </span>
                         <span className="mt-1 block text-xs leading-5 text-slate-500">
                           {option.description}
                         </span>
