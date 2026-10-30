@@ -16,7 +16,11 @@ import {
 import StoreToolIcon from '../components/StoreToolIcon.jsx';
 import { StoreToolPreviewScreen, storePreviewTabs } from '../components/StoreToolPreviewScreen.jsx';
 import AiStoreActionButton from '../components/AiStoreActionButton.jsx';
-import { getAvailablePublishedTools, useDownloads } from '../data/manageStore.js';
+import {
+  getAvailablePublishedTools,
+  getToolDownloadCount,
+  useDownloads,
+} from '../data/manageStore.js';
 import {
   detailContent,
   getToolDownloadSize,
@@ -91,6 +95,10 @@ export default function StoreDetailPage() {
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <HardDrive size={16} className="text-blue-600" /> {getToolDownloadSize(tool)}
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Download size={16} className="text-blue-600" /> 다운로드{' '}
+                  {getToolDownloadCount(tool).toLocaleString('ko-KR')}회
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <ShieldCheck size={16} className="text-blue-600" /> 사내 등록 도구

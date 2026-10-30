@@ -1,5 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
+import { Download } from 'lucide-react';
 import StoreToolIcon from './StoreToolIcon.jsx';
+import { getToolDownloadCount } from '../data/manageStore.js';
 
 function getPlacement(card, previewHeight) {
   const spaceBelow = window.innerHeight - card.getBoundingClientRect().bottom - 8;
@@ -79,7 +81,13 @@ export default function ToolHoverPreview({ tool, label, align = 'left' }) {
           </p>
           <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 px-4 py-2.5 text-xs text-slate-500">
             <span className="truncate">{makerLabel}</span>
-            <span className="shrink-0 font-semibold text-blue-600">v{tool.version}</span>
+            <span className="flex shrink-0 items-center gap-3">
+              <span className="inline-flex items-center gap-1 font-medium text-slate-600">
+                <Download size={13} className="text-blue-600" aria-hidden="true" />
+                {getToolDownloadCount(tool).toLocaleString('ko-KR')}회
+              </span>
+              <span className="font-semibold text-blue-600">v{tool.version}</span>
+            </span>
           </div>
         </div>
       )}

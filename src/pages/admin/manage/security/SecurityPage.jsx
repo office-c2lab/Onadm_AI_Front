@@ -6,6 +6,10 @@ import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import { appRecords, reviewRequests } from '../data.js';
 import AdminReviewProgress from './AdminReviewProgress.jsx';
 import { applyReviewDecision } from './reviewDecisionStore.js';
+import {
+  canDownloadReviewFile,
+  REVIEW_FILE_DOWNLOAD_UNAVAILABLE_MESSAGE,
+} from './reviewFileAccess.js';
 
 const tabs = ['전체', '자동 심사', '관리자 검토', '승인 완료', '반려'];
 const appsById = new Map(appRecords.map(app => [app.id, app]));
@@ -116,6 +120,7 @@ export default function SecurityPage() {
             {rows.map(item => {
               const status = getReviewStatus(item);
               const isOpen = openRequestId === item.id;
+              const canDownload = canDownloadReviewFile(item);
 
               return (
                 <article
@@ -158,15 +163,27 @@ export default function SecurityPage() {
                           </span>
                         </span>
                         <span className="mt-1 flex min-w-0 items-center gap-1.5 text-sm text-slate-500">
-                          <a
-                            href={`/api/admin/reviews/${item.id}/file`}
-                            download={item.fileName}
-                            title={`${item.fileName} 다운로드`}
-                            className="pointer-events-auto inline-flex min-w-0 items-center gap-1 text-blue-600 hover:underline focus-visible:underline focus-visible:outline-none"
-                          >
-                            <Download size={14} className="shrink-0" aria-hidden="true" />
-                            <span className="truncate">{item.fileName}</span>
-                          </a>
+                          {canDownload ? (
+                            <a
+                              href={`/api/admin/reviews/${item.id}/file`}
+                              download={item.fileName}
+                              title={`${item.fileName} 다운로드`}
+                              className="pointer-events-auto inline-flex min-w-0 items-center gap-1 text-blue-600 hover:underline focus-visible:underline focus-visible:outline-none"
+                            >
+                              <Download size={14} className="shrink-0" aria-hidden="true" />
+                              <span className="truncate">{item.fileName}</span>
+                            </a>
+                          ) : (
+                            <span
+                              className="pointer-events-auto inline-flex min-w-0 cursor-not-allowed items-center gap-1 text-slate-400 outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                              title={REVIEW_FILE_DOWNLOAD_UNAVAILABLE_MESSAGE}
+                              aria-label={`${item.fileName}. ${REVIEW_FILE_DOWNLOAD_UNAVAILABLE_MESSAGE}`}
+                              tabIndex={0}
+                            >
+                              <Download size={14} className="shrink-0" aria-hidden="true" />
+                              <span className="truncate">{item.fileName}</span>
+                            </span>
+                          )}
                           <span className="shrink-0 text-slate-300">·</span>
                           <span className="shrink-0">{item.size}</span>
                           {item.requestType === '업데이트' && item.version && (

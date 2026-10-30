@@ -7,6 +7,25 @@ import {
 
 export const ADMIN_DELETED_APPS_KEY = 'ondam:admin:deleted-apps';
 
+const toolDownloadCounts = {
+  report: 1240,
+  meeting: 860,
+  workflow: 642,
+  analysis: 518,
+  review: 397,
+  expense: 184,
+  translate: 731,
+  support: 456,
+  contract: 289,
+  email: 674,
+  inquiry: 352,
+  schedule: 216,
+};
+
+export function getToolDownloadCount(tool) {
+  return tool?.downloadCount ?? toolDownloadCounts[tool?.id] ?? 0;
+}
+
 export function getDeletedAppIds() {
   if (typeof window === 'undefined') return [];
 

@@ -6,6 +6,7 @@ import { appRecords } from '../data.js';
 import { getDeletedAppIds } from '../../../user/aistore/data/manageStore.js';
 
 const publicationTabs = ['전체', '게시 중', '숨김'];
+const primaryAppName = '회의록 정리 도우미';
 
 export default function AppsPage() {
   const navigate = useNavigate();
@@ -15,9 +16,15 @@ export default function AppsPage() {
 
   const approvedApps = useMemo(
     () =>
-      appRecords.filter(
-        item => item.scan === '통과' && item.approval === '승인' && !deletedAppIds.includes(item.id)
-      ),
+      appRecords
+        .filter(
+          item =>
+            item.scan === '통과' && item.approval === '승인' && !deletedAppIds.includes(item.id)
+        )
+        .sort(
+          (left, right) =>
+            Number(right.name === primaryAppName) - Number(left.name === primaryAppName)
+        ),
     [deletedAppIds]
   );
 

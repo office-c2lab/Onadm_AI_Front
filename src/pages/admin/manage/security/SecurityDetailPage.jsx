@@ -26,6 +26,10 @@ import {
   supportedEnvironment,
 } from '../../../user/aistore/data/storeDetailContent.js';
 import { applyReviewDecision, saveReviewDecision } from './reviewDecisionStore.js';
+import {
+  canDownloadReviewFile,
+  REVIEW_FILE_DOWNLOAD_UNAVAILABLE_MESSAGE,
+} from './reviewFileAccess.js';
 
 function formatProcessedAt(date = new Date()) {
   const pad = value => String(value).padStart(2, '0');
@@ -96,6 +100,7 @@ export default function SecurityDetailPage() {
       : []),
   ];
   const canMakeDecision = review.scan === '통과' && review.approval === '대기';
+  const canDownload = canDownloadReviewFile(review);
   const automaticReviewLabel =
     review.scan === '통과'
       ? '자동 심사 통과'
@@ -151,15 +156,27 @@ export default function SecurityDetailPage() {
             </div>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
-            <AiStoreActionButton
-              size="large"
-              icon={Download}
-              aria-label={`${review.fileName} 다운로드`}
-              href={`/api/admin/reviews/${review.id}/file`}
-              download={review.fileName}
-            >
-              다운로드
-            </AiStoreActionButton>
+            {canDownload ? (
+              <AiStoreActionButton
+                size="large"
+                icon={Download}
+                aria-label={`${review.fileName} 다운로드`}
+                href={`/api/admin/reviews/${review.id}/file`}
+                download={review.fileName}
+              >
+                다운로드
+              </AiStoreActionButton>
+            ) : (
+              <AiStoreActionButton
+                size="large"
+                icon={Download}
+                disabled
+                title={REVIEW_FILE_DOWNLOAD_UNAVAILABLE_MESSAGE}
+                aria-label={REVIEW_FILE_DOWNLOAD_UNAVAILABLE_MESSAGE}
+              >
+                심사 후 다운로드
+              </AiStoreActionButton>
+            )}
           </div>
         </header>
 
@@ -296,7 +313,7 @@ export default function SecurityDetailPage() {
               <div key={label} className="grid gap-1 py-4 sm:grid-cols-[14rem_1fr] sm:gap-4">
                 <dt className="font-medium text-slate-500">{label}</dt>
                 <dd className="break-words font-medium text-slate-800">
-                  {label === '등록 파일' ? (
+                  {label === '등록 파일' && canDownload ? (
                     <a
                       href={`/api/admin/reviews/${review.id}/file`}
                       download={review.fileName}
@@ -305,6 +322,15 @@ export default function SecurityDetailPage() {
                       <Download size={15} aria-hidden="true" />
                       {value}
                     </a>
+                  ) : label === '등록 파일' ? (
+                    <span
+                      className="inline-flex items-center gap-1.5 text-slate-500"
+                      title={REVIEW_FILE_DOWNLOAD_UNAVAILABLE_MESSAGE}
+                    >
+                      <Download size={15} className="text-slate-400" aria-hidden="true" />
+                      {value}
+                      <span className="sr-only">. {REVIEW_FILE_DOWNLOAD_UNAVAILABLE_MESSAGE}</span>
+                    </span>
                   ) : (
                     value
                   )}

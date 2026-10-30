@@ -1,4 +1,4 @@
-import { publishedTools } from '../../user/aistore/data/manageStore.js';
+import { getToolDownloadCount, publishedTools } from '../../user/aistore/data/manageStore.js';
 
 const managedAppRecords = [
   {
@@ -165,6 +165,7 @@ const publishedAppRecords = publishedTools.map((tool, index) => {
     approval: '승인',
     publication: '게시 중',
     visibility: existing?.visibility ?? '전사',
+    downloadCount: getToolDownloadCount(tool),
     users: existing?.users ?? 0,
     updatedAt: existing?.updatedAt ?? '2026.10.20',
     risk: existing?.risk ?? '낮음',

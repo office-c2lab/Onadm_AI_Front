@@ -38,7 +38,7 @@ function SectionTitle({ children, onViewAll }) {
           {children} <ChevronRight size={18} aria-hidden="true" />
         </h2>
       </div>
-      {onViewAll && (
+      {/* {onViewAll && (
         <button
           type="button"
           onClick={onViewAll}
@@ -46,7 +46,7 @@ function SectionTitle({ children, onViewAll }) {
         >
           전체 보기
         </button>
-      )}
+      )} */}
     </div>
   );
 }

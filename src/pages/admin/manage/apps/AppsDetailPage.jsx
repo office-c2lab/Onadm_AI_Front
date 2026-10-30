@@ -29,6 +29,7 @@ import {
   getToolDownloadSize,
   supportedEnvironment,
 } from '../../../user/aistore/data/storeDetailContent.js';
+import { getAppDownloadCount, getAppDownloadHistory } from './downloadHistory.js';
 
 export default function AppsDetailPage() {
   const { appId } = useParams();
@@ -80,6 +81,8 @@ export default function AppsDetailPage() {
   const versionHistory = sourceApp.versionHistory ?? [
     { version: sourceApp.version, updatedAt: sourceApp.updatedAt },
   ];
+  const downloadCount = getAppDownloadCount(sourceApp);
+  const recentDownloads = getAppDownloadHistory(sourceApp);
 
   return (
     <>
@@ -111,10 +114,14 @@ export default function AppsDetailPage() {
                 <span className="inline-flex items-center gap-2">
                   <HardDrive size={16} className="text-blue-600" /> {getToolDownloadSize(tool)}
                 </span>
-                <span className="inline-flex items-center gap-2">
+                <Link
+                  to={`/admin/manage/apps/${sourceApp.id}/downloads`}
+                  aria-label={`다운로드 ${downloadCount.toLocaleString('ko-KR')}회 이력 보기`}
+                  className="inline-flex items-center gap-2 rounded-sm transition-colors hover:text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                >
                   <Download size={16} className="text-blue-600" /> 다운로드{' '}
-                  {(sourceApp.downloadCount ?? sourceApp.users ?? 0).toLocaleString('ko-KR')}회
-                </span>
+                  {downloadCount.toLocaleString('ko-KR')}회
+                </Link>
                 <span className="inline-flex items-center gap-2">
                   <ShieldCheck size={16} className="text-blue-600" /> 사내 등록 도구
                 </span>
@@ -257,6 +264,31 @@ export default function AppsDetailPage() {
               </li>
             ))}
           </ol>
+        </AdminDetailSection>
+
+        <AdminDetailSection title="다운로드 이력">
+          <div className="flex max-w-4xl flex-col gap-4 border-y border-slate-200/80 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-800">
+                누적 다운로드{' '}
+                <span className="font-semibold text-blue-600">
+                  {downloadCount.toLocaleString('ko-KR')}회
+                </span>
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                {recentDownloads.length
+                  ? `최근 ${recentDownloads[0].name}님 외 다운로드 사용자 이력을 확인할 수 있습니다.`
+                  : '아직 이 도구를 다운로드한 사용자가 없습니다.'}
+              </p>
+            </div>
+            <Link
+              to={`/admin/manage/apps/${sourceApp.id}/downloads`}
+              className="inline-flex h-9 items-center gap-2 rounded-lg pl-3 text-sm font-medium text-slate-500 transition-colors hover:text-blue-600"
+            >
+              이력 보기
+              <ChevronRight size={16} aria-hidden="true" />
+            </Link>
+          </div>
         </AdminDetailSection>
 
         <AdminDetailSection title="스토어 노출">
