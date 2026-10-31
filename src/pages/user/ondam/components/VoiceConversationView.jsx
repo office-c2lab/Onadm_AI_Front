@@ -5,7 +5,7 @@ import GamgikAgentOrbWithFace from '../../../../components/character/GamgikAgent
 
 export default function VoiceConversationView({ onClose }) {
   const [isMuted, setIsMuted] = useState(false);
-  const [wakeExpression, setWakeExpression] = useState('idle');
+  const [wakeExpression, setWakeExpression] = useState(null);
   const wakeTimerRef = useRef(null);
 
   useEffect(
@@ -22,13 +22,13 @@ export default function VoiceConversationView({ onClose }) {
       setIsMuted(false);
       setWakeExpression('surprised');
       wakeTimerRef.current = window.setTimeout(() => {
-        setWakeExpression('idle');
+        setWakeExpression(null);
       }, 760);
       return;
     }
 
     setIsMuted(true);
-    setWakeExpression('idle');
+    setWakeExpression(null);
   };
 
   return (
