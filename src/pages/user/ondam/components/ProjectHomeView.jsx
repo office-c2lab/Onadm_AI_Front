@@ -25,7 +25,7 @@ const chatDescriptions = {
   'brand-copy': '채팅 입력하면 채팅 화면 전환 애니메이션과 문구를 정리해줘',
 };
 
-function ProjectComposer({ projectName, onSubmit }) {
+function ProjectComposer({ projectName, onSubmit, onStartVoice }) {
   const [prompt, setPrompt] = useState('');
   const [isListening, setIsListening] = useState(false);
   const fileInputRef = useRef(null);
@@ -77,7 +77,7 @@ function ProjectComposer({ projectName, onSubmit }) {
       </button>
       <button
         type={prompt.trim() ? 'submit' : 'button'}
-        onClick={!prompt.trim() ? () => setIsListening(value => !value) : undefined}
+        onClick={!prompt.trim() ? onStartVoice : undefined}
         className="ml-1.5 grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#3c7cf6] text-white transition hover:bg-[#2f6fe8]"
         aria-label={prompt.trim() ? '메시지 보내기' : '음성 대화 시작'}
       >
@@ -97,6 +97,7 @@ export default function ProjectHomeView({
   onSubmit,
   onSelectChat,
   onOpenSettings,
+  onStartVoice,
 }) {
   const [activeTab, setActiveTab] = useState('chats');
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -162,7 +163,11 @@ export default function ProjectHomeView({
         </header>
 
         <div className="mt-7">
-          <ProjectComposer projectName={project.title} onSubmit={onSubmit} />
+          <ProjectComposer
+            projectName={project.title}
+            onSubmit={onSubmit}
+            onStartVoice={onStartVoice}
+          />
         </div>
 
         <div className="mt-7 flex items-center gap-1" role="tablist">

@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowUp,
@@ -16,33 +15,32 @@ import GamgikAgentOrbWithFace from '../../../../components/character/GamgikAgent
 import ModelSelector from './ModelSelector.jsx';
 
 // 메시지 내용 출력
-function MessageContent({ content }) {
+function MessageContent({ content, isStreaming = false }) {
   return content.split('\n').map((line, lineIndex) => (
-    <p
-      key={`${line}-${lineIndex}`}
-      className={line ? 'min-h-6' : 'h-3'}
-    >
+    <p key={`${line}-${lineIndex}`} className={line ? 'min-h-6' : 'h-3'}>
       {line &&
         line.split(/(\*\*.*?\*\*)/g).map((part, partIndex) =>
-          part.startsWith('**') && part.endsWith('**') ? (
-            <strong
-              key={`${part}-${partIndex}`}
-              className="font-semibold text-[#171717]"
-            >
-              {part.slice(2, -2)}
+          (part.startsWith('**') && part.endsWith('**')) ||
+          (isStreaming && part.startsWith('**')) ? (
+            <strong key={`${part}-${partIndex}`} className="font-semibold text-[#171717]">
+              {part.endsWith('**') ? part.slice(2, -2) : part.slice(2)}
             </strong>
           ) : (
-            <span key={`${part}-${partIndex}`}>
-              {part}
-            </span>
+            <span key={`${part}-${partIndex}`}>{part}</span>
           )
         )}
+      {isStreaming && lineIndex === content.split('\n').length - 1 && (
+        <span
+          className="ml-0.5 inline-block h-[18px] w-0.5 translate-y-[3px] animate-pulse rounded-full bg-[#777]"
+          aria-hidden="true"
+        />
+      )}
     </p>
   ));
 }
 
 // 메시지 입력창
-function Composer({ onSubmit }) {
+function Composer({ onSubmit, onStartVoice, disabled = false }) {
   const [prompt, setPrompt] = useState('');
   const [isListening, setIsListening] = useState(false);
   const fileInputRef = useRef(null);
@@ -69,15 +67,11 @@ function Composer({ onSubmit }) {
       "
     >
       {/* 파일 첨부 */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        multiple
-      />
+      <input ref={fileInputRef} type="file" className="hidden" multiple />
 
       <button
         type="button"
+        disabled={disabled}
         onClick={() => fileInputRef.current?.click()}
         className="
           grid h-10 w-10 shrink-0 place-items-center
@@ -86,15 +80,13 @@ function Composer({ onSubmit }) {
         "
         aria-label="파일 첨부"
       >
-        <Plus
-          className="h-5 w-5"
-          strokeWidth={1.8}
-        />
+        <Plus className="h-5 w-5" strokeWidth={1.8} />
       </button>
 
       {/* 메시지 입력 */}
       <input
         autoFocus
+        disabled={disabled}
         value={prompt}
         onChange={event => setPrompt(event.target.value)}
         className="
@@ -114,49 +106,35 @@ function Composer({ onSubmit }) {
       {/* 음성 입력 */}
       <button
         type="button"
+        disabled={disabled}
         onClick={() => setIsListening(value => !value)}
         className={`
           grid h-10 w-10 shrink-0 place-items-center
           rounded-full
-          ${
-            isListening
-              ? 'bg-[#fee9e7] text-[#d93025]'
-              : 'text-[#303030] hover:bg-[#f0f0f0]'
-          }
+          ${isListening ? 'bg-[#fee9e7] text-[#d93025]' : 'text-[#303030] hover:bg-[#f0f0f0]'}
         `}
         aria-label="음성 입력"
       >
-        <Mic
-          className="h-[19px] w-[19px]"
-          strokeWidth={1.8}
-        />
+        <Mic className="h-[19px] w-[19px]" strokeWidth={1.8} />
       </button>
 
       {/* 메시지 전송 / 음성 대화 */}
       <button
         type={prompt.trim() ? 'submit' : 'button'}
+        disabled={disabled}
+        onClick={!prompt.trim() ? onStartVoice : undefined}
         className="
           ml-1.5 grid h-10 w-10 shrink-0
           place-items-center rounded-full
           bg-[#3c7cf6] text-white
-          hover:bg-[#2f6fe8]
+          hover:bg-[#2f6fe8] disabled:opacity-45
         "
-        aria-label={
-          prompt.trim()
-            ? '메시지 보내기'
-            : '음성 대화 시작'
-        }
+        aria-label={prompt.trim() ? '메시지 보내기' : '음성 대화 시작'}
       >
         {prompt.trim() ? (
-          <ArrowUp
-            className="h-[19px] w-[19px]"
-            strokeWidth={2}
-          />
+          <ArrowUp className="h-[19px] w-[19px]" strokeWidth={2} />
         ) : (
-          <AudioLines
-            className="h-[19px] w-[19px]"
-            strokeWidth={2}
-          />
+          <AudioLines className="h-[19px] w-[19px]" strokeWidth={2} />
         )}
       </button>
     </form>
@@ -164,19 +142,26 @@ function Composer({ onSubmit }) {
 }
 
 // 채팅 화면
-export default function ChatView({ messages, onSubmit }) {
+export default function ChatView({
+  messages,
+  onSubmit,
+  onStartVoice,
+  isResponding = false,
+  isLoadingHistory = false,
+}) {
   const [copiedId, setCopiedId] = useState(null);
   const bottomRef = useRef(null);
 
-  const isGenerating = messages.at(-1)?.role === 'user';
+  const lastMessage = messages.at(-1);
+  const isGenerating = isResponding && lastMessage?.role === 'user';
 
   // 새 메시지가 추가되면 맨 아래로 스크롤
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
-      behavior: 'smooth',
+      behavior: lastMessage?.isStreaming ? 'auto' : 'smooth',
       block: 'end',
     });
-  }, [messages]);
+  }, [lastMessage, messages]);
 
   // 답변 복사
   const copyMessage = async message => {
@@ -196,6 +181,31 @@ export default function ChatView({ messages, onSubmit }) {
         overflow-hidden bg-white
       "
     >
+      {/* 이전 대화 로딩 */}
+      {isLoadingHistory && (
+        <div
+          className="absolute inset-x-0 bottom-[100px] top-0 z-30 flex flex-col items-center justify-center bg-white pb-10"
+          role="status"
+          aria-live="polite"
+          aria-label="이전 응답을 가져오고 있어요"
+        >
+          <div className="h-[300px] w-[340px] shrink-0 overflow-visible">
+            <GamgikAgentOrbWithFace size={340} speed={10} motion={0.82} themeMode="light" />
+          </div>
+
+          <div className="mt-3 flex flex-col items-center gap-3 text-center">
+            <p className="text-[18px] font-medium tracking-[-0.015em] text-[#333]">
+              이전 응답을 가져오고 있어요
+            </p>
+            <span className="flex items-center gap-2" aria-hidden="true">
+              <i className="h-2 w-2 animate-bounce rounded-full bg-[#3c7cf6] [animation-delay:-0.3s]" />
+              <i className="h-2 w-2 animate-bounce rounded-full bg-[#3c7cf6] [animation-delay:-0.15s]" />
+              <i className="h-2 w-2 animate-bounce rounded-full bg-[#3c7cf6]" />
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* 채팅 메시지 영역 */}
       <div
         className="
@@ -218,10 +228,7 @@ export default function ChatView({ messages, onSubmit }) {
           {messages.map(message =>
             message.role === 'user' ? (
               // 사용자 메시지
-              <div
-                key={message.id}
-                className="flex justify-end"
-              >
+              <div key={message.id} className="flex justify-end">
                 <div
                   className="
                     max-w-[78%] rounded-[22px]
@@ -235,27 +242,23 @@ export default function ChatView({ messages, onSubmit }) {
               </div>
             ) : (
               // AI 메시지
-              <div
-                key={message.id}
-                className="group"
-              >
+              <div key={message.id} className="group">
                 <div className="min-w-0">
                   {/* AI 답변 */}
                   <div className="text-[16px] leading-7 text-[#303030]">
-                    <MessageContent
-                      content={message.content}
-                    />
+                    <MessageContent content={message.content} isStreaming={message.isStreaming} />
                   </div>
 
                   {/* AI 답변 액션 */}
                   <div
-                    className="
+                    className={`
                       mt-3 flex items-center gap-0.5
                       text-[#777] opacity-0
                       transition-opacity
                       group-hover:opacity-100
                       focus-within:opacity-100
-                    "
+                      ${message.isStreaming ? 'invisible' : ''}
+                    `}
                   >
                     {/* 복사 */}
                     <button
@@ -317,10 +320,7 @@ export default function ChatView({ messages, onSubmit }) {
 
           {/* AI 응답 생성 중 */}
           {isGenerating && (
-            <div
-              className="flex items-center gap-6"
-              aria-label="응답 생성 중"
-            >
+            <div className="flex items-center gap-6" aria-label="응답 생성 중">
               {/* AI 캐릭터 */}
               <div
                 className="
@@ -328,12 +328,7 @@ export default function ChatView({ messages, onSubmit }) {
                   shrink-0 overflow-visible
                 "
               >
-                <GamgikAgentOrbWithFace
-                  size={180}
-                  speed={10}
-                  motion={0.78}
-                  themeMode="light"
-                />
+                <GamgikAgentOrbWithFace size={180} speed={10} motion={0.78} themeMode="light" />
               </div>
 
               {/* 응답 생성 텍스트 */}
@@ -346,10 +341,7 @@ export default function ChatView({ messages, onSubmit }) {
               >
                 <span>응답 생성 중</span>
 
-                <span
-                  className="flex items-center gap-1.5"
-                  aria-hidden="true"
-                >
+                <span className="flex items-center gap-1.5" aria-hidden="true">
                   <i
                     className="
                       h-1.5 w-1.5 animate-bounce
@@ -391,7 +383,11 @@ export default function ChatView({ messages, onSubmit }) {
         "
       >
         <div className="mx-auto max-w-[780px]">
-          <Composer onSubmit={onSubmit} />
+          <Composer
+            onSubmit={onSubmit}
+            onStartVoice={onStartVoice}
+            disabled={isResponding || isLoadingHistory}
+          />
 
           <p
             className="
@@ -399,8 +395,7 @@ export default function ChatView({ messages, onSubmit }) {
               text-[11px] text-[#999]
             "
           >
-            ONDAM AI는 실수할 수 있습니다.
-            중요한 정보는 다시 확인해 주세요.
+            ONDAM AI는 실수할 수 있습니다. 중요한 정보는 다시 확인해 주세요.
           </p>
         </div>
       </div>

@@ -1,10 +1,11 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import OndamSidebar, {
   OndamSidebarRail,
 } from '../../../components/usersidebar/ondamsidebar/OndamSidebar.jsx';
 import NewChatView from './components/NewChatView.jsx';
 import ChatView from './components/ChatView.jsx';
 import ProjectHomeView from './components/ProjectHomeView.jsx';
+import VoiceConversationView from './components/VoiceConversationView.jsx';
 import { createMockAnswer } from './components/mockResponses.js';
 
 export default function OndamPage() {
@@ -16,7 +17,26 @@ export default function OndamPage() {
   const [projectViewKey, setProjectViewKey] = useState(0);
   const [projectSettingsRequest, setProjectSettingsRequest] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [isResponding, setIsResponding] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
   const chatVersionRef = useRef(0);
+  const responseTimersRef = useRef(new Set());
+
+  const clearResponseTimers = () => {
+    responseTimersRef.current.forEach(timerId => window.clearTimeout(timerId));
+    responseTimersRef.current.clear();
+  };
+
+  const scheduleResponse = (callback, delay) => {
+    const timerId = window.setTimeout(() => {
+      responseTimersRef.current.delete(timerId);
+      callback();
+    }, delay);
+    responseTimersRef.current.add(timerId);
+  };
+
+  useEffect(() => () => clearResponseTimers(), []);
 
   const setSidebarOpen = isOpen => {
     setIsSidebarOpen(isOpen);
@@ -24,7 +44,11 @@ export default function OndamPage() {
   };
 
   const startNewChat = (projectId = null, project = null, projectChats = []) => {
+    clearResponseTimers();
     chatVersionRef.current += 1;
+    setIsResponding(false);
+    setIsLoadingHistory(false);
+    setIsVoiceMode(false);
     setActiveChatId(null);
     setMessages([]);
 
@@ -37,7 +61,11 @@ export default function OndamPage() {
   };
 
   const selectProject = (project, projectChats = []) => {
+    clearResponseTimers();
     chatVersionRef.current += 1;
+    setIsResponding(false);
+    setIsLoadingHistory(false);
+    setIsVoiceMode(false);
     setActiveProject({ ...project, chats: projectChats });
     setActiveChatId(null);
     setMessages([]);
@@ -56,27 +84,73 @@ export default function OndamPage() {
   };
 
   const submitPrompt = prompt => {
-    const chatVersion = chatVersionRef.current;
-    const userMessage = { id: `user-${Date.now()}`, role: 'user', content: prompt };
+    if (isResponding || isLoadingHistory) return;
 
-    setActiveChatId(currentId => currentId ?? `new-${Date.now()}`);
+    const now = Date.now();
+    const chatVersion = chatVersionRef.current;
+    const userMessage = { id: `user-${now}`, role: 'user', content: prompt };
+    const assistantMessageId = `assistant-${now}`;
+    const answer = createMockAnswer(prompt);
+
+    setIsResponding(true);
+    setIsLoadingHistory(false);
+    setActiveChatId(currentId => currentId ?? `new-${now}`);
     setMessages(currentMessages => [...currentMessages, userMessage]);
 
-    window.setTimeout(() => {
+    scheduleResponse(() => {
       if (chatVersion !== chatVersionRef.current) return;
+
+      let visibleLength = Math.min(3, answer.length);
       setMessages(currentMessages => [
         ...currentMessages,
         {
-          id: `assistant-${Date.now()}`,
+          id: assistantMessageId,
           role: 'assistant',
-          content: createMockAnswer(prompt),
+          content: answer.slice(0, visibleLength),
+          isStreaming: true,
         },
       ]);
-    }, 5000);
+
+      const revealNextChunk = () => {
+        if (chatVersion !== chatVersionRef.current) return;
+
+        const currentCharacter = answer[visibleLength - 1];
+        const chunkSize = /[.!?。\n]/.test(currentCharacter) ? 2 : 4;
+        visibleLength = Math.min(answer.length, visibleLength + chunkSize);
+        const isComplete = visibleLength >= answer.length;
+
+        setMessages(currentMessages =>
+          currentMessages.map(message =>
+            message.id === assistantMessageId
+              ? {
+                  ...message,
+                  content: answer.slice(0, visibleLength),
+                  isStreaming: !isComplete,
+                }
+              : message
+          )
+        );
+
+        if (isComplete) {
+          setIsResponding(false);
+          return;
+        }
+
+        const nextDelay = /[.!?。\n]/.test(answer[visibleLength - 1]) ? 80 : 24;
+        scheduleResponse(revealNextChunk, nextDelay);
+      };
+
+      scheduleResponse(revealNextChunk, 40);
+    }, 750);
   };
 
   const selectChat = (chat, project = null) => {
+    clearResponseTimers();
     chatVersionRef.current += 1;
+    const chatVersion = chatVersionRef.current;
+    setIsResponding(false);
+    setIsLoadingHistory(true);
+    setIsVoiceMode(false);
     if (project) {
       setActiveProject(current => ({
         ...project,
@@ -86,14 +160,21 @@ export default function OndamPage() {
       setActiveProject(null);
     }
     setActiveChatId(chat.id);
-    setMessages([
-      { id: `${chat.id}-user`, role: 'user', content: chat.title },
-      {
-        id: `${chat.id}-assistant`,
-        role: 'assistant',
-        content: createMockAnswer(chat.title),
-      },
-    ]);
+    setMessages([{ id: `${chat.id}-user`, role: 'user', content: chat.title }]);
+
+    scheduleResponse(() => {
+      if (chatVersion !== chatVersionRef.current) return;
+
+      setMessages(currentMessages => [
+        ...currentMessages,
+        {
+          id: `${chat.id}-assistant`,
+          role: 'assistant',
+          content: createMockAnswer(chat.title),
+        },
+      ]);
+      setIsLoadingHistory(false);
+    }, 1000);
   };
 
   return (
@@ -124,7 +205,9 @@ export default function OndamPage() {
         className="min-w-0 flex-1 overflow-y-auto bg-white"
         aria-label="AI 채팅 영역"
       >
-        {!activeChatId && activeProject ? (
+        {isVoiceMode ? (
+          <VoiceConversationView onClose={() => setIsVoiceMode(false)} />
+        ) : !activeChatId && activeProject ? (
           <ProjectHomeView
             key={`${activeProject.id}-${projectViewKey}`}
             project={activeProject}
@@ -132,11 +215,18 @@ export default function OndamPage() {
             onSubmit={submitPrompt}
             onSelectChat={selectChat}
             onOpenSettings={openProjectSettings}
+            onStartVoice={() => setIsVoiceMode(true)}
           />
         ) : !activeChatId ? (
-          <NewChatView onSubmit={submitPrompt} />
+          <NewChatView onSubmit={submitPrompt} onStartVoice={() => setIsVoiceMode(true)} />
         ) : (
-          <ChatView messages={messages} onSubmit={submitPrompt} />
+          <ChatView
+            messages={messages}
+            onSubmit={submitPrompt}
+            isResponding={isResponding}
+            isLoadingHistory={isLoadingHistory}
+            onStartVoice={() => setIsVoiceMode(true)}
+          />
         )}
       </main>
     </div>
