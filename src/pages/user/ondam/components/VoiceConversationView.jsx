@@ -1,10 +1,35 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, X } from 'lucide-react';
 
 import GamgikAgentOrbWithFace from '../../../../components/character/GamgikAgentOrbWithFace.jsx';
 
 export default function VoiceConversationView({ onClose }) {
   const [isMuted, setIsMuted] = useState(false);
+  const [wakeExpression, setWakeExpression] = useState('idle');
+  const wakeTimerRef = useRef(null);
+
+  useEffect(
+    () => () => {
+      if (wakeTimerRef.current) window.clearTimeout(wakeTimerRef.current);
+    },
+    []
+  );
+
+  const toggleMute = () => {
+    if (wakeTimerRef.current) window.clearTimeout(wakeTimerRef.current);
+
+    if (isMuted) {
+      setIsMuted(false);
+      setWakeExpression('surprised');
+      wakeTimerRef.current = window.setTimeout(() => {
+        setWakeExpression('idle');
+      }, 760);
+      return;
+    }
+
+    setIsMuted(true);
+    setWakeExpression('idle');
+  };
 
   return (
     <section
@@ -27,7 +52,7 @@ export default function VoiceConversationView({ onClose }) {
             speed={isMuted ? 5 : 11}
             motion={isMuted ? 0.35 : 0.9}
             themeMode="light"
-            expressionOverride={isMuted ? 'sleepy' : 'idle'}
+            expressionOverride={isMuted ? 'sleepy' : wakeExpression}
           />
         </div>
       </div>
@@ -44,7 +69,7 @@ export default function VoiceConversationView({ onClose }) {
       <div className="absolute inset-x-0 bottom-8 flex items-center justify-center gap-3 sm:bottom-10">
         <button
           type="button"
-          onClick={() => setIsMuted(value => !value)}
+          onClick={toggleMute}
           className={`grid h-12 w-12 place-items-center rounded-full border transition-all ${
             isMuted
               ? 'border-[#dedede] bg-[#f1f1f1] text-[#555]'
