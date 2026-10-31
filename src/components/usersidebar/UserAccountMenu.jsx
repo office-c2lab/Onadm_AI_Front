@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  Bot,
   ChevronRight,
   CircleHelp,
   CircleUserRound,
@@ -12,6 +13,7 @@ import {
 const menuGroups = [
   [
     { id: 'upgrade', label: '플랜 업그레이드', icon: Sparkles },
+    { id: 'assistant', label: 'ONDAM 도우미', icon: Bot, ondamOnly: true },
     { id: 'personalization', label: '개인 설정', icon: SlidersHorizontal },
     { id: 'profile', label: '프로필', icon: CircleUserRound },
     { id: 'settings', label: '설정', icon: Settings },
@@ -22,7 +24,12 @@ const menuGroups = [
   ],
 ];
 
-export default function UserAccountMenu({ user = { name: 'rex307', plan: 'Plus' }, onAction }) {
+export default function UserAccountMenu({
+  user = { name: 'rex307', plan: 'Plus' },
+  onAction,
+  assistantEnabled,
+  onAssistantEnabledChange,
+}) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
   const initials = user.name.slice(0, 2).toUpperCase();
@@ -112,28 +119,53 @@ export default function UserAccountMenu({ user = { name: 'rex307', plan: 'Plus' 
                   : 'mt-2 border-t border-black/10 pt-2'
               }
             >
-              {group.map(item => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="menuitem"
-                    onClick={() => selectAction(item.id)}
-                    className="flex h-9 w-full items-center gap-3 rounded-lg px-2.5 text-left text-[14px] text-[#202020] transition-colors hover:bg-[#f3f3f3]"
-                  >
-                    <Icon
-                      className="h-[18px] w-[18px] shrink-0"
-                      strokeWidth={1.75}
-                      aria-hidden="true"
-                    />
-                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                    {item.trailing && (
-                      <ChevronRight className="h-4 w-4 shrink-0 text-[#777]" aria-hidden="true" />
-                    )}
-                  </button>
-                );
-              })}
+              {group
+                .filter(item => !item.ondamOnly || typeof assistantEnabled === 'boolean')
+                .map(item => {
+                  const Icon = item.icon;
+                  const isAssistantItem = item.id === 'assistant';
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      role={isAssistantItem ? 'menuitemcheckbox' : 'menuitem'}
+                      aria-checked={isAssistantItem ? assistantEnabled : undefined}
+                      onClick={() => {
+                        if (isAssistantItem) {
+                          onAssistantEnabledChange(!assistantEnabled);
+                          return;
+                        }
+
+                        selectAction(item.id);
+                      }}
+                      className="flex h-9 w-full items-center gap-3 rounded-lg px-2.5 text-left text-[14px] text-[#202020] transition-colors hover:bg-[#f3f3f3]"
+                    >
+                      <Icon
+                        className="h-[18px] w-[18px] shrink-0"
+                        strokeWidth={1.75}
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                      {isAssistantItem ? (
+                        <span
+                          className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+                            assistantEnabled ? 'bg-[#3c7cf6]' : 'bg-[#c9cdd4]'
+                          }`}
+                          aria-hidden="true"
+                        >
+                          <span
+                            className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                              assistantEnabled ? 'translate-x-[18px]' : 'translate-x-0.5'
+                            }`}
+                          />
+                        </span>
+                      ) : item.trailing ? (
+                        <ChevronRight className="h-4 w-4 shrink-0 text-[#777]" aria-hidden="true" />
+                      ) : null}
+                    </button>
+                  );
+                })}
             </div>
           ))}
         </div>

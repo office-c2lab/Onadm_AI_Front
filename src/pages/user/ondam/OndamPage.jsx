@@ -20,6 +20,9 @@ export default function OndamPage() {
   const [isResponding, setIsResponding] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isAssistantEnabled, setIsAssistantEnabled] = useState(() => {
+    return window.localStorage.getItem('ondam-assistant-enabled') !== 'false';
+  });
   const chatVersionRef = useRef(0);
   const responseTimersRef = useRef(new Set());
 
@@ -41,6 +44,11 @@ export default function OndamPage() {
   const setSidebarOpen = isOpen => {
     setIsSidebarOpen(isOpen);
     window.localStorage.setItem('ondam-sidebar-open', String(isOpen));
+  };
+
+  const setAssistantEnabled = isEnabled => {
+    setIsAssistantEnabled(isEnabled);
+    window.localStorage.setItem('ondam-assistant-enabled', String(isEnabled));
   };
 
   const startNewChat = (projectId = null, project = null, projectChats = []) => {
@@ -193,6 +201,8 @@ export default function OndamPage() {
             onProjectUpdated={updateProject}
             settingsRequest={projectSettingsRequest}
             onSettingsRequestHandled={() => setProjectSettingsRequest(null)}
+            assistantEnabled={isAssistantEnabled}
+            onAssistantEnabledChange={setAssistantEnabled}
             onClose={() => setSidebarOpen(false)}
           />
         ) : (
@@ -225,6 +235,7 @@ export default function OndamPage() {
             onSubmit={submitPrompt}
             isResponding={isResponding}
             isLoadingHistory={isLoadingHistory}
+            isAssistantEnabled={isAssistantEnabled}
             onStartVoice={() => setIsVoiceMode(true)}
           />
         )}

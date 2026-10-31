@@ -45,15 +45,10 @@ const companionStates = {
     eyebrow: 'ONDAM 도우미',
     label: '이어서 무엇을 해볼까요?',
   },
-  thinking: {
-    expression: 'searching',
-    eyebrow: '질문을 살펴보는 중',
-    label: '필요한 내용을 찾고 있어요',
-  },
-  answering: {
+  working: {
     expression: 'idle',
-    eyebrow: '답변 작성 중',
-    label: '생각을 정리해서 전하고 있어요',
+    eyebrow: 'ONDAM 도우미',
+    label: '답변을 준비하고 있어요',
   },
   complete: {
     expression: 'happy',
@@ -132,7 +127,7 @@ function ChatCompanion({ phase, onAction, disabled }) {
         <span className="min-w-0">
           <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#3c7cf6]">
             {state.eyebrow}
-            {(phase === 'thinking' || phase === 'answering') && (
+            {phase === 'working' && (
               <span className="flex gap-0.5" aria-hidden="true">
                 <i className="h-1 w-1 animate-bounce rounded-full bg-[#3c7cf6] [animation-delay:-0.3s]" />
                 <i className="h-1 w-1 animate-bounce rounded-full bg-[#3c7cf6] [animation-delay:-0.15s]" />
@@ -283,6 +278,7 @@ export default function ChatView({
   onStartVoice,
   isResponding = false,
   isLoadingHistory = false,
+  isAssistantEnabled = true,
 }) {
   const [copiedId, setCopiedId] = useState(null);
   const [showCompletion, setShowCompletion] = useState(false);
@@ -291,13 +287,7 @@ export default function ChatView({
 
   const lastMessage = messages.at(-1);
   const isGenerating = isResponding && lastMessage?.role === 'user';
-  const companionPhase = showCompletion
-    ? 'complete'
-    : isGenerating
-      ? 'thinking'
-      : isResponding
-        ? 'answering'
-        : 'idle';
+  const companionPhase = showCompletion ? 'complete' : isResponding ? 'working' : 'idle';
 
   useEffect(() => {
     let startTimer;
@@ -371,9 +361,9 @@ export default function ChatView({
 
       {/* 채팅 메시지 영역 */}
       <div
-        className="
+        className={`
           min-h-0 w-full flex-1 overflow-y-auto
-          pb-56 pt-8
+          ${isAssistantEnabled ? 'pb-56' : 'pb-44'} pt-8
 
           [scrollbar-color:transparent_transparent]
           [scrollbar-width:thin]
@@ -385,7 +375,7 @@ export default function ChatView({
           [&::-webkit-scrollbar-thumb]:bg-transparent
 
           hover:[&::-webkit-scrollbar-thumb]:bg-[#d9d9d9]
-        "
+        `}
       >
         <div className="mx-auto max-w-[780px] space-y-9 px-5 sm:px-8">
           {messages.map(message =>
@@ -483,15 +473,20 @@ export default function ChatView({
 
           {/* AI 응답 생성 중 */}
           {isGenerating && (
-            <div
-              className="flex items-center gap-2 py-2 text-[14px] text-[#777]"
-              aria-live="polite"
-            >
-              <span
-                className="h-2 w-2 animate-pulse rounded-full bg-[#3c7cf6]"
-                aria-hidden="true"
-              />
-              ONDAM이 질문을 살펴보고 있어요
+            <div className="flex items-center gap-6" aria-label="응답 생성 중">
+              <div className="-ml-[38px] h-[180px] w-[142px] shrink-0 overflow-visible">
+                <GamgikAgentOrbWithFace size={180} speed={10} motion={0.78} themeMode="light" />
+              </div>
+
+              <div className="flex items-center gap-2.5 text-[17px] font-medium text-[#4b4b4b]">
+                <span>응답 생성 중</span>
+
+                <span className="flex items-center gap-1.5" aria-hidden="true">
+                  <i className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#777] [animation-delay:-0.3s]" />
+                  <i className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#777] [animation-delay:-0.15s]" />
+                  <i className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#777]" />
+                </span>
+              </div>
             </div>
           )}
 
@@ -511,11 +506,13 @@ export default function ChatView({
         "
       >
         <div className="mx-auto max-w-[780px]">
-          <ChatCompanion
-            phase={companionPhase}
-            onAction={onSubmit}
-            disabled={isResponding || isLoadingHistory}
-          />
+          {isAssistantEnabled && (
+            <ChatCompanion
+              phase={companionPhase}
+              onAction={onSubmit}
+              disabled={isResponding || isLoadingHistory}
+            />
+          )}
 
           <Composer
             onSubmit={onSubmit}

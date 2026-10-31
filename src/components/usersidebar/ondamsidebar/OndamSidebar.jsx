@@ -344,6 +344,8 @@ export default function OndamSidebar({
   settingsRequest,
   onSettingsRequestHandled,
   onSelectMenu,
+  assistantEnabled,
+  onAssistantEnabledChange,
   onRenameChat, // (chatId, newTitle, projectId) => void
   onDeleteChat, // (chatId, projectId) => void
   onClose,
@@ -972,7 +974,12 @@ export default function OndamSidebar({
       </div>
 
       <div className="shrink-0 border-t border-black/5 p-2">
-        <UserAccountMenu user={user} onAction={onSelectMenu} />
+        <UserAccountMenu
+          user={user}
+          onAction={onSelectMenu}
+          assistantEnabled={assistantEnabled}
+          onAssistantEnabledChange={onAssistantEnabledChange}
+        />
       </div>
 
       {isAddingProject && (
