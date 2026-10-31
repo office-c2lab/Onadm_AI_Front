@@ -27,8 +27,18 @@ export default function VoiceConversationView({ onClose }) {
             speed={isMuted ? 5 : 11}
             motion={isMuted ? 0.35 : 0.9}
             themeMode="light"
+            expressionOverride={isMuted ? 'sleepy' : 'idle'}
           />
         </div>
+      </div>
+
+      <div className="pointer-events-none absolute bottom-28 left-1/2 -translate-x-1/2 text-center sm:bottom-32">
+        <p className="text-[18px] font-medium text-[#303030]">
+          {isMuted ? '잠시 쉬고 있을게요' : '듣고 있어요'}
+        </p>
+        <p className="mt-1 text-[13px] text-[#888]">
+          {isMuted ? '마이크를 켜면 다시 대화를 시작해요' : '편하게 말씀해 주세요'}
+        </p>
       </div>
 
       <div className="absolute inset-x-0 bottom-8 flex items-center justify-center gap-3 sm:bottom-10">

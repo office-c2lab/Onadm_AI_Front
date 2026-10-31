@@ -144,6 +144,7 @@ export default function GarimAgentOrbWithFace({
   themeMode = 'light',
   className = '',
   expressionOverride = null,
+  trackPointer = true,
 }) {
   const wrapRef = useRef(null);
   const blinkTimerRef = useRef(null);
@@ -158,6 +159,7 @@ export default function GarimAgentOrbWithFace({
   const [expression, setExpression] = useState('idle');
   const [isClickMoving, setIsClickMoving] = useState(false);
   const visibleExpression = expressionOverride ?? expression;
+  const visibleLook = trackPointer ? look : { x: 0, y: 0 };
 
   function triggerExpression(nextExpression, duration = 520) {
     if (resetTimerRef.current) window.clearTimeout(resetTimerRef.current);
@@ -211,6 +213,8 @@ export default function GarimAgentOrbWithFace({
   }, []);
 
   useEffect(() => {
+    if (!trackPointer) return undefined;
+
     function isPointerInsideViewport(event) {
       return (
         event.clientX >= 0 &&
@@ -271,7 +275,7 @@ export default function GarimAgentOrbWithFace({
       document.removeEventListener('mouseleave', resetLook);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [trackPointer]);
 
   function playClickMotion() {
     if (motionTimerRef.current) window.clearTimeout(motionTimerRef.current);
@@ -320,7 +324,7 @@ export default function GarimAgentOrbWithFace({
 
         <SearchDecorations expression={visibleExpression} />
 
-        <AgentFace look={look} expression={visibleExpression} />
+        <AgentFace look={visibleLook} expression={visibleExpression} />
 
         <div className={`garim-surprise-marks is-${visibleExpression}`} aria-hidden="true">
           <i className="garim-surprise-mark garim-surprise-mark-left" />

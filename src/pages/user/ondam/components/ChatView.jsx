@@ -4,15 +4,150 @@ import {
   AudioLines,
   Check,
   Copy,
+  Lightbulb,
+  ListChecks,
+  MessageCircleQuestion,
   Mic,
   Plus,
   RotateCcw,
+  Sparkles,
   ThumbsDown,
   ThumbsUp,
 } from 'lucide-react';
 
 import GamgikAgentOrbWithFace from '../../../../components/character/GamgikAgentOrbWithFace.jsx';
 import ModelSelector from './ModelSelector.jsx';
+
+const companionActions = [
+  {
+    id: 'summarize',
+    icon: ListChecks,
+    label: '핵심만 요약',
+    prompt: '방금 답변의 핵심만 간단히 요약해줘',
+  },
+  {
+    id: 'simplify',
+    icon: Lightbulb,
+    label: '쉽게 설명',
+    prompt: '방금 답변을 처음 접하는 사람도 이해할 수 있게 쉽게 설명해줘',
+  },
+  {
+    id: 'next-step',
+    icon: MessageCircleQuestion,
+    label: '다음 단계 추천',
+    prompt: '지금 대화를 바탕으로 다음에 해야 할 일을 추천해줘',
+  },
+];
+
+const companionStates = {
+  idle: {
+    expression: 'idle',
+    eyebrow: 'ONDAM 도우미',
+    label: '이어서 무엇을 해볼까요?',
+  },
+  thinking: {
+    expression: 'searching',
+    eyebrow: '질문을 살펴보는 중',
+    label: '필요한 내용을 찾고 있어요',
+  },
+  answering: {
+    expression: 'idle',
+    eyebrow: '답변 작성 중',
+    label: '생각을 정리해서 전하고 있어요',
+  },
+  complete: {
+    expression: 'happy',
+    eyebrow: '답변 완료',
+    label: '더 필요한 내용도 도와드릴게요',
+  },
+};
+
+function ChatCompanion({ phase, onAction, disabled }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const state = companionStates[phase] ?? companionStates.idle;
+
+  const runAction = prompt => {
+    setIsOpen(false);
+    onAction(prompt);
+  };
+
+  return (
+    <div className="relative mb-2 flex justify-start">
+      {isOpen && (
+        <div
+          className="absolute bottom-[68px] left-0 z-30 w-[min(340px,calc(100vw-40px))] rounded-2xl border border-[#e8e8e8] bg-white p-2 shadow-[0_12px_36px_rgba(0,0,0,0.13)]"
+          aria-label="ONDAM 도우미 빠른 메뉴"
+        >
+          <div className="flex items-center gap-2 px-2 pb-2 pt-1 text-[12px] font-medium text-[#777]">
+            <Sparkles className="h-3.5 w-3.5 text-[#3c7cf6]" aria-hidden="true" />
+            현재 대화를 이렇게 이어갈 수 있어요
+          </div>
+
+          {companionActions.map(action => {
+            const Icon = action.icon;
+
+            return (
+              <button
+                key={action.id}
+                type="button"
+                onClick={() => runAction(action.prompt)}
+                className="flex min-h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-[14px] text-[#333] transition-colors hover:bg-[#f5f7fb]"
+              >
+                <Icon className="h-4 w-4 shrink-0 text-[#3c7cf6]" strokeWidth={1.8} />
+                <span>{action.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setIsOpen(value => !value)}
+        className={`group flex h-[58px] max-w-full items-center rounded-[20px] border px-2 pr-4 text-left shadow-[0_3px_14px_rgba(31,82,170,0.09)] transition-all ${
+          phase === 'idle'
+            ? 'border-[#e3e9f5] bg-[#f8faff] hover:-translate-y-0.5 hover:border-[#cad8f2] hover:shadow-[0_7px_20px_rgba(31,82,170,0.13)]'
+            : 'cursor-default border-[#dce7fb] bg-[#f6f9ff]'
+        } disabled:opacity-100`}
+        aria-expanded={isOpen}
+        aria-label={`${state.eyebrow}. ${state.label}${disabled ? '' : '. 빠른 메뉴 열기'}`}
+      >
+        <span
+          className="relative -ml-1 h-[54px] w-[62px] shrink-0 overflow-visible"
+          aria-hidden="true"
+        >
+          <span className="absolute left-1/2 top-1/2 h-[82px] w-[82px] -translate-x-1/2 -translate-y-1/2">
+            <GamgikAgentOrbWithFace
+              size={82}
+              speed={phase === 'idle' ? 7 : 10}
+              motion={phase === 'idle' ? 0.55 : 0.82}
+              themeMode="light"
+              expressionOverride={state.expression}
+              trackPointer={false}
+            />
+          </span>
+        </span>
+
+        <span className="min-w-0">
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#3c7cf6]">
+            {state.eyebrow}
+            {(phase === 'thinking' || phase === 'answering') && (
+              <span className="flex gap-0.5" aria-hidden="true">
+                <i className="h-1 w-1 animate-bounce rounded-full bg-[#3c7cf6] [animation-delay:-0.3s]" />
+                <i className="h-1 w-1 animate-bounce rounded-full bg-[#3c7cf6] [animation-delay:-0.15s]" />
+                <i className="h-1 w-1 animate-bounce rounded-full bg-[#3c7cf6]" />
+              </span>
+            )}
+          </span>
+          <span className="block truncate text-[13px] font-medium text-[#3a3a3a] sm:text-[14px]">
+            {state.label}
+          </span>
+        </span>
+      </button>
+    </div>
+  );
+}
 
 // 메시지 내용 출력
 function MessageContent({ content, isStreaming = false }) {
@@ -150,10 +285,38 @@ export default function ChatView({
   isLoadingHistory = false,
 }) {
   const [copiedId, setCopiedId] = useState(null);
+  const [showCompletion, setShowCompletion] = useState(false);
   const bottomRef = useRef(null);
+  const wasRespondingRef = useRef(isResponding);
 
   const lastMessage = messages.at(-1);
   const isGenerating = isResponding && lastMessage?.role === 'user';
+  const companionPhase = showCompletion
+    ? 'complete'
+    : isGenerating
+      ? 'thinking'
+      : isResponding
+        ? 'answering'
+        : 'idle';
+
+  useEffect(() => {
+    let startTimer;
+    let completionTimer;
+
+    if (wasRespondingRef.current && !isResponding) {
+      startTimer = window.setTimeout(() => setShowCompletion(true), 0);
+      completionTimer = window.setTimeout(() => setShowCompletion(false), 1800);
+    } else if (isResponding) {
+      startTimer = window.setTimeout(() => setShowCompletion(false), 0);
+    }
+
+    wasRespondingRef.current = isResponding;
+
+    return () => {
+      if (startTimer) window.clearTimeout(startTimer);
+      if (completionTimer) window.clearTimeout(completionTimer);
+    };
+  }, [isResponding]);
 
   // 새 메시지가 추가되면 맨 아래로 스크롤
   useEffect(() => {
@@ -210,7 +373,7 @@ export default function ChatView({
       <div
         className="
           min-h-0 w-full flex-1 overflow-y-auto
-          pb-44 pt-8
+          pb-56 pt-8
 
           [scrollbar-color:transparent_transparent]
           [scrollbar-width:thin]
@@ -320,50 +483,15 @@ export default function ChatView({
 
           {/* AI 응답 생성 중 */}
           {isGenerating && (
-            <div className="flex items-center gap-6" aria-label="응답 생성 중">
-              {/* AI 캐릭터 */}
-              <div
-                className="
-                  -ml-[38px] h-[180px] w-[142px]
-                  shrink-0 overflow-visible
-                "
-              >
-                <GamgikAgentOrbWithFace size={180} speed={10} motion={0.78} themeMode="light" />
-              </div>
-
-              {/* 응답 생성 텍스트 */}
-              <div
-                className="
-                  flex items-center gap-2.5
-                  text-[17px] font-medium
-                  text-[#4b4b4b]
-                "
-              >
-                <span>응답 생성 중</span>
-
-                <span className="flex items-center gap-1.5" aria-hidden="true">
-                  <i
-                    className="
-                      h-1.5 w-1.5 animate-bounce
-                      rounded-full bg-[#777]
-                      [animation-delay:-0.3s]
-                    "
-                  />
-                  <i
-                    className="
-                      h-1.5 w-1.5 animate-bounce
-                      rounded-full bg-[#777]
-                      [animation-delay:-0.15s]
-                    "
-                  />
-                  <i
-                    className="
-                      h-1.5 w-1.5 animate-bounce
-                      rounded-full bg-[#777]
-                    "
-                  />
-                </span>
-              </div>
+            <div
+              className="flex items-center gap-2 py-2 text-[14px] text-[#777]"
+              aria-live="polite"
+            >
+              <span
+                className="h-2 w-2 animate-pulse rounded-full bg-[#3c7cf6]"
+                aria-hidden="true"
+              />
+              ONDAM이 질문을 살펴보고 있어요
             </div>
           )}
 
@@ -383,6 +511,12 @@ export default function ChatView({
         "
       >
         <div className="mx-auto max-w-[780px]">
+          <ChatCompanion
+            phase={companionPhase}
+            onAction={onSubmit}
+            disabled={isResponding || isLoadingHistory}
+          />
+
           <Composer
             onSubmit={onSubmit}
             onStartVoice={onStartVoice}

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ArrowUp, AudioLines, FileSearch, Laptop, MailSearch, Mic, Plus } from 'lucide-react';
+import { ArrowUp, AudioLines, FileSearch, Laptop, Mic, Plus } from 'lucide-react';
 
 import GamgikAgentOrbWithFace from '../../../../components/character/GamgikAgentOrbWithFace.jsx';
 import ModelSelector from './ModelSelector.jsx';
@@ -14,11 +14,6 @@ const suggestions = [
     id: 'file-changes',
     icon: FileSearch,
     prompt: '중요한 파일에 어떤 변경 사항이 있었는지 알려줘',
-  },
-  {
-    id: 'email-search',
-    icon: MailSearch,
-    prompt: '구독 취소할 수 있는 이메일을 찾아줘',
   },
 ];
 
@@ -58,7 +53,7 @@ export default function NewChatView({ onSubmit, onStartVoice }) {
           aria-label="ONDAM AI 캐릭터"
         >
           <div className="relative -top-[150px] h-[460px] w-[460px] shrink-0 overflow-visible">
-            <GamgikAgentOrbWithFace size={460} speed={10} motion={0.78} themeMode="light" />
+            <GamgikAgentOrbWithFace size={460} speed={8} motion={0.68} themeMode="light" />
           </div>
         </div>
 
@@ -67,10 +62,16 @@ export default function NewChatView({ onSubmit, onStartVoice }) {
           오늘은 어떤 생각이 드나요?
         </h1>
 
+        <p className="mt-2 text-center text-[14px] text-[#777]" aria-live="polite">
+          {prompt.trim()
+            ? '좋은 질문이에요. 준비되면 바로 보내주세요.'
+            : '업무 정리부터 파일 분석, 새로운 아이디어까지 함께할게요.'}
+        </p>
+
         {/* 메시지 입력창 */}
         <form
           onSubmit={submitPrompt}
-          className="mt-8 flex min-h-[58px] w-full items-center rounded-[30px] border border-[#dedede] bg-white p-1.5 pl-2 shadow-[0_2px_10px_rgba(0,0,0,0.06)] transition-shadow focus-within:shadow-[0_3px_14px_rgba(0,0,0,0.09)]"
+          className="mt-10 flex min-h-[58px] w-full items-center rounded-[30px] border border-[#dedede] bg-white p-1.5 pl-2 shadow-[0_2px_10px_rgba(0,0,0,0.06)] transition-shadow focus-within:shadow-[0_3px_14px_rgba(0,0,0,0.09)]"
         >
           {/* 파일 첨부 */}
           <input
