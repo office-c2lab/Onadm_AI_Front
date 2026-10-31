@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  Blocks,
+  CalendarClock,
   Check,
   ChevronRight,
+  Compass,
   Ellipsis,
   Folder,
   House,
+  LibraryBig,
   Lightbulb,
   PanelLeft,
   Pencil,
@@ -21,6 +25,13 @@ import AiStoreConfirmModal from '../../../pages/user/aistore/components/AiStoreC
 import ProjectSettingsModal from '../../../pages/user/ondam/components/ProjectSettingsModal.jsx';
 import UserAccountMenu from '../UserAccountMenu.jsx';
 import UserServiceSwitcher from '../UserServiceSwitcher.jsx';
+
+const primaryItems = [
+  { id: 'schedule', label: '예약', icon: CalendarClock },
+  { id: 'library', label: '라이브러리', icon: LibraryBig },
+  { id: 'plugins', label: '플러그인', icon: Blocks },
+  { id: 'explore', label: '탐색', icon: Compass },
+];
 
 // 목업 데이터: 실제 API 연동 시 부모 컴포넌트에서 전달할 수 있습니다.
 const defaultProjects = [
@@ -748,6 +759,17 @@ export default function OndamSidebar({
           isActive={!activeChatId}
           onClick={() => handleNewChat()}
         />
+
+        <div className="mt-1 space-y-0.5">
+          {primaryItems.map(item => (
+            <MenuButton
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              onClick={() => onSelectMenu?.(item.id)}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3 [scrollbar-color:#d8d8d8_transparent] [scrollbar-width:thin]">
