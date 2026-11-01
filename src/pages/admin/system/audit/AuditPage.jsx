@@ -216,6 +216,7 @@ export default function AuditPage() {
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedLogIds, setSelectedLogIds] = useState([]);
 
   const filteredLogs = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLocaleLowerCase('ko');
@@ -234,22 +235,43 @@ export default function AuditPage() {
   const totalPages = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
   const visibleLogs = filteredLogs.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const selectedLogs = filteredLogs.filter(log => selectedLogIds.includes(log.id));
+  const allVisibleLogsSelected =
+    visibleLogs.length > 0 && visibleLogs.every(log => selectedLogIds.includes(log.id));
 
   const handleReset = () => {
     setActiveTab('전체');
     setSearchInput('');
     setSearchQuery('');
     setCurrentPage(1);
+    setSelectedLogIds([]);
+  };
+
+  const handleToggleLogSelection = logId => {
+    setSelectedLogIds(current =>
+      current.includes(logId) ? current.filter(id => id !== logId) : [...current, logId]
+    );
+  };
+
+  const handleToggleAllVisibleLogs = () => {
+    const visibleLogIds = visibleLogs.map(log => log.id);
+
+    setSelectedLogIds(current => {
+      const allSelected = visibleLogIds.every(id => current.includes(id));
+      if (allSelected) return current.filter(id => !visibleLogIds.includes(id));
+
+      return [...new Set([...current, ...visibleLogIds])];
+    });
   };
 
   const handleDownloadCsv = () => {
-    if (!filteredLogs.length) return;
+    if (!selectedLogs.length) return;
 
     const escapeCsvValue = value => `"${String(value ?? '').replaceAll('"', '""')}"`;
     const headers = ['No.', '영역', '메뉴', '작업 내용', '대상', '접속 IP', '일시'];
     const csv = [
       headers,
-      ...filteredLogs.map(log => [
+      ...selectedLogs.map(log => [
         log.id,
         log.area,
         log.menu,
@@ -296,6 +318,7 @@ export default function AuditPage() {
                     onClick={() => {
                       setActiveTab(tab);
                       setCurrentPage(1);
+                      setSelectedLogIds([]);
                     }}
                     className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-1 text-sm transition-colors ${
                       isActive
@@ -330,6 +353,7 @@ export default function AuditPage() {
               onClick={() => {
                 setSearchQuery(searchInput.trim());
                 setCurrentPage(1);
+                setSelectedLogIds([]);
               }}
               className="h-[var(--app-control-lg)] min-w-[5.25rem]"
             >
@@ -343,14 +367,14 @@ export default function AuditPage() {
               />
             </MonitoringIconButtonTooltip>
             <MonitoringIconButtonTooltip
-              label={filteredLogs.length ? 'CSV 다운로드' : '다운로드할 로그가 없습니다'}
+              label={selectedLogs.length ? 'CSV 다운로드' : '항목을 선택하세요'}
             >
               <MonitoringActionButton
                 variant="csvDownload"
                 heightClass="h-[var(--app-control-lg)]"
                 widthClass="w-[var(--app-control-lg)] min-w-[var(--app-control-lg)] px-0"
                 onClick={handleDownloadCsv}
-                disabled={!filteredLogs.length}
+                disabled={!selectedLogs.length}
                 aria-label="CSV 다운로드"
               >
                 <Download
@@ -370,12 +394,24 @@ export default function AuditPage() {
                 className={`${monitoringTableClass} min-w-[58rem] table-fixed`}
               >
                 <colgroup>
-                  {['7%', '22%', '27%', '17%', '11%', '16%'].map((width, index) => (
+                  {['4%', '7%', '21%', '26%', '16%', '10%', '16%'].map((width, index) => (
                     <col key={`${width}-${index}`} style={{ width }} />
                   ))}
                 </colgroup>
                 <thead className={monitoringTableHeadClass}>
                   <tr className={monitoringTableHeaderRowClass}>
+                    <th
+                      scope="col"
+                      className={`${monitoringTableHeaderCellClass} px-0 text-center align-middle`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={allVisibleLogsSelected}
+                        onChange={handleToggleAllVisibleLogs}
+                        aria-label="현재 페이지 전체 선택"
+                        className="mx-auto block h-[var(--app-icon-xs)] w-[var(--app-icon-xs)] cursor-pointer rounded border-slate-300 accent-[#075DF6]"
+                      />
+                    </th>
                     {['No.', '위치', '작업 내용', '대상', '접속 IP', '일시'].map(column => (
                       <th key={column} scope="col" className={monitoringTableHeaderCellClass}>
                         {column}
@@ -389,6 +425,17 @@ export default function AuditPage() {
                       key={log.id}
                       className={monitoringTableRowClass({ striped: index % 2 === 1 })}
                     >
+                      <td
+                        className={monitoringTableCellClass(index, 'px-0 text-center align-middle')}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedLogIds.includes(log.id)}
+                          onChange={() => handleToggleLogSelection(log.id)}
+                          aria-label={`${log.id} 감사 로그 행 선택`}
+                          className="mx-auto block h-[var(--app-icon-xs)] w-[var(--app-icon-xs)] cursor-pointer rounded border-slate-300 accent-[#075DF6]"
+                        />
+                      </td>
                       <td className={monitoringTableCellClass(index, 'text-slate-500')}>
                         {log.id}
                       </td>
@@ -425,7 +472,7 @@ export default function AuditPage() {
                   ))}
                   {!filteredLogs.length ? (
                     <tr>
-                      <td colSpan={6} className="h-36 text-center text-sm text-slate-400">
+                      <td colSpan={7} className="h-36 text-center text-sm text-slate-400">
                         조건에 맞는 감사 로그가 없습니다.
                       </td>
                     </tr>
