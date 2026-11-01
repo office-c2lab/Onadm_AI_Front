@@ -25,7 +25,7 @@ const menuGroups = [
 ];
 
 export default function UserAccountMenu({
-  user = { name: 'rex307', plan: 'Plus' },
+  user = { name: 'rex307', email: 'rex307@ondam.ai', plan: 'Plus' },
   onAction,
   assistantEnabled,
   onAssistantEnabledChange,

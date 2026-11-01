@@ -42,7 +42,29 @@ export default function RegistrationAccessPanel() {
               ))}
             </div>
           </fieldset>
-
+  <div className="border-t border-slate-100 pt-6">
+            <fieldset className="pb-5">
+              <legend className="mb-3 text-base font-semibold text-slate-800">
+                등록 허용 부서
+              </legend>
+              <div className="flex flex-col items-start gap-2.5">
+                {[
+                  ['all', '전체 부서 허용'],
+                  ['selected', '선택한 부서만 허용'],
+                ].map(([value, label]) => (
+                  <RadioChoice
+                    key={value}
+                    name="department-scope"
+                    value={value}
+                    checked={departmentScope === value}
+                    onChange={() => setDepartmentScope(value)}
+                  >
+                    {label}
+                  </RadioChoice>
+                ))}
+              </div>
+            </fieldset>
+          </div>
           <div className="border-t border-slate-100 pt-6">
             <fieldset className="pb-5">
               <legend className="mb-3 text-base font-semibold text-slate-800">
@@ -67,29 +89,7 @@ export default function RegistrationAccessPanel() {
             </fieldset>
           </div>
 
-          <div className="border-t border-slate-100 pt-6">
-            <fieldset className="pb-5">
-              <legend className="mb-3 text-base font-semibold text-slate-800">
-                등록 허용 부서
-              </legend>
-              <div className="flex flex-col items-start gap-2.5">
-                {[
-                  ['all', '전체 부서 허용'],
-                  ['selected', '선택한 부서만 허용'],
-                ].map(([value, label]) => (
-                  <RadioChoice
-                    key={value}
-                    name="department-scope"
-                    value={value}
-                    checked={departmentScope === value}
-                    onChange={() => setDepartmentScope(value)}
-                  >
-                    {label}
-                  </RadioChoice>
-                ))}
-              </div>
-            </fieldset>
-          </div>
+        
         </div>
       </Card>
 

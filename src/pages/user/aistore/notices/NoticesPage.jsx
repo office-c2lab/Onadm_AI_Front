@@ -3,6 +3,13 @@ import { useMemo, useState } from 'react';
 import SearchHeader from '../../../../components/search/SearchHeader.jsx';
 import { readOperationNotices } from '../../../../data/operationNotices.js';
 
+const CATEGORY_TONE = {
+  긴급: 'border-red-600 bg-red-600 text-white',
+  '시스템 업데이트': 'border-blue-600 bg-blue-600 text-white',
+  '점검 안내': 'border-amber-500 bg-amber-500 text-white',
+  '운영 안내': 'border-slate-600 bg-slate-600 text-white',
+};
+
 function formatPublishedDate(value) {
   return value ? value.slice(0, 10).replaceAll('-', '.') : '—';
 }
@@ -24,7 +31,9 @@ export default function NoticesPage() {
     if (!normalizedKeyword) return visibleNotices;
 
     return visibleNotices.filter(notice =>
-      `${notice.title} ${notice.description}`.toLowerCase().includes(normalizedKeyword)
+      `${notice.category} ${notice.title} ${notice.description}`
+        .toLowerCase()
+        .includes(normalizedKeyword)
     );
   }, [keyword, visibleNotices]);
 
@@ -50,9 +59,16 @@ export default function NoticesPage() {
               className="flex min-h-[92px] items-center px-2 py-5 transition-colors hover:bg-slate-50 sm:px-4"
             >
               <div className="min-w-0 flex-1">
-                <h3 className="truncate text-[15px] font-semibold text-slate-900">
-                  {notice.title}
-                </h3>
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <h3 className="truncate text-[15px] font-semibold text-slate-900">
+                    {notice.title}
+                  </h3>
+                  <span
+                    className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${CATEGORY_TONE[notice.category] ?? CATEGORY_TONE['운영 안내']}`}
+                  >
+                    {notice.category}
+                  </span>
+                </div>
                 <p className="mt-1.5 truncate text-sm text-slate-500">{notice.description}</p>
               </div>
               <time className="w-24 shrink-0 text-right text-sm text-slate-500">

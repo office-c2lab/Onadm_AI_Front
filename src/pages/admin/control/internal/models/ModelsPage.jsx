@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Eye, EyeOff, Plus, X } from 'lucide-react';
 
 import CustomDropdown from '../../../../../components/dropdown/CustomDropdown.jsx';
+import deepseekIcon from '../../../../../assets/icons/deepseek.png';
 import geminiIcon from '../../../../../assets/icons/gemini-color.svg';
 import openaiIcon from '../../../../../assets/icons/openai.svg';
 import AppButton from '../../external/components/AppButton.jsx';
@@ -29,7 +30,7 @@ import '../../external/garim.css';
 import { providers, models, prompts } from '../data.js';
 const PAGE_SIZE = 5;
 
-const providerIcons = { openai: openaiIcon, google: geminiIcon, deepseek: null };
+const providerIcons = { openai: openaiIcon, google: geminiIcon, deepseek: deepseekIcon };
 
 function formatDateTime24(value) {
   const match = String(value ?? '').match(

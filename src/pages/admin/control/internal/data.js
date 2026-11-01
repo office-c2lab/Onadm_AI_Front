@@ -1,3 +1,4 @@
+import deepseekIcon from '../../../../assets/icons/deepseek.png';
 import geminiIcon from '../../../../assets/icons/gemini-color.svg';
 import openaiIcon from '../../../../assets/icons/openai.svg';
 
@@ -47,7 +48,7 @@ export const providers = [
     id: 'deepseek',
     name: 'DeepSeek',
     code: 'DEEPSEEK',
-    icon: null,
+    icon: deepseekIcon,
     endpoint: 'https://api.deepseek.com',
     key: 'sk-7...c31c',
     status: '활성',

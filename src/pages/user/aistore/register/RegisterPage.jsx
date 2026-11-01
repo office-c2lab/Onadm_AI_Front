@@ -326,7 +326,7 @@ export default function RegisterPage() {
                           <span
                             className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${
                               isResubmission
-                                ? 'border-violet-200 bg-violet-50 text-violet-700'
+                                ? 'border-violet-600 bg-violet-600 text-white'
                                 : isUpdateRequest
                                   ? 'border-blue-600 bg-blue-600 text-white'
                                   : 'border-slate-200 bg-white text-slate-600'

@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
 import openaiIcon from '../../../../assets/icons/openai.svg';
 import geminiIcon from '../../../../assets/icons/gemini-color.svg';
+import deepseekIcon from '../../../../assets/icons/deepseek.png';
 import { models } from '../../../admin/control/internal/data.js';
 
 const providerIcons = {
   openai: openaiIcon,
   google: geminiIcon,
+  deepseek: deepseekIcon,
 };
 
 const enabledModels = models

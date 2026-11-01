@@ -3,7 +3,11 @@ import { ChevronRight, Plus, Trash2 } from 'lucide-react';
 
 import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
 import { AdminDetailSection } from '../../../../layouts/admin/AdminDetailLayout.jsx';
-import { readOperationNotices, writeOperationNotices } from '../../../../data/operationNotices.js';
+import {
+  NOTICE_CATEGORIES,
+  readOperationNotices,
+  writeOperationNotices,
+} from '../../../../data/operationNotices.js';
 import AiStoreActionButton from '../../../user/aistore/components/AiStoreActionButton.jsx';
 import AiStoreConfirmModal from '../../../user/aistore/components/AiStoreConfirmModal.jsx';
 import PageLayout from '../../control/components/PageLayout.jsx';
@@ -17,9 +21,17 @@ const STATUS_TONE = {
   '게시 종료': 'text-slate-500',
 };
 
+const CATEGORY_TONE = {
+  긴급: 'border-red-600 bg-red-600 text-white',
+  '시스템 업데이트': 'border-blue-600 bg-blue-600 text-white',
+  '점검 안내': 'border-amber-500 bg-amber-500 text-white',
+  '운영 안내': 'border-slate-600 bg-slate-600 text-white',
+};
+
 const EMPTY_NOTICE = {
   title: '',
   description: '',
+  category: '운영 안내',
   startAt: '2026-10-28T14:30',
   endAt: '2026-10-31T23:59',
   status: '게시 중',
@@ -50,7 +62,14 @@ function OperationNoticesPanel({ notices, onOpen }) {
           className="flex min-h-[82px] w-full flex-wrap items-center gap-x-5 gap-y-2 px-1 py-4 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 sm:flex-nowrap sm:px-3"
         >
           <div className="min-w-0 flex-[1_1_22rem]">
-            <h3 className="truncate text-sm font-semibold text-slate-900">{notice.title}</h3>
+            <div className="flex min-w-0 items-center gap-2">
+              <h3 className="truncate text-sm font-semibold text-slate-900">{notice.title}</h3>
+              <span
+                className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${CATEGORY_TONE[notice.category] ?? CATEGORY_TONE['운영 안내']}`}
+              >
+                {notice.category}
+              </span>
+            </div>
             <p className="mt-1 truncate text-sm text-slate-500">{notice.description}</p>
           </div>
           <span className="flex w-36 shrink-0 flex-col text-xs leading-5 whitespace-nowrap text-slate-500">
@@ -139,6 +158,16 @@ function NoticeForm({ draft, onChange }) {
           onChange={event => onChange({ description: event.target.value })}
           placeholder="공지 내용을 입력하세요."
           className="mt-2 min-h-24 w-full resize-y rounded-lg border border-slate-200 px-3.5 py-3 text-sm leading-6 text-slate-900 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+        />
+      </label>
+      <label className="text-sm font-medium text-slate-700">
+        공지 분류
+        <CustomDropdown
+          value={draft.category}
+          onChange={value => onChange({ category: value })}
+          options={NOTICE_CATEGORIES}
+          ariaLabel="공지 분류"
+          className="mt-2 w-full [&>button]:h-11"
         />
       </label>
       <label className="text-sm font-medium text-slate-700">
