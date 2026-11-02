@@ -7,6 +7,7 @@ import {
   Search,
   ShieldCheck,
   SlidersHorizontal,
+  Tags,
 } from 'lucide-react';
 
 import { AdminDetailSection } from '../../../../layouts/admin/AdminDetailLayout.jsx';
@@ -15,12 +16,26 @@ import '../../control/external/garim.css';
 
 const ENGINES = [
   { name: 'Discover', version: 'v1.2.0', icon: Search },
+  { name: 'CSO Policy Engine', version: 'v1.4.0', icon: Tags },
   { name: 'Control 내부', version: 'v1.4.2', icon: ShieldCheck },
   { name: 'Control 외부', version: 'v1.3.8', icon: Globe2 },
   { name: 'Manage', version: 'v1.3.0', icon: Boxes },
 ];
 
 const CHANGE_HISTORY = [
+  {
+    engine: 'CSO Policy Engine',
+    title: 'CSO Policy Engine 개선',
+    description: '정보 등급과 AI 사용 정책 관리 기능 정비',
+    date: '2026.11.02',
+    version: 'v1.4.0',
+    changes: [
+      '프롬프트와 문서에 적용할 C/S/O 정보 등급 체계를 정비했습니다.',
+      '내부 AI와 승인·미승인 외부 AI의 처리 정책을 통합 관리하도록 개선했습니다.',
+      '탐지 규칙과 정책 시뮬레이터, 변경사항 저장 흐름을 추가했습니다.',
+    ],
+    issues: ['CSO-34 · 정보 등급 정책 매트릭스 추가', 'CSO-29 · 탐지 규칙 저장 흐름 개선'],
+  },
   {
     engine: 'Control 내부',
     title: 'AI Policy Engine 개선',
@@ -291,7 +306,7 @@ function ChangeHistoryPanel({ items }) {
               ) : (
                 <ChevronRight size={16} className="shrink-0 text-slate-400" aria-hidden="true" />
               )}
-             
+
               <span className="min-w-0 flex-1">
                 <strong className="block text-sm font-semibold text-slate-900">{item.title}</strong>
                 <span className="mt-1 block text-sm text-slate-500">{item.description}</span>
@@ -355,7 +370,7 @@ export default function SettingsPage() {
 
           <AdminDetailSection
             title="시스템 상태"
-            description="Discover, Control 내부·외부, Manage 엔진의 현재 상태와 버전을 확인합니다."
+            description="Discover, CSO Policy Engine, Control 내부·외부, Manage 엔진의 현재 상태와 버전을 확인합니다."
           >
             <SystemStatusPanel />
           </AdminDetailSection>
