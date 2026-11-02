@@ -152,13 +152,15 @@ const analysisSteps = [
 function Badge({ value }) {
   if (value === '—') return <span className="text-[#9aa7b8]">—</span>;
   const color =
-    value === 'AI 서비스' || value.startsWith('높음')
-      ? 'bg-[#eaf1ff] text-[#3774ee]'
-      : value === '등록됨'
-        ? 'bg-[#e4f7ee] text-[#18a66b]'
-        : value === '신규 후보' || value === '검토 필요'
-          ? 'bg-[#fff2dc] text-[#c78819]'
-          : 'bg-[#eef2f6] text-[#6b7a90]';
+    value === '판단 불가'
+      ? 'bg-red-600 text-white'
+      : value === 'AI 서비스' || value.startsWith('높음')
+        ? 'bg-[#eaf1ff] text-[#3774ee]'
+        : value === '등록됨'
+          ? 'bg-[#e4f7ee] text-[#18a66b]'
+          : value === '신규 후보' || value === '검토 필요'
+            ? 'bg-[#fff2dc] text-[#c78819]'
+            : 'bg-[#eef2f6] text-[#6b7a90]';
   return (
     <span className={`inline-flex rounded-md px-2 py-1 text-xs font-medium ${color}`}>{value}</span>
   );
@@ -441,7 +443,7 @@ export function AnalysisCard({ item, open, onToggle, onShowResult, onStop, onRet
               </span>
               {canOpenDetail && (
                 <span
-                  className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${item.ai === 'AI 서비스' ? 'border-blue-600 bg-blue-600 text-white' : item.ai === '비AI 서비스' ? 'border-slate-500 bg-slate-500 text-white' : 'border-amber-200 bg-amber-50 text-amber-600'}`}
+                  className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${item.ai === 'AI 서비스' ? 'border-blue-600 bg-blue-600 text-white' : item.ai === '비AI 서비스' ? 'border-slate-500 bg-slate-500 text-white' : 'border-red-600 bg-red-600 text-white'}`}
                 >
                   {item.ai}
                 </span>

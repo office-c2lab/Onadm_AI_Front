@@ -83,7 +83,7 @@ export default function UrlAnalysisDetailPage() {
             </div>
           </div>
           <span
-            className={`inline-flex h-9 shrink-0 items-center rounded-full px-4 text-sm font-semibold ${analysis.ai === 'AI 서비스' ? 'bg-blue-600 text-white' : analysis.ai === '비AI 서비스' ? 'bg-slate-500 text-white' : 'bg-amber-50 text-amber-600'}`}
+            className={`inline-flex h-9 shrink-0 items-center rounded-full px-4 text-sm font-semibold ${analysis.ai === 'AI 서비스' ? 'bg-blue-600 text-white' : analysis.ai === '비AI 서비스' ? 'bg-slate-500 text-white' : 'bg-red-600 text-white'}`}
           >
             {analysis.ai}
           </span>
