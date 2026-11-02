@@ -439,8 +439,15 @@ export default function DashboardPage() {
               <button
                 key={item.domain}
                 type="button"
-                onClick={() => navigate('/admin/discover/url-analysis')}
+                onClick={() => {
+                  const filters = new URLSearchParams({
+                    query: item.domain,
+                    status: item.status,
+                  });
+                  navigate(`/admin/discover/url-analysis?${filters.toString()}`);
+                }}
                 className="group flex min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-[#F5F7FB]"
+                aria-label={`${item.domain} ${item.status} 분석 목록 보기`}
               >
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-600">
                   <Search size={18} aria-hidden="true" />

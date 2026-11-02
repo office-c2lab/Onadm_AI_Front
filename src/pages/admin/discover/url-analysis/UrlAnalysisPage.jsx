@@ -677,6 +677,9 @@ function DetailModal({ item, onClose }) {
 export default function UrlAnalysisPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const initialFilters = new URLSearchParams(location.search);
+  const requestedQuery = initialFilters.get('query') ?? '';
+  const requestedStatus = initialFilters.get('status');
   const submittedAnalysis = location.state?.submittedAnalysis;
   const [history, setHistory] = useState(() => {
     const storedHistory = loadUrlAnalyses(sampleHistory);
@@ -688,8 +691,10 @@ export default function UrlAnalysisPage() {
       : storedHistory;
   });
   const [openHistoryId, setOpenHistoryId] = useState(submittedAnalysis?.id ?? null);
-  const [searchInput, setSearchInput] = useState('');
-  const [activeTab, setActiveTab] = useState('전체');
+  const [searchInput, setSearchInput] = useState(requestedQuery);
+  const [activeTab, setActiveTab] = useState(
+    analysisTabs.includes(requestedStatus) ? requestedStatus : '전체'
+  );
   const [stopTarget, setStopTarget] = useState(null);
   const hasRunningAnalysis = history.some(
     item => item.autoProgress && ['대기', '진행 중'].includes(getAnalysisStatus(item))
@@ -697,8 +702,8 @@ export default function UrlAnalysisPage() {
 
   useEffect(() => {
     if (!location.state) return;
-    navigate(location.pathname, { replace: true, state: null });
-  }, [location.pathname, location.state, navigate]);
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
+  }, [location.pathname, location.search, location.state, navigate]);
 
   useEffect(() => {
     saveUrlAnalyses(history);
