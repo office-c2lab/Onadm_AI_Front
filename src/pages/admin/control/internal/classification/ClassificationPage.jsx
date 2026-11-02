@@ -310,8 +310,7 @@ function Simulator({ matrix }) {
               className="min-w-0 flex-1 [&>button]:h-[var(--app-control-lg)] [&>button]:min-h-0 [&>button]:rounded-[var(--app-radius-lg)] [&>button]:font-semibold"
             />
             <AppButton onClick={runTest} className="h-[var(--app-control-lg)] shrink-0 px-4">
-              <FlaskConical className="h-4 w-4" />
-              정책 시험
+              정책 테스트
             </AppButton>
           </div>
         </div>
