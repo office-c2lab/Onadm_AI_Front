@@ -373,19 +373,10 @@ export default function ClassificationPage() {
     <div className="garim-external-root min-h-full bg-white text-[#111827]">
       <PageLayout gapClassName="gap-0" topPaddingClassName="pt-6">
         <div className="mx-auto w-full max-w-4xl pb-10 text-slate-900">
-          <header className="pb-8 sm:pb-10">
-            <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
-              CSO 분류 및 정책
-            </h1>
-            <p className="mt-4 max-w-3xl text-[15px] leading-7 text-slate-600">
-              프롬프트와 문서를 C/S/O 등급으로 분류하고, AI 전송 목적지에 따른 공통 처리 기준을
-              관리합니다.
-            </p>
-          </header>
-
           <AdminDetailSection
             title="정보 등급 체계"
             description="조직의 AI 사용에 적용할 C/S/O 등급과 대표 정보 유형을 정의합니다."
+            className="!border-t-0 !pt-0 sm:!pt-0"
           >
             <ClassificationTable />
           </AdminDetailSection>

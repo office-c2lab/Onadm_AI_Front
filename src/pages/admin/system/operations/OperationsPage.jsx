@@ -94,7 +94,6 @@ function OperationNoticesPanel({ notices, onOpen }) {
 function EnvironmentSettingsPanel() {
   const [maintenanceAlerts, setMaintenanceAlerts] = useState(true);
   const [incidentAlerts, setIncidentAlerts] = useState(true);
-  const [language, setLanguage] = useState('한국어');
 
   return (
     <div className="divide-y divide-slate-100">
@@ -121,17 +120,6 @@ function EnvironmentSettingsPanel() {
           ariaLabel="시스템 장애 알림"
         />
       </section>
-
-      <label className="block py-4">
-        <span className="mb-2 block text-sm font-semibold text-slate-800">기본 언어</span>
-        <CustomDropdown
-          value={language}
-          onChange={setLanguage}
-          options={['한국어', 'English', '日本語']}
-          ariaLabel="기본 언어"
-          className="w-full [&>button]:h-11 [&>button]:rounded-full"
-        />
-      </label>
     </div>
   );
 }
@@ -302,18 +290,10 @@ export default function OperationsPage() {
     <div className="garim-external-root min-h-full bg-white text-[#111827]">
       <PageLayout gapClassName="gap-0" topPaddingClassName="pt-6">
         <div className="mx-auto w-full max-w-4xl pb-10 text-slate-900">
-          <header className="pb-8 sm:pb-10">
-            <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
-              공지 및 설정
-            </h1>
-            <p className="mt-4 max-w-3xl text-[15px] leading-7 text-slate-600">
-              시스템 운영 공지와 관리자 환경 설정을 한 곳에서 관리합니다.
-            </p>
-          </header>
-
           <AdminDetailSection
             title="운영 공지"
             description="시스템 점검, 장애 안내와 신규 기능 소식을 관리합니다."
+            className="!border-t-0 !pt-0 sm:!pt-0"
             action={
               <AiStoreActionButton size="small" icon={Plus} onClick={openCreateNotice}>
                 공지 추가
@@ -325,7 +305,7 @@ export default function OperationsPage() {
 
           <AdminDetailSection
             title="환경 설정"
-            description="운영 알림 수신 여부와 기본 언어를 설정합니다."
+            description="시스템 운영 알림의 수신 여부를 설정합니다."
           >
             <EnvironmentSettingsPanel />
           </AdminDetailSection>

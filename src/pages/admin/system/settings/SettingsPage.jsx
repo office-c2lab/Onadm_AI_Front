@@ -359,18 +359,10 @@ export default function SettingsPage() {
     <div className="garim-external-root min-h-full bg-white text-[#111827]">
       <PageLayout gapClassName="gap-0" topPaddingClassName="pt-6">
         <div className="mx-auto w-full max-w-4xl pb-10 text-slate-900">
-          <header className="pb-8 sm:pb-10">
-            <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">
-              엔진 및 모듈 상태
-            </h1>
-            <p className="mt-4 max-w-3xl text-[15px] leading-7 text-slate-600">
-              관리자 플랫폼을 구성하는 엔진의 운영 상태와 버전, 배포 정보를 확인합니다.
-            </p>
-          </header>
-
           <AdminDetailSection
             title="시스템 상태"
             description="Discover, CSO Policy Engine, Control 내부·외부, Manage 엔진의 현재 상태와 버전을 확인합니다."
+            className="!border-t-0 !pt-0 sm:!pt-0"
           >
             <SystemStatusPanel />
           </AdminDetailSection>

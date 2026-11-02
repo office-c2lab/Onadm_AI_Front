@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-import CustomDropdown from '../../../../components/dropdown/CustomDropdown.jsx';
 import { AdminDetailSection } from '../../../../layouts/admin/AdminDetailLayout.jsx';
 import AppToggle from '../../control/external/components/AppToggle.jsx';
 import PageLayout from '../../control/components/PageLayout.jsx';
@@ -9,7 +8,6 @@ import '../../control/external/garim.css';
 export default function EnvironmentPage() {
   const [maintenanceAlerts, setMaintenanceAlerts] = useState(true);
   const [incidentAlerts, setIncidentAlerts] = useState(true);
-  const [language, setLanguage] = useState('한국어');
 
   return (
     <div className="garim-external-root min-h-full bg-white text-[#111827]">
@@ -17,7 +15,7 @@ export default function EnvironmentPage() {
         <div className="mx-auto w-full max-w-4xl pb-10 text-slate-900">
           <AdminDetailSection
             title="환경 설정"
-            description="운영 알림 수신 여부와 기본 언어를 설정합니다."
+            description="시스템 운영 알림의 수신 여부를 설정합니다."
           >
             <div className="divide-y divide-slate-100">
               <section className="flex items-center justify-between gap-5 py-4 first:pt-1">
@@ -43,17 +41,6 @@ export default function EnvironmentPage() {
                   ariaLabel="시스템 장애 알림"
                 />
               </section>
-
-              <label className="block py-4">
-                <span className="mb-2 block text-sm font-semibold text-slate-800">기본 언어</span>
-                <CustomDropdown
-                  value={language}
-                  onChange={setLanguage}
-                  options={['한국어', 'English', '日本語']}
-                  ariaLabel="기본 언어"
-                  className="w-full [&>button]:h-11 [&>button]:rounded-full"
-                />
-              </label>
             </div>
           </AdminDetailSection>
         </div>
