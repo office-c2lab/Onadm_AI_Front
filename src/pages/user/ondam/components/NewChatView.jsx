@@ -1,13 +1,27 @@
 import { useRef, useState } from 'react';
-import { ArrowUp, AudioLines, Mic, Plus } from 'lucide-react';
+import { ArrowUp, AudioLines, FileSearch, Laptop, Mic, Plus } from 'lucide-react';
 
 import GamgikAgentOrbWithFace from '../../../../components/character/GamgikAgentOrbWithFace.jsx';
 import ModelSelector from './ModelSelector.jsx';
+
+const suggestions = [
+  {
+    id: 'weekly-update',
+    icon: Laptop,
+    prompt: '이번 주 주요 업무 업데이트와 실무에 영향을 주는 변경점을 정리해줘',
+  },
+  {
+    id: 'file-changes',
+    icon: FileSearch,
+    prompt: '중요한 파일에 어떤 변경 사항이 있었는지 알려줘',
+  },
+];
 
 export default function NewChatView({ onSubmit, onStartVoice }) {
   const [prompt, setPrompt] = useState('');
   const [isListening, setIsListening] = useState(false);
 
+  const inputRef = useRef(null);
   const fileInputRef = useRef(null);
 
   // 메시지 전송
@@ -18,6 +32,14 @@ export default function NewChatView({ onSubmit, onStartVoice }) {
     if (!trimmedPrompt) return;
 
     onSubmit?.(trimmedPrompt);
+  };
+
+  const selectSuggestion = suggestion => {
+    setPrompt(suggestion.prompt);
+
+    window.requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
   };
 
   return (
@@ -71,6 +93,7 @@ export default function NewChatView({ onSubmit, onStartVoice }) {
 
           {/* 메시지 입력 */}
           <input
+            ref={inputRef}
             value={prompt}
             onChange={event => setPrompt(event.target.value)}
             className="min-w-0 flex-1 bg-transparent px-1.5 text-[15px] text-[#222] outline-none placeholder:text-[#888]"
@@ -112,6 +135,28 @@ export default function NewChatView({ onSubmit, onStartVoice }) {
             )}
           </button>
         </form>
+
+        <div className="mt-7 space-y-1" aria-label="추천 질문">
+          {suggestions.map(suggestion => {
+            const Icon = suggestion.icon;
+
+            return (
+              <button
+                key={suggestion.id}
+                type="button"
+                onClick={() => selectSuggestion(suggestion)}
+                className="group flex min-h-11 w-full items-center gap-4 rounded-xl px-4 py-2 text-left text-[14px] text-[#777] transition-colors hover:bg-white hover:text-[#303030] hover:shadow-sm sm:text-[15px]"
+              >
+                <Icon
+                  className="h-[18px] w-[18px] shrink-0 text-[#6f7784] group-hover:text-[#3c7cf6]"
+                  strokeWidth={1.7}
+                  aria-hidden="true"
+                />
+                <span>{suggestion.prompt}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
