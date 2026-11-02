@@ -23,6 +23,9 @@ export default function OndamPage() {
   const [isAssistantEnabled, setIsAssistantEnabled] = useState(() => {
     return window.localStorage.getItem('ondam-assistant-enabled') !== 'false';
   });
+  const [isVoiceReactivityEnabled, setIsVoiceReactivityEnabled] = useState(() => {
+    return window.localStorage.getItem('ondam-voice-reactivity-enabled') !== 'false';
+  });
   const chatVersionRef = useRef(0);
   const responseTimersRef = useRef(new Set());
 
@@ -49,6 +52,11 @@ export default function OndamPage() {
   const setAssistantEnabled = isEnabled => {
     setIsAssistantEnabled(isEnabled);
     window.localStorage.setItem('ondam-assistant-enabled', String(isEnabled));
+  };
+
+  const setVoiceReactivityEnabled = isEnabled => {
+    setIsVoiceReactivityEnabled(isEnabled);
+    window.localStorage.setItem('ondam-voice-reactivity-enabled', String(isEnabled));
   };
 
   const startNewChat = (projectId = null, project = null, projectChats = []) => {
@@ -203,6 +211,8 @@ export default function OndamPage() {
             onSettingsRequestHandled={() => setProjectSettingsRequest(null)}
             assistantEnabled={isAssistantEnabled}
             onAssistantEnabledChange={setAssistantEnabled}
+            voiceReactivityEnabled={isVoiceReactivityEnabled}
+            onVoiceReactivityEnabledChange={setVoiceReactivityEnabled}
             onClose={() => setSidebarOpen(false)}
           />
         ) : (
@@ -216,7 +226,10 @@ export default function OndamPage() {
         aria-label="AI 채팅 영역"
       >
         {isVoiceMode ? (
-          <VoiceConversationView onClose={() => setIsVoiceMode(false)} />
+          <VoiceConversationView
+            reactivityEnabled={isVoiceReactivityEnabled}
+            onClose={() => setIsVoiceMode(false)}
+          />
         ) : !activeChatId && activeProject ? (
           <ProjectHomeView
             key={`${activeProject.id}-${projectViewKey}`}

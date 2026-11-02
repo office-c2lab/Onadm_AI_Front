@@ -357,6 +357,8 @@ export default function OndamSidebar({
   onSelectMenu,
   assistantEnabled,
   onAssistantEnabledChange,
+  voiceReactivityEnabled,
+  onVoiceReactivityEnabledChange,
   onRenameChat, // (chatId, newTitle, projectId) => void
   onDeleteChat, // (chatId, projectId) => void
   onClose,
@@ -1001,6 +1003,8 @@ export default function OndamSidebar({
           onAction={onSelectMenu}
           assistantEnabled={assistantEnabled}
           onAssistantEnabledChange={onAssistantEnabledChange}
+          voiceReactivityEnabled={voiceReactivityEnabled}
+          onVoiceReactivityEnabledChange={onVoiceReactivityEnabledChange}
         />
       </div>
 

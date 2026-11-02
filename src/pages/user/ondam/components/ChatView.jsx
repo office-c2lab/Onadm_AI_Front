@@ -112,9 +112,9 @@ function ChatCompanion({ phase, onAction, disabled }) {
           className="relative -ml-1 h-[54px] w-[62px] shrink-0 overflow-visible"
           aria-hidden="true"
         >
-          <span className="absolute left-1/2 top-1/2 h-[82px] w-[82px] -translate-x-1/2 -translate-y-1/2">
+          <span className="absolute left-1/2 top-1/2 h-[clamp(72px,6vw,82px)] w-[clamp(72px,6vw,82px)] -translate-x-1/2 -translate-y-1/2">
             <GamgikAgentOrbWithFace
-              size={82}
+              size="100%"
               speed={phase === 'idle' ? 7 : 10}
               motion={phase === 'idle' ? 0.55 : 0.82}
               themeMode="light"
@@ -342,8 +342,8 @@ export default function ChatView({
           aria-live="polite"
           aria-label="이전 응답을 가져오고 있어요"
         >
-          <div className="h-[300px] w-[340px] shrink-0 overflow-visible">
-            <GamgikAgentOrbWithFace size={340} speed={10} motion={0.82} themeMode="light" />
+          <div className="h-[clamp(240px,38vw,340px)] w-[clamp(240px,38vw,340px)] shrink-0 overflow-visible">
+            <GamgikAgentOrbWithFace size="100%" speed={10} motion={0.82} themeMode="light" />
           </div>
 
           <div className="mt-3 flex flex-col items-center gap-3 text-center">
@@ -474,8 +474,13 @@ export default function ChatView({
           {/* AI 응답 생성 중 */}
           {isGenerating && (
             <div className="flex items-center gap-6" aria-label="응답 생성 중">
-              <div className="-ml-[38px] h-[180px] w-[142px] shrink-0 overflow-visible">
-                <GamgikAgentOrbWithFace size={180} speed={10} motion={0.78} themeMode="light" />
+              <div className="-ml-[clamp(24px,4vw,38px)] h-[clamp(140px,18vw,180px)] w-[clamp(110px,14vw,142px)] shrink-0 overflow-visible">
+                <GamgikAgentOrbWithFace
+                  size="clamp(140px, 18vw, 180px)"
+                  speed={10}
+                  motion={0.78}
+                  themeMode="light"
+                />
               </div>
 
               <div className="flex items-center gap-2.5 text-[17px] font-medium text-[#4b4b4b]">

@@ -3,7 +3,7 @@ import { Mic, MicOff, X } from 'lucide-react';
 
 import GamgikAgentOrbWithFace from '../../../../components/character/GamgikAgentOrbWithFace.jsx';
 
-export default function VoiceConversationView({ onClose }) {
+export default function VoiceConversationView({ onClose, reactivityEnabled = true }) {
   const [isMuted, setIsMuted] = useState(false);
   const [wakeExpression, setWakeExpression] = useState(null);
   const [audioLevel, setAudioLevel] = useState(0);
@@ -15,13 +15,17 @@ export default function VoiceConversationView({ onClose }) {
   const isMutedRef = useRef(isMuted);
   const lastLevelUpdateRef = useRef(0);
 
-  const visibleAudioLevel = isMuted ? 0 : audioLevel;
-  const isSpeaking = microphoneStatus === 'active' && visibleAudioLevel > 0.08;
+  const visibleAudioLevel = isMuted || !reactivityEnabled ? 0 : audioLevel;
+  const isSpeaking = reactivityEnabled && microphoneStatus === 'active' && visibleAudioLevel > 0.08;
 
   useEffect(() => {
     let isCancelled = false;
 
     const startAudioMonitoring = async () => {
+      if (!reactivityEnabled) return;
+
+      setMicrophoneStatus('requesting');
+
       if (!navigator.mediaDevices?.getUserMedia) {
         setMicrophoneStatus('unavailable');
         return;
@@ -103,14 +107,14 @@ export default function VoiceConversationView({ onClose }) {
       mediaStreamRef.current?.getTracks().forEach(track => track.stop());
       audioContextRef.current?.close();
     };
-  }, []);
+  }, [reactivityEnabled]);
 
   useEffect(() => {
     isMutedRef.current = isMuted;
     mediaStreamRef.current?.getAudioTracks().forEach(track => {
-      track.enabled = !isMuted;
+      track.enabled = !isMuted && reactivityEnabled;
     });
-  }, [isMuted]);
+  }, [isMuted, reactivityEnabled]);
 
   useEffect(
     () => () => {
@@ -168,9 +172,9 @@ export default function VoiceConversationView({ onClose }) {
           aria-hidden="true"
         />
 
-        <div className="absolute left-1/2 top-1/2 h-[680px] w-[680px] -translate-x-1/2 -translate-y-1/2 scale-[0.55] sm:scale-[0.76] lg:scale-100">
+        <div className="absolute inset-0">
           <GamgikAgentOrbWithFace
-            size={680}
+            size="100%"
             speed={isMuted ? 5 : 9 + visibleAudioLevel * 7}
             motion={isMuted ? 0.35 : 0.68 + visibleAudioLevel * 0.47}
             themeMode="light"
@@ -183,9 +187,10 @@ export default function VoiceConversationView({ onClose }) {
         <p className="text-[18px] font-medium text-[#303030]">
           {isMuted
             ? '잠시 쉬고 있을게요'
-            : microphoneStatus === 'denied' || microphoneStatus === 'unavailable'
+            : reactivityEnabled &&
+                (microphoneStatus === 'denied' || microphoneStatus === 'unavailable')
               ? '마이크를 사용할 수 없어요'
-              : microphoneStatus === 'requesting'
+              : reactivityEnabled && microphoneStatus === 'requesting'
                 ? '마이크 연결 중'
                 : isSpeaking
                   ? '목소리를 듣고 있어요'
@@ -194,9 +199,9 @@ export default function VoiceConversationView({ onClose }) {
         <p className="mt-1 text-[13px] text-[#888]">
           {isMuted
             ? '마이크를 켜면 다시 대화를 시작해요'
-            : microphoneStatus === 'denied'
+            : reactivityEnabled && microphoneStatus === 'denied'
               ? '브라우저의 마이크 권한을 확인해 주세요'
-              : microphoneStatus === 'unavailable'
+              : reactivityEnabled && microphoneStatus === 'unavailable'
                 ? '이 환경에서는 음성 감지를 지원하지 않아요'
                 : isSpeaking
                   ? '말소리에 맞춰 캐릭터가 반응하고 있어요'

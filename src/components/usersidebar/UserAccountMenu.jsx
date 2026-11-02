@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  AudioLines,
   Bot,
   ChevronRight,
   CircleHelp,
@@ -14,6 +15,7 @@ const menuGroups = [
   [
     { id: 'upgrade', label: '플랜 업그레이드', icon: Sparkles },
     { id: 'assistant', label: 'ONDAM 도우미', icon: Bot, ondamOnly: true },
+    { id: 'voice-reactivity', label: '음성 반응 효과', icon: AudioLines, ondamOnly: true },
     { id: 'personalization', label: '개인 설정', icon: SlidersHorizontal },
     { id: 'profile', label: '프로필', icon: CircleUserRound },
     { id: 'settings', label: '설정', icon: Settings },
@@ -29,6 +31,8 @@ export default function UserAccountMenu({
   onAction,
   assistantEnabled,
   onAssistantEnabledChange,
+  voiceReactivityEnabled,
+  onVoiceReactivityEnabledChange,
 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
@@ -120,20 +124,37 @@ export default function UserAccountMenu({
               }
             >
               {group
-                .filter(item => !item.ondamOnly || typeof assistantEnabled === 'boolean')
+                .filter(
+                  item =>
+                    !item.ondamOnly ||
+                    (typeof assistantEnabled === 'boolean' &&
+                      typeof voiceReactivityEnabled === 'boolean')
+                )
                 .map(item => {
                   const Icon = item.icon;
                   const isAssistantItem = item.id === 'assistant';
+                  const isVoiceReactivityItem = item.id === 'voice-reactivity';
+                  const isToggleItem = isAssistantItem || isVoiceReactivityItem;
+                  const isChecked = isAssistantItem
+                    ? assistantEnabled
+                    : isVoiceReactivityItem
+                      ? voiceReactivityEnabled
+                      : undefined;
 
                   return (
                     <button
                       key={item.id}
                       type="button"
-                      role={isAssistantItem ? 'menuitemcheckbox' : 'menuitem'}
-                      aria-checked={isAssistantItem ? assistantEnabled : undefined}
+                      role={isToggleItem ? 'menuitemcheckbox' : 'menuitem'}
+                      aria-checked={isToggleItem ? isChecked : undefined}
                       onClick={() => {
                         if (isAssistantItem) {
                           onAssistantEnabledChange(!assistantEnabled);
+                          return;
+                        }
+
+                        if (isVoiceReactivityItem) {
+                          onVoiceReactivityEnabledChange(!voiceReactivityEnabled);
                           return;
                         }
 
@@ -147,16 +168,16 @@ export default function UserAccountMenu({
                         aria-hidden="true"
                       />
                       <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                      {isAssistantItem ? (
+                      {isToggleItem ? (
                         <span
                           className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
-                            assistantEnabled ? 'bg-[#3c7cf6]' : 'bg-[#c9cdd4]'
+                            isChecked ? 'bg-[#3c7cf6]' : 'bg-[#c9cdd4]'
                           }`}
                           aria-hidden="true"
                         >
                           <span
                             className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
-                              assistantEnabled ? 'translate-x-[18px]' : 'translate-x-0.5'
+                              isChecked ? 'translate-x-[18px]' : 'translate-x-0.5'
                             }`}
                           />
                         </span>

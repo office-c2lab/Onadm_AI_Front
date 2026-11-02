@@ -7,17 +7,17 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-function AgentFace({ look, expression }) {
-  const faceY = look.y * 6.2;
-  const eyeY = look.y * 10.5;
+function AgentFace({ look, expression, detailScale }) {
+  const faceY = look.y * 6.2 * detailScale;
+  const eyeY = look.y * 10.5 * detailScale;
 
   return (
     <div
       className={`garim-agent-face is-${expression}`}
       style={{
-        '--face-x': `${look.x * 4.6}px`,
+        '--face-x': `${look.x * 4.6 * detailScale}px`,
         '--face-y': `${faceY}px`,
-        '--eye-x': `${look.x * 8.8}px`,
+        '--eye-x': `${look.x * 8.8 * detailScale}px`,
         '--eye-y': `${eyeY}px`,
       }}
     >
@@ -158,8 +158,24 @@ export default function GarimAgentOrbWithFace({
   const [look, setLook] = useState({ x: 0, y: 0 });
   const [expression, setExpression] = useState('idle');
   const [isClickMoving, setIsClickMoving] = useState(false);
+  const [renderedSize, setRenderedSize] = useState(() => (typeof size === 'number' ? size : 460));
   const visibleExpression = expressionOverride ?? expression;
   const visibleLook = trackPointer ? look : { x: 0, y: 0 };
+  const detailScale = clamp(renderedSize / 460, 0.28, 1.25);
+  const faceScale = clamp(0.82 + (renderedSize / 460) * 0.18, 0.84, 1);
+
+  useEffect(() => {
+    const target = wrapRef.current;
+    if (!target || typeof ResizeObserver === 'undefined') return undefined;
+
+    const observer = new ResizeObserver(entries => {
+      const nextSize = entries[0]?.contentRect.width;
+      if (nextSize > 0) setRenderedSize(nextSize);
+    });
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
 
   function triggerExpression(nextExpression, duration = 520) {
     if (resetTimerRef.current) window.clearTimeout(resetTimerRef.current);
@@ -312,6 +328,13 @@ export default function GarimAgentOrbWithFace({
       style={{
         width: typeof size === 'number' ? `${size}px` : size,
         height: typeof size === 'number' ? `${size}px` : size,
+        '--garim-face-scale': faceScale,
+        '--garim-glow-blur': `${Math.max(3, 13 * detailScale)}px`,
+        '--garim-shadow-small': `${Math.max(1, 4 * detailScale)}px`,
+        '--garim-shadow-medium': `${Math.max(2, 10 * detailScale)}px`,
+        '--garim-shadow-large': `${Math.max(3, 20 * detailScale)}px`,
+        '--garim-speck-size': `${Math.max(0.3, 0.7 * detailScale)}px`,
+        '--garim-speck-gap': `${Math.max(2, 4 * detailScale)}px`,
       }}
       onClick={handleClick}
     >
@@ -320,11 +343,17 @@ export default function GarimAgentOrbWithFace({
           isClickMoving || visibleExpression === 'surprised' ? 'is-click-moving' : ''
         }`}
       >
-        <GarimReferenceOrb size={size} speed={speed} motion={motion} themeMode={themeMode} />
+        <GarimReferenceOrb
+          size="100%"
+          renderSize={renderedSize}
+          speed={speed}
+          motion={motion}
+          themeMode={themeMode}
+        />
 
         <SearchDecorations expression={visibleExpression} />
 
-        <AgentFace look={visibleLook} expression={visibleExpression} />
+        <AgentFace look={visibleLook} expression={visibleExpression} detailScale={detailScale} />
 
         <div className={`garim-surprise-marks is-${visibleExpression}`} aria-hidden="true">
           <i className="garim-surprise-mark garim-surprise-mark-left" />
@@ -486,7 +515,9 @@ export default function GarimAgentOrbWithFace({
           pointer-events: none;
           transform:
             translate(-50%, -50%)
-            translate(var(--face-x), var(--face-y));
+            translate(var(--face-x), var(--face-y))
+            scale(var(--garim-face-scale));
+          transform-origin: 50% 50%;
           transition:
             transform 180ms ease,
             opacity 180ms ease;
@@ -511,7 +542,7 @@ export default function GarimAgentOrbWithFace({
               rgba(7, 93, 246, 0.08) 76%,
               rgba(7, 93, 246, 0) 100%
             );
-          filter: blur(13px);
+          filter: blur(var(--garim-glow-blur));
           opacity: 0.68;
           animation: garimFaceGlowPulse 3.8s ease-in-out infinite;
         }
@@ -522,8 +553,12 @@ export default function GarimAgentOrbWithFace({
           inset: 8%;
           border-radius: inherit;
           background-image:
-            radial-gradient(circle, rgba(210, 245, 255, 0.38) 0 0.7px, transparent 0.9px);
-          background-size: 4px 4px;
+            radial-gradient(
+              circle,
+              rgba(210, 245, 255, 0.38) 0 var(--garim-speck-size),
+              transparent calc(var(--garim-speck-size) + 0.2px)
+            );
+          background-size: var(--garim-speck-gap) var(--garim-speck-gap);
           opacity: 0.24;
           mix-blend-mode: screen;
           mask-image: radial-gradient(ellipse at center, black 0%, black 54%, transparent 78%);
@@ -559,9 +594,9 @@ export default function GarimAgentOrbWithFace({
           transform: translateY(-50%);
           display: block;
           filter:
-            drop-shadow(0 0 3px rgba(255, 255, 255, 0.92))
-            drop-shadow(0 0 8px rgba(54, 233, 255, 0.66))
-            drop-shadow(0 0 16px rgba(0, 229, 255, 0.42));
+            drop-shadow(0 0 var(--garim-shadow-small) rgba(255, 255, 255, 0.92))
+            drop-shadow(0 0 var(--garim-shadow-medium) rgba(54, 233, 255, 0.66))
+            drop-shadow(0 0 var(--garim-shadow-large) rgba(0, 229, 255, 0.42));
           transition:
             transform 90ms ease,
             opacity 110ms ease,
@@ -573,9 +608,9 @@ export default function GarimAgentOrbWithFace({
 
         .garim-agent-orb-wrap.is-dark .garim-eye {
           filter:
-            drop-shadow(0 0 3px rgba(255, 255, 255, 0.92))
-            drop-shadow(0 0 8px rgba(190, 235, 255, 0.62))
-            drop-shadow(0 0 16px rgba(139, 92, 246, 0.42));
+            drop-shadow(0 0 var(--garim-shadow-small) rgba(255, 255, 255, 0.92))
+            drop-shadow(0 0 var(--garim-shadow-medium) rgba(190, 235, 255, 0.62))
+            drop-shadow(0 0 var(--garim-shadow-large) rgba(139, 92, 246, 0.42));
         }
 
         /*
@@ -611,9 +646,9 @@ export default function GarimAgentOrbWithFace({
               rgba(212, 235, 255, 0.94) 100%
             );
           box-shadow:
-            inset 0 0 4px rgba(255, 255, 255, 0.9),
-            0 0 7px rgba(255, 255, 255, 0.78),
-            0 0 16px rgba(154, 220, 255, 0.48);
+            inset 0 0 var(--garim-shadow-small) rgba(255, 255, 255, 0.9),
+            0 0 var(--garim-shadow-medium) rgba(255, 255, 255, 0.78),
+            0 0 var(--garim-shadow-large) rgba(154, 220, 255, 0.48);
           transition:
             opacity 90ms ease,
             transform 90ms ease;
@@ -636,9 +671,9 @@ export default function GarimAgentOrbWithFace({
               rgba(218, 235, 255, 0.95) 100%
             );
           box-shadow:
-            inset 0 0 4px rgba(255, 255, 255, 0.9),
-            0 0 7px rgba(255, 255, 255, 0.78),
-            0 0 16px rgba(154, 220, 255, 0.48);
+            inset 0 0 var(--garim-shadow-small) rgba(255, 255, 255, 0.9),
+            0 0 var(--garim-shadow-medium) rgba(255, 255, 255, 0.78),
+            0 0 var(--garim-shadow-large) rgba(154, 220, 255, 0.48);
           transition:
             opacity 90ms ease,
             transform 90ms ease;
@@ -719,9 +754,9 @@ export default function GarimAgentOrbWithFace({
           width: 12%;
           transform: translateY(-50%) scaleY(1.12);
           filter:
-            drop-shadow(0 0 5px rgba(255, 255, 255, 1))
-            drop-shadow(0 0 13px rgba(210, 245, 255, 0.86))
-            drop-shadow(0 0 24px rgba(139, 92, 246, 0.58));
+            drop-shadow(0 0 var(--garim-shadow-small) rgba(255, 255, 255, 1))
+            drop-shadow(0 0 var(--garim-shadow-medium) rgba(210, 245, 255, 0.86))
+            drop-shadow(0 0 var(--garim-shadow-large) rgba(139, 92, 246, 0.58));
         }
 
         .garim-agent-face.is-surprised .garim-eye-pillar {
@@ -738,9 +773,9 @@ export default function GarimAgentOrbWithFace({
           animation: garimSleepyEyes 2000ms ease-in-out forwards;
           opacity: 0.78;
           filter:
-            drop-shadow(0 0 3px rgba(255, 255, 255, 0.86))
-            drop-shadow(0 0 7px rgba(190, 235, 255, 0.5))
-            drop-shadow(0 0 14px rgba(139, 92, 246, 0.34));
+            drop-shadow(0 0 var(--garim-shadow-small) rgba(255, 255, 255, 0.86))
+            drop-shadow(0 0 var(--garim-shadow-medium) rgba(190, 235, 255, 0.5))
+            drop-shadow(0 0 var(--garim-shadow-large) rgba(139, 92, 246, 0.34));
         }
 
         .garim-agent-face.is-sleepy .garim-eye-pillar {
@@ -756,9 +791,9 @@ export default function GarimAgentOrbWithFace({
           height: 64%;
           transform: translateY(-50%) rotate(90deg);
           filter:
-            drop-shadow(0 0 5px rgba(255, 255, 255, 1))
-            drop-shadow(0 0 13px rgba(210, 245, 255, 0.82))
-            drop-shadow(0 0 22px rgba(139, 92, 246, 0.52));
+            drop-shadow(0 0 var(--garim-shadow-small) rgba(255, 255, 255, 1))
+            drop-shadow(0 0 var(--garim-shadow-medium) rgba(210, 245, 255, 0.82))
+            drop-shadow(0 0 var(--garim-shadow-large) rgba(139, 92, 246, 0.52));
         }
 
         .garim-agent-face.is-happy .garim-eye-left {
@@ -798,9 +833,9 @@ export default function GarimAgentOrbWithFace({
           width: 12%;
           transform: translateY(-50%) scaleY(1.12);
           filter:
-            drop-shadow(0 0 5px rgba(255, 255, 255, 1))
-            drop-shadow(0 0 13px rgba(210, 245, 255, 0.86))
-            drop-shadow(0 0 24px rgba(139, 92, 246, 0.58));
+            drop-shadow(0 0 var(--garim-shadow-small) rgba(255, 255, 255, 1))
+            drop-shadow(0 0 var(--garim-shadow-medium) rgba(210, 245, 255, 0.86))
+            drop-shadow(0 0 var(--garim-shadow-large) rgba(139, 92, 246, 0.58));
         }
 
         .garim-agent-face.is-angry .garim-eye-left {
@@ -868,9 +903,9 @@ export default function GarimAgentOrbWithFace({
               rgba(134, 210, 255, 0.9) 100%
             );
           box-shadow:
-            inset 0 0 4px rgba(255, 255, 255, 0.82),
-            0 0 6px rgba(255, 255, 255, 0.72),
-            0 0 14px rgba(154, 220, 255, 0.5);
+            inset 0 0 var(--garim-shadow-small) rgba(255, 255, 255, 0.82),
+            0 0 var(--garim-shadow-medium) rgba(255, 255, 255, 0.72),
+            0 0 var(--garim-shadow-large) rgba(154, 220, 255, 0.5);
           transition: transform 120ms ease;
         }
 
@@ -888,9 +923,9 @@ export default function GarimAgentOrbWithFace({
           width: 12%;
           transform: translateY(-50%) scaleY(1.12);
           filter:
-            drop-shadow(0 0 5px rgba(255, 255, 255, 1))
-            drop-shadow(0 0 13px rgba(210, 245, 255, 0.86))
-            drop-shadow(0 0 24px rgba(139, 92, 246, 0.58));
+            drop-shadow(0 0 var(--garim-shadow-small) rgba(255, 255, 255, 1))
+            drop-shadow(0 0 var(--garim-shadow-medium) rgba(210, 245, 255, 0.86))
+            drop-shadow(0 0 var(--garim-shadow-large) rgba(139, 92, 246, 0.58));
         }
 
         .garim-agent-face.is-crying .garim-eye-pillar {
@@ -946,9 +981,9 @@ export default function GarimAgentOrbWithFace({
               rgba(222, 232, 255, 0.96) 100%
             );
           box-shadow:
-            0 0 5px rgba(255, 255, 255, 0.95),
-            0 0 14px rgba(184, 184, 255, 0.78),
-            0 0 27px rgba(112, 92, 255, 0.62);
+            0 0 var(--garim-shadow-small) rgba(255, 255, 255, 0.95),
+            0 0 var(--garim-shadow-medium) rgba(184, 184, 255, 0.78),
+            0 0 var(--garim-shadow-large) rgba(112, 92, 255, 0.62);
         }
 
         .garim-surprise-mark-left {
@@ -1001,9 +1036,9 @@ export default function GarimAgentOrbWithFace({
           height: 47%;
           transform-origin: 0% 50%;
           filter:
-            drop-shadow(0 0 4px rgba(255, 255, 255, 0.96))
-            drop-shadow(0 0 10px rgba(210, 245, 255, 0.72))
-            drop-shadow(0 0 18px rgba(139, 92, 246, 0.48));
+            drop-shadow(0 0 var(--garim-shadow-small) rgba(255, 255, 255, 0.96))
+            drop-shadow(0 0 var(--garim-shadow-medium) rgba(210, 245, 255, 0.72))
+            drop-shadow(0 0 var(--garim-shadow-large) rgba(139, 92, 246, 0.48));
         }
 
         .garim-anger-corner .garim-chevron-line {
@@ -1049,9 +1084,9 @@ export default function GarimAgentOrbWithFace({
 
         .garim-agent-orb-wrap:hover .garim-eye {
           filter:
-            drop-shadow(0 0 4px rgba(255, 255, 255, 1))
-            drop-shadow(0 0 10px rgba(210, 245, 255, 0.76))
-            drop-shadow(0 0 20px rgba(139, 92, 246, 0.54));
+            drop-shadow(0 0 var(--garim-shadow-small) rgba(255, 255, 255, 1))
+            drop-shadow(0 0 var(--garim-shadow-medium) rgba(210, 245, 255, 0.76))
+            drop-shadow(0 0 var(--garim-shadow-large) rgba(139, 92, 246, 0.54));
         }
 
         @keyframes garimFaceGlowPulse {

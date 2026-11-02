@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -24,6 +24,19 @@ const ORB_THEMES = {
     outerGlow: '#8B6CFF',
   },
 };
+
+function ResponsiveCamera({ zoom }) {
+  const { camera } = useThree();
+
+  useEffect(() => {
+    // Three.js 카메라는 React 상태가 아닌 명령형 객체이므로 투영값을 직접 갱신합니다.
+    // eslint-disable-next-line react-hooks/immutability
+    camera.zoom = zoom;
+    camera.updateProjectionMatrix();
+  }, [camera, zoom]);
+
+  return null;
+}
 
 function OrbPlane({ speed = 0.95, motion = 0.78, themeMode = 'light' }) {
   const materialRef = useRef(null);
@@ -281,6 +294,7 @@ function OrbPlane({ speed = 0.95, motion = 0.78, themeMode = 'light' }) {
 
 export function GarimReferenceOrb({
   size = 460,
+  renderSize,
   className = '',
   background = 'transparent',
   speed = 0.95,
@@ -289,7 +303,7 @@ export function GarimReferenceOrb({
 }) {
   const isDark = themeMode === 'dark';
   const floatDuration = `${(Math.PI * 2) / (0.55 * Math.max(speed, 0.01))}s`;
-  const numericSize = typeof size === 'number' ? size : 460;
+  const numericSize = renderSize ?? (typeof size === 'number' ? size : 460);
   const cameraZoom = 120 * (numericSize / 460);
 
   return (
@@ -317,6 +331,7 @@ export function GarimReferenceOrb({
         }}
         dpr={[1, 2]}
       >
+        <ResponsiveCamera zoom={cameraZoom} />
         <OrbPlane speed={speed} motion={motion} themeMode={themeMode} />
       </Canvas>
 
