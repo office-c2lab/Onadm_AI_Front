@@ -316,6 +316,7 @@ export default function OperationsPage() {
         open={Boolean(noticeModal)}
         allowOverflow
         rootClassName="garim-external-root"
+        panelClassName="!max-w-xl"
         title={noticeModal?.mode === 'edit' ? '운영 공지 수정' : '운영 공지 추가'}
         confirmLabel={noticeModal?.mode === 'edit' ? '저장' : '추가'}
         confirmVariant="primary"

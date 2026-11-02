@@ -12,6 +12,7 @@ export default function AiStoreConfirmModal({
   footerStart,
   allowOverflow = false,
   rootClassName = '',
+  panelClassName = '',
   error,
   onClose,
   onConfirm,
@@ -48,7 +49,9 @@ export default function AiStoreConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`w-full max-w-md rounded-xl bg-white shadow-2xl ${allowOverflow ? 'overflow-visible' : 'overflow-hidden'}`}
+        className={`w-full max-w-md rounded-xl bg-white shadow-2xl ${
+          allowOverflow ? 'overflow-visible' : 'overflow-hidden'
+        } ${panelClassName}`.trim()}
       >
         <div className="px-6 py-6 sm:px-7">
           <h2 id={titleId} className="text-lg font-bold text-slate-900">
