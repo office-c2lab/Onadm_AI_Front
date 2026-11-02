@@ -297,14 +297,9 @@ function normalizeAttachmentAnalysisResults(event) {
 }
 
 function createDefaultDateRange() {
-  const endDate = new Date();
-  const startDate = new Date(endDate);
-
-  startDate.setDate(endDate.getDate() - 13);
-
   return {
-    startDate: formatDateValue(startDate),
-    endDate: formatDateValue(endDate),
+    startDate: '2026-10-01',
+    endDate: '2026-10-31',
   };
 }
 
@@ -349,13 +344,6 @@ function getStatusTextClassName(row) {
 
 function normalizeLogDateTime(value) {
   return String(value).replace(' ', 'T');
-}
-
-function formatDateValue(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 }
 
 function buildAnswerDetail(row) {
