@@ -21,10 +21,10 @@ export default function OndamPage() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isAssistantEnabled, setIsAssistantEnabled] = useState(() => {
-    return window.localStorage.getItem('ondam-assistant-enabled') !== 'false';
+    return window.localStorage.getItem('ondam-assistant-enabled') === 'true';
   });
   const [isVoiceReactivityEnabled, setIsVoiceReactivityEnabled] = useState(() => {
-    return window.localStorage.getItem('ondam-voice-reactivity-enabled') !== 'false';
+    return window.localStorage.getItem('ondam-voice-reactivity-enabled') === 'true';
   });
   const chatVersionRef = useRef(0);
   const responseTimersRef = useRef(new Set());
