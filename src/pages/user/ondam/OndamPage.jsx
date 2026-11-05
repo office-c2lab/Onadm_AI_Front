@@ -7,6 +7,7 @@ import ChatView from './components/ChatView.jsx';
 import ProjectHomeView from './components/ProjectHomeView.jsx';
 import VoiceConversationView from './components/VoiceConversationView.jsx';
 import ToolBrowserView from './components/ToolBrowserView.jsx';
+import LibraryView from './components/LibraryView.jsx';
 import { createMockAnswer } from './components/mockResponses.js';
 import usePreferencesStore from '../../../stores/preferencesStore.js';
 
@@ -200,7 +201,7 @@ export default function OndamPage() {
   };
 
   const selectSidebarMenu = menuId => {
-    if (menuId !== 'plugins') return;
+    if (menuId !== 'plugins' && menuId !== 'library') return;
 
     clearResponseTimers();
     chatVersionRef.current += 1;
@@ -248,6 +249,8 @@ export default function OndamPage() {
       >
         {activeMenu === 'plugins' ? (
           <ToolBrowserView />
+        ) : activeMenu === 'library' ? (
+          <LibraryView />
         ) : isVoiceMode ? (
           <VoiceConversationView
             themeMode={characterThemeMode}
