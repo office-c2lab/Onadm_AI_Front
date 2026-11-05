@@ -6,6 +6,7 @@ import NewChatView from './components/NewChatView.jsx';
 import ChatView from './components/ChatView.jsx';
 import ProjectHomeView from './components/ProjectHomeView.jsx';
 import VoiceConversationView from './components/VoiceConversationView.jsx';
+import ToolBrowserView from './components/ToolBrowserView.jsx';
 import { createMockAnswer } from './components/mockResponses.js';
 import usePreferencesStore from '../../../stores/preferencesStore.js';
 
@@ -23,6 +24,7 @@ export default function OndamPage() {
   const [isResponding, setIsResponding] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [activeMenu, setActiveMenu] = useState(null);
   const [isAssistantEnabled, setIsAssistantEnabled] = useState(() => {
     return window.localStorage.getItem('ondam-assistant-enabled') === 'true';
   });
@@ -66,6 +68,7 @@ export default function OndamPage() {
     setIsResponding(false);
     setIsLoadingHistory(false);
     setIsVoiceMode(false);
+    setActiveMenu(null);
     setActiveChatId(null);
     setMessages([]);
 
@@ -83,6 +86,7 @@ export default function OndamPage() {
     setIsResponding(false);
     setIsLoadingHistory(false);
     setIsVoiceMode(false);
+    setActiveMenu(null);
     setActiveProject({ ...project, chats: projectChats });
     setActiveChatId(null);
     setMessages([]);
@@ -168,6 +172,7 @@ export default function OndamPage() {
     setIsResponding(false);
     setIsLoadingHistory(true);
     setIsVoiceMode(false);
+    setActiveMenu(null);
     if (project) {
       setActiveProject(current => ({
         ...project,
@@ -194,6 +199,17 @@ export default function OndamPage() {
     }, 1000);
   };
 
+  const selectSidebarMenu = menuId => {
+    if (menuId !== 'plugins') return;
+
+    clearResponseTimers();
+    chatVersionRef.current += 1;
+    setIsResponding(false);
+    setIsLoadingHistory(false);
+    setIsVoiceMode(false);
+    setActiveMenu(menuId);
+  };
+
   return (
     <div
       className={`flex h-dvh overflow-hidden bg-white text-[#0d0d0d] ${
@@ -207,10 +223,12 @@ export default function OndamPage() {
       >
         {isSidebarOpen ? (
           <OndamSidebar
-            activeChatId={activeChatId}
+            activeChatId={activeMenu ? null : activeChatId}
             onNewChat={startNewChat}
             onSelectChat={selectChat}
             onSelectProject={selectProject}
+            onSelectMenu={selectSidebarMenu}
+            activeMenu={activeMenu}
             onProjectUpdated={updateProject}
             settingsRequest={projectSettingsRequest}
             onSettingsRequestHandled={() => setProjectSettingsRequest(null)}
@@ -228,7 +246,9 @@ export default function OndamPage() {
         className="min-w-0 flex-1 overflow-y-auto bg-white"
         aria-label="AI 채팅 영역"
       >
-        {isVoiceMode ? (
+        {activeMenu === 'plugins' ? (
+          <ToolBrowserView />
+        ) : isVoiceMode ? (
           <VoiceConversationView
             themeMode={characterThemeMode}
             onClose={() => setIsVoiceMode(false)}

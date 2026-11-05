@@ -106,6 +106,35 @@ input:disabled {
   background-color: #450a0a !important;
 }
 
+:is(.ondam-dark, body.ondam-dark-active) .bg-violet-100 {
+  background-color: #34265d !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .bg-amber-100 {
+  background-color: #493516 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .bg-sky-100,
+:is(.ondam-dark, body.ondam-dark-active) .bg-cyan-100 {
+  background-color: #123b4a !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .bg-indigo-100 {
+  background-color: #262e63 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .bg-rose-100 {
+  background-color: #552438 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .bg-fuchsia-100 {
+  background-color: #54205c !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .bg-teal-100 {
+  background-color: #143f3d !important;
+}
+
 :is(.ondam-dark, body.ondam-dark-active) .bg-white.border-slate-200 {
   background-color: #292929 !important;
 }
@@ -160,6 +189,35 @@ input:disabled {
 
 :is(.ondam-dark, body.ondam-dark-active) .text-red-700 {
   color: #fca5a5 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .text-violet-600 {
+  color: #c4b5fd !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .text-amber-600 {
+  color: #fbbf24 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .text-sky-600,
+:is(.ondam-dark, body.ondam-dark-active) .text-cyan-700 {
+  color: #67e8f9 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .text-indigo-600 {
+  color: #a5b4fc !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .text-rose-600 {
+  color: #fda4af !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .text-fuchsia-600 {
+  color: #f0abfc !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .text-teal-700 {
+  color: #5eead4 !important;
 }
 
 :is(.ondam-dark, body.ondam-dark-active) [class~='text-[#d93025]'],
@@ -245,6 +303,11 @@ input:disabled {
 :is(.ondam-dark, body.ondam-dark-active) [class*='hover:text-[#333]']:hover,
 :is(.ondam-dark, body.ondam-dark-active) [class*='hover:text-[#3d3d3d]']:hover {
   color: #ededed !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .ondam-plugin-connect-button:not(:disabled):hover {
+  background-color: #292929 !important;
+  color: #78a5ff !important;
 }
 
 :is(.ondam-dark, body.ondam-dark-active) [class*='focus-within:ring-[#eaf1ff]']:focus-within,

@@ -2,10 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Blocks,
-  CalendarClock,
   Check,
   ChevronRight,
-  Compass,
   Ellipsis,
   Folder,
   House,
@@ -27,10 +25,8 @@ import UserAccountMenu from '../UserAccountMenu.jsx';
 import UserServiceSwitcher from '../UserServiceSwitcher.jsx';
 
 const primaryItems = [
-  { id: 'schedule', label: '예약', icon: CalendarClock },
   { id: 'library', label: '라이브러리', icon: LibraryBig },
   { id: 'plugins', label: '플러그인', icon: Blocks },
-  { id: 'explore', label: '탐색', icon: Compass },
 ];
 
 // 목업 데이터: 실제 API 연동 시 부모 컴포넌트에서 전달할 수 있습니다.
@@ -355,6 +351,7 @@ export default function OndamSidebar({
   settingsRequest,
   onSettingsRequestHandled,
   onSelectMenu,
+  activeMenu = null,
   assistantEnabled,
   onAssistantEnabledChange,
   onRenameChat, // (chatId, newTitle, projectId) => void
@@ -756,7 +753,7 @@ export default function OndamSidebar({
         <MenuButton
           icon={SquarePen}
           label="새 채팅"
-          isActive={!activeChatId}
+          isActive={!activeChatId && !activeMenu}
           onClick={() => handleNewChat()}
         />
 
@@ -766,6 +763,7 @@ export default function OndamSidebar({
               key={item.id}
               icon={item.icon}
               label={item.label}
+              isActive={activeMenu === item.id}
               onClick={() => onSelectMenu?.(item.id)}
             />
           ))}

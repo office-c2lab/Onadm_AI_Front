@@ -8,13 +8,11 @@ import {
   Moon,
   Settings,
   SlidersHorizontal,
-  Sparkles,
 } from 'lucide-react';
 import usePreferencesStore from '../../stores/preferencesStore.js';
 
 const menuGroups = [
   [
-    { id: 'upgrade', label: '플랜 업그레이드', icon: Sparkles },
     { id: 'assistant', label: 'ONDAM 도우미', icon: Bot, assistantOnly: true },
     { id: 'dark-mode', label: '다크 모드', icon: Moon, darkModeAvailableOnly: true },
     { id: 'personalization', label: '개인 설정', icon: SlidersHorizontal },
