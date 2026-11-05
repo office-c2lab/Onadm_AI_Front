@@ -52,6 +52,7 @@ export default function VoiceConversationView({ onClose, themeMode = 'light' }) 
             themeMode={themeMode}
             expressionOverride={isMuted ? 'sleepy' : wakeExpression}
             randomizeDoubleClick
+            doubleClickEnabled={!isMuted}
           />
         </div>
       </div>

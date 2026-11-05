@@ -169,6 +169,7 @@ export default function GarimAgentOrbWithFace({
   actionSequence = 0,
   onActionComplete,
   randomizeDoubleClick = false,
+  doubleClickEnabled = true,
 }) {
   const wrapRef = useRef(null);
   const motionRef = useRef(null);
@@ -190,8 +191,9 @@ export default function GarimAgentOrbWithFace({
   const requestedAction = Object.prototype.hasOwnProperty.call(GAMGIK_DURATIONS, action)
     ? action
     : 'idle';
-  const activeAction = requestedAction === 'idle' ? interactionAction : requestedAction;
-  const activeActionSequence = requestedAction === 'idle' ? interactionSequence : actionSequence;
+  const canUseInteractionAction = requestedAction === 'idle' && doubleClickEnabled;
+  const activeAction = canUseInteractionAction ? interactionAction : requestedAction;
+  const activeActionSequence = canUseInteractionAction ? interactionSequence : actionSequence;
   const visibleExpression =
     expressionOverride ?? (activeAction === 'idle' ? expression : ACTION_EXPRESSIONS[activeAction]);
   const visibleLook = lookOverride ?? (trackPointer ? look : { x: 0, y: 0 });
@@ -371,6 +373,8 @@ export default function GarimAgentOrbWithFace({
     if (event.detail >= 2) {
       if (clickTimerRef.current) window.clearTimeout(clickTimerRef.current);
 
+      if (!doubleClickEnabled) return;
+
       if (!randomizeDoubleClick || requestedAction !== 'idle') {
         playClickMotion();
         return;
@@ -424,7 +428,9 @@ export default function GarimAgentOrbWithFace({
       <div
         ref={motionRef}
         className={`garim-agent-motion action-${activeAction} ${
-          isClickMoving || visibleExpression === 'surprised' ? 'is-click-moving' : ''
+          (doubleClickEnabled && isClickMoving) || visibleExpression === 'surprised'
+            ? 'is-click-moving'
+            : ''
         }`}
       >
         <GarimReferenceOrb
