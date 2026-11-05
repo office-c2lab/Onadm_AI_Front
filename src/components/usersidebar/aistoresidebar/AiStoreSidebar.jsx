@@ -1,10 +1,9 @@
 import {
   Atom,
-  CircleHelp,
   ClipboardCheck,
   Grid2X2,
   LibraryBig,
-  Newspaper,
+  Megaphone,
   PanelLeft,
   Store,
 } from 'lucide-react';
@@ -22,10 +21,7 @@ const storeItems = [
   { label: '라이브러리', to: '/user/aistore/library', icon: LibraryBig },
 ];
 
-const supportItems = [
-  { label: '공지사항', to: '/user/aistore/notices', icon: Newspaper },
-  { label: '이용 가이드', to: '/user/aistore/guide', icon: CircleHelp },
-];
+const supportItems = [{ label: '공지사항', to: '/user/aistore/notices', icon: Megaphone }];
 
 function SidebarLink({ item, onNavigate }) {
   const Icon = item.icon;
@@ -176,7 +172,7 @@ export default function AiStoreSidebar({ className = '', onNavigate, onClose }) 
       </div>
 
       <div className="shrink-0 border-t border-black/5 p-2">
-        <UserAccountMenu />
+        <UserAccountMenu darkModeAvailable />
       </div>
     </aside>
   );

@@ -15,8 +15,8 @@ import usePreferencesStore from '../../stores/preferencesStore.js';
 const menuGroups = [
   [
     { id: 'upgrade', label: '플랜 업그레이드', icon: Sparkles },
-    { id: 'assistant', label: 'ONDAM 도우미', icon: Bot, ondamOnly: true },
-    { id: 'dark-mode', label: '다크 모드', icon: Moon, ondamOnly: true },
+    { id: 'assistant', label: 'ONDAM 도우미', icon: Bot, assistantOnly: true },
+    { id: 'dark-mode', label: '다크 모드', icon: Moon, darkModeAvailableOnly: true },
     { id: 'personalization', label: '개인 설정', icon: SlidersHorizontal },
     { id: 'profile', label: '프로필', icon: CircleUserRound },
     { id: 'settings', label: '설정', icon: Settings },
@@ -32,6 +32,7 @@ export default function UserAccountMenu({
   onAction,
   assistantEnabled,
   onAssistantEnabledChange,
+  darkModeAvailable = false,
 }) {
   const [open, setOpen] = useState(false);
   const isDarkModeEnabled = usePreferencesStore(state => state.isDarkModeEnabled);
@@ -125,7 +126,11 @@ export default function UserAccountMenu({
               }
             >
               {group
-                .filter(item => !item.ondamOnly || typeof assistantEnabled === 'boolean')
+                .filter(
+                  item =>
+                    (!item.assistantOnly || typeof assistantEnabled === 'boolean') &&
+                    (!item.darkModeAvailableOnly || darkModeAvailable)
+                )
                 .map(item => {
                   const Icon = item.icon;
                   const isAssistantItem = item.id === 'assistant';

@@ -1001,6 +1001,7 @@ export default function OndamSidebar({
           onAction={onSelectMenu}
           assistantEnabled={assistantEnabled}
           onAssistantEnabledChange={onAssistantEnabledChange}
+          darkModeAvailable
         />
       </div>
 
