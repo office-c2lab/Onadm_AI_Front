@@ -7,6 +7,7 @@ import {
   Ellipsis,
   Folder,
   House,
+  History,
   LibraryBig,
   Lightbulb,
   PanelLeft,
@@ -295,7 +296,14 @@ function ConversationButton({
   );
 }
 
-export function OndamSidebarRail({ onOpen, onNewChat }) {
+export function OndamSidebarRail({
+  onOpen,
+  onOpenSection,
+  onNewChat,
+  onSelectMenu,
+  activeMenu = null,
+  activeChatId = null,
+}) {
   return (
     <aside
       className="ondam-sidebar flex h-dvh w-12 flex-col border-r border-black/5 bg-white text-[#0d0d0d]"
@@ -314,12 +322,66 @@ export function OndamSidebarRail({ onOpen, onNewChat }) {
         <button
           type="button"
           onClick={() => onNewChat?.(null)}
-          className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#ececec]"
+          className={`grid h-9 w-9 place-items-center rounded-lg transition-colors ${
+            !activeChatId && !activeMenu ? 'bg-[#e8e8e8]' : 'hover:bg-[#ececec]'
+          }`}
           aria-label="새 채팅"
           title="새 채팅"
         >
           <SquarePen className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
         </button>
+        <button
+          type="button"
+          onClick={() => (onOpenSection ? onOpenSection('search') : onOpen?.())}
+          className="grid h-9 w-9 place-items-center rounded-lg transition-colors hover:bg-[#ececec]"
+          aria-label="채팅 검색 열기"
+          title="채팅 검색"
+        >
+          <Search className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
+        </button>
+
+        <div className="mt-1 flex flex-col items-center gap-1">
+          {primaryItems.map(item => {
+            const Icon = item.icon;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectMenu?.(item.id)}
+                className={`grid h-9 w-9 place-items-center rounded-lg transition-colors ${
+                  activeMenu === item.id ? 'bg-[#e8e8e8]' : 'hover:bg-[#ececec]'
+                }`}
+                aria-label={item.label}
+                aria-pressed={activeMenu === item.id}
+                title={item.label}
+              >
+                <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-1 flex flex-col items-center gap-1 border-t border-black/5 pt-2">
+          <button
+            type="button"
+            onClick={() => (onOpenSection ? onOpenSection('projects') : onOpen?.())}
+            className="grid h-9 w-9 place-items-center rounded-lg transition-colors hover:bg-[#ececec]"
+            aria-label="프로젝트 열기"
+            title="프로젝트"
+          >
+            <Folder className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => (onOpenSection ? onOpenSection('recent') : onOpen?.())}
+            className="grid h-9 w-9 place-items-center rounded-lg transition-colors hover:bg-[#ececec]"
+            aria-label="최근 대화 열기"
+            title="최근 대화"
+          >
+            <History className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       <div className="flex justify-center border-t border-black/5 py-3">
@@ -352,15 +414,16 @@ export default function OndamSidebar({
   onSettingsRequestHandled,
   onSelectMenu,
   activeMenu = null,
+  initialOpenSection = null,
   assistantEnabled,
   onAssistantEnabledChange,
   onRenameChat, // (chatId, newTitle, projectId) => void
   onDeleteChat, // (chatId, projectId) => void
   onClose,
 }) {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isProjectsOpen, setIsProjectsOpen] = useState(false);
-  const [isRecentOpen, setIsRecentOpen] = useState(true);
+  const [isSearchOpen, setIsSearchOpen] = useState(() => initialOpenSection === 'search');
+  const [isProjectsOpen, setIsProjectsOpen] = useState(() => initialOpenSection === 'projects');
+  const [isRecentOpen, setIsRecentOpen] = useState(() => initialOpenSection !== 'projects');
   const [expandedProjectId, setExpandedProjectId] = useState(null);
   const [showAllProjectChats, setShowAllProjectChats] = useState(false);
   const [isAddingProject, setIsAddingProject] = useState(false);
@@ -731,7 +794,8 @@ export default function OndamSidebar({
             />
             <input
               autoFocus
-              type="search"
+              type="text"
+              role="searchbox"
               value={query}
               onChange={event => setQuery(event.target.value)}
               placeholder="채팅 검색"

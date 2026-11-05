@@ -17,6 +17,7 @@ export default function OndamPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     return window.localStorage.getItem('ondam-sidebar-open') !== 'false';
   });
+  const [sidebarOpenSection, setSidebarOpenSection] = useState(null);
   const [activeChatId, setActiveChatId] = useState(null);
   const [activeProject, setActiveProject] = useState(null);
   const [projectViewKey, setProjectViewKey] = useState(0);
@@ -56,6 +57,11 @@ export default function OndamPage() {
   const setSidebarOpen = isOpen => {
     setIsSidebarOpen(isOpen);
     window.localStorage.setItem('ondam-sidebar-open', String(isOpen));
+  };
+
+  const openSidebar = (section = null) => {
+    setSidebarOpenSection(section);
+    setSidebarOpen(true);
   };
 
   const setAssistantEnabled = isEnabled => {
@@ -230,6 +236,7 @@ export default function OndamPage() {
             onSelectProject={selectProject}
             onSelectMenu={selectSidebarMenu}
             activeMenu={activeMenu}
+            initialOpenSection={sidebarOpenSection}
             onProjectUpdated={updateProject}
             settingsRequest={projectSettingsRequest}
             onSettingsRequestHandled={() => setProjectSettingsRequest(null)}
@@ -238,7 +245,14 @@ export default function OndamPage() {
             onClose={() => setSidebarOpen(false)}
           />
         ) : (
-          <OndamSidebarRail onOpen={() => setSidebarOpen(true)} onNewChat={startNewChat} />
+          <OndamSidebarRail
+            onOpen={() => openSidebar()}
+            onOpenSection={openSidebar}
+            onNewChat={startNewChat}
+            onSelectMenu={selectSidebarMenu}
+            activeMenu={activeMenu}
+            activeChatId={activeChatId}
+          />
         )}
       </div>
 
