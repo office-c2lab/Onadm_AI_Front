@@ -200,7 +200,7 @@ function OrbPlane({
       if (actionIndex < 1.5) return 3.7;
       if (actionIndex < 3.5) return 3.9;
       if (actionIndex < 4.5) return 4.0;
-      return 1.2;
+      return 1.5;
     }
 
     float orbMotionSDF(vec2 p, float t) {

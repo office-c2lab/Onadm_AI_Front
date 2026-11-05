@@ -142,7 +142,7 @@ const GAMGIK_ACTIONS = [
   { id: 'curious', label: '호기심', duration: 3700 },
   { id: 'happy', label: '기쁨', duration: 3900 },
   { id: 'shy', label: '수줍음', duration: 4000 },
-  { id: 'split', label: '분열', duration: 1200 },
+  { id: 'split', label: '분열', duration: 1500 },
 ];
 
 const GAMGIK_DURATIONS = Object.fromEntries(
@@ -164,6 +164,7 @@ export default function GarimAgentOrbWithFace({
   className = '',
   expressionOverride = null,
   trackPointer = true,
+  lookOverride = null,
   action = 'idle',
   actionSequence = 0,
   onActionComplete,
@@ -193,7 +194,7 @@ export default function GarimAgentOrbWithFace({
   const activeActionSequence = requestedAction === 'idle' ? interactionSequence : actionSequence;
   const visibleExpression =
     expressionOverride ?? (activeAction === 'idle' ? expression : ACTION_EXPRESSIONS[activeAction]);
-  const visibleLook = trackPointer ? look : { x: 0, y: 0 };
+  const visibleLook = lookOverride ?? (trackPointer ? look : { x: 0, y: 0 });
   const actionLook = activeAction === 'curious' ? { x: 0.58, y: -0.24 } : visibleLook;
   const detailScale = clamp(renderedSize / 460, 0.28, 1.25);
   const faceScale = clamp(0.82 + (renderedSize / 460) * 0.18, 0.84, 1);
@@ -1267,11 +1268,11 @@ export default function GarimAgentOrbWithFace({
         }
 
         .garim-agent-motion.action-split {
-          animation: garimActionSplit 1.2s ease-in-out both;
+          animation: garimActionSplit 1.5s ease-in-out both;
         }
 
         .garim-agent-motion.action-split .garim-agent-face {
-          animation: garimActionHideSplit 1.2s ease-in-out both;
+          animation: garimActionHideSplit 1.5s ease-in-out both;
         }
 
         @keyframes garimActionCurious {

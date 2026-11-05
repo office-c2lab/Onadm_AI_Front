@@ -497,7 +497,8 @@ export default function ChatView({
                   speed={10}
                   motion={0.78}
                   themeMode={themeMode}
-                  action="curious"
+                  trackPointer={false}
+                  lookOverride={{ x: 0, y: -0.24 }}
                 />
               </div>
 
@@ -505,9 +506,9 @@ export default function ChatView({
                 <span>응답 생성 중</span>
 
                 <span className="flex items-center gap-1.5" aria-hidden="true">
-                  <i className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#777] [animation-delay:-0.3s]" />
-                  <i className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#777] [animation-delay:-0.15s]" />
-                  <i className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#777]" />
+                  <i className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#3c7cf6] [animation-delay:-0.3s]" />
+                  <i className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#3c7cf6] [animation-delay:-0.15s]" />
+                  <i className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#3c7cf6]" />
                 </span>
               </div>
             </div>
