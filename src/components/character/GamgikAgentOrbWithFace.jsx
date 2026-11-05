@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { GarimReferenceOrb } from './GamgikBlobOrb.jsx';
 
 function clamp(value, min, max) {
@@ -137,6 +137,25 @@ function SearchDecorations({ expression }) {
   );
 }
 
+const GAMGIK_ACTIONS = [
+  { id: 'idle', label: '기본', duration: 0 },
+  { id: 'curious', label: '호기심', duration: 3700 },
+  { id: 'happy', label: '기쁨', duration: 3900 },
+  { id: 'shy', label: '수줍음', duration: 4000 },
+  { id: 'split', label: '분열', duration: 1200 },
+];
+
+const GAMGIK_DURATIONS = Object.fromEntries(
+  GAMGIK_ACTIONS.map(action => [action.id, action.duration])
+);
+
+const ACTION_EXPRESSIONS = {
+  curious: 'idle',
+  happy: 'happy',
+  shy: 'wink-left',
+  split: 'idle',
+};
+
 export default function GarimAgentOrbWithFace({
   size = 460,
   speed = 0.95,
@@ -145,8 +164,12 @@ export default function GarimAgentOrbWithFace({
   className = '',
   expressionOverride = null,
   trackPointer = true,
+  action = 'idle',
+  actionSequence = 0,
+  onActionComplete,
 }) {
   const wrapRef = useRef(null);
+  const motionRef = useRef(null);
   const blinkTimerRef = useRef(null);
   const clickTimerRef = useRef(null);
   const motionTimerRef = useRef(null);
@@ -159,10 +182,40 @@ export default function GarimAgentOrbWithFace({
   const [expression, setExpression] = useState('idle');
   const [isClickMoving, setIsClickMoving] = useState(false);
   const [renderedSize, setRenderedSize] = useState(() => (typeof size === 'number' ? size : 460));
-  const visibleExpression = expressionOverride ?? expression;
+  const activeAction = Object.prototype.hasOwnProperty.call(GAMGIK_DURATIONS, action)
+    ? action
+    : 'idle';
+  const visibleExpression =
+    expressionOverride ?? (activeAction === 'idle' ? expression : ACTION_EXPRESSIONS[activeAction]);
   const visibleLook = trackPointer ? look : { x: 0, y: 0 };
+  const actionLook = activeAction === 'curious' ? { x: 0.58, y: -0.24 } : visibleLook;
   const detailScale = clamp(renderedSize / 460, 0.28, 1.25);
   const faceScale = clamp(0.82 + (renderedSize / 460) * 0.18, 0.84, 1);
+  const animationKey = `${activeAction}:${actionSequence}`;
+
+  useLayoutEffect(() => {
+    const motionElement = motionRef.current;
+    if (!motionElement) return;
+
+    const faceElement = motionElement.querySelector('.garim-agent-face');
+    motionElement.style.animation = 'none';
+    if (faceElement) faceElement.style.animation = 'none';
+
+    void motionElement.offsetWidth;
+
+    motionElement.style.animation = '';
+    if (faceElement) faceElement.style.animation = '';
+  }, [animationKey]);
+
+  useEffect(() => {
+    if (activeAction === 'idle' || !onActionComplete) return undefined;
+
+    const timerId = window.setTimeout(
+      () => onActionComplete(activeAction),
+      GAMGIK_DURATIONS[activeAction]
+    );
+    return () => window.clearTimeout(timerId);
+  }, [activeAction, actionSequence, onActionComplete]);
 
   useEffect(() => {
     const target = wrapRef.current;
@@ -324,7 +377,7 @@ export default function GarimAgentOrbWithFace({
   return (
     <div
       ref={wrapRef}
-      className={`garim-agent-orb-wrap is-${themeMode} ${className}`}
+      className={`garim-agent-orb-wrap is-${themeMode} action-${activeAction} ${className}`}
       style={{
         width: typeof size === 'number' ? `${size}px` : size,
         height: typeof size === 'number' ? `${size}px` : size,
@@ -339,7 +392,8 @@ export default function GarimAgentOrbWithFace({
       onClick={handleClick}
     >
       <div
-        className={`garim-agent-motion ${
+        ref={motionRef}
+        className={`garim-agent-motion action-${activeAction} ${
           isClickMoving || visibleExpression === 'surprised' ? 'is-click-moving' : ''
         }`}
       >
@@ -349,11 +403,13 @@ export default function GarimAgentOrbWithFace({
           speed={speed}
           motion={motion}
           themeMode={themeMode}
+          action={activeAction}
+          actionSequence={actionSequence}
         />
 
         <SearchDecorations expression={visibleExpression} />
 
-        <AgentFace look={visibleLook} expression={visibleExpression} detailScale={detailScale} />
+        <AgentFace look={actionLook} expression={visibleExpression} detailScale={detailScale} />
 
         <div className={`garim-surprise-marks is-${visibleExpression}`} aria-hidden="true">
           <i className="garim-surprise-mark garim-surprise-mark-left" />
@@ -1167,6 +1223,56 @@ export default function GarimAgentOrbWithFace({
           50% {
             opacity: 1;
           }
+        }
+
+        .garim-agent-motion.action-curious {
+          animation: garimActionCurious 3.7s cubic-bezier(0.2, 0.75, 0.3, 1) both;
+        }
+
+        .garim-agent-motion.action-happy {
+          animation: garimActionHappy 3.9s cubic-bezier(0.3, 0.78, 0.25, 1) both;
+        }
+
+        .garim-agent-motion.action-shy {
+          animation: garimActionShy 4s ease-in-out both;
+        }
+
+        .garim-agent-motion.action-split {
+          animation: garimActionSplit 1.2s ease-in-out both;
+        }
+
+        .garim-agent-motion.action-split .garim-agent-face {
+          animation: garimActionHideSplit 1.2s ease-in-out both;
+        }
+
+        @keyframes garimActionCurious {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          22% { transform: translateY(-4%) rotate(-10deg); }
+          48% { transform: translateY(1%) rotate(8deg); }
+          72% { transform: translateY(-5%) rotate(-4deg); }
+        }
+
+        @keyframes garimActionHappy {
+          0%, 100% { transform: translateY(0) scale(1); }
+          22% { transform: translateY(-9%) scale(1.04, 1.08); }
+          41% { transform: translateY(0) scale(1.12, 0.87); }
+          61% { transform: translateY(-11%) scale(0.97, 1.1); }
+          81% { transform: translateY(0) scale(1.06, 0.96); }
+        }
+
+        @keyframes garimActionShy {
+          0%, 100% { transform: rotate(0) translate(0, 0); }
+          30% { transform: rotate(-15deg) translate(-5%, 6%); }
+          60% { transform: rotate(13deg) translate(5%, -2%); }
+        }
+
+        @keyframes garimActionSplit {
+          0%, 100% { transform: translateY(0); }
+          20%, 80% { transform: translateY(-2%); }
+        }
+
+        @keyframes garimActionHideSplit {
+          0%, 100% { opacity: 0; }
         }
 
         @media (prefers-reduced-motion: reduce) {

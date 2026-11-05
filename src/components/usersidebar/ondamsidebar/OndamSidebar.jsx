@@ -403,7 +403,7 @@ export default function OndamSidebar({
     name: 'rex307',
     email: 'rex307@ondam.ai',
     plan: 'Plus',
-    remainingCredits: 50000,
+    remainingCredits: 30000,
     totalCredits: 1000000,
   },
   onNewChat,

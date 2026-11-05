@@ -4,6 +4,14 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
+const ORB_ACTIONS = {
+  idle: 0,
+  curious: 1,
+  happy: 3,
+  shy: 4,
+  split: 9,
+};
+
 const ORB_THEMES = {
   light: {
     bodyTop: '#168BFF',
@@ -38,15 +46,25 @@ function ResponsiveCamera({ zoom }) {
   return null;
 }
 
-function OrbPlane({ speed = 0.95, motion = 0.78, themeMode = 'light' }) {
+function OrbPlane({
+  speed = 0.95,
+  motion = 0.78,
+  themeMode = 'light',
+  action = 'idle',
+  actionSequence = 0,
+}) {
   const materialRef = useRef(null);
   const groupRef = useRef(null);
+  const actionStartRef = useRef(null);
+  const actionKeyRef = useRef('');
   const { size } = useThree();
   const theme = ORB_THEMES[themeMode] ?? ORB_THEMES.light;
 
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
+      uAction: { value: 0 },
+      uActionTime: { value: 0 },
       uAspect: { value: 1 },
       uMotion: { value: motion },
       uLightMode: { value: themeMode === 'light' ? 1 : 0 },
@@ -66,9 +84,19 @@ function OrbPlane({ speed = 0.95, motion = 0.78, themeMode = 'light' }) {
   useFrame(state => {
     const elapsed = state.clock.getElapsedTime();
     const t = elapsed * speed;
+    const actionKey = `${action}:${actionSequence}`;
+
+    if (actionKeyRef.current !== actionKey) {
+      actionKeyRef.current = actionKey;
+      actionStartRef.current = elapsed;
+    }
+
+    const actionTime = elapsed - (actionStartRef.current ?? elapsed);
 
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = t;
+      materialRef.current.uniforms.uAction.value = ORB_ACTIONS[action] ?? 0;
+      materialRef.current.uniforms.uActionTime.value = actionTime;
       materialRef.current.uniforms.uAspect.value = size.width / size.height;
       materialRef.current.uniforms.uMotion.value = motion;
       materialRef.current.uniforms.uLightMode.value = themeMode === 'light' ? 1 : 0;
@@ -102,6 +130,8 @@ function OrbPlane({ speed = 0.95, motion = 0.78, themeMode = 'light' }) {
     varying vec2 vUv;
 
     uniform float uTime;
+    uniform float uAction;
+    uniform float uActionTime;
     uniform float uAspect;
     uniform float uMotion;
     uniform float uLightMode;
@@ -149,6 +179,131 @@ function OrbPlane({ speed = 0.95, motion = 0.78, themeMode = 'light' }) {
       return radius - r;
     }
 
+    float morphEllipse(vec2 p, vec2 radii) {
+      return (length(p / radii) - 1.0) * min(radii.x, radii.y);
+    }
+
+    float organicCircleSDF(vec2 p, float radius, float t, float offset, float amount) {
+      float angle = atan(p.y, p.x);
+      float edge = radius;
+      edge += amount * 0.62 * sin(angle * 2.0 + t * 1.25 + offset);
+      edge += amount * 0.38 * sin(angle * 3.0 - t * 0.92 + offset * 1.7);
+      return length(p) - edge;
+    }
+
+    float morphUnion(float a, float b, float k) {
+      float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+      return mix(b, a, h) - k * h * (1.0 - h);
+    }
+
+    float motionDuration(float actionIndex) {
+      if (actionIndex < 1.5) return 3.7;
+      if (actionIndex < 3.5) return 3.9;
+      if (actionIndex < 4.5) return 4.0;
+      return 1.2;
+    }
+
+    float orbMotionSDF(vec2 p, float t) {
+      float original = orbSDF(p, t);
+      if (uAction < 0.5) return original;
+
+      // 액션 형상 위에서도 idle 오브의 외곽 물결과 호흡이 계속 살아 있도록
+      // 기본 구체 대비 현재 오브의 유기적인 변형량을 별도로 보존합니다.
+      float neutralSphere = length(p) - 0.585;
+      float livingDeformation = original - neutralSphere;
+
+      float duration = motionDuration(uAction);
+      float phase = clamp(uActionTime / duration, 0.0, 1.0);
+      float easeIn = smoothstep(0.0, 0.16, phase);
+      float easeOut = uAction > 8.5 ? 1.0 : 1.0 - smoothstep(0.83, 1.0, phase);
+      float strength = easeIn * easeOut;
+      float shape = original;
+
+      if (uAction > 0.5 && uAction < 1.5) {
+        vec2 q = rotate2d(0.15 * sin(uActionTime * 2.1)) * p;
+        shape = morphEllipse(q, vec2(0.60, 0.58));
+        shape = morphUnion(
+          shape,
+          morphEllipse(q - vec2(-0.55, -0.16), vec2(0.13, 0.15)),
+          0.10
+        );
+        float thoughtSmall = length(
+          p - vec2(
+            0.625 + 0.006 * cos(uActionTime * 2.6),
+            0.17 + 0.01 * sin(uActionTime * 2.6)
+          )
+        ) - 0.028;
+        float thoughtMedium = length(
+          p - vec2(
+            0.70 + 0.008 * cos(uActionTime * 2.35 + 0.7),
+            0.255 + 0.014 * sin(uActionTime * 2.35 + 0.7)
+          )
+        ) - 0.047;
+        float thoughtLarge = length(
+          p - vec2(
+            0.80 + 0.008 * cos(uActionTime * 2.1 + 1.4),
+            0.365 + 0.018 * sin(uActionTime * 2.1 + 1.4)
+          )
+        ) - 0.07;
+        shape = min(shape, min(thoughtSmall, min(thoughtMedium, thoughtLarge)));
+      } else if (uAction > 2.5 && uAction < 3.5) {
+        shape = morphEllipse(p, vec2(0.59, 0.57));
+        shape = morphUnion(
+          shape,
+          morphEllipse(p - vec2(-0.54, -0.13), vec2(0.17, 0.18)),
+          0.11
+        );
+        shape = morphUnion(
+          shape,
+          morphEllipse(p - vec2(0.53, 0.23), vec2(0.17, 0.18)),
+          0.12
+        );
+        shape += 0.008 * sin(uActionTime * 6.0);
+      } else if (uAction > 3.5 && uAction < 4.5) {
+        vec2 q = rotate2d(-0.18 * sin(uActionTime * 2.0)) * (p - vec2(0.045, 0.0));
+        shape = morphEllipse(q, vec2(0.59, 0.58));
+        shape = morphUnion(
+          shape,
+          morphEllipse(q - vec2(-0.45, -0.39), vec2(0.19, 0.18)),
+          0.12
+        );
+      } else if (uAction > 8.5) {
+        // 처음부터 작은 구로 수축하지 않고, 겹친 큰 덩어리가 자연스럽게
+        // 여러 조각으로 나뉘면서 각 조각의 최종 크기에 도달합니다.
+        float splitProgress = smoothstep(0.04, 0.42, phase);
+        float spread = smoothstep(0.10, 0.46, phase);
+        float firstRadius = mix(0.585, 0.11, splitProgress);
+        float secondRadius = mix(0.585, 0.20, splitProgress);
+        float centerRadius = mix(0.585, 0.16, splitProgress);
+        float fourthRadius = mix(0.585, 0.14, splitProgress);
+        float fifthRadius = mix(0.585, 0.075, splitProgress);
+        vec2 firstPoint = p - vec2(-0.70 * spread, 0.015 * spread);
+        vec2 fifthPoint = p - vec2(0.66 * spread, 0.02 * spread);
+        float first = organicCircleSDF(
+          firstPoint,
+          firstRadius,
+          uActionTime,
+          0.0,
+          0.012 * splitProgress
+        );
+        float second = length(p - vec2(-0.37 * spread, 0.0)) - secondRadius;
+        float center = length(p - vec2(0.025 * spread, 0.0)) - centerRadius;
+        float fourth = length(p - vec2(0.37 * spread, 0.0)) - fourthRadius;
+        float fifth = organicCircleSDF(
+          fifthPoint,
+          fifthRadius,
+          uActionTime,
+          2.4,
+          0.009 * splitProgress
+        );
+        shape = min(min(min(first, second), min(center, fourth)), fifth);
+      }
+
+      shape += livingDeformation * 0.62;
+
+      return mix(original, shape, strength);
+    }
+
     void main() {
       float t = uTime;
 
@@ -165,7 +320,7 @@ function OrbPlane({ speed = 0.95, motion = 0.78, themeMode = 'light' }) {
       float rot = sin(t * 0.14) * 0.028 * uMotion;
       p = rotate2d(rot) * p;
 
-      float d = orbSDF(p, t);
+      float d = orbMotionSDF(p, t);
 
       // 내부 마스크
       float inside = 1.0 - smoothstep(0.0, 0.012, d);
@@ -300,6 +455,8 @@ export function GarimReferenceOrb({
   speed = 0.95,
   motion = 0.78,
   themeMode = 'light',
+  action = 'idle',
+  actionSequence = 0,
 }) {
   const isDark = themeMode === 'dark';
   const floatDuration = `${(Math.PI * 2) / (0.55 * Math.max(speed, 0.01))}s`;
@@ -332,7 +489,13 @@ export function GarimReferenceOrb({
         dpr={[1, 2]}
       >
         <ResponsiveCamera zoom={cameraZoom} />
-        <OrbPlane speed={speed} motion={motion} themeMode={themeMode} />
+        <OrbPlane
+          speed={speed}
+          motion={motion}
+          themeMode={themeMode}
+          action={action}
+          actionSequence={actionSequence}
+        />
       </Canvas>
 
       <div className="garim-orb-reflection" />

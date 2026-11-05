@@ -273,6 +273,25 @@ function Composer({ onSubmit, onStartVoice, disabled = false }) {
   );
 }
 
+function HistoryLoadingOrb({ themeMode }) {
+  const [action, setAction] = useState('idle');
+
+  useEffect(() => {
+    const splitTimer = window.setTimeout(() => setAction('split'), 450);
+    return () => window.clearTimeout(splitTimer);
+  }, []);
+
+  return (
+    <GamgikAgentOrbWithFace
+      size="100%"
+      speed={10}
+      motion={0.82}
+      themeMode={themeMode}
+      action={action}
+    />
+  );
+}
+
 // 채팅 화면
 export default function ChatView({
   messages,
@@ -345,19 +364,14 @@ export default function ChatView({
           aria-live="polite"
           aria-label="이전 응답을 가져오고 있어요"
         >
-          <div className="h-[clamp(240px,38vw,340px)] w-[clamp(240px,38vw,340px)] shrink-0 overflow-visible">
-            <GamgikAgentOrbWithFace size="100%" speed={10} motion={0.82} themeMode={themeMode} />
+          <div className="h-[clamp(320px,38vw,460px)] w-[clamp(320px,38vw,460px)] shrink-0 overflow-visible">
+            <HistoryLoadingOrb themeMode={themeMode} />
           </div>
 
-          <div className="mt-3 flex flex-col items-center gap-3 text-center">
+          <div className="mt-3 text-center">
             <p className="text-[18px] font-medium tracking-[-0.015em] text-[#333]">
               이전 응답을 가져오고 있어요
             </p>
-            <span className="flex items-center gap-2" aria-hidden="true">
-              <i className="h-2 w-2 animate-bounce rounded-full bg-[#3c7cf6] [animation-delay:-0.3s]" />
-              <i className="h-2 w-2 animate-bounce rounded-full bg-[#3c7cf6] [animation-delay:-0.15s]" />
-              <i className="h-2 w-2 animate-bounce rounded-full bg-[#3c7cf6]" />
-            </span>
           </div>
         </div>
       )}
