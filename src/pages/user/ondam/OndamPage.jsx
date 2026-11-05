@@ -7,8 +7,11 @@ import ChatView from './components/ChatView.jsx';
 import ProjectHomeView from './components/ProjectHomeView.jsx';
 import VoiceConversationView from './components/VoiceConversationView.jsx';
 import { createMockAnswer } from './components/mockResponses.js';
+import usePreferencesStore from '../../../stores/preferencesStore.js';
 
 export default function OndamPage() {
+  const isDarkModeEnabled = usePreferencesStore(state => state.isDarkModeEnabled);
+  const characterThemeMode = isDarkModeEnabled ? 'dark' : 'light';
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     return window.localStorage.getItem('ondam-sidebar-open') !== 'false';
   });
@@ -22,9 +25,6 @@ export default function OndamPage() {
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isAssistantEnabled, setIsAssistantEnabled] = useState(() => {
     return window.localStorage.getItem('ondam-assistant-enabled') === 'true';
-  });
-  const [isVoiceReactivityEnabled, setIsVoiceReactivityEnabled] = useState(() => {
-    return window.localStorage.getItem('ondam-voice-reactivity-enabled') === 'true';
   });
   const chatVersionRef = useRef(0);
   const responseTimersRef = useRef(new Set());
@@ -44,6 +44,12 @@ export default function OndamPage() {
 
   useEffect(() => () => clearResponseTimers(), []);
 
+  useEffect(() => {
+    document.body.classList.toggle('ondam-dark-active', isDarkModeEnabled);
+
+    return () => document.body.classList.remove('ondam-dark-active');
+  }, [isDarkModeEnabled]);
+
   const setSidebarOpen = isOpen => {
     setIsSidebarOpen(isOpen);
     window.localStorage.setItem('ondam-sidebar-open', String(isOpen));
@@ -52,11 +58,6 @@ export default function OndamPage() {
   const setAssistantEnabled = isEnabled => {
     setIsAssistantEnabled(isEnabled);
     window.localStorage.setItem('ondam-assistant-enabled', String(isEnabled));
-  };
-
-  const setVoiceReactivityEnabled = isEnabled => {
-    setIsVoiceReactivityEnabled(isEnabled);
-    window.localStorage.setItem('ondam-voice-reactivity-enabled', String(isEnabled));
   };
 
   const startNewChat = (projectId = null, project = null, projectChats = []) => {
@@ -194,7 +195,11 @@ export default function OndamPage() {
   };
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-white text-[#0d0d0d]">
+    <div
+      className={`flex h-dvh overflow-hidden bg-white text-[#0d0d0d] ${
+        isDarkModeEnabled ? 'ondam-dark' : ''
+      }`}
+    >
       <div
         className={`h-dvh shrink-0 overflow-hidden transition-[width] duration-200 ease-out ${
           isSidebarOpen ? 'w-[292px]' : 'w-12'
@@ -211,8 +216,6 @@ export default function OndamPage() {
             onSettingsRequestHandled={() => setProjectSettingsRequest(null)}
             assistantEnabled={isAssistantEnabled}
             onAssistantEnabledChange={setAssistantEnabled}
-            voiceReactivityEnabled={isVoiceReactivityEnabled}
-            onVoiceReactivityEnabledChange={setVoiceReactivityEnabled}
             onClose={() => setSidebarOpen(false)}
           />
         ) : (
@@ -227,7 +230,7 @@ export default function OndamPage() {
       >
         {isVoiceMode ? (
           <VoiceConversationView
-            reactivityEnabled={isVoiceReactivityEnabled}
+            themeMode={characterThemeMode}
             onClose={() => setIsVoiceMode(false)}
           />
         ) : !activeChatId && activeProject ? (
@@ -241,7 +244,11 @@ export default function OndamPage() {
             onStartVoice={() => setIsVoiceMode(true)}
           />
         ) : !activeChatId ? (
-          <NewChatView onSubmit={submitPrompt} onStartVoice={() => setIsVoiceMode(true)} />
+          <NewChatView
+            themeMode={characterThemeMode}
+            onSubmit={submitPrompt}
+            onStartVoice={() => setIsVoiceMode(true)}
+          />
         ) : (
           <ChatView
             messages={messages}
@@ -249,6 +256,7 @@ export default function OndamPage() {
             isResponding={isResponding}
             isLoadingHistory={isLoadingHistory}
             isAssistantEnabled={isAssistantEnabled}
+            themeMode={characterThemeMode}
             onStartVoice={() => setIsVoiceMode(true)}
           />
         )}

@@ -57,7 +57,7 @@ const companionStates = {
   },
 };
 
-function ChatCompanion({ phase, onAction, disabled }) {
+function ChatCompanion({ phase, onAction, disabled, themeMode }) {
   const [isOpen, setIsOpen] = useState(false);
   const state = companionStates[phase] ?? companionStates.idle;
 
@@ -117,7 +117,7 @@ function ChatCompanion({ phase, onAction, disabled }) {
               size="100%"
               speed={phase === 'idle' ? 7 : 10}
               motion={phase === 'idle' ? 0.55 : 0.82}
-              themeMode="light"
+              themeMode={themeMode}
               expressionOverride={state.expression}
               trackPointer={false}
             />
@@ -279,6 +279,7 @@ export default function ChatView({
   isResponding = false,
   isLoadingHistory = false,
   isAssistantEnabled = true,
+  themeMode = 'light',
 }) {
   const [copiedId, setCopiedId] = useState(null);
   const [showCompletion, setShowCompletion] = useState(false);
@@ -343,7 +344,7 @@ export default function ChatView({
           aria-label="이전 응답을 가져오고 있어요"
         >
           <div className="h-[clamp(240px,38vw,340px)] w-[clamp(240px,38vw,340px)] shrink-0 overflow-visible">
-            <GamgikAgentOrbWithFace size="100%" speed={10} motion={0.82} themeMode="light" />
+            <GamgikAgentOrbWithFace size="100%" speed={10} motion={0.82} themeMode={themeMode} />
           </div>
 
           <div className="mt-3 flex flex-col items-center gap-3 text-center">
@@ -479,7 +480,7 @@ export default function ChatView({
                   size="clamp(140px, 18vw, 180px)"
                   speed={10}
                   motion={0.78}
-                  themeMode="light"
+                  themeMode={themeMode}
                 />
               </div>
 
@@ -516,6 +517,7 @@ export default function ChatView({
               phase={companionPhase}
               onAction={onSubmit}
               disabled={isResponding || isLoadingHistory}
+              themeMode={themeMode}
             />
           )}
 

@@ -23,3 +23,143 @@ select:disabled,
 input:disabled {
   cursor: not-allowed;
 }
+
+/* ONDAM AI 대화 전용 다크 모드 */
+:is(.ondam-dark, body.ondam-dark-active) {
+  color-scheme: dark;
+  background-color: #171717 !important;
+  color: #ededed !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .bg-white,
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#fff]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#ffffff]'] {
+  background-color: #171717 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) form,
+:is(.ondam-dark, body.ondam-dark-active) [role='menu'],
+:is(.ondam-dark, body.ondam-dark-active) [role='dialog'] {
+  background-color: #212121 !important;
+  border-color: #3a3a3a !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#fafafa]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#f8f8f8]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#f7f7f7]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#f7f7f8]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#f8faff]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#f6f9ff]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#f5f7fb]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#f3f5f8]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#f5f5f5]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#f4f4f4]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#f3f3f3]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#f1f1f1]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#f0f0f0]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#eef4ff]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#ececec]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#ededed]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#e8e8e8]'] {
+  background-color: #262626 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#e3e3e3]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#dedede]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#ddd]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#dcdcdc]'] {
+  background-color: #333 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#0d0d0d]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#111]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#171717]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#191919]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#202020]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#222]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#242424]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#262626]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#272727]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#2f2f2f]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#303030]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#333]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#3a3a3a]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#3d3d3d]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#404040]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#444]'],
+:is(.ondam-dark, body.ondam-dark-active) .text-slate-900,
+:is(.ondam-dark, body.ondam-dark-active) .text-slate-800 {
+  color: #ededed !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#4b4b4b]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#555]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#5d5d5d]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#666]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#677080]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#6f7784]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#777]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#888]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#999]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#aaa]'],
+:is(.ondam-dark, body.ondam-dark-active) .text-slate-600,
+:is(.ondam-dark, body.ondam-dark-active) .text-slate-500 {
+  color: #a3a3a3 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='border-black/'] {
+  border-color: rgb(255 255 255 / 0.1) !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#dedede]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#e2e2e2]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#e3e9f5]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#dce7fb]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#d9d9d9]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#e4e4e4]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#e5e5e5]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#e7e7e7]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#e8e8e8]'] {
+  border-color: #3a3a3a !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='hover:bg-[#f']:hover,
+:is(.ondam-dark, body.ondam-dark-active) [class*='hover:bg-white']:hover {
+  background-color: #2c2c2c !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active)
+  .ondam-sidebar
+  :is(
+    [class*='hover:bg-[#f'],
+    [class*='hover:bg-[#e'],
+    [class*='hover:bg-[#d'],
+    [class*='hover:bg-white']
+  ):hover {
+  background-color: #202020 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .from-white {
+  --tw-gradient-from: #171717 var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(23 23 23 / 0) var(--tw-gradient-to-position) !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .via-white {
+  --tw-gradient-via: #171717 var(--tw-gradient-via-position) !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) input,
+:is(.ondam-dark, body.ondam-dark-active) textarea,
+:is(.ondam-dark, body.ondam-dark-active) select {
+  color: #ededed;
+  caret-color: #ededed;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) textarea:not(.bg-transparent) {
+  background-color: #212121;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) input::placeholder,
+:is(.ondam-dark, body.ondam-dark-active) textarea::placeholder {
+  color: #737373;
+}

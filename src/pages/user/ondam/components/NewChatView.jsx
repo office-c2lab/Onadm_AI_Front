@@ -17,7 +17,7 @@ const suggestions = [
   },
 ];
 
-export default function NewChatView({ onSubmit, onStartVoice }) {
+export default function NewChatView({ onSubmit, onStartVoice, themeMode = 'light' }) {
   const [prompt, setPrompt] = useState('');
   const [isListening, setIsListening] = useState(false);
 
@@ -52,7 +52,7 @@ export default function NewChatView({ onSubmit, onStartVoice }) {
           aria-label="ONDAM AI 캐릭터"
         >
           <div className="relative -top-[clamp(105px,12vw,150px)] h-[clamp(320px,38vw,460px)] w-[clamp(320px,38vw,460px)] shrink-0 overflow-visible">
-            <GamgikAgentOrbWithFace size="100%" speed={8} motion={0.68} themeMode="light" />
+            <GamgikAgentOrbWithFace size="100%" speed={8} motion={0.68} themeMode={themeMode} />
           </div>
         </div>
 

@@ -302,7 +302,7 @@ function ConversationButton({
 export function OndamSidebarRail({ onOpen, onNewChat }) {
   return (
     <aside
-      className="flex h-dvh w-12 flex-col border-r border-black/5 bg-white text-[#0d0d0d]"
+      className="ondam-sidebar flex h-dvh w-12 flex-col border-r border-black/5 bg-white text-[#0d0d0d]"
       aria-label="접힌 ONDAM AI 채팅 메뉴"
     >
       <div className="flex flex-1 flex-col items-center gap-2 py-3">
@@ -357,8 +357,6 @@ export default function OndamSidebar({
   onSelectMenu,
   assistantEnabled,
   onAssistantEnabledChange,
-  voiceReactivityEnabled,
-  onVoiceReactivityEnabledChange,
   onRenameChat, // (chatId, newTitle, projectId) => void
   onDeleteChat, // (chatId, projectId) => void
   onClose,
@@ -698,7 +696,7 @@ export default function OndamSidebar({
 
   return (
     <aside
-      className="flex h-dvh w-[292px] shrink-0 flex-col border-r border-black/5 bg-white text-[#0d0d0d]"
+      className="ondam-sidebar flex h-dvh w-[292px] shrink-0 flex-col border-r border-black/5 bg-white text-[#0d0d0d]"
       aria-label="ONDAM AI 채팅 메뉴"
     >
       <header className="flex h-14 shrink-0 items-center gap-1 px-3">
@@ -1003,8 +1001,6 @@ export default function OndamSidebar({
           onAction={onSelectMenu}
           assistantEnabled={assistantEnabled}
           onAssistantEnabledChange={onAssistantEnabledChange}
-          voiceReactivityEnabled={voiceReactivityEnabled}
-          onVoiceReactivityEnabledChange={onVoiceReactivityEnabledChange}
         />
       </div>
 

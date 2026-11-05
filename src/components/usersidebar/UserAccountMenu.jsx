@@ -1,21 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  AudioLines,
   Bot,
   ChevronRight,
   CircleHelp,
   CircleUserRound,
   LogOut,
+  Moon,
   Settings,
   SlidersHorizontal,
   Sparkles,
 } from 'lucide-react';
+import usePreferencesStore from '../../stores/preferencesStore.js';
 
 const menuGroups = [
   [
     { id: 'upgrade', label: '플랜 업그레이드', icon: Sparkles },
     { id: 'assistant', label: 'ONDAM 도우미', icon: Bot, ondamOnly: true },
-    { id: 'voice-reactivity', label: '음성 반응 효과', icon: AudioLines, ondamOnly: true },
+    { id: 'dark-mode', label: '다크 모드', icon: Moon, ondamOnly: true },
     { id: 'personalization', label: '개인 설정', icon: SlidersHorizontal },
     { id: 'profile', label: '프로필', icon: CircleUserRound },
     { id: 'settings', label: '설정', icon: Settings },
@@ -31,10 +32,10 @@ export default function UserAccountMenu({
   onAction,
   assistantEnabled,
   onAssistantEnabledChange,
-  voiceReactivityEnabled,
-  onVoiceReactivityEnabledChange,
 }) {
   const [open, setOpen] = useState(false);
+  const isDarkModeEnabled = usePreferencesStore(state => state.isDarkModeEnabled);
+  const setDarkModeEnabled = usePreferencesStore(state => state.setDarkModeEnabled);
   const containerRef = useRef(null);
   const initials = user.name.slice(0, 2).toUpperCase();
   const hasCreditInfo =
@@ -124,22 +125,13 @@ export default function UserAccountMenu({
               }
             >
               {group
-                .filter(
-                  item =>
-                    !item.ondamOnly ||
-                    (typeof assistantEnabled === 'boolean' &&
-                      typeof voiceReactivityEnabled === 'boolean')
-                )
+                .filter(item => !item.ondamOnly || typeof assistantEnabled === 'boolean')
                 .map(item => {
                   const Icon = item.icon;
                   const isAssistantItem = item.id === 'assistant';
-                  const isVoiceReactivityItem = item.id === 'voice-reactivity';
-                  const isToggleItem = isAssistantItem || isVoiceReactivityItem;
-                  const isChecked = isAssistantItem
-                    ? assistantEnabled
-                    : isVoiceReactivityItem
-                      ? voiceReactivityEnabled
-                      : undefined;
+                  const isDarkModeItem = item.id === 'dark-mode';
+                  const isToggleItem = isAssistantItem || isDarkModeItem;
+                  const isChecked = isAssistantItem ? assistantEnabled : isDarkModeEnabled;
 
                   return (
                     <button
@@ -153,8 +145,8 @@ export default function UserAccountMenu({
                           return;
                         }
 
-                        if (isVoiceReactivityItem) {
-                          onVoiceReactivityEnabledChange(!voiceReactivityEnabled);
+                        if (isDarkModeItem) {
+                          setDarkModeEnabled(!isDarkModeEnabled);
                           return;
                         }
 
