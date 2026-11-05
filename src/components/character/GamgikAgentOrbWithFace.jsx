@@ -167,6 +167,7 @@ export default function GarimAgentOrbWithFace({
   action = 'idle',
   actionSequence = 0,
   onActionComplete,
+  randomizeDoubleClick = false,
 }) {
   const wrapRef = useRef(null);
   const motionRef = useRef(null);
@@ -176,22 +177,27 @@ export default function GarimAgentOrbWithFace({
   const resetTimerRef = useRef(null);
   const expressionStartTimerRef = useRef(null);
   const expressionTimerRef = useRef(null);
+  const interactionTimerRef = useRef(null);
   const expressionRef = useRef('idle');
 
   const [look, setLook] = useState({ x: 0, y: 0 });
   const [expression, setExpression] = useState('idle');
   const [isClickMoving, setIsClickMoving] = useState(false);
+  const [interactionAction, setInteractionAction] = useState('idle');
+  const [interactionSequence, setInteractionSequence] = useState(0);
   const [renderedSize, setRenderedSize] = useState(() => (typeof size === 'number' ? size : 460));
-  const activeAction = Object.prototype.hasOwnProperty.call(GAMGIK_DURATIONS, action)
+  const requestedAction = Object.prototype.hasOwnProperty.call(GAMGIK_DURATIONS, action)
     ? action
     : 'idle';
+  const activeAction = requestedAction === 'idle' ? interactionAction : requestedAction;
+  const activeActionSequence = requestedAction === 'idle' ? interactionSequence : actionSequence;
   const visibleExpression =
     expressionOverride ?? (activeAction === 'idle' ? expression : ACTION_EXPRESSIONS[activeAction]);
   const visibleLook = trackPointer ? look : { x: 0, y: 0 };
   const actionLook = activeAction === 'curious' ? { x: 0.58, y: -0.24 } : visibleLook;
   const detailScale = clamp(renderedSize / 460, 0.28, 1.25);
   const faceScale = clamp(0.82 + (renderedSize / 460) * 0.18, 0.84, 1);
-  const animationKey = `${activeAction}:${actionSequence}`;
+  const animationKey = `${activeAction}:${activeActionSequence}`;
 
   useLayoutEffect(() => {
     const motionElement = motionRef.current;
@@ -208,14 +214,14 @@ export default function GarimAgentOrbWithFace({
   }, [animationKey]);
 
   useEffect(() => {
-    if (activeAction === 'idle' || !onActionComplete) return undefined;
+    if (requestedAction === 'idle' || !onActionComplete) return undefined;
 
     const timerId = window.setTimeout(
-      () => onActionComplete(activeAction),
-      GAMGIK_DURATIONS[activeAction]
+      () => onActionComplete(requestedAction),
+      GAMGIK_DURATIONS[requestedAction]
     );
     return () => window.clearTimeout(timerId);
-  }, [activeAction, actionSequence, onActionComplete]);
+  }, [requestedAction, actionSequence, onActionComplete]);
 
   useEffect(() => {
     const target = wrapRef.current;
@@ -278,6 +284,7 @@ export default function GarimAgentOrbWithFace({
       if (resetTimerRef.current) window.clearTimeout(resetTimerRef.current);
       if (expressionStartTimerRef.current) window.clearTimeout(expressionStartTimerRef.current);
       if (expressionTimerRef.current) window.clearTimeout(expressionTimerRef.current);
+      if (interactionTimerRef.current) window.clearTimeout(interactionTimerRef.current);
     };
   }, []);
 
@@ -362,7 +369,29 @@ export default function GarimAgentOrbWithFace({
   function handleClick(event) {
     if (event.detail >= 2) {
       if (clickTimerRef.current) window.clearTimeout(clickTimerRef.current);
-      playClickMotion();
+
+      if (!randomizeDoubleClick || requestedAction !== 'idle') {
+        playClickMotion();
+        return;
+      }
+
+      if (interactionTimerRef.current) window.clearTimeout(interactionTimerRef.current);
+
+      const effects = ['motion', 'happy', 'shy'];
+      const nextEffect = effects[Math.floor(Math.random() * effects.length)];
+
+      if (nextEffect === 'motion') {
+        setInteractionAction('idle');
+        playClickMotion();
+        return;
+      }
+
+      setIsClickMoving(false);
+      setInteractionAction(nextEffect);
+      setInteractionSequence(current => current + 1);
+      interactionTimerRef.current = window.setTimeout(() => {
+        setInteractionAction('idle');
+      }, GAMGIK_DURATIONS[nextEffect]);
       return;
     }
 
@@ -404,7 +433,7 @@ export default function GarimAgentOrbWithFace({
           motion={motion}
           themeMode={themeMode}
           action={activeAction}
-          actionSequence={actionSequence}
+          actionSequence={activeActionSequence}
         />
 
         <SearchDecorations expression={visibleExpression} />

@@ -203,7 +203,7 @@ export default function OndamPage() {
         },
       ]);
       setIsLoadingHistory(false);
-    }, 5000);
+    }, 4200);
   };
 
   const selectSidebarMenu = menuId => {

@@ -497,6 +497,7 @@ export default function ChatView({
                   speed={10}
                   motion={0.78}
                   themeMode={themeMode}
+                  action="curious"
                 />
               </div>
 
