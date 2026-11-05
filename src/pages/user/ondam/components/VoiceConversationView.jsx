@@ -36,8 +36,6 @@ export default function VoiceConversationView({ onClose, themeMode = 'light' }) 
       className="relative flex h-full min-h-0 items-center justify-center overflow-hidden bg-white"
       aria-label="음성 대화"
     >
-      <div className="pointer-events-none absolute h-[min(84vw,660px)] w-[min(84vw,660px)] rounded-full bg-[radial-gradient(circle,rgba(60,124,246,0.09)_0%,rgba(60,124,246,0.03)_48%,transparent_70%)] blur-xl" />
-
       <div
         className={`relative h-[min(90vw,680px)] w-[min(90vw,680px)] shrink-0 transition-all duration-500 ${
           isMuted ? 'scale-[0.94] opacity-80' : 'scale-100'

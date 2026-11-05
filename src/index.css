@@ -39,6 +39,7 @@ input:disabled {
 
 :is(.ondam-dark, body.ondam-dark-active) form,
 :is(.ondam-dark, body.ondam-dark-active) [role='menu'],
+:is(.ondam-dark, body.ondam-dark-active) [role='listbox'],
 :is(.ondam-dark, body.ondam-dark-active) [role='dialog'] {
   background-color: #212121 !important;
   border-color: #3a3a3a !important;
@@ -66,9 +67,47 @@ input:disabled {
 
 :is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#e3e3e3]'],
 :is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#dedede]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#e0e0e0]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#eee]'],
 :is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#ddd]'],
-:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#dcdcdc]'] {
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#dcdcdc]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#a7a7a7]'] {
   background-color: #333 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#c9cdd4]'] {
+  background-color: #525252 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#dde9ff]'] {
+  background-color: #1e3a5f !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#fee9e7]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#fff0f0]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#fff1f0]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='bg-[#ffe3e3]'] {
+  background-color: #3b1719 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .bg-slate-50 {
+  background-color: #1c1c1c !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .bg-slate-100 {
+  background-color: #292929 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .bg-blue-50 {
+  background-color: #172554 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .bg-red-50 {
+  background-color: #450a0a !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .bg-white.border-slate-200 {
+  background-color: #292929 !important;
 }
 
 :is(.ondam-dark, body.ondam-dark-active) [class~='text-[#0d0d0d]'],
@@ -107,6 +146,36 @@ input:disabled {
   color: #a3a3a3 !important;
 }
 
+:is(.ondam-dark, body.ondam-dark-active) .text-slate-700 {
+  color: #d4d4d4 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .text-slate-400 {
+  color: #8b8b8b !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .text-blue-700 {
+  color: #93c5fd !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .text-red-700 {
+  color: #fca5a5 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#d93025]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#e03131]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#c62a2f]'] {
+  color: #f87171 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#268a4b]'] {
+  color: #6ee7a0 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='text-[#b76e00]'] {
+  color: #fbbf24 !important;
+}
+
 :is(.ondam-dark, body.ondam-dark-active) [class*='border-black/'] {
   border-color: rgb(255 255 255 / 0.1) !important;
 }
@@ -123,9 +192,92 @@ input:disabled {
   border-color: #3a3a3a !important;
 }
 
+:is(.ondam-dark, body.ondam-dark-active) .border-slate-200,
+:is(.ondam-dark, body.ondam-dark-active) .border-slate-300 {
+  border-color: #3a3a3a !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) .border-blue-200 {
+  border-color: #1e40af !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#aaa]'] {
+  border-color: #525252 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#9db9f4]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#bdd0f7]'],
+:is(.ondam-dark, body.ondam-dark-active) [class~='border-[#cad8f2]'] {
+  border-color: #315c96 !important;
+}
+
 :is(.ondam-dark, body.ondam-dark-active) [class*='hover:bg-[#f']:hover,
 :is(.ondam-dark, body.ondam-dark-active) [class*='hover:bg-white']:hover {
   background-color: #2c2c2c !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='hover:bg-slate-']:hover {
+  background-color: #333 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='hover:border-slate-']:hover {
+  border-color: #525252 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='hover:border-[#cad8f2]']:hover {
+  border-color: #426ca3 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='hover:bg-blue-']:hover {
+  background-color: #1e3a8a !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='focus-visible:bg-[#f']:focus-visible {
+  background-color: #2c2c2c !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='hover:bg-[#fff']:hover,
+:is(.ondam-dark, body.ondam-dark-active) [class*='hover:bg-[#ffe']:hover {
+  background-color: #512024 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='hover:text-[#303030]']:hover,
+:is(.ondam-dark, body.ondam-dark-active) [class*='hover:text-[#333]']:hover,
+:is(.ondam-dark, body.ondam-dark-active) [class*='hover:text-[#3d3d3d]']:hover {
+  color: #ededed !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='focus-within:ring-[#eaf1ff]']:focus-within,
+:is(.ondam-dark, body.ondam-dark-active) [class*='focus:ring-[#eaf1ff]']:focus {
+  --tw-ring-color: rgb(59 130 246 / 0.25) !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='focus:border-[#aaa]']:focus,
+:is(.ondam-dark, body.ondam-dark-active) [class*='focus-within:border-[#9db9f4]']:focus-within {
+  border-color: #426ca3 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='disabled:bg-slate-']:disabled,
+:is(.ondam-dark, body.ondam-dark-active) [class*='disabled:bg-[#a7a7a7]']:disabled {
+  background-color: #333 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='disabled:text-slate-']:disabled,
+:is(.ondam-dark, body.ondam-dark-active) [class*='disabled:text-[#f1f1f1]']:disabled {
+  color: #8b8b8b !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class~='divide-[#eeeeee]'] > :not(:last-child) {
+  border-color: #303030 !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active) [class*='scrollbar-color'] {
+  scrollbar-color: #3a3a3a transparent !important;
+}
+
+:is(.ondam-dark, body.ondam-dark-active)
+  [class*='webkit-scrollbar-thumb']:hover::-webkit-scrollbar-thumb {
+  background-color: #3a3a3a !important;
 }
 
 :is(.ondam-dark, body.ondam-dark-active)

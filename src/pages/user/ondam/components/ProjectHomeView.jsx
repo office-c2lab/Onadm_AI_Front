@@ -144,9 +144,14 @@ export default function ProjectHomeView({
                 <Ellipsis className="h-5 w-5" strokeWidth={1.8} />
               </button>
               {isMoreOpen && (
-                <div className="absolute right-0 top-12 z-20 w-48 rounded-xl border border-[#e7e7e7] bg-white p-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.13)]">
+                <div
+                  role="menu"
+                  aria-label="프로젝트 메뉴"
+                  className="absolute right-0 top-12 z-20 w-48 rounded-xl border border-[#e7e7e7] bg-white p-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.13)]"
+                >
                   <button
                     type="button"
+                    role="menuitem"
                     onClick={() => {
                       setIsMoreOpen(false);
                       onOpenSettings?.(project);

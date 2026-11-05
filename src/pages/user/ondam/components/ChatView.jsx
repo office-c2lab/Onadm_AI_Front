@@ -70,6 +70,7 @@ function ChatCompanion({ phase, onAction, disabled, themeMode }) {
     <div className="relative mb-2 flex justify-start">
       {isOpen && (
         <div
+          role="menu"
           className="absolute bottom-[68px] left-0 z-30 w-[min(340px,calc(100vw-40px))] rounded-2xl border border-[#e8e8e8] bg-white p-2 shadow-[0_12px_36px_rgba(0,0,0,0.13)]"
           aria-label="ONDAM 도우미 빠른 메뉴"
         >
@@ -85,6 +86,7 @@ function ChatCompanion({ phase, onAction, disabled, themeMode }) {
               <button
                 key={action.id}
                 type="button"
+                role="menuitem"
                 onClick={() => runAction(action.prompt)}
                 className="flex min-h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-[14px] text-[#333] transition-colors hover:bg-[#f5f7fb]"
               >
