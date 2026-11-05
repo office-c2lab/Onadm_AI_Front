@@ -15,13 +15,13 @@ const ORB_THEMES = {
     outerGlow: '#15DFFF',
   },
   dark: {
-    bodyTop: '#343CA8',
-    bodyMid: '#20246D',
-    bodyBottom: '#080B24',
-    rimWhite: '#F6F0FF',
-    rimPurple: '#A58BFF',
-    bottomBlue: '#4E6BFF',
-    outerGlow: '#8B6CFF',
+    bodyTop: '#5258D8',
+    bodyMid: '#303493',
+    bodyBottom: '#10143D',
+    rimWhite: '#FAF7FF',
+    rimPurple: '#B8A7FF',
+    bottomBlue: '#687DFF',
+    outerGlow: '#A78BFA',
   },
 };
 
