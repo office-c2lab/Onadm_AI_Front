@@ -144,7 +144,7 @@ export default function ToolBrowserView() {
                   <span
                     id={`connected-plugin-${tool.id}-tooltip`}
                     role="tooltip"
-                    className="pointer-events-none absolute left-1/2 top-[calc(100%+6px)] z-20 -translate-x-1/2 whitespace-nowrap rounded-md bg-[#202020] px-2 py-1 text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+                    className="ondam-connected-plugin-tooltip pointer-events-none absolute top-[calc(100%+0.5rem)] left-1/2 z-50 -translate-x-1/2 rounded-lg border border-[#B6D9FF] bg-white px-2.5 py-1.5 text-[12px] font-bold whitespace-nowrap text-[#075DF6] opacity-0 shadow-[0_10px_24px_rgba(7,93,246,0.14)] transition group-hover:opacity-100 group-focus-visible:opacity-100"
                   >
                     {tool.name}
                   </span>

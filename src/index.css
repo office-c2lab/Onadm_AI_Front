@@ -310,6 +310,17 @@ input:disabled {
   color: #78a5ff !important;
 }
 
+:is(.ondam-dark, body.ondam-dark-active) .ondam-connected-plugin-tooltip {
+  border-color: transparent !important;
+  border-radius: 0.375rem !important;
+  background-color: #202020 !important;
+  padding: 0.25rem 0.5rem !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+}
+
 :is(.ondam-dark, body.ondam-dark-active) [class*='focus-within:ring-[#eaf1ff]']:focus-within,
 :is(.ondam-dark, body.ondam-dark-active) [class*='focus:ring-[#eaf1ff]']:focus {
   --tw-ring-color: rgb(59 130 246 / 0.25) !important;
